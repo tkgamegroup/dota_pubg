@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<prefab name="Main">
+	<children>
+		<item name="Cube">
+			<components>
+				<item type_hash="920714677" pos="0,-2,-13" eul="-25,0,0" />
+				<item type_hash="1530691652" />
+			</components>
+		</item>
+	</children>
+</prefab>
