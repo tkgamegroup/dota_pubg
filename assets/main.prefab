@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <prefab name="Main">
+	<components>
+		<item type_hash="920714677" />
+	</components>
 	<children>
 		<item name="Cube">
 			<components>

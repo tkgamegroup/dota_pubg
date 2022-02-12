@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_hash="920714677" />
+		<item type_hash="901068134" texture_name="assets/height.png" />
+	</components>
+</prefab>
