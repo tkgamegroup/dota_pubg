@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<animation>
+	<channels>
+		<channel node_name="mixamorig:Hips">
+			<keys offset="0" size="56" />
+		</channel>
+		<channel node_name="mixamorig:LeftFoot">
+			<keys offset="56" size="28" />
+		</channel>
+		<channel node_name="mixamorig:LeftHand">
+			<keys offset="84" size="28" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandThumb1">
+			<keys offset="112" size="28" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandThumb2">
+			<keys offset="140" size="28" />
+		</channel>
+		<channel node_name="mixamorig:LeftLeg">
+			<keys offset="168" size="28" />
+		</channel>
+		<channel node_name="mixamorig:LeftUpLeg">
+			<keys offset="196" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightFoot">
+			<keys offset="224" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHand">
+			<keys offset="252" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHandMiddle3">
+			<keys offset="280" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHandPinky1">
+			<keys offset="308" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHandPinky2">
+			<keys offset="336" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHandThumb1">
+			<keys offset="364" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHandThumb2">
+			<keys offset="392" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightHandThumb3">
+			<keys offset="420" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightLeg">
+			<keys offset="448" size="28" />
+		</channel>
+		<channel node_name="mixamorig:RightUpLeg">
+			<keys offset="476" size="28" />
+		</channel>
+	</channels>
+</animation>

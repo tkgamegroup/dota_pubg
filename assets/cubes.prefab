@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<prefab file_id="267f2d164df88eda041e3ba2eb3c71cf">
+	<components>
+		<item type_hash="920714677" />
+	</components>
+	<children>
+		<item file_id="457a132541d93dcb9a0b549429dbb95d" name="Entity 0">
+			<components>
+				<item type_hash="920714677" pos="-2.93967,0,-13" />
+				<item type_hash="1530691652" />
+			</components>
+		</item>
+		<item file_id="3da0a0714efa9588f31722ab0c2e2710" name="Entity 1">
+			<components>
+				<item type_hash="920714677" pos="1.09956,0,-9" />
+				<item type_hash="1530691652" />
+			</components>
+		</item>
+	</children>
+</prefab>

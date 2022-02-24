@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<model>
+	<meshes>
+		<mesh material="xbot_Beta_Joints_MAT.fmat" bounds="-88.3467,-0.323116,-12.4688,88.3467,159.361,13.0237">
+			<positions offset="0" size="149676" />
+			<uvs offset="149676" size="99784" />
+			<normals offset="249460" size="149676" />
+			<bone_ids offset="399136" size="199568" />
+			<bone_weights offset="598704" size="199568" />
+			<indices offset="798272" size="250080" />
+		</mesh>
+		<mesh material="xbot_asdf1_Beta_HighLimbsGeoSG2.fmat" bounds="-90.2566,-0.320193,-14.3739,90.2566,180.605,17.6958">
+			<positions offset="1048352" size="190812" />
+			<uvs offset="1239164" size="127208" />
+			<normals offset="1366372" size="190812" />
+			<bone_ids offset="1557184" size="254416" />
+			<bone_weights offset="1811600" size="254416" />
+			<indices offset="2066016" size="339264" />
+		</mesh>
+	</meshes>
+	<bones>
+		<bone name="mixamorig:Hips">
+			<offset_matrix offset="2405280" size="64" />
+		</bone>
+		<bone name="mixamorig:Spine">
+			<offset_matrix offset="2405344" size="64" />
+		</bone>
+		<bone name="mixamorig:Spine1">
+			<offset_matrix offset="2405408" size="64" />
+		</bone>
+		<bone name="mixamorig:Spine2">
+			<offset_matrix offset="2405472" size="64" />
+		</bone>
+		<bone name="mixamorig:Neck">
+			<offset_matrix offset="2405536" size="64" />
+		</bone>
+		<bone name="mixamorig:Head">
+			<offset_matrix offset="2405600" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftShoulder">
+			<offset_matrix offset="2405664" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftArm">
+			<offset_matrix offset="2405728" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftForeArm">
+			<offset_matrix offset="2405792" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHand">
+			<offset_matrix offset="2405856" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandThumb1">
+			<offset_matrix offset="2405920" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandThumb2">
+			<offset_matrix offset="2405984" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandThumb3">
+			<offset_matrix offset="2406048" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandIndex1">
+			<offset_matrix offset="2406112" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandIndex2">
+			<offset_matrix offset="2406176" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandIndex3">
+			<offset_matrix offset="2406240" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandMiddle1">
+			<offset_matrix offset="2406304" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandMiddle2">
+			<offset_matrix offset="2406368" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandMiddle3">
+			<offset_matrix offset="2406432" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandRing1">
+			<offset_matrix offset="2406496" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandRing2">
+			<offset_matrix offset="2406560" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandRing3">
+			<offset_matrix offset="2406624" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandPinky1">
+			<offset_matrix offset="2406688" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandPinky2">
+			<offset_matrix offset="2406752" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftHandPinky3">
+			<offset_matrix offset="2406816" size="64" />
+		</bone>
+		<bone name="mixamorig:RightShoulder">
+			<offset_matrix offset="2406880" size="64" />
+		</bone>
+		<bone name="mixamorig:RightArm">
+			<offset_matrix offset="2406944" size="64" />
+		</bone>
+		<bone name="mixamorig:RightForeArm">
+			<offset_matrix offset="2407008" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHand">
+			<offset_matrix offset="2407072" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandPinky1">
+			<offset_matrix offset="2407136" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandPinky2">
+			<offset_matrix offset="2407200" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandPinky3">
+			<offset_matrix offset="2407264" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandRing1">
+			<offset_matrix offset="2407328" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandRing2">
+			<offset_matrix offset="2407392" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandRing3">
+			<offset_matrix offset="2407456" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandMiddle1">
+			<offset_matrix offset="2407520" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandMiddle2">
+			<offset_matrix offset="2407584" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandMiddle3">
+			<offset_matrix offset="2407648" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandIndex1">
+			<offset_matrix offset="2407712" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandIndex2">
+			<offset_matrix offset="2407776" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandIndex3">
+			<offset_matrix offset="2407840" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandThumb1">
+			<offset_matrix offset="2407904" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandThumb2">
+			<offset_matrix offset="2407968" size="64" />
+		</bone>
+		<bone name="mixamorig:RightHandThumb3">
+			<offset_matrix offset="2408032" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftUpLeg">
+			<offset_matrix offset="2408096" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftLeg">
+			<offset_matrix offset="2408160" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftFoot">
+			<offset_matrix offset="2408224" size="64" />
+		</bone>
+		<bone name="mixamorig:LeftToeBase">
+			<offset_matrix offset="2408288" size="64" />
+		</bone>
+		<bone name="mixamorig:RightUpLeg">
+			<offset_matrix offset="2408352" size="64" />
+		</bone>
+		<bone name="mixamorig:RightLeg">
+			<offset_matrix offset="2408416" size="64" />
+		</bone>
+		<bone name="mixamorig:RightFoot">
+			<offset_matrix offset="2408480" size="64" />
+		</bone>
+		<bone name="mixamorig:RightToeBase">
+			<offset_matrix offset="2408544" size="64" />
+		</bone>
+	</bones>
+</model>

@@ -1,14 +1,19 @@
 <?xml version="1.0"?>
-<prefab name="Main">
+<prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_hash="920714677" />
 	</components>
 	<children>
-		<item name="Cube">
+		<item file_id="bdf21dad416d62ee2efaa3a85da1c390" name="Cube">
 			<components>
 				<item type_hash="920714677" pos="0,-2,-13" eul="-25,0,0" />
 				<item type_hash="1530691652" />
 			</components>
+		</item>
+		<item file_id="267f2d164df88eda041e3ba2eb3c71cf" filename="assets\cubes.prefab">
+			<modifications>
+				<item entity="457a132541d93dcb9a0b549429dbb95d" component="920714677" name="1448031337" value="-2.93967,0,-5.85524" />
+			</modifications>
 		</item>
 	</children>
 </prefab>
