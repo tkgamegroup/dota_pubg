@@ -2,6 +2,7 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_hash="920714677" />
+		<item type_hash="4076533307" />
 	</components>
 	<children>
 		<item file_id="bdf21dad416d62ee2efaa3a85da1c390" name="Cube">

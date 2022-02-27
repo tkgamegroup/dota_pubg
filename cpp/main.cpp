@@ -1,26 +1,26 @@
-#include <flame/universe/component.h>
+#include <flame/universe/entity.h>
 
-using namespace flame;
+#include "main.h"
 
-FLAME_TYPE(cMain)
-
-struct cMain : Component
+void cMain::start()
 {
-	void start() override
+	printf("Hello World\n");
+}
+
+struct cMainCreate : cMain::Create
+{
+	cMainPtr operator()(EntityPtr e) override
 	{
-		printf("Hello World\n");
+		if (e == INVALID_POINTER)
+			return nullptr;
+		return new cMain;
 	}
+}cMain_create;
+cMain::Create& cMain::create = cMain_create;
 
-	struct Create
-	{
-		virtual cMainPtr operator()(EntityPtr) = 0;
-	};
-	/// Reflect static
-	__declspec(dllexport) static Create& create;
-};
-
-__declspec(dllexport)
-void* cpp_info()
+EXPORT void* cpp_info()
 {
+	auto uinfo = universe_info();
+	cMain::create((EntityPtr)INVALID_POINTER);
 	return nullptr;
 }
