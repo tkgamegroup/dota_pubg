@@ -2,18 +2,17 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_hash="920714677" />
-		<item type_hash="4076533307" />
 	</components>
 	<children>
-		<item file_id="bdf21dad416d62ee2efaa3a85da1c390" name="Cube">
+		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
 			<components>
-				<item type_hash="920714677" pos="0,-2,-13" eul="-25,0,0" />
-				<item type_hash="1530691652" />
+				<item type_hash="920714677" pos="8.64245,-11.5384,-20.0461" eul="35.9737,-24.4591,0" />
+				<item type_hash="2718714598" aspect="1.80871" />
 			</components>
 		</item>
-		<item file_id="267f2d164df88eda041e3ba2eb3c71cf" filename="assets\cubes.prefab">
+		<item file_id="318a777f4d3654d1e5786f8e1326b6b9" filename="assets\terrain.prefab">
 			<modifications>
-				<item entity="457a132541d93dcb9a0b549429dbb95d" component="920714677" name="1448031337" value="-2.93967,0,-5.85524" />
+				<item entity="318a777f4d3654d1e5786f8e1326b6b9" component="920714677" name="1448031337" value="-100,-25,-100" />
 			</modifications>
 		</item>
 	</children>
