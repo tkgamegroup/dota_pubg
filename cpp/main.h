@@ -10,6 +10,7 @@ FLAME_TYPE(cMain)
 struct cMain : Component
 {
 	void start() override;
+	void update() override;
 
 	struct Create
 	{

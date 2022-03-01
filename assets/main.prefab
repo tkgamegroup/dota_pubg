@@ -6,14 +6,26 @@
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
 			<components>
-				<item type_hash="920714677" pos="8.64245,-11.5384,-20.0461" eul="35.9737,-24.4591,0" />
-				<item type_hash="2718714598" aspect="1.80871" />
+				<item type_hash="920714677" pos="-63.7852,-12.0119,20.892" eul="162.169,-32.8198,0" />
+				<item type_hash="2718714598" aspect="1.89208" />
 			</components>
 		</item>
 		<item file_id="318a777f4d3654d1e5786f8e1326b6b9" filename="assets\terrain.prefab">
 			<modifications>
 				<item entity="318a777f4d3654d1e5786f8e1326b6b9" component="920714677" name="1448031337" value="-100,-25,-100" />
 			</modifications>
+		</item>
+		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player">
+			<components>
+				<item type_hash="920714677" pos="-66.7455,-19.0814,26.8476" />
+				<item type_hash="1574893871" />
+			</components>
+			<children>
+				<item file_id="538ae5c24d936fab370a69b31c270c1a" filename="assets\xbot.prefab">
+					<modifications>
+					</modifications>
+				</item>
+			</children>
 		</item>
 	</children>
 </prefab>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <prefab name="RootNode">
 	<components>
-		<item type_hash="920714677" />
+		<item type_hash="920714677" scl="0.01,0.01,0.01" />
 		<item type_hash="3587583750" model_name="assets/xbot.fmod" />
 	</components>
 	<children>
