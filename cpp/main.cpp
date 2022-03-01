@@ -27,7 +27,7 @@ void cMain::start()
 {
 	printf("Hello World\n");
 	add_event([this]() {
-		sScene::instance()->generate_navmesh();
+		sScene::instance()->generate_nav_mesh();
 		return false;
 	});
 	main_player.init(entity->find_child("main_player"));
