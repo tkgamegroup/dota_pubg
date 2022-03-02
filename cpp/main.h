@@ -9,6 +9,8 @@ FLAME_TYPE(cMain)
 /// Reflect ctor
 struct cMain : Component
 {
+	void on_active() override;
+	void on_inactive() override;
 	void start() override;
 	void update() override;
 

@@ -1,7 +1,9 @@
+#include <flame/graphics/window.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
+#include <flame/universe/systems/node_renderer.h>
 
 #include "main.h"
 
@@ -16,12 +18,26 @@ struct MainPlayer
 		e = _e;
 		node = e->get_component_i<cNode>(0);
 		nav = e->get_component_t<cNavAgent>();
-		add_event([this]() {
-			nav->set_target(node->g_pos + vec3(1.f, 0.f, 0.f));
-			return false;
-		}, 1.f);
 	}
 }main_player;
+
+void cMain::on_active()
+{
+	graphics::Window::get_list().front()->imgui_callbacks.add([]() {
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+		{
+			vec3 p;
+			sNodeRenderer::instance()->pick_up((vec2)ImGui::GetMousePos(), &p);
+			printf("%s\n", str(p).c_str());
+			main_player.nav->set_target(p);
+		}
+	}, "main"_h);
+}
+
+void cMain::on_inactive()
+{
+	graphics::Window::get_list().front()->imgui_callbacks.remove("main"_h);
+}
 
 void cMain::start()
 {
