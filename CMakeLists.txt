@@ -43,15 +43,11 @@ target_link_libraries(cpp "${flame_path}/bin/debug/flame_universe.lib")
 file(GENERATE OUTPUT "$<TARGET_FILE_DIR:cpp>/cpp.typedesc" CONTENT "${CMAKE_CURRENT_SOURCE_DIR}/cpp" TARGET cpp)
 add_custom_command(TARGET cpp POST_BUILD COMMAND "${flame_path}/bin/debug/typeinfogen.exe" $<TARGET_FILE:cpp>)
 
+add_custom_target(copy_binaries 
+	COMMAND xcopy "${flame_path}\\bin\\debug\\*.dll" "${CMAKE_SOURCE_DIR}\\bin\\debug" /Y /D COMMAND xcopy "${flame_path}\\bin\\debug\\*.typeinfo" "${CMAKE_SOURCE_DIR}\\bin\\debug" /Y /D
+	COMMAND xcopy "${flame_path}\\bin\\relwithdebinfo\\*.dll" "${CMAKE_SOURCE_DIR}\\bin\\relwithdebinfo" /Y /D COMMAND xcopy "${flame_path}\\bin\\relwithdebinfo\\*.typeinfo" "${CMAKE_SOURCE_DIR}\\bin\\relwithdebinfo" /Y /D)
+
 add_executable(dota_pubg "app.cpp")
+add_dependencies(dota_pubg copy_binaries)
 target_link_libraries(dota_pubg cpp)
 set_target_properties(dota_pubg PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-
-file(GLOB dll_files "${flame_path}/bin/debug/*.dll")
-foreach(f IN LISTS dll_files)
-	add_custom_command(TARGET dota_pubg POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${f} $(TargetDir))
-endforeach()
-file(GLOB typeinfo_files "${flame_path}/bin/debug/*.typeinfo")
-foreach(f IN LISTS typeinfo_files)
-	add_custom_command(TARGET dota_pubg POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${f} $(TargetDir))
-endforeach()
