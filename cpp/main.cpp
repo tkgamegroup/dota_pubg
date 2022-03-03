@@ -23,7 +23,9 @@ struct MainPlayer
 
 void cMain::on_active()
 {
-	graphics::Window::get_list().front()->imgui_callbacks.add([]() {
+	auto main_window = graphics::Window::get_list().front();
+	ImGui::SetCurrentContext((ImGuiContext*)main_window->imgui_context());
+	main_window->imgui_callbacks.add([]() {
 		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 		{
 			vec3 p;
