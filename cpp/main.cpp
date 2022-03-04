@@ -2,8 +2,9 @@
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/systems/input.h>
 #include <flame/universe/systems/scene.h>
-#include <flame/universe/systems/node_renderer.h>
+#include <flame/universe/systems/renderer.h>
 
 #include "main.h"
 
@@ -21,26 +22,6 @@ struct MainPlayer
 	}
 }main_player;
 
-void cMain::on_active()
-{
-	auto main_window = graphics::Window::get_list().front();
-	ImGui::SetCurrentContext((ImGuiContext*)main_window->imgui_context());
-	main_window->imgui_callbacks.add([]() {
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-		{
-			vec3 p;
-			sNodeRenderer::instance()->pick_up((vec2)ImGui::GetMousePos(), &p);
-			printf("%s\n", str(p).c_str());
-			main_player.nav->set_target(p);
-		}
-	}, "main"_h);
-}
-
-void cMain::on_inactive()
-{
-	graphics::Window::get_list().front()->imgui_callbacks.remove("main"_h);
-}
-
 void cMain::start()
 {
 	printf("Hello World\n");
@@ -53,7 +34,14 @@ void cMain::start()
 
 void cMain::update()
 {
-
+	auto input = sInput::instance();
+	if (input->mpressed(Mouse_Left))
+	{
+		vec3 p;
+		sRenderer::instance()->pick_up(input->mpos, &p);
+		printf("%s\n", str(p).c_str());
+		main_player.nav->set_target(p);
+	}
 }
 
 struct cMainCreate : cMain::Create

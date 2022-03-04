@@ -43,9 +43,12 @@ target_link_libraries(cpp "${flame_path}/bin/debug/flame_universe.lib")
 file(GENERATE OUTPUT "$<TARGET_FILE_DIR:cpp>/cpp.typedesc" CONTENT "${CMAKE_CURRENT_SOURCE_DIR}/cpp" TARGET cpp)
 add_custom_command(TARGET cpp POST_BUILD COMMAND "${flame_path}/bin/debug/typeinfogen.exe" $<TARGET_FILE:cpp>)
 
+file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}" current_path)
 add_custom_target(copy_binaries 
-	COMMAND xcopy "${flame_path}\\bin\\debug\\*.dll" "${CMAKE_SOURCE_DIR}\\bin\\debug" /Y /D COMMAND xcopy "${flame_path}\\bin\\debug\\*.typeinfo" "${CMAKE_SOURCE_DIR}\\bin\\debug" /Y /D
-	COMMAND xcopy "${flame_path}\\bin\\relwithdebinfo\\*.dll" "${CMAKE_SOURCE_DIR}\\bin\\relwithdebinfo" /Y /D COMMAND xcopy "${flame_path}\\bin\\relwithdebinfo\\*.typeinfo" "${CMAKE_SOURCE_DIR}\\bin\\relwithdebinfo" /Y /D)
+	COMMAND xcopy "${flame_path}\\bin\\debug\\*.dll"				"${current_path}\\bin\\debug"			/Y /D	
+	COMMAND xcopy "${flame_path}\\bin\\debug\\*.typeinfo"			"${current_path}\\bin\\debug"			/Y /D
+	COMMAND xcopy "${flame_path}\\bin\\relwithdebinfo\\*.dll"		"${current_path}\\bin\\relwithdebinfo"	/Y /D	
+	COMMAND xcopy "${flame_path}\\bin\\relwithdebinfo\\*.typeinfo"	"${current_path}\\bin\\relwithdebinfo"	/Y /D)
 
 add_executable(dota_pubg "app.cpp")
 add_dependencies(dota_pubg copy_binaries)

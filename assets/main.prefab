@@ -7,7 +7,7 @@
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
 			<components>
-				<item type_name="flame::cNode" pos="-63.7852,-12.0119,20.892" eul="162.169,-32.8198,0" />
+				<item type_name="flame::cNode" pos="-66.3939,-7.41497,29.691" eul="-2.36529,-75.1428,0" />
 				<item type_name="flame::cCamera" />
 			</components>
 		</item>
