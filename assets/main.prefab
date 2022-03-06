@@ -2,7 +2,7 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="cMain" />
+		<item type_name="cMain" camera_length="26" camera_angle="56" />
 	</components>
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
@@ -21,6 +21,8 @@
 				<item type_name="flame::cNode" pos="-66.7455,-19.0814,26.8476" />
 				<item type_name="flame::cMesh" />
 				<item type_name="flame::cNavAgent" />
+				<item type_name="cCharacter" />
+				<item type_name="cPlayer" />
 			</components>
 		</item>
 	</children>

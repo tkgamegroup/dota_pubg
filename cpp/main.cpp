@@ -7,20 +7,11 @@
 #include <flame/universe/systems/renderer.h>
 
 #include "main.h"
+#include "character.h"
+#include "player.h"
 
-struct MainPlayer
-{
-	EntityPtr e;
-	cNodePtr node;
-	cNavAgentPtr nav;
-
-	void init(EntityPtr _e)
-	{
-		e = _e;
-		node = e->get_component_i<cNode>(0);
-		nav = e->get_component_t<cNavAgent>();
-	}
-}main_player;
+cNodePtr camera_node;
+cPlayerPtr main_player;
 
 void cMain::start()
 {
@@ -29,7 +20,8 @@ void cMain::start()
 		sScene::instance()->generate_nav_mesh();
 		return false;
 	});
-	main_player.init(entity->find_child("main_player"));
+	camera_node = entity->find_child("Camera")->get_component_i<cNode>(0);
+	main_player = entity->find_child("main_player")->get_component_t<cPlayer>();
 }
 
 void cMain::update()
@@ -38,10 +30,13 @@ void cMain::update()
 	if (input->mpressed(Mouse_Left))
 	{
 		vec3 p;
-		sRenderer::instance()->pick_up(input->mpos, &p);
-		printf("%s\n", str(p).c_str());
-		main_player.nav->set_target(p);
+		auto obj = sRenderer::instance()->pick_up(input->mpos, &p);
+		if (obj)
+			main_player->character->nav->set_target(p);
 	}
+
+	camera_node->set_eul(vec3(0.f, -camera_angle, 0.f));
+	camera_node->set_pos(main_player->character->node->g_pos + camera_length * camera_node->g_rot[2]);
 }
 
 struct cMainCreate : cMain::Create
@@ -59,5 +54,7 @@ EXPORT void* cpp_info()
 {
 	auto uinfo = universe_info();
 	cMain::create((EntityPtr)INVALID_POINTER);
+	cCharacter::create((EntityPtr)INVALID_POINTER);
+	cPlayer::create((EntityPtr)INVALID_POINTER);
 	return nullptr;
 }
