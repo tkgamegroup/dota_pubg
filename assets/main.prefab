@@ -7,7 +7,7 @@
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
 			<components>
-				<item type_name="flame::cNode" pos="-66.3939,-7.41497,29.691" eul="-2.36529,-75.1428,0" />
+				<item type_name="flame::cNode" pos="-54.9626,-11.3635,15.7009" eul="142.007,343.497,0" />
 				<item type_name="flame::cCamera" />
 			</components>
 		</item>
@@ -16,13 +16,21 @@
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cNode|pos" value="-100,-25,-100" />
 			</modifications>
 		</item>
-		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player">
+		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player" tag="2">
 			<components>
 				<item type_name="flame::cNode" pos="-66.7455,-19.0814,26.8476" />
 				<item type_name="flame::cMesh" />
 				<item type_name="flame::cNavAgent" />
-				<item type_name="cCharacter" />
+				<item type_name="cCharacter" passive="true" />
 				<item type_name="cPlayer" />
+			</components>
+		</item>
+		<item file_id="944e2c0c4ab810e04bc801ba75b18c09" name="monster" tag="4">
+			<components>
+				<item type_name="flame::cNode" pos="-65.4072,-19.0724,32.4845" />
+				<item type_name="flame::cMesh" />
+				<item type_name="flame::cNavAgent" />
+				<item type_name="cCharacter" party="RightSide" />
 			</components>
 		</item>
 	</children>

@@ -27,7 +27,7 @@ void cMain::start()
 void cMain::update()
 {
 	auto input = sInput::instance();
-	if (input->mpressed(Mouse_Left))
+	if (input->mpressed(Mouse_Right))
 	{
 		vec3 p;
 		auto obj = sRenderer::instance()->pick_up(input->mpos, &p);

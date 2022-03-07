@@ -8,6 +8,7 @@ FLAME_TYPE(cMain)
 FLAME_TYPE(cPlayer)
 FLAME_TYPE(cCharacter)
 
+/// Reflect
 enum Party
 {
 	LeftSide = 1 << 1,
