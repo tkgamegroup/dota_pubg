@@ -122,7 +122,8 @@ cCharacter::cCharacter()
 
 void cCharacter::die()
 {
-
+	if (dead)
+		return;
 }
 
 void cCharacter::start()
