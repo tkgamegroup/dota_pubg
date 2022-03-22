@@ -2,6 +2,6 @@
 <prefab>
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cTerrain" height_map_name="assets/height.png" material_name="default" />
+		<item type_name="flame::cTerrain" height_map_name="assets/height.png" material_name="assets/terrain.fmat" />
 	</components>
 </prefab>
