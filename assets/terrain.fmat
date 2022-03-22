@@ -1,9 +1,12 @@
-<material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="256,0,0,0" color_map="0">
+<material shader_file="flame/shaders/terrain/default_mat.glsl" float_values="0.5,0.5,0.0,0.1" int_values="256,0,0,0">
 	<textures>
 		<item filename="assets/grass.jpg" auto_mipmap="true" />
+		<item filename="assets/dirt.jpg" auto_mipmap="true" />
 	</textures>
 	<shader_defines>
 		<item v="frag:UV_TILING" />
+		<item v="frag:COLOR_MAP0=0" />
+		<item v="frag:COLOR_MAP1=1" />
 	</shader_defines>
 </material>
 
