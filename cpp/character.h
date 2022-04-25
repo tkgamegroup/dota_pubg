@@ -48,7 +48,9 @@ struct cCharacter : Component
 	/// Reflect requires
 	cNodePtr node;
 	/// Reflect requires
-	cNavAgentPtr nav;
+	cNavAgentPtr nav_agent;
+
+	cArmaturePtr armature;
 
 	/// Reflect
 	Party party = LeftSide;

@@ -10,8 +10,43 @@
 #include "character.h"
 #include "player.h"
 
-cNodePtr camera_node;
-cPlayerPtr main_player;
+struct MainCamera
+{
+	EntityPtr entity = nullptr;
+	cNodePtr node = nullptr;
+	cCameraPtr camera = nullptr;
+
+	void init(EntityPtr e)
+	{
+		entity = e;
+		if (e)
+		{
+			node = e->get_component_i<cNode>(0);
+			camera = e->get_component_t<cCamera>();
+		}
+	}
+}main_camera;
+
+struct MainPlayer
+{
+	EntityPtr entity = nullptr;
+	cNodePtr node = nullptr;
+	cNavAgentPtr nav_agent = nullptr;
+	cCharacterPtr character = nullptr;
+	cPlayerPtr player = nullptr;
+
+	void init(EntityPtr e)
+	{
+		entity = e;
+		if (e)
+		{
+			node = e->get_component_i<cNode>(0);
+			nav_agent = e->get_component_t<cNavAgent>();
+			character = e->get_component_t<cCharacter>();
+			player = e->get_component_t<cPlayer>();
+		}
+	}
+}main_player;
 
 void cMain::start()
 {
@@ -20,8 +55,9 @@ void cMain::start()
 		sScene::instance()->generate_nav_mesh();
 		return false;
 	});
-	camera_node = entity->find_child("Camera")->get_component_i<cNode>(0);
-	main_player = entity->find_child("main_player")->get_component_t<cPlayer>();
+
+	main_camera.init(entity->find_child("Camera"));
+	main_player.init(entity->find_child("main_player"));
 }
 
 void cMain::update()
@@ -29,14 +65,20 @@ void cMain::update()
 	auto input = sInput::instance();
 	if (input->mpressed(Mouse_Right))
 	{
-		vec3 p;
-		auto obj = sRenderer::instance()->pick_up(input->mpos, &p);
-		if (obj)
-			main_player->character->nav->set_target(p);
+		if (main_player.nav_agent)
+		{
+			vec3 p;
+			auto obj = sRenderer::instance()->pick_up(input->mpos, &p);
+			if (obj)
+				main_player.nav_agent->set_target(p);
+		}
 	}
 
-	camera_node->set_eul(vec3(0.f, -camera_angle, 0.f));
-	camera_node->set_pos(main_player->character->node->g_pos + camera_length * camera_node->g_rot[2]);
+	if (main_camera.node)
+	{
+		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
+		main_camera.node->set_pos(main_player.node->g_pos + camera_length * main_camera.node->g_rot[2]);
+	}
 }
 
 struct cMainCreate : cMain::Create

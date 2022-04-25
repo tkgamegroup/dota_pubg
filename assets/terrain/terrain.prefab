@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+		<item type_name="flame::cTerrain" extent="200,200,200" height_map_name="assets/terrain/height.png" material_name="assets/terrain/terrain.fmat" />
+	</components>
+</prefab>

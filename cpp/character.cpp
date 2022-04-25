@@ -3,6 +3,7 @@
 #include <flame/universe/octree.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
+#include <flame/universe/components/armature.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
@@ -79,7 +80,7 @@ void BattleState::update()
 			auto dist2 = ang1 - ang0; if (dist2 < 0.f) dist2 += 360.f;
 			if (min(dist1, dist2) < 60.f)
 			{
-				character->nav->stop();
+				character->nav_agent->stop();
 				action = Attack;
 				attack_counter = 0;
 			}
@@ -87,7 +88,7 @@ void BattleState::update()
 	}
 
 	if (action == Chase)
-		character->nav->set_target(target->node->g_pos);
+		character->nav_agent->set_target(target->node->g_pos);
 
 	if (action == Attack)
 	{
@@ -128,12 +129,22 @@ void cCharacter::die()
 
 void cCharacter::start()
 {
-
+	auto e = entity;
+	while (e)
+	{
+		if (armature = e->get_component_t<cArmature>(); armature)
+			break;
+		if (!e->children.empty())
+			e = e->children[0].get();
+	}
 }
 
 void cCharacter::update()
 {
 	state->update();
+
+	if (armature)
+		armature->play("idle"_h);
 }
 
 struct cCharacterCreate : cCharacter::Create
