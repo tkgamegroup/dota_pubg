@@ -1,8 +1,8 @@
 <material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="16,0,0,0">
 	<textures>
 		<item filename="assets/terrain/splash.png"/>
-		<item filename="assets/terrain/dirt.png" srgb="true" auto_mipmap="true" />
-		<item filename="assets/terrain/grass.png" srgb="true" auto_mipmap="true" />
+		<item filename="assets/terrain/rock.jpg" srgb="true" auto_mipmap="true" />
+		<item filename="assets/terrain/grass.jpg" srgb="true" auto_mipmap="true" />
 	</textures>
 	<shader_defines>
 		<item v="frag:UV_TILING" />
