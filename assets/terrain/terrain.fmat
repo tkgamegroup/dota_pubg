@@ -1,4 +1,4 @@
-<material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="16,0,0,0">
+<material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="64,0,0,0">
 	<textures>
 		<item filename="assets/terrain/splash.png"/>
 		<item filename="assets/terrain/rock.jpg" srgb="true" auto_mipmap="true" />

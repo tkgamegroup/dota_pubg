@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<material metallic="1" roughness="0.5" color_map="0" filename="D:\dota_pubg\assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat">
+<material metallic="0" roughness="1" color_map="0" filename="D:\dota_pubg\assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat">
 	<textures>
 		<item filename="assets\knight\paladin_prop_j_nordstrom.fbm\Paladin_diffuse.png" />
 		<item />

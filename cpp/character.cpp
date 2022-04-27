@@ -144,7 +144,16 @@ void cCharacter::update()
 	state->update();
 
 	if (armature)
-		armature->play("idle"_h);
+	{
+		uint anim_name = "idle"_h;
+		if (nav_agent)
+		{
+			if (length(nav_agent->current_velocity()) > 0.1f)
+				anim_name = "run"_h;
+		}
+		if (anim_name)
+			armature->play(anim_name);
+	}
 }
 
 struct cCharacterCreate : cCharacter::Create
