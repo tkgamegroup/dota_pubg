@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="0.2,1.0,1.0"/>
+		<item type_name="flame::cMesh" mesh_name="assets\arrow.fmod#0" />
+	</components>
+</prefab>

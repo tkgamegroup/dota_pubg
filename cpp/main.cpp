@@ -70,7 +70,17 @@ void cMain::update()
 			vec3 p;
 			auto obj = sRenderer::instance()->pick_up(input->mpos, &p);
 			if (obj)
+			{
+				static EntityPtr e_arrow = nullptr;
+				if (!e_arrow)
+				{
+					e_arrow = Entity::create();
+					e_arrow->load(L"assets/arrow.prefab");
+					entity->add_child(e_arrow);
+				}
+				e_arrow->get_component_i<cNode>(0)->set_pos(p);
 				main_player.nav_agent->set_target(p);
+			}
 		}
 	}
 
