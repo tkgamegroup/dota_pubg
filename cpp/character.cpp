@@ -146,6 +146,8 @@ void cCharacter::update()
 	if (armature)
 	{
 		uint anim_name = "idle"_h;
+		if (state && state->type == State::Battle)
+			;
 		if (nav_agent)
 		{
 			if (length(nav_agent->current_velocity()) > 0.1f)

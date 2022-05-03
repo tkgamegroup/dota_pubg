@@ -20,7 +20,6 @@
 		<item file_id="318a777f4d3654d1e5786f8e1326b6b9" filename="assets\terrain\terrain.prefab">
 			<modifications>
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cNode|pos" value="-100,-25,-100" />
-				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cTerrain|extent" value="200,128,200" />
 			</modifications>
 		</item>
 		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player" tag="2">

@@ -1,12 +1,11 @@
-<material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="64,0,0,0">
+<material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="1,0,0,0">
 	<textures>
-		<item filename="assets/terrain/splash.png"/>
 		<item filename="assets/terrain/rock.jpg" srgb="true" auto_mipmap="true" />
 		<item filename="assets/terrain/grass.jpg" srgb="true" auto_mipmap="true" />
 	</textures>
 	<shader_defines>
-		<item v="frag:UV_TILING" />
 		<item v="frag:LAYERS=2" />
+		<item v="frag:TRI_PLANAR" />
 	</shader_defines>
 </material>
 
