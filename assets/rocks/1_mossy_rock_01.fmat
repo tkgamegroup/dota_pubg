@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<material color_map="0" >
+	<textures>
+		<item filename="assets\rocks\rock1.jpg" srgb="true" auto_mipmap="true"/>
+	</textures>
+</material>

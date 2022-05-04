@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item name="mossy_rock_01_LOD_2">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="assets\rocks\1.fmod#0" material_name="assets\rocks\1_mossy_rock_01.fmat" />
+			</components>
+		</item>
+	</children>
+</prefab>
