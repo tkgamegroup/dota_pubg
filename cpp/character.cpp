@@ -150,7 +150,7 @@ void cCharacter::update()
 			;
 		if (nav_agent)
 		{
-			if (length(nav_agent->current_velocity()) > 0.1f)
+			if (length(nav_agent->desire_velocity()) > 0.1f)
 				anim_name = "run"_h;
 		}
 		if (anim_name)

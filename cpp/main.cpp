@@ -87,7 +87,7 @@ void cMain::update()
 	if (main_camera.node)
 	{
 		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
-		main_camera.node->set_pos(main_player.node->g_pos + camera_length * main_camera.node->g_rot[2]);
+		main_camera.node->set_pos(mix(main_camera.node->pos, main_player.node->g_pos + camera_length * main_camera.node->g_rot[2], 0.1f));
 	}
 }
 
