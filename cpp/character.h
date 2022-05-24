@@ -2,44 +2,19 @@
 
 #include "main.h"
 
-struct State
+enum State
 {
-	enum Type
-	{
-		Idle,
-		Battle
-	}type;
-
-	cCharacterPtr character = nullptr;
-
-	virtual void update() = 0;
+	StateIdle,
+	StateMove,
+	StateBattle,
+	StateBack
 };
 
-struct IdleState : State
+enum Action
 {
-	void update() override;
-};
-
-struct MoveState : State
-{
-	void update() override;
-};
-
-struct BattleState : State
-{
-	enum Action
-	{
-		Waiting,
-		Chase,
-		Attack
-	}action;
-
-	std::vector<cCharacterPtr> enemies;
-	cCharacterPtr target = nullptr;
-	vec3 start_pos;
-	uint attack_counter;
-
-	void update() override;
+	ActionNone,
+	ActionMove,
+	ActionAttack
 };
 
 /// Reflect ctor
@@ -53,8 +28,6 @@ struct cCharacter : Component
 	cArmaturePtr armature;
 
 	/// Reflect
-	Party party = LeftSide;
-	/// Reflect
 	uint radius = 6;
 	/// Reflect
 	uint hp = 100;
@@ -63,19 +36,19 @@ struct cCharacter : Component
 	/// Reflect
 	uint atk = 10;
 	/// Reflect
-	uint atk_radius = 15;
+	uint atk_distance = 15;
 	/// Reflect
-	uint atk_frames = 30;
+	uint atk_speed = 30;
 	/// Reflect
-	uint disappear_frames = 30;
+	uint ai_id = 0;
 
-	/// Reflect
-	bool passive = false;
-
-	std::unique_ptr<State> state;
 	bool dead = false;
+	State state = StateIdle;
+	Action action = ActionNone;
+	vec3 started_pos;
+	std::vector<cCharacterPtr> hate_list;
+	uint attack_tick = 0;
 
-	cCharacter();
 	void die();
 	void start() override;
 	void update() override;

@@ -8,32 +8,6 @@ FLAME_TYPE(cMain)
 FLAME_TYPE(cPlayer)
 FLAME_TYPE(cCharacter)
 
-/// Reflect
-enum Party
-{
-	LeftSide = 1 << 1,
-	RightSide = 1 << 2,
-	MiddleSide = 1 << 3
-};
-
-struct Ref
-{
-	EntityPtr e;
-	bool invalid = false;
-	uint n = 1;
-	void* lis;
-};
-
-struct RefManager
-{
-	std::map<EntityPtr, Ref> refs;
-
-	Ref* get(EntityPtr e);
-	void release(Ref* ref);
-
-	static RefManager& instance;
-};
-
 /// Reflect ctor
 struct cMain : Component
 {
