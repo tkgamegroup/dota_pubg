@@ -458,25 +458,25 @@
 				<item file_id="d376fa7e48350e3ee6d72bbb6c6d0ca9" name="Paladin_J_Nordstrom">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#0" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#mesh0" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
 					</components>
 				</item>
 				<item file_id="f8fbdb86496e014147a896ad6fffae9f" name="Paladin_J_Nordstrom_Helmet">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#1" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#mesh1" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
 					</components>
 				</item>
 				<item file_id="5909cf1341b07bb11f327d93282eab31" name="Paladin_J_Nordstrom_Sword">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#2" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#mesh2" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
 					</components>
 				</item>
 				<item file_id="2f0bc9b74ca82d20ee2fffa208940cef" name="Paladin_J_Nordstrom_Shield">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#3" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\knight\paladin_prop_j_nordstrom.fmod#mesh3" material_name="assets\knight\paladin_prop_j_nordstrom_Paladin_MAT.fmat" />
 					</components>
 				</item>
 			</children>

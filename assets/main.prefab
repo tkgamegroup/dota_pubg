@@ -24,7 +24,7 @@
 		</item>
 		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player" tag="2">
 			<components>
-				<item type_name="flame::cNode" pos="-14.154,-13.3949,-36.6687" />
+				<item type_name="flame::cNode" pos="6.54738,-14.9869,-22.7267" />
 				<item type_name="flame::cNavAgent" />
 				<item type_name="cCharacter" />
 				<item type_name="cPlayer" />
@@ -37,9 +37,14 @@
 		</item>
 		<item file_id="944e2c0c4ab810e04bc801ba75b18c09" name="monster" tag="4">
 			<components>
-				<item type_name="flame::cNode" pos="-65.4072,-19.0724,32.4845" />
+				<item type_name="flame::cNode" pos="8.21098,-15.5231,-18.5079" />
 				<item type_name="flame::cNavAgent" />
 			</components>
+			<children>
+				<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\xbot\xbot.prefab">
+					<modifications />
+				</item>
+			</children>
 		</item>
 	</children>
 </prefab>
