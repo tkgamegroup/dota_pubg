@@ -7,6 +7,33 @@
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
+std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
+{
+	std::vector<cNodePtr> objs;
+	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 15.f, objs, CharacterTag);
+	std::vector<cCharacterPtr> enemies;
+	for (auto obj : objs)
+	{
+		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && chr->faction != faction)
+			enemies.push_back(chr);
+	}
+	return enemies;
+}
+
+void cCharacter::enter_move_state(const vec3& pos)
+{
+	state = StateMove;
+	action = ActionNone;
+	nav_agent->set_target(pos);
+}
+
+void cCharacter::enter_battle_state(const std::vector<cCharacterPtr>& enemies)
+{
+	state = StateBattle;
+	action = ActionNone;
+	hate_list = enemies;
+}
+
 void cCharacter::die()
 {
 	if (dead)
@@ -30,44 +57,20 @@ void cCharacter::update()
 	switch (state)
 	{
 	case StateIdle:
-	{
-		//Party enemy_side = (Party)0;
-		//switch (character->party)
-		//{
-		//case LeftSide:
-		//	enemy_side = RightSide;
-		//	break;
-		//case RightSide:
-		//	enemy_side = LeftSide;
-		//	break;
-		//}
-		//if (enemy_side != 0)
-		//{
-		//	std::vector<cNodePtr> objs;
-		//	sScene::instance()->octree->get_colliding(character->node->g_pos, 15.f, objs, enemy_side);
-		//	if (!objs.empty())
-		//	{
-		//		std::vector<cCharacterPtr> enemies;
-		//		for (auto obj : objs)
-		//		{
-		//			if (auto chr = obj->entity->get_component_t<cCharacter>(); chr)
-		//				enemies.push_back(chr);
-		//		}
-		//		if (!enemies.empty())
-		//		{
-		//			auto state = new BattleState;
-		//			state->character = character;
-		//			state->action = BattleState::Waiting;
-		//			state->enemies = enemies;
-		//			character->state.reset(state);
-		//			return;
-		//		}
-		//	}
-		//}
-	}
+		break;
+	case StateMove:
+		if (length(nav_agent->desire_velocity()) <= 0.f)
+		{
+			nav_agent->stop();
+			state = StateIdle;
+			action = ActionNone;
+		}
+		else
+			action = ActionMove;
 		break;
 	case StateBattle:
 	{
+
 		//if (target == nullptr)
 		//{
 		//	if (enemies.empty())

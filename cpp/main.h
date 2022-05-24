@@ -8,6 +8,8 @@ FLAME_TYPE(cMain)
 FLAME_TYPE(cPlayer)
 FLAME_TYPE(cCharacter)
 
+const auto CharacterTag = 1 << 1;
+
 /// Reflect ctor
 struct cMain : Component
 {

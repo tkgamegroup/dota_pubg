@@ -79,7 +79,7 @@ void cMain::update()
 					entity->add_child(e_arrow);
 				}
 				e_arrow->get_component_i<cNode>(0)->set_pos(p);
-				main_player.nav_agent->set_target(p);
+				main_player.character->enter_move_state(p);
 			}
 		}
 	}

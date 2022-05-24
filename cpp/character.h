@@ -40,6 +40,9 @@ struct cCharacter : Component
 	/// Reflect
 	uint atk_speed = 30;
 	/// Reflect
+	uint faction = 0;
+
+	/// Reflect
 	uint ai_id = 0;
 
 	bool dead = false;
@@ -47,9 +50,14 @@ struct cCharacter : Component
 	Action action = ActionNone;
 	vec3 started_pos;
 	std::vector<cCharacterPtr> hate_list;
+	uint search_tick = 0;
 	uint attack_tick = 0;
 
+	std::vector<cCharacterPtr> find_enemies(float radius);
+	void enter_move_state(const vec3& pos);
+	void enter_battle_state(const std::vector<cCharacterPtr>& enemies);
 	void die();
+
 	void start() override;
 	void update() override;
 
