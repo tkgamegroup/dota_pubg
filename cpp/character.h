@@ -28,7 +28,7 @@ struct cCharacter : Component
 	cArmaturePtr armature;
 
 	/// Reflect
-	uint radius = 6;
+	float radius = 0.6f;
 	/// Reflect
 	uint hp = 100;
 	/// Reflect
@@ -36,12 +36,11 @@ struct cCharacter : Component
 	/// Reflect
 	uint atk = 10;
 	/// Reflect
-	uint atk_distance = 15;
+	float atk_distance = 1.5f;
 	/// Reflect
 	uint atk_speed = 30;
 	/// Reflect
 	uint faction = 0;
-
 	/// Reflect
 	uint ai_id = 0;
 
@@ -50,10 +49,12 @@ struct cCharacter : Component
 	Action action = ActionNone;
 	vec3 started_pos;
 	std::vector<cCharacterPtr> hate_list;
+	cCharacterPtr target = nullptr;
+	uint chase_tick = 0;
 	uint search_tick = 0;
 	uint attack_tick = 0;
 
-	std::vector<cCharacterPtr> find_enemies(float radius);
+	std::vector<cCharacterPtr> find_enemies(float radius = 0.f);
 	void enter_move_state(const vec3& pos);
 	void enter_battle_state(const std::vector<cCharacterPtr>& enemies);
 	void die();

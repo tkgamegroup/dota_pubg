@@ -50,6 +50,7 @@ struct MainPlayer
 
 void cMain::start()
 {
+	srand(time(0));
 	printf("Hello World\n");
 	add_event([this]() {
 		sScene::instance()->generate_nav_mesh();

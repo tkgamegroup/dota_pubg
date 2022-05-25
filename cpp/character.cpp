@@ -32,6 +32,20 @@ void cCharacter::enter_battle_state(const std::vector<cCharacterPtr>& enemies)
 	state = StateBattle;
 	action = ActionNone;
 	hate_list = enemies;
+	for (auto chr : enemies)
+	{
+		auto e = chr->entity;
+		e->message_listeners.add([this, e](uint h, void*, void*) {
+			if (h == "destroyed"_h)
+			{
+				for (auto& chr : hate_list)
+				{
+					if (chr->entity == e)
+						chr = nullptr;
+				}
+			}
+		});
+	}
 }
 
 void cCharacter::die()
@@ -70,72 +84,49 @@ void cCharacter::update()
 		break;
 	case StateBattle:
 	{
+		for (auto it = hate_list.begin(); it != hate_list.end(); )
+		{
+			if (*it == nullptr)
+				it = hate_list.erase(it);
+			else
+				it++;
+		}
+		if (hate_list.empty())
+		{
+			state = StateIdle;
+			action = ActionNone;
+		}
+		else
+		{
+			if (action == ActionNone)
+				target = hate_list[0];
 
-		//if (target == nullptr)
-		//{
-		//	if (enemies.empty())
-		//	{
-		//		auto state = new IdleState;
-		//		state->character = character;
-		//		character->state.reset(state);
-		//		return;
-		//	}
-		//	target = enemies.front();
-		//}
+			auto tar_pos = target->node->g_pos;
+			auto self_pos = node->g_pos;
+			auto dir = tar_pos - self_pos;
+			auto len = length(dir);
+			dir = normalize(dir);
+			auto ang_dist = angle_dist(node->get_eul().x, degrees(atan2(dir.x, dir.z)));
 
-		//if (action == Waiting)
-		//	action = Chase;
+			if (action == ActionNone || action == ActionMove)
+			{
+				if (ang_dist <= 60.f && len <= atk_distance)
+				{
+					action = ActionAttack;
+				}
+				else
+				{
+					action = ActionMove;
+					nav_agent->set_target(tar_pos);
+				}
+			}
+			else if (action == ActionAttack)
+			{
 
-		//if (action == Chase)
-		//{
-		//	if (distance(character->node->g_pos, target->node->g_pos) <
-		//		(character->radius + target->radius + character->atk_radius) * 0.1f)
-		//	{
-		//		auto ang0 = character->node->get_eul().x;
-		//		auto ang1 = target->node->get_eul().x;
-		//		auto dist1 = ang0 - ang1; if (dist1 < 0.f) dist1 += 360.f;
-		//		auto dist2 = ang1 - ang0; if (dist2 < 0.f) dist2 += 360.f;
-		//		if (min(dist1, dist2) < 60.f)
-		//		{
-		//			character->nav_agent->stop();
-		//			action = Attack;
-		//			attack_counter = 0;
-		//		}
-		//	}
-		//}
-
-		//if (action == Chase)
-		//	character->nav_agent->set_target(target->node->g_pos);
-
-		//if (action == Attack)
-		//{
-		//	if (attack_counter >= character->atk_frames)
-		//	{
-		//		if (distance(character->node->g_pos, target->node->g_pos) <
-		//			(character->radius + target->radius + character->atk_radius) * 0.15f)
-		//		{
-		//			auto ang0 = character->node->get_eul().x;
-		//			auto ang1 = target->node->get_eul().x;
-		//			auto dist1 = ang0 - ang1; if (dist1 < 0.f) dist1 += 360.f;
-		//			auto dist2 = ang1 - ang0; if (dist2 < 0.f) dist2 += 360.f;
-		//			if (min(dist1, dist2) < 60.f)
-		//			{
-		//				auto hp_prev = target->hp;
-		//				target->hp -= min(target->hp, character->atk);
-		//				printf("attack: damage %d, %d -> %d\n", character->atk, hp_prev, target->hp);
-		//			}
-		//		}
-		//		action = Waiting;
-		//	}
-		//	else
-		//		attack_counter++;
-		//}
+			}
+		}
 	}
 		break;
-	}
-	switch (action)
-	{
-
 	}
 
 	if (armature)
