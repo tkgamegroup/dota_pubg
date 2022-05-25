@@ -28,3 +28,5 @@ struct cMain : Component
 	/// Reflect static
 	EXPORT static Create& create;
 };
+
+float random01();

@@ -27,7 +27,7 @@
 			<components>
 				<item type_name="flame::cNode" pos="6.54738,-14.9869,-22.7267" />
 				<item type_name="flame::cNavAgent" />
-				<item type_name="cCharacter" />
+				<item type_name="cCharacter" faction="1" />
 				<item type_name="cPlayer" />
 			</components>
 			<children>
@@ -40,7 +40,7 @@
 			<components>
 				<item type_name="flame::cNode" pos="8.21098,-15.5231,-18.5079" />
 				<item type_name="flame::cNavAgent" />
-				<item type_name="cCharacter" />
+				<item type_name="cCharacter" faction="2" ai_id="1" />
 			</components>
 			<children>
 				<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\xbot\xbot.prefab">

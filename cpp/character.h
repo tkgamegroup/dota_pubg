@@ -38,7 +38,9 @@ struct cCharacter : Component
 	/// Reflect
 	float atk_distance = 1.5f;
 	/// Reflect
-	uint atk_speed = 30;
+	float atk_interval = 1.8f; // time
+	/// Reflect
+	float atk_precast = 0.5f; // 0-1, of the atk_interval
 	/// Reflect
 	uint faction = 0;
 	/// Reflect
@@ -50,10 +52,12 @@ struct cCharacter : Component
 	vec3 started_pos;
 	std::vector<cCharacterPtr> hate_list;
 	cCharacterPtr target = nullptr;
-	uint chase_tick = 0;
-	uint search_tick = 0;
-	uint attack_tick = 0;
+	float search_timer = 0;
+	float chase_timer = 0.f;
+	float attack_timer = 0;
 
+	~cCharacter();
+	void on_init() override;
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f);
 	void enter_move_state(const vec3& pos);
 	void enter_battle_state(const std::vector<cCharacterPtr>& enemies);

@@ -103,6 +103,14 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
+float random01()
+{
+	static std::random_device rd;
+	static std::mt19937 mt(rd());
+	static std::uniform_real_distribution<float> dt;
+	return dt(mt);
+}
+
 EXPORT void* cpp_info()
 {
 	auto uinfo = universe_info();

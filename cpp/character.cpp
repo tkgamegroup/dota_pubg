@@ -7,10 +7,23 @@
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
+cCharacter::~cCharacter()
+{
+	node->measurers.remove("character"_h);
+}
+
+void cCharacter::on_init()
+{
+	node->measurers.add([this](AABB* ret) {
+		*ret = AABB(AABB(vec3(), vec3()).get_points(node->transform));
+		return true;
+	}, "character"_h);
+}
+
 std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
 {
 	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 15.f, objs, CharacterTag);
+	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 5.f, objs, CharacterTag);
 	std::vector<cCharacterPtr> enemies;
 	for (auto obj : objs)
 	{
@@ -56,6 +69,8 @@ void cCharacter::die()
 
 void cCharacter::start()
 {
+	entity->tag |= CharacterTag;
+
 	auto e = entity;
 	while (e)
 	{
@@ -68,9 +83,23 @@ void cCharacter::start()
 
 void cCharacter::update()
 {
+	auto dt = delta_time;
+
 	switch (state)
 	{
 	case StateIdle:
+		if (ai_id == 1)
+		{
+			if (search_timer <= 0.f)
+			{
+				auto enemies = find_enemies();
+				if (!enemies.empty())
+					enter_battle_state(enemies);
+				search_timer = 0.3f + random01() * 0.1f;
+			}
+			else
+				search_timer -= dt;
+		}
 		break;
 	case StateMove:
 		if (length(nav_agent->desire_velocity()) <= 0.f)
@@ -104,20 +133,26 @@ void cCharacter::update()
 			auto tar_pos = target->node->g_pos;
 			auto self_pos = node->g_pos;
 			auto dir = tar_pos - self_pos;
-			auto len = length(dir);
+			auto dist = length(dir);
 			dir = normalize(dir);
-			auto ang_dist = angle_dist(node->get_eul().x, degrees(atan2(dir.x, dir.z)));
+			auto ang_diff = angle_diff(node->get_eul().x, degrees(atan2(dir.x, dir.z)));
 
 			if (action == ActionNone || action == ActionMove)
 			{
-				if (ang_dist <= 60.f && len <= atk_distance)
+				if (ang_diff <= 60.f && dist <= atk_distance)
 				{
 					action = ActionAttack;
 				}
 				else
 				{
 					action = ActionMove;
-					nav_agent->set_target(tar_pos);
+					if (chase_timer <= 0.f)
+					{
+						nav_agent->set_target(tar_pos);
+						chase_timer = 0.1f + random01() * 0.05f;
+					}
+					else
+						chase_timer -= dt;
 				}
 			}
 			else if (action == ActionAttack)
