@@ -10,43 +10,8 @@
 #include "character.h"
 #include "player.h"
 
-struct MainCamera
-{
-	EntityPtr entity = nullptr;
-	cNodePtr node = nullptr;
-	cCameraPtr camera = nullptr;
-
-	void init(EntityPtr e)
-	{
-		entity = e;
-		if (e)
-		{
-			node = e->get_component_i<cNode>(0);
-			camera = e->get_component_t<cCamera>();
-		}
-	}
-}main_camera;
-
-struct MainPlayer
-{
-	EntityPtr entity = nullptr;
-	cNodePtr node = nullptr;
-	cNavAgentPtr nav_agent = nullptr;
-	cCharacterPtr character = nullptr;
-	cPlayerPtr player = nullptr;
-
-	void init(EntityPtr e)
-	{
-		entity = e;
-		if (e)
-		{
-			node = e->get_component_i<cNode>(0);
-			nav_agent = e->get_component_t<cNavAgent>();
-			character = e->get_component_t<cCharacter>();
-			player = e->get_component_t<cPlayer>();
-		}
-	}
-}main_player;
+MainCamera main_camera;
+MainPlayer main_player;
 
 void cMain::start()
 {

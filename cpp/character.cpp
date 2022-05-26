@@ -1,8 +1,10 @@
 #include "character.h"
 
+#include <flame/graphics/gui.h>
 #include <flame/universe/octree.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
+#include <flame/universe/components/camera.h>
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
@@ -10,14 +12,20 @@
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
+
+	graphics::gui_callbacks.remove(gui_lis);
 }
 
 void cCharacter::on_init()
 {
 	node->measurers.add([this](AABB* ret) {
-		*ret = AABB(AABB(vec3(), vec3()).get_points(node->transform));
+		*ret = AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform));
 		return true;
 	}, "character"_h);
+
+	gui_lis = graphics::gui_callbacks.add([this]() {
+		main_camera.camera->proj_view_mat * vec4(node->g_pos, 1.f);
+	});
 }
 
 std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
@@ -84,6 +92,12 @@ void cCharacter::start()
 void cCharacter::update()
 {
 	auto dt = delta_time;
+	if (search_timer > 0)
+		search_timer -= dt;
+	if (attack_interval_timer > 0)
+		attack_interval_timer -= dt;
+	if (chase_timer > 0)
+		chase_timer -= dt;
 
 	switch (state)
 	{
@@ -97,8 +111,6 @@ void cCharacter::update()
 					enter_battle_state(enemies);
 				search_timer = 0.3f + random01() * 0.1f;
 			}
-			else
-				search_timer -= dt;
 		}
 		break;
 	case StateMove:
@@ -141,7 +153,12 @@ void cCharacter::update()
 			{
 				if (ang_diff <= 60.f && dist <= atk_distance)
 				{
-					action = ActionAttack;
+					if (attack_interval_timer < 0.f)
+					{
+						action = ActionAttack;
+						attack_interval_timer = atk_interval;
+						attack_timer = atk_interval * atk_precast;
+					}
 				}
 				else
 				{
@@ -151,13 +168,16 @@ void cCharacter::update()
 						nav_agent->set_target(tar_pos);
 						chase_timer = 0.1f + random01() * 0.05f;
 					}
-					else
-						chase_timer -= dt;
 				}
 			}
 			else if (action == ActionAttack)
 			{
-
+				if (attack_timer <= 0.f)
+				{
+					action = ActionNone;
+				}
+				else
+					attack_timer -= dt;
 			}
 		}
 	}

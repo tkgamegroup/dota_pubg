@@ -30,6 +30,8 @@ struct cCharacter : Component
 	/// Reflect
 	float radius = 0.6f;
 	/// Reflect
+	float height = 1.8f;
+	/// Reflect
 	uint hp = 100;
 	/// Reflect
 	uint hp_max = 100;
@@ -52,9 +54,12 @@ struct cCharacter : Component
 	vec3 started_pos;
 	std::vector<cCharacterPtr> hate_list;
 	cCharacterPtr target = nullptr;
-	float search_timer = 0;
+	float search_timer = 0.f;
 	float chase_timer = 0.f;
-	float attack_timer = 0;
+	float attack_interval_timer = 0.f;
+	float attack_timer = 0.f;
+
+	void* gui_lis;
 
 	~cCharacter();
 	void on_init() override;
