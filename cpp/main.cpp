@@ -10,6 +10,28 @@
 #include "character.h"
 #include "player.h"
 
+void MainCamera::init(EntityPtr e)
+{
+	entity = e;
+	if (e)
+	{
+		node = e->get_component_i<cNode>(0);
+		camera = e->get_component_t<cCamera>();
+	}
+}
+
+void MainPlayer::init(EntityPtr e)
+{
+	entity = e;
+	if (e)
+	{
+		node = e->get_component_i<cNode>(0);
+		nav_agent = e->get_component_t<cNavAgent>();
+		character = e->get_component_t<cCharacter>();
+		player = e->get_component_t<cPlayer>();
+	}
+}
+
 MainCamera main_camera;
 MainPlayer main_player;
 

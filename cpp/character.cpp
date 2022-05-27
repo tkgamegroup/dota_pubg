@@ -24,7 +24,10 @@ void cCharacter::on_init()
 	}, "character"_h);
 
 	gui_lis = graphics::gui_callbacks.add([this]() {
-		main_camera.camera->proj_view_mat * vec4(node->g_pos, 1.f);
+		if (main_camera.camera)
+		{
+			main_camera.camera->proj_view_mat* vec4(node->g_pos, 1.f);
+		}
 	});
 }
 

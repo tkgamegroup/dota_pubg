@@ -16,15 +16,7 @@ struct MainCamera
 	cNodePtr node = nullptr;
 	cCameraPtr camera = nullptr;
 
-	void init(EntityPtr e)
-	{
-		entity = e;
-		if (e)
-		{
-			node = e->get_component_i<cNode>(0);
-			camera = e->get_component_t<cCamera>();
-		}
-	}
+	void init(EntityPtr e);
 };
 extern MainCamera main_camera;
 
@@ -36,17 +28,7 @@ struct MainPlayer
 	cCharacterPtr character = nullptr;
 	cPlayerPtr player = nullptr;
 
-	void init(EntityPtr e)
-	{
-		entity = e;
-		if (e)
-		{
-			node = e->get_component_i<cNode>(0);
-			nav_agent = e->get_component_t<cNavAgent>();
-			character = e->get_component_t<cCharacter>();
-			player = e->get_component_t<cPlayer>();
-		}
-	}
+	void init(EntityPtr e);
 };
 extern MainPlayer main_player;
 
