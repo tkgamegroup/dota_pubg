@@ -31,7 +31,7 @@
 				<item type_name="cPlayer" />
 			</components>
 			<children>
-				<item file_id="50d8b05d404569714eaaeebf357f1619" filename="assets\knight\paladin_prop_j_nordstrom.prefab">
+				<item file_id="50d8b05d404569714eaaeebf357f1619" filename="assets\knight\Paladin WProp J Nordstrom.prefab">
 					<modifications />
 				</item>
 			</children>
@@ -43,7 +43,7 @@
 				<item type_name="cCharacter" faction="2" ai_id="1" />
 			</components>
 			<children>
-				<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\xbot\xbot.prefab">
+				<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\.prefab">
 					<modifications />
 				</item>
 			</children>
