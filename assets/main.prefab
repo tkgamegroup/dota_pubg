@@ -7,14 +7,19 @@
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
 			<components>
-				<item type_name="flame::cNode" pos="-15.2279,4.54071,-45.4996" eul="-6.93348,116.381,180" qut="0.031873,0.848251,0.526131,-0.051387" />
+				<item type_name="flame::cNode" pos="-15.2279,4.54071,-45.4996" eul="6.93348,180,63.6188" qut="0.031873,0.848251,0.526131,-0.051387" />
 				<item type_name="flame::cCamera" />
 			</components>
 		</item>
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">
 			<components>
-				<item type_name="flame::cNode" eul="0,-92.0001,0" qut="0.71934,-0,-0,-0.694658" />
+				<item type_name="flame::cNode" eul="-0,0,-87.9999" qut="0.71934,-0,-0,-0.694658" />
 				<item type_name="flame::cLight" color="1,1,1,3.14" />
+			</components>
+		</item>
+		<item file_id="82f4ac9944dcaea2d43185a721b76f02" name="Environment">
+			<components>
+				<item type_name="flame::cEnvironment" sky_map_name="D:\skies\2.dds" />
 			</components>
 		</item>
 		<item file_id="318a777f4d3654d1e5786f8e1326b6b9" filename="assets\terrain\terrain.prefab">
@@ -28,7 +33,6 @@
 				<item type_name="flame::cNode" pos="6.54738,-14.9869,-22.7267" />
 				<item type_name="flame::cNavAgent" />
 				<item type_name="cCharacter" faction="1" />
-				<item type_name="cPlayer" />
 			</components>
 			<children>
 				<item file_id="50d8b05d404569714eaaeebf357f1619" filename="assets\knight\Paladin WProp J Nordstrom.prefab">

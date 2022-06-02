@@ -8,7 +8,6 @@
 
 #include "main.h"
 #include "character.h"
-#include "player.h"
 
 void MainCamera::init(EntityPtr e)
 {
@@ -28,7 +27,6 @@ void MainPlayer::init(EntityPtr e)
 		node = e->get_component_i<cNode>(0);
 		nav_agent = e->get_component_t<cNavAgent>();
 		character = e->get_component_t<cCharacter>();
-		player = e->get_component_t<cPlayer>();
 	}
 }
 
@@ -100,9 +98,8 @@ float random01()
 
 EXPORT void* cpp_info()
 {
-	auto uinfo = universe_info();
-	cMain::create((EntityPtr)INVALID_POINTER);
-	cCharacter::create((EntityPtr)INVALID_POINTER);
-	cPlayer::create((EntityPtr)INVALID_POINTER);
+	auto uinfo = universe_info(); // references universe module explicitly
+	cMain::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	return nullptr;
 }

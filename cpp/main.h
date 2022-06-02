@@ -5,7 +5,6 @@
 using namespace flame;
 
 FLAME_TYPE(cMain)
-FLAME_TYPE(cPlayer)
 FLAME_TYPE(cCharacter)
 
 const auto CharacterTag = 1 << 1;
@@ -26,7 +25,6 @@ struct MainPlayer
 	cNodePtr node = nullptr;
 	cNavAgentPtr nav_agent = nullptr;
 	cCharacterPtr character = nullptr;
-	cPlayerPtr player = nullptr;
 
 	void init(EntityPtr e);
 };
