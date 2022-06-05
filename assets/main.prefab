@@ -13,7 +13,7 @@
 		</item>
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">
 			<components>
-				<item type_name="flame::cNode" eul="-0,0,-87.9999" qut="0.71934,-0,-0,-0.694658" />
+				<item type_name="flame::cNode" eul="0,-23.26,0" qut="0.97947,-0.201591,0,0" />
 				<item type_name="flame::cLight" color="1,1,1,3.14" />
 			</components>
 		</item>
@@ -28,27 +28,23 @@
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|name" value="terrain" />
 			</modifications>
 		</item>
-		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player" tag="2">
-			<components>
-				<item type_name="flame::cNode" pos="6.54738,-14.9869,-22.7267" />
-				<item type_name="flame::cNavAgent" />
-				<item type_name="cCharacter" faction="1" />
-			</components>
-			<children>
-				<item file_id="50d8b05d404569714eaaeebf357f1619" filename="assets\knight\Paladin WProp J Nordstrom.prefab">
-					<modifications />
-				</item>
-			</children>
+		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" filename="D:\dota_pubg\assets\main_player.prefab">
+			<modifications />
 		</item>
-		<item file_id="944e2c0c4ab810e04bc801ba75b18c09" name="monster" tag="4">
+		<item file_id="944e2c0c4ab810e04bc801ba75b18c09" filename="D:\dota_pubg\assets\monster.prefab">
+			<modifications />
+		</item>
+		<item file_id="d2a4ae904efb9fd0027aed84dcedcabf" name="spawn">
 			<components>
-				<item type_name="flame::cNode" pos="8.21098,-15.5231,-18.5079" />
-				<item type_name="flame::cNavAgent" />
-				<item type_name="cCharacter" faction="2" ai_id="1" />
+				<item type_name="flame::cNode" pos="-3.29,-14.65,-16.33" />
+				<item type_name="flame::cNavAgent" radius="2.46" height="2" speed="0" turn_speed="0" />
 			</components>
 			<children>
-				<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\.prefab">
-					<modifications />
+				<item file_id="6738b77f4d39e514bb6768ab59f62765" filename="assets\medieval_house\Medieval_House.prefab">
+					<modifications>
+						<item target="42bfa77c488ba8756920b9864b71238b|flame::cNode|pos" value="0,-2.18287e-14,0" />
+						<item target="42bfa77c488ba8756920b9864b71238b|flame::cNode|scl" value="1,1,1" />
+					</modifications>
 				</item>
 			</children>
 		</item>

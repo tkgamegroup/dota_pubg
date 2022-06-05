@@ -28,7 +28,7 @@ struct cCharacter : Component
 	cArmaturePtr armature;
 
 	/// Reflect
-	float radius = 0.6f;
+	float radius = 0.3f;
 	/// Reflect
 	float height = 1.8f;
 	/// Reflect
@@ -63,6 +63,8 @@ struct cCharacter : Component
 
 	~cCharacter();
 	void on_init() override;
+	void on_active() override;
+	void on_inactive() override;
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f);
 	void enter_move_state(const vec3& pos);
 	void enter_battle_state(const std::vector<cCharacterPtr>& enemies);

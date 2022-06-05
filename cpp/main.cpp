@@ -1,4 +1,5 @@
 #include <flame/graphics/window.h>
+#include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
@@ -36,6 +37,7 @@ MainPlayer main_player;
 void cMain::start()
 {
 	srand(time(0));
+	graphics::gui_set_current();
 	printf("Hello World\n");
 	add_event([this]() {
 		sScene::instance()->generate_nav_mesh();

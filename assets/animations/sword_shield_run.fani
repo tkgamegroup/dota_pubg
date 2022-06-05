@@ -1,0 +1,263 @@
+animation:
+<?xml version="1.0"?>
+<animation duration="0.708000004">
+	<channels>
+		<channel node_name="mixamorig:Hips">
+			<position_keys data_offset="0" data_size="288" />
+			<rotation_keys data_offset="288" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:Spine">
+			<position_keys data_offset="648" data_size="0" />
+			<rotation_keys data_offset="648" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:Spine1">
+			<position_keys data_offset="1008" data_size="0" />
+			<rotation_keys data_offset="1008" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:Spine2">
+			<position_keys data_offset="1368" data_size="0" />
+			<rotation_keys data_offset="1368" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:Neck">
+			<position_keys data_offset="1728" data_size="0" />
+			<rotation_keys data_offset="1728" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:Head">
+			<position_keys data_offset="2088" data_size="0" />
+			<rotation_keys data_offset="2088" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftShoulder">
+			<position_keys data_offset="2448" data_size="0" />
+			<rotation_keys data_offset="2448" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftArm">
+			<position_keys data_offset="2808" data_size="0" />
+			<rotation_keys data_offset="2808" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftForeArm">
+			<position_keys data_offset="3168" data_size="0" />
+			<rotation_keys data_offset="3168" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftHand">
+			<position_keys data_offset="3528" data_size="0" />
+			<rotation_keys data_offset="3528" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandThumb1">
+			<position_keys data_offset="3888" data_size="0" />
+			<rotation_keys data_offset="3888" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandThumb2">
+			<position_keys data_offset="3908" data_size="0" />
+			<rotation_keys data_offset="3908" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandThumb3">
+			<position_keys data_offset="3928" data_size="0" />
+			<rotation_keys data_offset="3928" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandIndex1">
+			<position_keys data_offset="3948" data_size="0" />
+			<rotation_keys data_offset="3948" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandIndex2">
+			<position_keys data_offset="3968" data_size="0" />
+			<rotation_keys data_offset="3968" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandIndex3">
+			<position_keys data_offset="3988" data_size="0" />
+			<rotation_keys data_offset="3988" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandMiddle1">
+			<position_keys data_offset="4008" data_size="0" />
+			<rotation_keys data_offset="4008" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandMiddle2">
+			<position_keys data_offset="4028" data_size="0" />
+			<rotation_keys data_offset="4028" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandMiddle3">
+			<position_keys data_offset="4048" data_size="0" />
+			<rotation_keys data_offset="4048" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandRing1">
+			<position_keys data_offset="4068" data_size="0" />
+			<rotation_keys data_offset="4068" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandRing2">
+			<position_keys data_offset="4088" data_size="0" />
+			<rotation_keys data_offset="4088" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandRing3">
+			<position_keys data_offset="4108" data_size="0" />
+			<rotation_keys data_offset="4108" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandPinky1">
+			<position_keys data_offset="4128" data_size="0" />
+			<rotation_keys data_offset="4128" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandPinky2">
+			<position_keys data_offset="4148" data_size="0" />
+			<rotation_keys data_offset="4148" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftHandPinky3">
+			<position_keys data_offset="4168" data_size="0" />
+			<rotation_keys data_offset="4168" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightShoulder">
+			<position_keys data_offset="4188" data_size="0" />
+			<rotation_keys data_offset="4188" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightArm">
+			<position_keys data_offset="4548" data_size="0" />
+			<rotation_keys data_offset="4548" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightForeArm">
+			<position_keys data_offset="4908" data_size="0" />
+			<rotation_keys data_offset="4908" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightHand">
+			<position_keys data_offset="5268" data_size="0" />
+			<rotation_keys data_offset="5268" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightHandThumb1">
+			<position_keys data_offset="5628" data_size="0" />
+			<rotation_keys data_offset="5628" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandThumb2">
+			<position_keys data_offset="5648" data_size="0" />
+			<rotation_keys data_offset="5648" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandThumb3">
+			<position_keys data_offset="5668" data_size="0" />
+			<rotation_keys data_offset="5668" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandIndex1">
+			<position_keys data_offset="5688" data_size="0" />
+			<rotation_keys data_offset="5688" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandIndex2">
+			<position_keys data_offset="5708" data_size="0" />
+			<rotation_keys data_offset="5708" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandIndex3">
+			<position_keys data_offset="5728" data_size="0" />
+			<rotation_keys data_offset="5728" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandMiddle1">
+			<position_keys data_offset="5748" data_size="0" />
+			<rotation_keys data_offset="5748" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandMiddle2">
+			<position_keys data_offset="5768" data_size="0" />
+			<rotation_keys data_offset="5768" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandMiddle3">
+			<position_keys data_offset="5788" data_size="0" />
+			<rotation_keys data_offset="5788" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandRing1">
+			<position_keys data_offset="5808" data_size="0" />
+			<rotation_keys data_offset="5808" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandRing2">
+			<position_keys data_offset="5828" data_size="0" />
+			<rotation_keys data_offset="5828" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandRing3">
+			<position_keys data_offset="5848" data_size="0" />
+			<rotation_keys data_offset="5848" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandPinky1">
+			<position_keys data_offset="5868" data_size="0" />
+			<rotation_keys data_offset="5868" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandPinky2">
+			<position_keys data_offset="5888" data_size="0" />
+			<rotation_keys data_offset="5888" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:RightHandPinky3">
+			<position_keys data_offset="5908" data_size="0" />
+			<rotation_keys data_offset="5908" data_size="20" />
+		</channel>
+		<channel node_name="mixamorig:LeftUpLeg">
+			<position_keys data_offset="5928" data_size="0" />
+			<rotation_keys data_offset="5928" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftLeg">
+			<position_keys data_offset="6288" data_size="0" />
+			<rotation_keys data_offset="6288" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftFoot">
+			<position_keys data_offset="6648" data_size="0" />
+			<rotation_keys data_offset="6648" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:LeftToeBase">
+			<position_keys data_offset="7008" data_size="0" />
+			<rotation_keys data_offset="7008" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightUpLeg">
+			<position_keys data_offset="7368" data_size="0" />
+			<rotation_keys data_offset="7368" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightLeg">
+			<position_keys data_offset="7728" data_size="0" />
+			<rotation_keys data_offset="7728" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightFoot">
+			<position_keys data_offset="8088" data_size="0" />
+			<rotation_keys data_offset="8088" data_size="360" />
+		</channel>
+		<channel node_name="mixamorig:RightToeBase">
+			<position_keys data_offset="8448" data_size="0" />
+			<rotation_keys data_offset="8448" data_size="360" />
+		</channel>
+	</channels>
+</animation>
+
+data:
+AAAAAACBJDuSLatCAL8SPZ7vJz0Vtqc-E0iuQu-TdEHn-6k9OA6wPjETsUJ-8PNBAAAAPpxg4j5NCrNCZg01Quf7KT7_g0Q_SLCyQsDkbEL0_VQ-fEihP67nr0JRyJJCAACAPuiB7j9PzKxCjbivQvT9lD79tBVAOrOrQr47zUL6fqo-18YgQPchrkJL--xCAADAPlRvKEBhi7NCVxYHQ_T91D6yHDxAJpu4Qo_GF0P6fuo-v2VSQDWWukIrEylD
+AAAAP1zBU0De0LhCK1M6Q_p-Cj_PhDNAREK0QhQbS0N9PxU_yGb3P04srkJwW1xDAAAgPwp4hT8WL6lCfaltQ_p-Kj-EBcU-Qg6oQn5KfkN9PzU_NkAqPCwnq0LEZYdDAAAAAJThej8MLC0-V9fFve3eJj2e7yc9hK16P-aWKT7zgNO9flpiPef7qT0wbXo_gu01PrSbvb0Y1F09AAAAPpCQej9lGz4-Ek-ZvZWGND3n-yk-so17P9f5MD5CJ2W9
+00cbPfT9VD7D13w_SusWPstbEr2zcB89AACAPrZ9fT8gNAc-vYgTvE7BNj30_ZQ-8S19P4kaED6R5c88VtccPfp-qj6823s_KvwsPrb0cT3AEwc8AADAPkvreT_JB04-j72bPc9D1bz0_dQ-pKN4PzTHZT4xAI89WRAcvfp-6j416Hg_9XpoPvXMRT0FaeO8AAAAPy6fej_T6E4-iuHOPKK9K7z6fgo_cG18P1IGKj7h4UM8rS3wOn0_FT-jXn0_
+czkSPsy1uTvuz5Q7AAAgP-tgfT8XpBE-8dM3vKj-kzv6fio_56J8P1s_HT6N0UG9mXKKPH0_NT8F5no__QotPi4Nxb0HFCY9AAAAAH6lej-RB0Q-bjpkPbygJb2e7yc9DC15P7fdMz7qnQc-196Evef7qT2GeXg_VdQSPlXqNz5jY5K9AAAAPk3MeD9oJPo9eEBDPrGzhL3n-yk-Gmx5P00cBT4ryTI-tPhsvfT9VD7m9Hk_rS0kPqPuBz6OVGy9
+AACAPr5Tej-gGEA-sRGOPVhQfb30_ZQ-ITN7P-FIPj7G-Ma6VI1Rvfp-qj6JIHw_ZMwhPuZWj70tpVG8AADAPvKxez_G3QA-eBQDvg1zCT30_dQ-tLJ6P4ULzD1sUCu-RjZjPfp-6j4dYno_P12xPd05PL6ZNjw9AAAAP62gej9uHMU9BHM2viU5uzz6fgo_rtl6P8Bz9D3peyO-vJIcPH0_FT8MNXs_uMQSPluwAr7qhIQ8AAAgP5_Xez-O3SQ-
+QOWavc6_xDz6fio_ARF8P-F-Mj7LWhq82s2XO30_NT8zqno_1eFDPu0nYj3KIiS9AAAAAMfrfz8UwpQ8G4mHPAlwcbue7yc9a8R_P3oPrDxm8hc9ICzuuef7qT2OoH8_nvy4PCaSRz1Lk6k7AAAAPvCVfz_hL8I8IqdQPfsSEDzn-yk-CaN_P8Ixyjxgkz09Du4VPPT9VD5lwn8_neHMPJdQDj2oaN87AACAPq3hfz8obsk8RQSRPDJRMDv0_ZQ-
+h-1_P8gMwjwluIy6DFeZuvp-qj4S5X8_ZtGqPH0AoLyhgxm7AADAPkzOfz-fl3U8ODITve8My7n0_dQ-HbN_PxIlLzxgbUG9QFROOvp-6j54pX8_pNVIPEsRUb0MDRe7AAAAP3uofz9kpIk8jqdFvQcR-rv6fgo_fLN_P_yvojxq0y69kqgxvH0_FT_AyX8_RaKwPOUSB70i3CW8AAAgPzflfz9Hrbg8z36DvNYR67v6fio_y-9_PzhqsDwZ5B07
+nqOju30_NT_d638_p_qUPL-ghjyxIXK7AAAAAK1Sfz_9i5A9qCGJPNNFlbue7yc93SV_P-dZlD0XkBg9Q8Veu-f7qT3vBH8_jJ2UPSLSRz0MAKE6AAAAPiX2fj9cr5c9NWNQPVeUnDvn-yk-3_h-P4i2nD1Y7Dw9eRq3O_T9VD6OFX8_F7adPe-BDT2AEYw7AACAPmg4fz9wops9O8uOPLl15Tr0_ZQ-jEd_P1WFmT27Arm67-Ztufp-qj5tR38_
+iyeUPYIVorx_6bM5AADAPn1Cfz8T1Ig9q54TvYhTZzv0_dQ-DDV_P7BIgD1zf0G9WN2vO_p-6j5YIX8_VkmEPeYKUb0FcCY7AAAAPyoVfz9dEI494OFFvQ46Obv6fgo_Txx_P2y2kT2sbi-9wBnPu30_FT-CNX8_5FSRPYt4B71Ib9C7AAAgP05Kfz-5hpQ9uWGCvJIdorv6fio_8kx_P8Pllj3U1zA7fnWVu30_NT-uUn8_ApmQPdg6iDzfSJW7
+AAAAANzifj8ie7y9QeJIPOfGAbye7yc9E25_P6Qogb1MyaK82AMPPOf7qT1nkX8__RQAvYLtNL1Ygaw8AAAAPgWDfz_gS4C8rRpgvdPcwzzn-yk-6Y9_Pzacl7wNwVe9rgyOPPT9VD41qX8_i7cHvVD-HL3nlRI8AACAPuOVfz8HFF69dmyKvP9cVTv0_ZQ-RU5_P_B5lr3xkn87ixzeOvp-qj6IEH8_SQuovfnHwDxAZzw7AADAPrUKfz-X7Ja9
+4S84PVhkjrv0_dQ-qv1-P4s8b70o3oI9DFievPp-6j7Exn4_8nZZvaLbmz0sSPm8AAAAP3h_fj8OE3O9naOqPV4KEL36fgo_IE5-P176jL3PeK09BMMSvX0_FT8daH4_gqmgvZXolD056v68AAAgP1Krfj_wD7G9jd5JPXvbsLz6fio_ktV-P15Zub0XTN88xJ5KvH0_NT_Q4n4_UXW8vb3OSjw4VwK8AAAAAAL_eD9G7Ga-wmQdvTzBJb2e7yc9
+ZwB4P-N9ZL5wp9W9VTHtvOf7qT21ZXY_6gdkvsfHHL6O4cW8AAAAPg5fdT-djWW-itczvs_3b7zn-yk-64R1P9k0ZL6z4DK-bC-iu_T9VD6bpnY_VAxmvqIuFb7z_mK7AACAPmaPdz-ZA2--RInQvT60ADn0_ZQ-XSd4PzDec77NC3K97zJJPPp-qj5iCXk_UTNsvkMkLLznHJg8AADAPrF-eT8KRmC-VBs1PWEHgjz0_dQ-ZR15P2NvWL4berc9
+KvCcPPp-6j72l3g_dshTvkeo7T2Ti-U8AAAAPzqheD-kTFC-eIz3PXQh4jz6fgo_ZE55P7-qTL4dEts9OcJzPH0_FT8GRHo_lVlKvjc1lD1ns2C7AAAgP7Cdej_tBk6-QirbPJ6uqLz6fio_GPl5P4v3Wb4Hljm8R4EHvX0_NT85AXk_VdJmvgiHHL1GgiW9AAAAAAQgqr7Unw6_3CXivuyoHj-e7yc9oB_AvhlwD78G9OK-QC8XP-f7qT0N2tI-
+D4ASP0eB3T642Q-_AAAAPm3T1j5efxQ_vHnXPuCdDr_n-yk-ZNrUPrUWGD-YE84-NwsPv_T9VD4aA9Y-5sIdP2bbwT4ouAy_AACAPlTN4D7k0CI_zcm5PsRHBb_0_ZQ-BAr1PgSGJD_l5Lk--XTzvvp-qj6IdAM_snIjP12WvT7bF-C-AADAPubsBj91yyE_tffAPiWq2b70_dQ-1WIHP639Hz82h8Q-d6ravvp-6j6HDAg_TuEdP5QkyT7w9dq-
+AAAAP51YBz92hRw_NMXMPho73b76fgo_JMoAP_2GHD9CAM4-C0jrvn0_FT8d-ew-TmscP47DzT48PQC_AAAgP-E44D6ZPxs_Jv7PPnhZBr_6fio_83PQPh6hFz9F4dc-UocNv30_NT_Obaq-yrQOv-cV4r7ghh4_AAAAANEdZT9FStg-PMuwPBYYET6e7yc9AyJhPxC47j5yd8Q9-hmXu-f7qT2f7Vw_zDvtPuzKEj4HxxC-AAAAPi9lXD-dUeI-
+0mc9PuQHL77n-yk-TyhgP2AG2z6MWUo-fjzZvfT9VD4GnGY_ZuXOPvecIT4R3ZM8AACAPl6Waz8UJbY-4v9QPVV7Hj70_ZQ-fP5oPyFenz64Sc2970GCPvp-qj5EUmE_1-OQPmGFd75P2ZY-AADAPqLaXT_7Mnk-TQCuvv2Eiz70_dQ-Yd1eP6wgQj4zVMq-TgFlPvp-6j7gnmE_EJsePqZj0L4Uujs-AAAAP9ZYZz_cOCE-v-S4vu-_Kz76fgo_
+f1BuP6nGOT4JToa-tj02Pn0_FT_WuHA_qGVrPn-hF772aE8-AAAgPwtZbD_e_p4-OZuavUdxWj76fio_kYhmP7blxj7wew297ttEPn0_NT9MImU_eifYPldNrTwEhxE-AAAAAPjIYT8Wyx-82tf5vT4H6T6e7yc9vepePw1YiDyik9a9D9H1Puf7qT1hLFk_Lq6MPa71x71VDQQ_AAAAPmVBVT8z3cQ9eQLNvRYZCT_n-yk-VStUP4UZwD3kRNu9
+W4kKP_T9VD52OlY_SZGpPZ-n-b1i-gY_AACAPsgfXD_t6489NLsTvn8k-D70_ZQ-lOFgP9PLhT2f2DK-0kLhPvp-qj57Nl8_rM6lPQ1nTr4ereA-AADAPq2WVj8-Xuo9gKRPvk13_D70_dQ-LddLP5kSFT596z--CnUOP_p-6j5SIEU__ewoPi71Ob7gxRY_AAAAP6vQRT-uzCU-yeo8vtnaFT_6fgo_7VBMP08-AT44mDC-7DYQP30_FT_fd1U_
+96iYPVafGb4UpAY_AAAgPwhXXT9Mkx89Am4Rvhz09T76fio_PEZhP-3QljwtNBG-PO3nPn0_NT9pyGE_YiQcvIcq-r19BOk-AAAAAM3peD9Xr1092jgTO9nAaD6e7yc9RSt7P6DAyDwFBY-6NGVEPuf7qT3JFnw_jWDSuuGxq7rnSzI-AAAAPt4QfD8IEvO8yCgCug47MD7n-yk-RJt7P7uLZr1HlF65AuQzPvT9VD4ye3o_CxCave534bmz8kQ-
+AACAPjlgdz-DH6y9hALauUgaeT70_ZQ-tphyPy-_rr3ZeVa6mI2dPvp-qj6xjHA__wSuvViN6Lo0sKk-AADAPr9Tcz9Znqi9iGg7uypnmT70_dQ-bCZ2P0QYl70OqXG7N3qHPvp-6j4V8nY_ZZR6vZnBMbuyRYM-AAAAP1Mydz9nyk-9fK-dutyNgj76fgo__EJ3P14XRr1W5kO4RkyCPn0_FT9YuHU_Esp8vSZd8Tp8HIw-AAAgP4Hjcz-l2oq9
+E_xOO2mwlz76fio_-3x1P25p0bzg2pY7upmQPn0_NT9s5Xg_CBxbPTfGFjuAMmk-AAAAAJiidT9pY-I9WoCePVAsfT4AAAAAmcZ7PwEZzz0kLSw9i3UTvgAAAABe12M_d2UFPrK03z6ZXoe7AAAAAIUIcT-sKKk-19iMvPtzgj0AAAAARLFuP5YCuD5VhmI8rAoTPQAAAACVk38_iANhPRblijrBxYq8AAAAAAhScT_qmKo-bX9OOvONnjwAAAAA
+MA1nP7dg2z7Y1ZI8vsgePQAAAABEpHw_r60kPjBfMTs7s2S8AAAAAEi4Wj9gBgU_bbCxu0y0jDoAAAAAP-hsPwnvwT5zvHS7shkvPAAAAACvl30_O64LPm7--rophiu8AAAAAF6mZD8Yf-M-iH_OvPelhD0AAAAAY1NNP3nlGD8UQfo3CPFgOgAAAAA5lnc_Ty6CPukE7zPQ_bs5AAAAAINXCD_fjxE_Qv7avgWv6j6e7yc9d3TaPsGMCz9VmPW-
+ZQcKP-f7qT0BPKg-zKAHP7KrAr9KoBc_AAAAPgNvjT7U3wc_ApIEvwiFHD_n-yk-s_SGPtg3CT_NkQO_KJ4dP_T9VD7kDIo-Iy8KP11jAb_O6B0_AACAPmytkj4glgs_ov38vrwSHT_0_ZQ-kwKgPqYmDj_7_PS-FqwaP_p-qj520a4-g-URP20S6r5XXhc_AADAPjZzuz55BhY_BCDevnUEFD_0_dQ-y_TFPi2BGT_ezdO-88YQP_p-6j4Js88-
+IuMbP4pVzL4Bdw0_AAAAPwcI2T6xihw_2QTJvtZkCj_6fgo_LdTiPuR7Gz9oY8m-cn4HP30_FT944e0-PlcZP_OczL6c8QM_AAAgP9B_-T7I0BY_G3LRvi8K_z76fio_sYICP3E4FD-yeda-fzn1Pn0_NT_ISwg_fpURP5z12r5mxOo-AAAAAAibYD9JvM4-uUJVPuIIHr6e7yc9XK9iP7SvpT4NDWU-Xjt9vuf7qT2eqWQ_g-9fPkrfWz7icqi-
+AAAAPl8LZj8sLxw-eGBOPoiet77n-yk-QUZnP5F5Gz4Nz0Y-M6KzvvT9VD5yR2Y_feY4PrXQQD6BabO-AACAPithZD-welM-EKYxPpuXub70_ZQ-_LhjP72zaD43GRo-07i7vvp-qj4vxWM_FwB_Pm9p-j1pnLm-AADAPgsAZD9TdIk-UDWzPV6Atr70_dQ-yLRlP6w-jz7G2UQ9uhatvvp-6j5i5Wg_7e6QPrm0YTycU5u-AAAAP8hraj8bbZM-
+WjY7utKDj776fgo_P-9oP-zsmz7KVPE7xCmQvn0_FT_jcGY_uVmqPoXIGz1amI6-AAAgP0TnZD90g7k-O1q0PTfXfb76fio_qW9jP7BjxT5YSxY--ShOvn0_NT8FomA_ma3OPqrBVD6kZB6-AAAAALCqPj9uNjg94T-3Pa7kKL-e7yc9ybxIPxvWiD1CPQY-uVcav-f7qT0AW1E_XMzLPZwUOz4fXgm_AAAAPpx3VD9jh-o9tY5ZPny_AL_n-yk-
+vXtTP1g_2D0LMFE-dbMDv_T9VD5fnlE_nR6nPbg4Mz4jZAq_AACAPnATUT9nNGs9c4oSPvNaDr_0_ZQ-HGdSP8iYIT2Ll-w9cXEOv_p-qj5PyFU_p37WPCBGxD2mgwq_AADAPgybWT-anaY8-7S7PSmwBL_0_dQ-U0VaP9ycyTwZzdM9aPgCv_p-6j6DdVY_ReEbPY8b-D0h9we_AAAAP3bSUj8ygFM9HqgHPqiWDL_6fgo_nH1SPxtocD0Jlws-
+u6kMv30_FT89d1A_Dmh-PbtOCD7qvw-_AAAgP5tmSj9jSX09Mun4PabPGL_6fio_pxVEP9AJYj2dKdg9VLshv30_NT_stT4_OI84PYaAtz2F1ii_AAAAAPzafD-PkbU9-R6xuTXCA76e7yc96wx9PyQt1D3M9Cq7Ge_hvef7qT2TGn0_1yLCPeE5XLsL-O29AAAAPhT1fD9gK6o9tUY0uuZtBL7n-yk-_TB9P6QZqj2OwfA6Vin6vfT9VD7c_H0_
+NyebPflcyDoF9Mu9AACAPuDHfj9z4T09lC_Vufyer730_ZQ-nel-P91Lizyfj7a6fk25vfp-qj7wVH4_5dGGPFyllbrN9ua9AADAPvwQfT8Fq0c9t64Ju0ZIEr70_dQ-g557P31Ssj3lJ1O7QDEmvvp-6j7g8no_7lLdPcAxoLpgeym-AAAAP2DPej99QuQ9Z-KAOil3Kr76fgo__KJ6P6wO4z3AL2w69uMuvn0_FT9WB3s_gsbkPYLGjzrPDiW-
+AAAgP2nlez8e4d49c4b0OlepEL76fio_x398P1oSzD0lDJk692wGvn0_NT9P2nw_C7-1PSG_qrljxwO-AAAAAG98YT8jDOw-TdncvZjAFbsAAAAAJ6J7PxmIxr2zdh--ed5YvAAAAADhIXk_QnsDvl3mCj44kQk-AAAAAB8EXD-ItAI_UhtkPEMKtjwAAAAAOsxVP0V2DD9M3qy8eLYDvQAAAAA6SF4_vNT9PsXZT7zrRTs8AAAAAJDgUz9ipw8_
+KfgaPCUXqrsAAAAAN1M9P7z2Kz8KQ-e83iwEvQAAAAC-nnU_GSOQPrAVi7vqDFs8AAAAAGolRT-u-CI_6wiiPLy1Ej0AAAAAsnFNP_S0GD8Ul2i6gfZCvAAAAADSMXE_BIOrPgpvhDtw8Bw8AAAAALTyOT9oui8_pe7IPEgkybwAAAAAlKxjPxQZ6j6fFiM1VbwmugAAAAAkhnk_I95kPpGGC7QLDqO5AAAAAEDHtrxCS8U9Xc3yPh31Xz-e7yc9
+FUkdvIgr2j2dGhA_ZM9RP-f7qT200im8ck3hPUmTJD_ACUI_AAAAPsjf77vw0K49opgmP0MiQT_n-yk-fAP3OwBQeT31XwM_ZChbP_T9VD5D47o83GUbPdD_2z5t4mY_AACAPqkqAD1-DNI8lvTUPkOTaD_0_ZQ-jPgbPYjbgTrVp7g-X5JuP_p-qj5AJNM7eNehPLCshT5PEHc_AADAPtwvGb0pMWU9s_4RPl7MfD_0_dQ-puRpvQ7Koz34WaY9
+Mel9P_p-6j4BzD29k--aPbX_1zsq_H4_AAAAPzwY17waEXU9azsqvTc7fz_6fgo_xt_HvKrbST2YdkC9VlR_P30_FT_dmhO9cLkCPaalljtVs38_AAAgPz_NiL2an3o8GTUMPkH7fD_6fio_PjpqvdXXvjwFEaM-XydyP30_NT8OKri8BgLEPZw58j5UIWA_AAAAAHn_CD9XOli_xl_0OINRZzye7yc9ZYUMPzGIVb9CPaC8muZPPef7qT3Ljhg_
+EdRMv62J27y5F4E9AAAAPmuDSD92hh6_W3gIvY6XND3n-yk-TVp4P18hcr7NW0y96RGuPPT9VD4Kjng_SjVvvoJ9Rr14I6Q8AACAPjJKaj-Ufs2-gksVvbJa8Dr0_ZQ-pohjP9Mh6r6O8e68-3wCPPp-qj7h2mo_MErLvkjW2zwa1AC7AADAPr39dj8Qzn--LByoPet6Jjr0_dQ-r9J5P7uTT76vGqY9vE4ZO_p-6j6pc3c_-WCCvn-NxTw0vn48
+AAAAPxA0Zz-7jdu-sDM8OzbZrTz6fgo_nzNDPzqKJb_K0qs8PdveOX0_FT-E2hM_fohQvzpjKz2eGQq9AAAgP8gr275vtGQ_LSKOvXW68D36fio_YvLbvqXoZT9cRT692UOoPX0_NT_JzQg_o1pYv23YzjllKVo8AAAAANtTbT-Sqq0-02i-PXr5BD6e7yc9xPhzP3UOjj4YLcY9KcKWPef7qT014Hc_Fl9rPrHJtz2NoiI9AAAAPrN7cz8u5Jo-
+H-p9PdcnwDvn-yk-cflrP1IrxT5PxSM9GImqvPT9VD7hOGk_2-vRPgrEuTyzRxq9AACAPj56Wz-KXQM_pPLdPMI4-bz0_ZQ-On1IP8StHj_HfAs90qETvfp-qj60bz0_GLYrP5SLKz3Tn-K8AADAPklfTD8WzBk_7Nv-PNSB5Lz0_dQ-gnJlPwss4j4FJuU8SsHivPp-6j7LAWs_PEDKPjeItTwQYeC8AAAAP2lZaj-MUcw-FBQmPNGNUr36fgo_
+Q3tvP6Rwsj4RU-g7A-ttvX0_FT-IMHg_MgB3PoctajyE6yi9AAAgPzfJdT96Qow-6EJBPRo8-jz6fio_S2dyP_5_nD6k7pM98TSNPX0_NT8SX20_boutPooIvj0KfgQ-AAAAAM-mbj8rV7Y-nkhrvfpQ6Tye7yc92TltP_yQvz6DUQ29DzwuvOf7qT0sb2s_xnvHPgepg7zBOz69AAAAPgYkbD-dlMQ-zYoMvLwYJr3n-yk-n99tP_n7vD4c94e7
+zBeXvPT9VD6uWG8_n6W1PlkJOrp-YRk7AACAPrZcbz-ohbU-DPVyO3JA6Dv0_ZQ-BU1vP8TVtT5Mr5o7oGr0O_p-qj4_Tm8_Gs61Po3wqDuSUPk7AADAPidJZj8Jid8-hb8WPNlWKDz0_dQ-0ztiPw8Y6D47C769VsyPPfp-6j7WwGs_ZlayPrZHK74TtFE9AAAAP4D4aD-y7Mk-AIYAvmb5vLz6fgo_T9pqP7q-xT6t3hK9JHS2vX0_FT8iSGs_
+smTHPtvHRL3o7RW9AAAgP7dcbT-QWTU-ikyavrrZCT76fio_m_V0Pxbgjj4ju4a9mPI_PX0_NT82tW4_nAm2PnBpa73lbeo8AAAAAA_Xhz11Bmo7OYAzPjx2ez-e7yc9VR_aPV7OaL35OSE7fiB-P-f7qT255P49al_jvRq59b3liXo_AAAAPoWmAD57Mem90X-xvdVQez_n-yk-59HgPdd9zr0LOo29JoZ8P_T9VD4tAeM97d9avVjOAL1L7X0_
+AACAPrqaBj52E_e8rtIyPTNqfT_0_ZQ-jP4mPgG9a7wlylg-d6l2P_p-qj7KDxg-tGxbvbzd3j5t52I_AADAPoSa0T0ikKu9llMUP7fiTT_0_dQ-J0WMPYNlq71YLh8_gpJGP_p-6j5ZU089x2SNvR7DHD8iM0k_AAAAP5wjEj1UJma9MiAMP-aQVT_6fgo_TJvyPHojL729tdo-txVnP30_FT9ZNEs9EjLWOzuG4D4ct2U_AAAgP7NhGD2_Dgk9
+K-PJPrzoaj_6fio_DT4fPYllpTy2epU-A5d0P30_NT96a4c9nz10O4hzND44bHs_AAAAAG6naj-gksi-xiuhvbjzTLye7yc999R5P7N3NL73iAG-km6_vOf7qT2kmn4_jdl4uz2Xz72Xg8a8AAAAPs2Oez8zrjC-YdeBvWoCy7zn-yk-N6dqPwN-x75MAXG9yQiKvfT9VD4Ur0Q_tMEhv9bkzr1SgIU8AACAPgFyEj9je0-_oC-dvQG8zD30_ZQ-
+2Z3cvrXcYj_wTmU9BL4kvvp-qj5bwtm-FGVkP6NxQz2X7xO-AADAPk6jDj87YFK_Ckw0vWkK4z30_dQ-YXw2Pz6CMr8DVei8mmWOPfp-6j7m61Y_rr8KvxeeTrwa3xE9AAAAPw6ccD-uxa6-r5gBO11jIjz6fgo_sjF-P5B-8r0MKMw7ZUl3uX0_FT-LVG0_Bma-vj92Pz1OEAQ8AAAgP-iZXD8-LAG_o1FYPUpt0rv6fio__kpfP2Vd-r7cW_M7
+pJi1u30_NT9ylGo_Qv3IvmLEn72yM028AAAAABSvOT_Evi8_WJKCvHnbRj2e7yc9AkZRP5J-Ej_dXwK84t6EPef7qT36eGw_2Ny7PlNcVTyxyd89AAAAPlwAcD8oVqM-Zk7fPLeJCz7n-yk-n89vP6ZamD5Hpxg9lLk4PvT9VD7kcng_QhhqPqtAUruCqpw9AACAPnyocz_B05s-F3wSvWUIYbz0_ZQ-7j9uPxV_uj5pGQ29yCmMOvp-qj5rg2Y_
+zuzdPtiIFL0FWFw7AADAPnQOYj97Xe8-1i0lvcRt_7v0_dQ-dzBiP30t7z6mTQi9VSwTu_p-6j6LLmU_GMHjPkhRo7xhb4Y8AAAAP3A9aT_ea9I-5O9DvLFr8Dz6fgo_sD9uP4yZuT7tc6K7IHFKPX0_FT94umE_-wPwPkFkVrznXlA9AAAgP3MeRT--cCI_W1Z3vNh1hT36fio_vlgzPwcONj-4mKu8tS9hPX0_NT_1oTk_VswvP5jqgrzyDkc9
+AAAAAIA_Zz9Ri9o-W231u_SGLL2e7yc9t2VaP6xMBT_MVS68otr8vOf7qT0BaWY_2QLfPhCeUDxjP9-7AAAAPiEsdT-YwZE-_XURPdDQtrzn-yk-9UBzP8JGnz5i9v25RemTvPT9VD4BzGg_1JHUPp_9-rvKpM28AACAPiUHZD99ROU-M91lPU6wXb30_ZQ-hHVlP0nP4T6djio9Z9OavPp-qj7u7Wo_OwfKPm3ncjzNiTM9AADAPhE2bD9KmcI-
+1mRlPAkPgT30_dQ-5wdrP0O_yD5Zl0i6Py5uPfp-6j5yQWo_tlHNPl9ON7tw2C89AAAAP7tRbD9GZsQ-pLMEvBOvzjz6fgo_r3xvP8JRtD5J7ai81QOhvH0_FT_LTG8_Eg-1PhbNv7sNXAm9AAAgPwqOcD8EO64-ahPru55UDL36fio_EetvPw7EsT4WSa-7G-MIvX0_NT_2Umc_0jnaPmWp9LusPiy9
+

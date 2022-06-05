@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<prefab file_id="944e2c0c4ab810e04bc801ba75b18c09" name="monster" tag="4">
+	<components>
+		<item type_name="flame::cNode" pos="8.21098,-15.5231,-18.5079" />
+		<item type_name="flame::cNavAgent" />
+		<item type_name="cCharacter" faction="2" ai_id="1" />
+	</components>
+	<children>
+		<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\knight\Paladin WProp J Nordstrom.prefab">
+			<modifications />
+		</item>
+	</children>
+</prefab>
