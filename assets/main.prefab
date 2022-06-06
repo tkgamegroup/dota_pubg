@@ -40,12 +40,7 @@
 				<item type_name="flame::cNavAgent" radius="2.46" height="2" speed="0" turn_speed="0" />
 			</components>
 			<children>
-				<item file_id="6738b77f4d39e514bb6768ab59f62765" filename="assets\medieval_house\Medieval_House.prefab">
-					<modifications>
-						<item target="42bfa77c488ba8756920b9864b71238b|flame::cNode|pos" value="0,-2.18287e-14,0" />
-						<item target="42bfa77c488ba8756920b9864b71238b|flame::cNode|scl" value="1,1,1" />
-					</modifications>
-				</item>
+				<item file_id="6738b77f4d39e514bb6768ab59f62765" filename="assets\medieval_house\Medieval_House.prefab" />
 			</children>
 		</item>
 	</children>
