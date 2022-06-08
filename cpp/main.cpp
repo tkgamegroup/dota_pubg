@@ -41,6 +41,8 @@ MainPlayer main_player;
 
 std::vector<vec2> site_positions;
 
+static EntityPtr e_arrow = nullptr;
+
 void cMain::start()
 {
 	srand(time(0));
@@ -53,6 +55,10 @@ void cMain::start()
 
 	main_camera.init(entity->find_child("Camera"));
 	main_player.init(entity->find_child("main_player"));
+
+	e_arrow = Entity::create();
+	e_arrow->load(L"assets/arrow.prefab");
+	entity->add_child(e_arrow);
 
 	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
 	{
@@ -85,13 +91,6 @@ void cMain::update()
 			auto obj = sRenderer::instance()->pick_up(input->mpos, &p);
 			if (obj)
 			{
-				static EntityPtr e_arrow = nullptr;
-				if (!e_arrow)
-				{
-					e_arrow = Entity::create();
-					e_arrow->load(L"assets/arrow.prefab");
-					entity->add_child(e_arrow);
-				}
 				e_arrow->get_component_i<cNode>(0)->set_pos(p);
 				main_player.character->enter_move_state(p);
 			}

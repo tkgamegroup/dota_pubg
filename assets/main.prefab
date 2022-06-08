@@ -36,11 +36,14 @@
 		</item>
 		<item file_id="d2a4ae904efb9fd0027aed84dcedcabf" name="spawn">
 			<components>
-				<item type_name="flame::cNode" pos="-3.29,-14.65,-16.33" />
+				<item type_name="flame::cNode" pos="0.946051,-15.7381,-13.6718" />
 				<item type_name="flame::cNavAgent" radius="2.46" height="2" speed="0" turn_speed="0" />
+				<item type_name="cSpwaner" prefab_path="assets\monster.prefab" />
 			</components>
 			<children>
-				<item file_id="6738b77f4d39e514bb6768ab59f62765" filename="assets\medieval_house\Medieval_House.prefab" />
+				<item file_id="6738b77f4d39e514bb6768ab59f62765" filename="assets\medieval_house\Medieval_House.prefab">
+					<modifications />
+				</item>
 			</children>
 		</item>
 	</children>

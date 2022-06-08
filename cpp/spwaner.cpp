@@ -10,6 +10,7 @@ void cSpwaner::set_prefab_path(const std::filesystem::path& path)
 {
 	if (prefab_path == path)
 		return;
+	prefab_path = path;
 	auto e = Entity::create();
 	e->load(prefab_path);
 	auto nav = e->get_component_t<cNavAgent>();
