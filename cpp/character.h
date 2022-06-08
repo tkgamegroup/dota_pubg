@@ -6,8 +6,8 @@ enum State
 {
 	StateIdle,
 	StateMove,
-	StateBattle,
-	StateBack
+	StateMoveAttack,
+	StateBattle
 };
 
 enum Action

@@ -1,7 +1,11 @@
+#define FLAME_NO_XML
+#define FLAME_NO_JSON
+#include <flame/foundation/typeinfo_serialize.h>
 #include <flame/graphics/window.h>
 #include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
+#include <flame/universe/components/terrain.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/scene.h>
@@ -9,6 +13,7 @@
 
 #include "main.h"
 #include "character.h"
+#include "spwaner.h"
 
 void MainCamera::init(EntityPtr e)
 {
@@ -34,6 +39,8 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainPlayer main_player;
 
+std::vector<vec2> site_positions;
+
 void cMain::start()
 {
 	srand(time(0));
@@ -46,6 +53,25 @@ void cMain::start()
 
 	main_camera.init(entity->find_child("Camera"));
 	main_player.init(entity->find_child("main_player"));
+
+	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
+	{
+		if (auto terrain = e_terrain->get_component_t<cTerrain>(); terrain)
+		{
+			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
+			{
+				height_map_info_fn += L".info";
+				std::ifstream file(height_map_info_fn);
+				if (file.good())
+				{
+					LineReader info(file);
+					info.read_block("sites:");
+					unserialize_text(info, &site_positions);
+					file.close();
+				}
+			}
+		}
+	}
 }
 
 void cMain::update()
@@ -103,5 +129,6 @@ EXPORT void* cpp_info()
 	auto uinfo = universe_info(); // references universe module explicitly
 	cMain::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cSpwaner::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	return nullptr;
 }

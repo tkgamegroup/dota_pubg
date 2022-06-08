@@ -1,6 +1,8 @@
 #include "spwaner.h"
 
 #include <flame/universe/entity.h>
+#include <flame/universe/world.h>
+#include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
@@ -33,12 +35,21 @@ void cSpwaner::update()
 		if (spwan_timer <= 0.f)
 		{
 			auto e = prefab->copy();
-			auto a = 2.f * prefab_radius / (nav_agent->radius + prefab_radius);
-			for (auto ang = 0.f; ang < 360.f; ang += a)
-			{
-
-			}
+			auto p = node->g_pos + node->g_rot[0] * nav_agent->radius;
+			e->get_component_i<cNode>(0)->set_pos(p);
+			World::instance()->root->add_child(e);
 			spwan_timer = spwan_interval;
 		}
 	}
 }
+
+struct cSpwanerCreate : cSpwaner::Create
+{
+	cSpwanerPtr operator()(EntityPtr e) override
+	{
+		if (e == INVALID_POINTER)
+			return nullptr;
+		return new cSpwaner;
+	}
+}cSpwaner_create;
+cSpwaner::Create& cSpwaner::create = cSpwaner_create;

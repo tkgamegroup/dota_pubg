@@ -127,20 +127,29 @@ void cCharacter::update()
 	if (chase_timer > 0)
 		chase_timer -= dt;
 
+	auto search_enemies_and_enter_battle = [this]() {
+		if (search_timer <= 0.f)
+		{
+			search_timer = 0.3f + random01() * 0.1f;
+			auto enemies = find_enemies();
+			if (!enemies.empty())
+			{
+				enter_battle_state(enemies);
+				return true;
+			}
+		}
+		return false;
+	};
+
 	switch (state)
 	{
 	case StateIdle:
 		if (ai_id == 1)
-		{
-			if (search_timer <= 0.f)
-			{
-				auto enemies = find_enemies();
-				if (!enemies.empty())
-					enter_battle_state(enemies);
-				search_timer = 0.3f + random01() * 0.1f;
-			}
-		}
+			search_enemies_and_enter_battle();
 		break;
+	case StateMoveAttack:
+		if (search_enemies_and_enter_battle())
+			break;
 	case StateMove:
 		if (length(nav_agent->desire_velocity()) <= 0.f)
 		{
