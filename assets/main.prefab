@@ -22,26 +22,30 @@
 				<item type_name="flame::cEnvironment" sky_map_name="D:\skies\2.dds" />
 			</components>
 		</item>
-		<item file_id="318a777f4d3654d1e5786f8e1326b6b9" filename="assets\terrain\terrain.prefab">
+		<item filename="assets\terrain\terrain.prefab">
 			<modifications>
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cNode|pos" value="-100,-25,-100" />
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|name" value="terrain" />
 			</modifications>
 		</item>
-		<item file_id="5ccdadde44f9fd98e684f6baa6717ce7" filename="D:\dota_pubg\assets\main_player.prefab">
-			<modifications />
+		<item filename="D:\dota_pubg\assets\main_player.prefab">
+			<modifications>
+				<item target="5ccdadde44f9fd98e684f6baa6717ce7|flame::cNode|pos" value="6.146,-16.0842,-23.3823" />
+			</modifications>
 		</item>
-		<item file_id="944e2c0c4ab810e04bc801ba75b18c09" filename="D:\dota_pubg\assets\monster1.prefab">
-			<modifications />
+		<item filename="D:\dota_pubg\assets\monster1.prefab">
+			<modifications>
+				<item target="944e2c0c4ab810e04bc801ba75b18c09|flame::cNode|pos" value="8.21098,-15.5231,-18.5079" />
+			</modifications>
 		</item>
 		<item file_id="d2a4ae904efb9fd0027aed84dcedcabf" name="spawn">
 			<components>
 				<item type_name="flame::cNode" pos="0.946051,-15.7381,-13.6718" />
 				<item type_name="flame::cNavAgent" radius="2.46" height="2" speed="0" turn_speed="0" />
-				<item type_name="cSpwaner" prefab_path="assets\monster.prefab" spwan_interval="0.5" />
+				<item type_name="cSpwaner" spwan_interval="0.5" prefab_path="assets\monster.prefab" />
 			</components>
 			<children>
-				<item file_id="6738b77f4d39e514bb6768ab59f62765" filename="assets\medieval_house\Medieval_House.prefab">
+				<item filename="assets\medieval_house\Medieval_House.prefab">
 					<modifications />
 				</item>
 			</children>

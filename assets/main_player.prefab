@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <prefab file_id="5ccdadde44f9fd98e684f6baa6717ce7" name="main_player" tag="2">
 	<components>
-		<item type_name="flame::cNode" pos="6.54738,-14.9869,-22.7267" />
 		<item type_name="flame::cNavAgent" />
 		<item type_name="cCharacter" faction="1" />
 	</components>

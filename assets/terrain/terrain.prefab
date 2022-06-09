@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<prefab>
+<prefab file_id="318a777f4d3654d1e5786f8e1326b6b9" >
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cTerrain" extent="256,16,256" height_map_name="assets/terrain/height.png" splash_map_name="assets/terrain/splash.png" material_name="assets/terrain/terrain.fmat" />
