@@ -34,15 +34,18 @@ void cCharacter::on_active()
 			auto tar = tars.front();
 			auto p = main_camera.camera->proj_view_mat * vec4(node->g_pos + vec3(0.f, height + 0.5f, 0.f), 1.f);
 			p /= p.w;
-			p.xy = (p.xy * 0.5f + 0.5f) * vec2(tar->image->size);
-			p.xy += sInput::instance()->offset;
-			ImGui::SetNextWindowPos(p.xy(), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-			ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-			ImGui::TextUnformatted(entity->name.c_str());
-			ImGui::Text("HP: %d", hp);
-			ImGui::Text("State: %d", state);
-			ImGui::Text("Action: %d", action);
-			ImGui::End();
+			if (p.x > -1.f && p.x < 1.f && p.y > -1.f && p.y < 1.f && p.z > 0.f && p.z < 1.f)
+			{
+				p.xy = (p.xy * 0.5f + 0.5f) * vec2(tar->image->size);
+				p.xy += sInput::instance()->offset;
+				ImGui::SetNextWindowPos(p.xy(), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+				ImGui::TextUnformatted(entity->name.c_str());
+				ImGui::Text("HP: %d", hp);
+				ImGui::Text("State: %d", state);
+				ImGui::Text("Action: %d", action);
+				ImGui::End();
+			}
 		}
 	});
 }

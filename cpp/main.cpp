@@ -15,6 +15,8 @@
 #include "character.h"
 #include "spwaner.h"
 
+EntityPtr root = nullptr;
+
 void MainCamera::init(EntityPtr e)
 {
 	entity = e;
@@ -52,6 +54,8 @@ void cMain::start()
 		sScene::instance()->generate_nav_mesh();
 		return false;
 	});
+
+	root = entity;
 
 	main_camera.init(entity->find_child("Camera"));
 	main_player.init(entity->find_child("main_player"));

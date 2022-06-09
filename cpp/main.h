@@ -10,6 +10,8 @@ FLAME_TYPE(cSpwaner)
 
 const auto CharacterTag = 1 << 1;
 
+extern EntityPtr root;
+
 struct MainCamera
 {
 	EntityPtr entity = nullptr;

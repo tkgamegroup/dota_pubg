@@ -25,6 +25,11 @@ void cSpwaner::set_prefab_path(const std::filesystem::path& path)
 	prefab_radius = nav->radius;
 }
 
+void cSpwaner::start()
+{
+	spwan_timer = spwan_interval;
+}
+
 void cSpwaner::update()
 {
 	auto dt = delta_time;
@@ -38,8 +43,9 @@ void cSpwaner::update()
 			auto e = prefab->copy();
 			auto p = node->g_pos + node->g_rot[0] * nav_agent->radius;
 			e->get_component_i<cNode>(0)->set_pos(p);
-			World::instance()->root->add_child(e);
+			root->add_child(e);
 			spwan_timer = spwan_interval;
+			spwan_timer = 10000.f; // test
 		}
 	}
 }

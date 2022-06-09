@@ -22,6 +22,7 @@ struct cSpwaner : Component
 	EntityPtr prefab = nullptr;
 	float prefab_radius = 0.f;
 
+	void start() override;
 	void update() override;
 
 	struct Create
