@@ -82,6 +82,18 @@ void cMain::start()
 			}
 		}
 	}
+
+	if (!site_positions.empty())
+	{
+		std::vector<float> site_centrality(site_positions.size());
+		for (auto i = 0; i < site_positions.size(); i++)
+		{
+			auto pos = abs(site_positions[i] * 2.f - 1.f);
+			site_centrality[i] = pos.x * pos.y;
+		}
+		std::sort(site_centrality.begin(), site_centrality.end());
+
+	}
 }
 
 void cMain::update()

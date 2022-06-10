@@ -42,7 +42,7 @@
 			<components>
 				<item type_name="flame::cNode" pos="0.946051,-15.7381,-13.6718" />
 				<item type_name="flame::cNavAgent" radius="2.46" height="2" speed="0" turn_speed="0" />
-				<item type_name="cSpwaner" spwan_interval="0.5" prefab_path="assets\monster.prefab" />
+				<item type_name="cSpwaner" prefab_path="assets\monster.prefab" />
 			</components>
 			<children>
 				<item filename="assets\medieval_house\Medieval_House.prefab">
