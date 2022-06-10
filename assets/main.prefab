@@ -24,8 +24,8 @@
 		</item>
 		<item filename="assets\terrain\terrain.prefab">
 			<modifications>
-				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cNode|pos" value="-100,-25,-100" />
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|name" value="terrain" />
+				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cNode|pos" value="-100,-25,-100" />
 			</modifications>
 		</item>
 		<item filename="D:\dota_pubg\assets\main_player.prefab">
