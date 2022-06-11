@@ -38,13 +38,17 @@ void cCharacter::on_active()
 			{
 				p.xy = (p.xy * 0.5f + 0.5f) * vec2(tar->image->size);
 				p.xy += sInput::instance()->offset;
+				ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.5f));
 				ImGui::SetNextWindowPos(p.xy(), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-				ImGui::TextUnformatted(entity->name.c_str());
-				ImGui::Text("HP: %d", hp);
-				ImGui::Text("State: %d", state);
-				ImGui::Text("Action: %d", action);
+				ImGui::Text("%s %d %d", entity->name.c_str(), state, action);
+				ImGui::Dummy(ImVec2(100.f, 5.f));
+				auto dl = ImGui::GetWindowDrawList();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * 100.f, 5.f), ImColor(0.f, 1.f, 0.f));
+				dl->AddRect(p0, p0 + vec2(100.f, 5.f), ImColor(1.f, 1.f, 1.f));
 				ImGui::End();
+				ImGui::PopStyleColor();
 			}
 		}
 	});
@@ -58,7 +62,7 @@ void cCharacter::on_inactive()
 std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
 {
 	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 5.f, objs, CharacterTag);
+	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 3.5f, objs, CharacterTag);
 	std::vector<cCharacterPtr> enemies;
 	for (auto obj : objs)
 	{
@@ -68,32 +72,40 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
 	return enemies;
 }
 
+void cCharacter::change_target(cCharacterPtr character)
+{
+	if (target)
+		target->entity->message_listeners.remove((uint)this);
+	target = character;
+	if (target)
+	{
+		target->entity->message_listeners.add([this](uint h, void*, void*) {
+			if (h == "destroyed"_h)
+				target = nullptr;
+		}, (uint)this);
+	}
+}
+
 void cCharacter::enter_move_state(const vec3& pos)
 {
 	state = StateMove;
 	action = ActionNone;
+	move_target = pos;
 	nav_agent->set_target(pos);
 }
 
-void cCharacter::enter_battle_state(const std::vector<cCharacterPtr>& enemies)
+void cCharacter::enter_move_attack_state(const vec3& pos)
+{
+	state = StateMoveAttack;
+	action = ActionNone;
+	move_target = pos;
+	nav_agent->set_target(pos);
+}
+
+void cCharacter::enter_battle_state()
 {
 	state = StateBattle;
 	action = ActionNone;
-	hate_list = enemies;
-	for (auto chr : enemies)
-	{
-		auto e = chr->entity;
-		e->message_listeners.add([this, e](uint h, void*, void*) {
-			if (h == "destroyed"_h)
-			{
-				for (auto& chr : hate_list)
-				{
-					if (chr->entity == e)
-						chr = nullptr;
-				}
-			}
-		});
-	}
 }
 
 void cCharacter::die()
@@ -122,6 +134,14 @@ void cCharacter::start()
 
 void cCharacter::update()
 {
+	if (dead)
+	{
+		add_event([this]() {
+			entity->parent->remove_child(entity);
+			return false;
+		});
+	}
+
 	auto dt = delta_time;
 	if (search_timer > 0)
 		search_timer -= dt;
@@ -137,7 +157,7 @@ void cCharacter::update()
 			auto enemies = find_enemies();
 			if (!enemies.empty())
 			{
-				enter_battle_state(enemies);
+				enter_battle_state();
 				return true;
 			}
 		}
@@ -147,12 +167,28 @@ void cCharacter::update()
 	switch (state)
 	{
 	case StateIdle:
-		if (ai_id == 1)
-			search_enemies_and_enter_battle();
+		if (next_state != StateIdle)
+		{
+			switch (next_state)
+			{
+			case StateMoveAttack:
+				enter_move_attack_state(move_target);
+				break;
+			}
+			next_state = StateIdle;
+		}
+		else
+		{
+			if (ai_id == 1)
+				search_enemies_and_enter_battle();
+		}
 		break;
 	case StateMoveAttack:
 		if (search_enemies_and_enter_battle())
+		{
+			next_state = StateMoveAttack;
 			break;
+		}
 	case StateMove:
 		if (length(nav_agent->desire_velocity()) <= 0.f)
 		{
@@ -171,14 +207,32 @@ void cCharacter::update()
 		break;
 	case StateBattle:
 	{
-		for (auto it = hate_list.begin(); it != hate_list.end(); )
+		if (ai_id == 1 && action == ActionNone)
 		{
-			if (*it == nullptr)
-				it = hate_list.erase(it);
-			else
-				it++;
+			auto enemies = find_enemies();
+			std::vector<std::pair<float, cCharacterPtr>> enemies_with_dist(enemies.size());
+			auto self_pos = node->g_pos;
+			for (auto i = 0; i < enemies.size(); i++)
+			{
+				auto c = enemies[i];
+				enemies_with_dist[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
+			}
+			std::sort(enemies_with_dist.begin(), enemies_with_dist.end(), [](const auto& a, const auto& b) {
+				return a.first < b.first;
+			});
+			auto tar_dist = target ? distance(target->node->g_pos, self_pos) : 100000.f;
+			if (tar_dist > 8.f)
+				change_target(nullptr);
+			if (!target || tar_dist > atk_distance)
+			{
+				if (!enemies_with_dist.empty())
+					change_target(enemies_with_dist.front().second);
+				else
+					change_target(nullptr);
+			}
 		}
-		if (hate_list.empty())
+
+		if (!target)
 		{
 			state = StateIdle;
 			action = ActionNone;
@@ -187,9 +241,6 @@ void cCharacter::update()
 		}
 		else
 		{
-			if (action == ActionNone)
-				target = hate_list[0];
-
 			auto tar_pos = target->node->g_pos;
 			auto self_pos = node->g_pos;
 			auto dir = tar_pos - self_pos;
@@ -228,6 +279,14 @@ void cCharacter::update()
 				nav_agent->set_target(tar_pos, true);
 				if (attack_timer <= 0.f)
 				{
+					if (target->hp > atk)
+						target->hp -= atk;
+					else
+					{
+						target->hp = 0;
+						target->dead = true;
+					}
+
 					action = ActionNone;
 					if (armature)
 						armature->play("idle"_h, 0.5f);

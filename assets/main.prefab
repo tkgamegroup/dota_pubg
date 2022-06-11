@@ -2,12 +2,12 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="cMain" camera_length="15" />
+		<item type_name="cMain" camera_length="30" />
 	</components>
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
 			<components>
-				<item type_name="flame::cNode" pos="-15.2279,4.54071,-45.4996" eul="6.93348,180,63.6188" qut="0.031873,0.848251,0.526131,-0.051387" />
+				<item type_name="flame::cNode" pos="0,10,10" eul="0,-45,0" />
 				<item type_name="flame::cCamera" />
 			</components>
 		</item>
@@ -24,31 +24,8 @@
 		</item>
 		<item filename="assets\terrain\terrain.prefab">
 			<modifications>
-				<item target="318a777f4d3654d1e5786f8e1326b6b9|name" value="terrain" />
 				<item target="318a777f4d3654d1e5786f8e1326b6b9|flame::cNode|pos" value="-100,-25,-100" />
 			</modifications>
-		</item>
-		<item filename="D:\dota_pubg\assets\main_player.prefab">
-			<modifications>
-				<item target="5ccdadde44f9fd98e684f6baa6717ce7|flame::cNode|pos" value="6.146,-16.0842,-23.3823" />
-			</modifications>
-		</item>
-		<item filename="D:\dota_pubg\assets\monster1.prefab">
-			<modifications>
-				<item target="944e2c0c4ab810e04bc801ba75b18c09|flame::cNode|pos" value="8.21098,-15.5231,-18.5079" />
-			</modifications>
-		</item>
-		<item file_id="d2a4ae904efb9fd0027aed84dcedcabf" name="spawn">
-			<components>
-				<item type_name="flame::cNode" pos="0.946051,-15.7381,-13.6718" />
-				<item type_name="flame::cNavAgent" radius="2.46" height="2" speed="0" turn_speed="0" />
-				<item type_name="cSpwaner" prefab_path="assets\monster.prefab" />
-			</components>
-			<children>
-				<item filename="assets\medieval_house\Medieval_House.prefab">
-					<modifications />
-				</item>
-			</children>
 		</item>
 	</children>
 </prefab>

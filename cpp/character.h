@@ -42,7 +42,7 @@ struct cCharacter : Component
 	/// Reflect
 	float atk_interval = 1.8f; // time
 	/// Reflect
-	float atk_precast = 0.5f; // 0-1, of the atk_interval
+	float atk_precast = 0.43f; // 0-1, of the atk_interval
 	/// Reflect
 	uint faction = 0;
 	/// Reflect
@@ -50,9 +50,10 @@ struct cCharacter : Component
 
 	bool dead = false;
 	State state = StateIdle;
+	State next_state = StateIdle;
 	Action action = ActionNone;
 	vec3 started_pos;
-	std::vector<cCharacterPtr> hate_list;
+	vec3 move_target;
 	cCharacterPtr target = nullptr;
 	float search_timer = 0.f;
 	float chase_timer = 0.f;
@@ -66,8 +67,10 @@ struct cCharacter : Component
 	void on_active() override;
 	void on_inactive() override;
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f);
+	void change_target(cCharacterPtr character);
 	void enter_move_state(const vec3& pos);
-	void enter_battle_state(const std::vector<cCharacterPtr>& enemies);
+	void enter_move_attack_state(const vec3& pos);
+	void enter_battle_state();
 	void die();
 
 	void start() override;

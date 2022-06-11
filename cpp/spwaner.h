@@ -17,6 +17,8 @@ struct cSpwaner : Component
 	/// Reflect
 	void set_prefab_path(const std::filesystem::path& path);
 
+	Listeners<void(EntityPtr e)> callbacks;
+
 	float spwan_timer = 0.f;
 
 	EntityPtr prefab = nullptr;

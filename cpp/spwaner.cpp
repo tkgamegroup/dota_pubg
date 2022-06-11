@@ -45,6 +45,8 @@ void cSpwaner::update()
 				node->g_rot[2] * (random01() * 1.f - 0.5f);
 			e->get_component_i<cNode>(0)->set_pos(p);
 			root->add_child(e);
+			for (auto& cb : callbacks.list)
+				cb.first(e);
 			spwan_timer = spwan_interval;
 		}
 	}

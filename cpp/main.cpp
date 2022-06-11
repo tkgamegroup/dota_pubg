@@ -41,7 +41,7 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainPlayer main_player;
 
-std::vector<vec2> site_positions;
+std::vector<vec3> site_positions;
 
 static EntityPtr e_arrow = nullptr;
 
@@ -58,7 +58,6 @@ void cMain::start()
 	root = entity;
 
 	main_camera.init(entity->find_child("Camera"));
-	main_player.init(entity->find_child("main_player"));
 
 	e_arrow = Entity::create();
 	e_arrow->load(L"assets/arrow.prefab");
@@ -80,20 +79,70 @@ void cMain::start()
 					file.close();
 				}
 			}
+
+			if (!site_positions.empty())
+			{
+				std::vector<std::pair<float, int>> site_centrality(site_positions.size());
+				for (auto i = 0; i < site_positions.size(); i++)
+				{
+					auto x = abs(site_positions[i].x * 2.f - 1.f);
+					auto z = abs(site_positions[i].z * 2.f - 1.f);
+					site_centrality[i] = std::make_pair(x * z, i);
+				}
+				std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
+					return a.first < b.first;
+				});
+
+				auto terrain_pos = terrain->node->pos;
+				auto demon_pos = terrain_pos +
+					site_positions[site_centrality.front().second] * terrain->extent;
+				auto player1_pos = terrain_pos +
+					site_positions[site_centrality.back().second] * terrain->extent;
+				{
+					auto e = Entity::create();
+					e->load(L"assets/spawner.prefab");
+					e->get_component_i<cNode>(0)->set_pos(demon_pos);
+					auto spawner = e->get_component_t<cSpwaner>();
+					spawner->spwan_interval = 20.f;
+					spawner->set_prefab_path(L"assets/monster.prefab");
+					spawner->callbacks.add([player1_pos](EntityPtr e) {
+						auto character = e->get_component_t<cCharacter>();
+						character->faction = 2;
+						add_event([character, player1_pos]() {
+							character->enter_move_attack_state(player1_pos);
+							return false;
+						});
+					});
+					root->add_child(e);
+				}
+				{
+					auto e = Entity::create();
+					e->load(L"assets/main_player.prefab");
+					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -5.f));
+					root->add_child(e);
+					main_player.init(e);
+				}
+				{
+					auto e = Entity::create();
+					e->load(L"assets/spawner.prefab");
+					e->get_component_i<cNode>(0)->set_pos(player1_pos);
+					auto spawner = e->get_component_t<cSpwaner>();
+					spawner->spwan_interval = 20.f;
+					spawner->set_prefab_path(L"assets/monster.prefab");
+					spawner->callbacks.add([demon_pos](EntityPtr e) {
+						auto character = e->get_component_t<cCharacter>();
+						character->faction = 1;
+						add_event([character, demon_pos]() {
+							character->enter_move_attack_state(demon_pos);
+							return false;
+						});
+					});
+					root->add_child(e);
+				}
+			}
 		}
 	}
 
-	if (!site_positions.empty())
-	{
-		std::vector<float> site_centrality(site_positions.size());
-		for (auto i = 0; i < site_positions.size(); i++)
-		{
-			auto pos = abs(site_positions[i] * 2.f - 1.f);
-			site_centrality[i] = pos.x * pos.y;
-		}
-		std::sort(site_centrality.begin(), site_centrality.end());
-
-	}
 }
 
 void cMain::update()
@@ -112,11 +161,19 @@ void cMain::update()
 			}
 		}
 	}
-
-	if (main_camera.node)
+	if (input->kpressed(Keyboard_A))
 	{
+		if (main_player.node)
+		{
+
+		}
+	}
+
+	if (main_camera.node && main_player.node)
+	{
+		static vec3 velocity(0.f);
 		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
-		main_camera.node->set_pos(mix(main_camera.node->pos, main_player.node->g_pos + camera_length * main_camera.node->g_rot[2], 0.1f));
+		main_camera.node->set_pos(smooth_damp(main_camera.node->pos, main_player.node->g_pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
 	}
 }
 
