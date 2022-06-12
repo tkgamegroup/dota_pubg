@@ -36,7 +36,7 @@ struct cCharacter : Component
 	/// Reflect
 	uint hp_max = 100;
 	/// Reflect
-	uint atk = 10;
+	uint atk = 100;
 	/// Reflect
 	float atk_distance = 1.5f;
 	/// Reflect
@@ -60,8 +60,6 @@ struct cCharacter : Component
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
 
-	void* gui_lis;
-
 	~cCharacter();
 	void on_init() override;
 	void on_active() override;
@@ -70,7 +68,7 @@ struct cCharacter : Component
 	void change_target(cCharacterPtr character);
 	void enter_move_state(const vec3& pos);
 	void enter_move_attack_state(const vec3& pos);
-	void enter_battle_state();
+	void enter_battle_state(cCharacterPtr target);
 	void die();
 
 	void start() override;

@@ -27,7 +27,7 @@ void cCharacter::on_init()
 
 void cCharacter::on_active()
 {
-	gui_lis = graphics::gui_callbacks.add([this]() {
+	graphics::gui_callbacks.add([this]() {
 		auto& tars = sRenderer::instance()->iv_tars;
 		if (!tars.empty() && main_camera.camera)
 		{
@@ -39,24 +39,27 @@ void cCharacter::on_active()
 				p.xy = (p.xy * 0.5f + 0.5f) * vec2(tar->image->size);
 				p.xy += sInput::instance()->offset;
 				ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.5f));
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 				ImGui::SetNextWindowPos(p.xy(), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 				ImGui::Text("%s %d %d", entity->name.c_str(), state, action);
 				ImGui::Dummy(ImVec2(100.f, 5.f));
 				auto dl = ImGui::GetWindowDrawList();
 				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * 100.f, 5.f), ImColor(0.f, 1.f, 0.f));
 				dl->AddRect(p0, p0 + vec2(100.f, 5.f), ImColor(1.f, 1.f, 1.f));
 				ImGui::End();
 				ImGui::PopStyleColor();
+				ImGui::PopStyleVar();
 			}
 		}
-	});
+	}, (uint)this);
 }
 
 void cCharacter::on_inactive()
 {
-	graphics::gui_callbacks.remove(gui_lis);
+	graphics::gui_callbacks.remove((uint)this);
 }
 
 std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
@@ -102,10 +105,11 @@ void cCharacter::enter_move_attack_state(const vec3& pos)
 	nav_agent->set_target(pos);
 }
 
-void cCharacter::enter_battle_state()
+void cCharacter::enter_battle_state(cCharacterPtr target)
 {
 	state = StateBattle;
 	action = ActionNone;
+	change_target(target);
 }
 
 void cCharacter::die()
@@ -140,6 +144,7 @@ void cCharacter::update()
 			entity->parent->remove_child(entity);
 			return false;
 		});
+		return;
 	}
 
 	auto dt = delta_time;
@@ -157,7 +162,7 @@ void cCharacter::update()
 			auto enemies = find_enemies();
 			if (!enemies.empty())
 			{
-				enter_battle_state();
+				enter_battle_state(enemies.front());
 				return true;
 			}
 		}
@@ -207,28 +212,31 @@ void cCharacter::update()
 		break;
 	case StateBattle:
 	{
-		if (ai_id == 1 && action == ActionNone)
+		if (action == ActionNone)
 		{
-			auto enemies = find_enemies();
-			std::vector<std::pair<float, cCharacterPtr>> enemies_with_dist(enemies.size());
-			auto self_pos = node->g_pos;
-			for (auto i = 0; i < enemies.size(); i++)
+			if (ai_id != 0)
 			{
-				auto c = enemies[i];
-				enemies_with_dist[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
-			}
-			std::sort(enemies_with_dist.begin(), enemies_with_dist.end(), [](const auto& a, const auto& b) {
-				return a.first < b.first;
-			});
-			auto tar_dist = target ? distance(target->node->g_pos, self_pos) : 100000.f;
-			if (tar_dist > 8.f)
-				change_target(nullptr);
-			if (!target || tar_dist > atk_distance)
-			{
-				if (!enemies_with_dist.empty())
-					change_target(enemies_with_dist.front().second);
-				else
+				auto enemies = find_enemies();
+				std::vector<std::pair<float, cCharacterPtr>> enemies_with_dist(enemies.size());
+				auto self_pos = node->g_pos;
+				for (auto i = 0; i < enemies.size(); i++)
+				{
+					auto c = enemies[i];
+					enemies_with_dist[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
+				}
+				std::sort(enemies_with_dist.begin(), enemies_with_dist.end(), [](const auto& a, const auto& b) {
+					return a.first < b.first;
+					});
+				auto tar_dist = target ? distance(target->node->g_pos, self_pos) : 100000.f;
+				if (tar_dist > 8.f)
 					change_target(nullptr);
+				if (!target || tar_dist > atk_distance)
+				{
+					if (!enemies_with_dist.empty())
+						change_target(enemies_with_dist.front().second);
+					else
+						change_target(nullptr);
+				}
 			}
 		}
 

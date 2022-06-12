@@ -165,7 +165,9 @@ void cMain::update()
 	{
 		if (main_player.node)
 		{
-
+			auto enemies = main_player.character->find_enemies();
+			if (!enemies.empty())
+				main_player.character->enter_battle_state(enemies.front());
 		}
 	}
 
