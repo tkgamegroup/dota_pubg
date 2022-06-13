@@ -36,7 +36,7 @@ struct cCharacter : Component
 	/// Reflect
 	uint hp_max = 100;
 	/// Reflect
-	uint atk = 100;
+	uint atk = 10;
 	/// Reflect
 	float atk_distance = 1.5f;
 	/// Reflect
