@@ -2,7 +2,7 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="cMain" camera_length="30" />
+		<item type_name="cMain" camera_length="5" />
 	</components>
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
@@ -19,7 +19,7 @@
 		</item>
 		<item file_id="82f4ac9944dcaea2d43185a721b76f02" name="Environment">
 			<components>
-				<item type_name="flame::cEnvironment" sky_map_name="D:\skies\2.dds" />
+				<item type_name="flame::cEnvironment" sky_map_name="assets\skies\daytime.dds" />
 			</components>
 		</item>
 		<item filename="assets\terrain\terrain.prefab">
