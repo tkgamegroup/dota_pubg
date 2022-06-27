@@ -36,11 +36,15 @@ extern MainPlayer main_player;
 /// Reflect ctor
 struct cMain : Component
 {
+	/// Reflect requires
+	cNodePtr node;
+
 	/// Reflect
 	float camera_length = 10.f;
 	/// Reflect
 	float camera_angle = 45.f;
 
+	~cMain();
 	void start() override;
 	void update() override;
 

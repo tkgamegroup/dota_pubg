@@ -4,7 +4,10 @@
 #include <flame/graphics/window.h>
 #include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
+#include <flame/universe/draw_data.h>
 #include <flame/universe/components/node.h>
+#include <flame/universe/components/mesh.h>
+#include <flame/universe/components/armature.h>
 #include <flame/universe/components/terrain.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/input.h>
@@ -16,6 +19,8 @@
 #include "spwaner.h"
 
 EntityPtr root = nullptr;
+
+static EntityPtr e_arrow = nullptr;
 
 void MainCamera::init(EntityPtr e)
 {
@@ -43,7 +48,12 @@ MainPlayer main_player;
 
 std::vector<vec3> site_positions;
 
-static EntityPtr e_arrow = nullptr;
+cCharacterPtr hovering_character = nullptr;
+
+cMain::~cMain()
+{
+	node->drawers.remove("main"_h);
+}
 
 void cMain::start()
 {
@@ -57,11 +67,11 @@ void cMain::start()
 
 	root = entity;
 
-	main_camera.init(entity->find_child("Camera"));
-
 	e_arrow = Entity::create();
 	e_arrow->load(L"assets/arrow.prefab");
 	entity->add_child(e_arrow);
+
+	main_camera.init(entity->find_child("Camera"));
 
 	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
 	{
@@ -143,21 +153,67 @@ void cMain::start()
 		}
 	}
 
+	node->drawers.add([](DrawData& draw_data) {
+		if (draw_data.pass == "outline"_h)
+		{
+			if (hovering_character)
+			{
+				if (auto armature = hovering_character->armature; armature && armature->model)
+				{
+					for (auto& c : armature->entity->children)
+					{
+						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+							draw_data.draw_meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(128, 128, 64, 255));
+					}
+				}
+			}
+		}
+	}, "main"_h);
 }
 
 void cMain::update()
 {
 	auto input = sInput::instance();
+	vec3 hovering_pos;
+	auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
+		switch (draw_data.category)
+		{
+		case "mesh"_h:
+			if (auto character = n->entity->get_component_t<cCharacter>(); character)
+			{
+				if (character->armature)
+				{
+					for (auto& c : character->armature->entity->children)
+					{
+						if (auto mesh = c->get_component_t<cMesh>(); mesh)
+							draw_data.draw_meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+					}
+				}
+			}
+			break;
+		case "terrain"_h:
+			if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
+				draw_data.draw_terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
+			break;
+		}
+	});
+	hovering_character = nullptr;
+	if (hovering_node)
+	{
+		if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
+			hovering_character = character;
+	}
 	if (input->mpressed(Mouse_Right))
 	{
 		if (main_player.nav_agent)
 		{
-			vec3 p;
-			auto obj = sRenderer::instance()->pick_up(input->mpos, &p);
-			if (obj)
+			if (hovering_node)
 			{
-				e_arrow->get_component_i<cNode>(0)->set_pos(p);
-				main_player.character->enter_move_state(p);
+				if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+				{
+					e_arrow->get_component_i<cNode>(0)->set_pos(hovering_pos);
+					main_player.character->enter_move_state(hovering_pos);
+				}
 			}
 		}
 	}

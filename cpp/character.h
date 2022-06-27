@@ -25,7 +25,7 @@ struct cCharacter : Component
 	/// Reflect requires
 	cNavAgentPtr nav_agent;
 
-	cArmaturePtr armature;
+	cArmaturePtr armature = nullptr;
 
 	/// Reflect
 	float radius = 0.3f;
