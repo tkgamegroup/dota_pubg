@@ -163,7 +163,7 @@ void cMain::start()
 					for (auto& c : armature->entity->children)
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
-							draw_data.draw_meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(128, 128, 64, 255));
+							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(128, 128, 64, 255));
 					}
 				}
 			}
@@ -186,14 +186,14 @@ void cMain::update()
 					for (auto& c : character->armature->entity->children)
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh)
-							draw_data.draw_meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 					}
 				}
 			}
 			break;
 		case "terrain"_h:
 			if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
-				draw_data.draw_terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
+				draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
 			break;
 		}
 	});

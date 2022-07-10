@@ -8,7 +8,7 @@ struct cSpwaner : Component
 	/// Reflect requires
 	cNodePtr node;
 	/// Reflect requires
-	cNavAgentPtr nav_agent;
+	cNavObstaclePtr nav_obstacle;
 
 	/// Reflect
 	float spwan_interval = 10.f;

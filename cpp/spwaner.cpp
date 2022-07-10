@@ -4,6 +4,7 @@
 #include <flame/universe/world.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/components/nav_obstacle.h>
 #include <flame/universe/systems/scene.h>
 
 void cSpwaner::set_prefab_path(const std::filesystem::path& path)
@@ -41,7 +42,7 @@ void cSpwaner::update()
 		if (spwan_timer <= 0.f)
 		{
 			auto e = prefab->copy();
-			auto p = node->g_pos + node->g_rot[0] * (nav_agent->radius + random01() * 0.5f) + 
+			auto p = node->g_pos + node->g_rot[0] * (nav_obstacle->radius + random01() * 0.5f) + 
 				node->g_rot[2] * (random01() * 1.f - 0.5f);
 			e->get_component_i<cNode>(0)->set_pos(p);
 			root->add_child(e);
