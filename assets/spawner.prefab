@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <prefab file_id="d2a4ae904efb9fd0027aed84dcedcabf" name="spawner">
 	<components>
-		<item type_name="flame::cNode" pos="0.946051,-15.7381,-13.6718" />
+		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavObstacle" radius="2.46" height="2" />
 		<item type_name="cSpwaner" />
 	</components>

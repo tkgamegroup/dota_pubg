@@ -118,6 +118,7 @@ void cMain::start()
 					spawner->callbacks.add([player1_pos](EntityPtr e) {
 						auto character = e->get_component_t<cCharacter>();
 						character->faction = 2;
+						character->nav_agent->separate_group = 2;
 						add_event([character, player1_pos]() {
 							character->enter_move_attack_state(player1_pos);
 							return false;
@@ -142,6 +143,7 @@ void cMain::start()
 					spawner->callbacks.add([demon_pos](EntityPtr e) {
 						auto character = e->get_component_t<cCharacter>();
 						character->faction = 1;
+						character->nav_agent->separate_group = 1;
 						add_event([character, demon_pos]() {
 							character->enter_move_attack_state(demon_pos);
 							return false;
