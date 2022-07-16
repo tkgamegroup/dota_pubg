@@ -32,26 +32,29 @@ void cCharacter::on_active()
 		if (!tars.empty() && main_camera.camera)
 		{
 			auto tar = tars.front();
-			auto p = main_camera.camera->proj_view_mat * vec4(node->g_pos + vec3(0.f, height + 0.5f, 0.f), 1.f);
+			auto p = main_camera.camera->proj_view_mat * vec4(node->g_pos + vec3(0.f, height + 0.1f, 0.f), 1.f);
 			p /= p.w;
 			if (p.x > -1.f && p.x < 1.f && p.y > -1.f && p.y < 1.f && p.z > 0.f && p.z < 1.f)
 			{
 				p.xy = (p.xy * 0.5f + 0.5f) * vec2(tar->image->size);
 				p.xy += sInput::instance()->offset;
-				ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.f, 0.f, 0.f, 0.5f));
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
 				ImGui::SetNextWindowPos(p.xy(), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-				ImGui::Text("%s %d %d", entity->name.c_str(), state, action);
-				ImGui::Dummy(ImVec2(100.f, 5.f));
+				const auto w = 80.f;
+				const auto h = 5.f;
+				ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | 
+					ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs);
+				//ImGui::Text("%s %d %d", entity->name.c_str(), state, action);
+				ImGui::Dummy(ImVec2(w, h));
 				auto dl = ImGui::GetWindowDrawList();
 				auto p0 = (vec2)ImGui::GetItemRectMin();
 				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * 100.f, 5.f), ImColor(0.f, 1.f, 0.f));
+				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * w, h), ImColor(0.f, 1.f, 0.f));
 				dl->AddRect(p0, p0 + vec2(100.f, 5.f), ImColor(1.f, 1.f, 1.f));
 				ImGui::End();
-				ImGui::PopStyleColor();
-				ImGui::PopStyleVar();
+				ImGui::PopStyleVar(2);
 			}
 		}
 	}, (uint)this);

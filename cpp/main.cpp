@@ -198,6 +198,8 @@ void cMain::update()
 				draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
 			break;
 		}
+		if (sInput::instance()->kpressed(Keyboard_F12))
+			draw_data.graphics_debug = true;
 	});
 	hovering_character = nullptr;
 	if (hovering_node)
