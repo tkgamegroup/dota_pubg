@@ -109,22 +109,23 @@ void cMain::start()
 				auto player1_pos = terrain_pos +
 					site_positions[site_centrality.back().second] * terrain->extent;
 				{
-					auto e = Entity::create();
-					e->load(L"assets/spawner.prefab");
-					e->get_component_i<cNode>(0)->set_pos(demon_pos);
-					auto spawner = e->get_component_t<cSpwaner>();
-					spawner->spwan_interval = 20.f;
-					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([player1_pos](EntityPtr e) {
-						auto character = e->get_component_t<cCharacter>();
-						character->faction = 2;
-						character->nav_agent->separation_group = 2;
-						add_event([character, player1_pos]() {
-							character->enter_move_attack_state(player1_pos);
-							return false;
-						});
-					});
-					root->add_child(e);
+					//auto e = Entity::create();
+					//e->load(L"assets/spawner.prefab");
+					//e->get_component_i<cNode>(0)->set_pos(demon_pos);
+					//auto spawner = e->get_component_t<cSpwaner>();
+					//spawner->spwan_interval = 5.f;
+					//spawner->set_prefab_path(L"assets/monster.prefab");
+					//spawner->callbacks.add([player1_pos](EntityPtr e) {
+					//	auto character = e->get_component_t<cCharacter>();
+					//	character->faction = 2;
+					//	character->nav_agent->separation_group = 2;
+					//	add_event([character, player1_pos]() {
+					//		//character->enter_move_attack_state(player1_pos);
+					//		character->cmd_move_to(player1_pos);
+					//		return false;
+					//	});
+					//});
+					//root->add_child(e);
 				}
 				{
 					auto e = Entity::create();
@@ -138,14 +139,16 @@ void cMain::start()
 					e->load(L"assets/spawner.prefab");
 					e->get_component_i<cNode>(0)->set_pos(player1_pos);
 					auto spawner = e->get_component_t<cSpwaner>();
-					spawner->spwan_interval = 20.f;
+					spawner->spwan_interval = 1.f;
 					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([demon_pos](EntityPtr e) {
+					spawner->callbacks.add([demon_pos, spawner](EntityPtr e) {
 						auto character = e->get_component_t<cCharacter>();
-						character->faction = 1;
-						character->nav_agent->separation_group = 1;
-						add_event([character, demon_pos]() {
-							character->enter_move_attack_state(demon_pos);
+						character->faction = 2;
+						character->nav_agent->separation_group = 2;
+						add_event([character, demon_pos, spawner]() {
+							//character->enter_move_attack_state(demon_pos);
+							//character->cmd_move_to(demon_pos);
+							spawner->spwan_interval = 10000.f;
 							return false;
 						});
 					});
@@ -165,7 +168,8 @@ void cMain::start()
 					for (auto& c : armature->entity->children)
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
-							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(128, 128, 64, 255));
+							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, 
+								hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
 					}
 				}
 			}
@@ -209,15 +213,17 @@ void cMain::update()
 	}
 	if (input->mpressed(Mouse_Right))
 	{
-		if (main_player.nav_agent)
+		if (hovering_character)
 		{
-			if (hovering_node)
+			if (hovering_character->faction != main_player.character->faction)
+				main_player.character->cmd_attack_target(hovering_character);
+		}
+		else if (hovering_node)
+		{
+			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 			{
-				if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
-				{
-					e_arrow->get_component_i<cNode>(0)->set_pos(hovering_pos);
-					main_player.character->enter_move_state(hovering_pos);
-				}
+				e_arrow->get_component_i<cNode>(0)->set_pos(hovering_pos);
+				main_player.character->cmd_move_to(hovering_pos);
 			}
 		}
 	}
@@ -225,9 +231,9 @@ void cMain::update()
 	{
 		if (main_player.node)
 		{
-			auto enemies = main_player.character->find_enemies();
-			if (!enemies.empty())
-				main_player.character->enter_battle_state(enemies.front());
+			//auto enemies = main_player.character->find_enemies();
+			//if (!enemies.empty())
+			//	main_player.character->enter_battle_state(enemies.front());
 		}
 	}
 

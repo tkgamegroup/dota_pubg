@@ -2,12 +2,12 @@
 
 #include "main.h"
 
-enum State
+enum Command
 {
-	StateIdle,
-	StateMove,
-	StateMoveAttack,
-	StateBattle
+	CommandIdle,
+	CommandMoveTo,
+	CommandAttackTarget,
+	CommandMoveAttack
 };
 
 enum Action
@@ -49,8 +49,7 @@ struct cCharacter : Component
 	uint ai_id = 0;
 
 	bool dead = false;
-	State state = StateIdle;
-	State next_state = StateIdle;
+	Command command;
 	Action action = ActionNone;
 	vec3 started_pos;
 	vec3 move_target;
@@ -64,12 +63,11 @@ struct cCharacter : Component
 	void on_init() override;
 	void on_active() override;
 	void on_inactive() override;
-	std::vector<cCharacterPtr> find_enemies(float radius = 0.f);
+	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true);
 	void change_target(cCharacterPtr character);
-	void enter_move_state(const vec3& pos);
-	void enter_move_attack_state(const vec3& pos);
-	void enter_battle_state(cCharacterPtr target);
 	void die();
+	void cmd_move_to(const vec3& pos);
+	void cmd_attack_target(cCharacterPtr character);
 
 	void start() override;
 	void update() override;

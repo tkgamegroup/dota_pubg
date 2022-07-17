@@ -65,11 +65,18 @@ void cCharacter::on_inactive()
 	graphics::gui_callbacks.remove((uint)this);
 }
 
-std::vector<cCharacterPtr> cCharacter::find_enemies(float radius)
+std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_timer)
 {
+	std::vector<cCharacterPtr> enemies;
+	if (!ignore_timer)
+	{
+		if (search_timer <= 0.f)
+			search_timer = 0.3f + random01() * 0.1f;
+		else
+			return enemies;
+	}
 	std::vector<cNodePtr> objs;
 	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 3.5f, objs, CharacterTag);
-	std::vector<cCharacterPtr> enemies;
 	for (auto obj : objs)
 	{
 		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && chr->faction != faction)
@@ -92,33 +99,25 @@ void cCharacter::change_target(cCharacterPtr character)
 	}
 }
 
-void cCharacter::enter_move_state(const vec3& pos)
-{
-	state = StateMove;
-	action = ActionNone;
-	move_target = pos;
-	nav_agent->set_target(pos);
-}
-
-void cCharacter::enter_move_attack_state(const vec3& pos)
-{
-	state = StateMoveAttack;
-	action = ActionNone;
-	move_target = pos;
-	nav_agent->set_target(pos);
-}
-
-void cCharacter::enter_battle_state(cCharacterPtr target)
-{
-	state = StateBattle;
-	action = ActionNone;
-	change_target(target);
-}
-
 void cCharacter::die()
 {
 	if (dead)
 		return;
+}
+
+void cCharacter::cmd_move_to(const vec3& pos)
+{
+	command = CommandMoveTo;
+	move_target = pos;
+}
+
+void cCharacter::cmd_attack_target(cCharacterPtr character)
+{
+	command = CommandAttackTarget;
+	change_target(character);
+	action = ActionNone;
+	if (armature)
+		armature->play("idle"_h, 0.5f);
 }
 
 void cCharacter::start()
@@ -158,50 +157,24 @@ void cCharacter::update()
 	if (chase_timer > 0)
 		chase_timer -= dt;
 
-	auto search_enemies_and_enter_battle = [this]() {
-		if (search_timer <= 0.f)
-		{
-			search_timer = 0.3f + random01() * 0.1f;
-			auto enemies = find_enemies();
-			if (!enemies.empty())
-			{
-				enter_battle_state(enemies.front());
-				return true;
-			}
-		}
-		return false;
-	};
-
-	switch (state)
+	switch (command)
 	{
-	case StateIdle:
-		if (next_state != StateIdle)
+	case CommandIdle:
+		if (ai_id == 1)
 		{
-			switch (next_state)
-			{
-			case StateMoveAttack:
-				enter_move_attack_state(move_target);
-				break;
-			}
-			next_state = StateIdle;
-		}
-		else
-		{
-			if (ai_id == 1)
-				search_enemies_and_enter_battle();
+			auto enemies = find_enemies(0.f, false);
 		}
 		break;
-	case StateMoveAttack:
-		if (search_enemies_and_enter_battle())
-		{
-			next_state = StateMoveAttack;
-			break;
-		}
-	case StateMove:
+	case CommandMoveTo:
+		nav_agent->set_target(move_target);
+		action = ActionMove;
+		if (armature)
+			armature->play("run"_h);
+
 		if (length(nav_agent->desire_velocity()) <= 0.f)
 		{
 			nav_agent->stop();
-			state = StateIdle;
+			command = CommandIdle;
 			action = ActionNone;
 			if (armature)
 				armature->play("idle"_h, 0.3f);
@@ -213,47 +186,14 @@ void cCharacter::update()
 				armature->play("run"_h);
 		}
 		break;
-	case StateBattle:
+	case CommandAttackTarget:
 	{
-		if (action == ActionNone)
-		{
-			if (ai_id != 0)
-			{
-				auto enemies = find_enemies();
-				std::vector<std::pair<float, cCharacterPtr>> enemies_with_dist(enemies.size());
-				auto self_pos = node->g_pos;
-				for (auto i = 0; i < enemies.size(); i++)
-				{
-					auto c = enemies[i];
-					enemies_with_dist[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
-				}
-				std::sort(enemies_with_dist.begin(), enemies_with_dist.end(), [](const auto& a, const auto& b) {
-					return a.first < b.first;
-					});
-				auto tar_dist = target ? distance(target->node->g_pos, self_pos) : 100000.f;
-				if (tar_dist > 8.f)
-					change_target(nullptr);
-				if (!target || tar_dist > atk_distance)
-				{
-					if (!enemies_with_dist.empty())
-						change_target(enemies_with_dist.front().second);
-					else
-						change_target(nullptr);
-				}
-			}
-		}
-
 		if (!target)
-		{
-			state = StateIdle;
-			action = ActionNone;
-			if (armature)
-				armature->play("idle"_h, 0.3f);
-		}
+			command = CommandIdle;
 		else
 		{
-			auto tar_pos = target->node->g_pos;
 			auto self_pos = node->g_pos;
+			auto tar_pos = target->node->g_pos;
 			auto dir = tar_pos - self_pos;
 			auto dist = length(dir);
 			dir = normalize(dir);
@@ -261,16 +201,22 @@ void cCharacter::update()
 
 			if (action == ActionNone || action == ActionMove)
 			{
-				if (ang_diff <= 60.f && dist <= atk_distance)
+				if (dist <= atk_distance)
 				{
-					if (attack_interval_timer <= 0.f)
+					nav_agent->stop();
+					if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
 					{
 						action = ActionAttack;
 						if (armature)
 							armature->play("attack"_h);
-						nav_agent->stop();
 						attack_interval_timer = atk_interval;
 						attack_timer = atk_interval * atk_precast;
+					}
+					else
+					{
+						action = ActionNone;
+						if (armature)
+							armature->play("idle"_h, 0.5f);
 					}
 				}
 				else
@@ -278,11 +224,7 @@ void cCharacter::update()
 					action = ActionMove;
 					if (armature)
 						armature->play("run"_h);
-					if (chase_timer <= 0.f)
-					{
-						nav_agent->set_target(tar_pos);
-						chase_timer = 0.1f + random01() * 0.05f;
-					}
+					nav_agent->set_target(tar_pos);
 				}
 			}
 			else if (action == ActionAttack)
@@ -307,6 +249,53 @@ void cCharacter::update()
 			}
 		}
 	}
+		break;
+	case CommandMoveAttack:
+	{
+		auto enemies = find_enemies(0.f, false);
+	}
+		break;
+	//case CommandBattle:
+	//{
+	//	if (action == ActionNone)
+	//	{
+	//		if (ai_id != 0)
+	//		{
+	//			auto enemies = find_enemies();
+	//			std::vector<std::pair<float, cCharacterPtr>> enemies_with_dist(enemies.size());
+	//			auto self_pos = node->g_pos;
+	//			for (auto i = 0; i < enemies.size(); i++)
+	//			{
+	//				auto c = enemies[i];
+	//				enemies_with_dist[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
+	//			}
+	//			std::sort(enemies_with_dist.begin(), enemies_with_dist.end(), [](const auto& a, const auto& b) {
+	//				return a.first < b.first;
+	//				});
+	//			auto tar_dist = target ? distance(target->node->g_pos, self_pos) : 100000.f;
+	//			if (tar_dist > 8.f)
+	//				change_target(nullptr);
+	//			if (!target || tar_dist > atk_distance)
+	//			{
+	//				if (!enemies_with_dist.empty())
+	//					change_target(enemies_with_dist.front().second);
+	//				else
+	//					change_target(nullptr);
+	//			}
+	//		}
+	//	}
+
+	//	if (!target)
+	//	{
+	//		state = StateIdle;
+	//		action = ActionNone;
+	//		if (armature)
+	//			armature->play("idle"_h, 0.3f);
+	//	}
+	//	else
+	//	{
+	//	}
+	//}
 		break;
 	}
 }

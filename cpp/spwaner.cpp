@@ -43,7 +43,7 @@ void cSpwaner::update()
 		{
 			auto e = prefab->copy();
 			auto p = node->g_pos + node->g_rot[0] * (nav_obstacle->radius + random01() * 0.5f) + 
-				node->g_rot[2] * (random01() * 1.f - 0.5f);
+				node->g_rot[2] * (random01() * 6.f - 3.f);
 			e->get_component_i<cNode>(0)->set_pos(p);
 			root->add_child(e);
 			for (auto& cb : callbacks.list)
