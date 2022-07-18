@@ -13,6 +13,8 @@ struct cSpwaner : Component
 	/// Reflect
 	float spwan_interval = 10.f;
 	/// Reflect
+	int spwan_count = 1;
+	/// Reflect
 	std::filesystem::path prefab_path;
 	/// Reflect
 	void set_prefab_path(const std::filesystem::path& path);

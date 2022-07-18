@@ -41,13 +41,16 @@ void cSpwaner::update()
 	{
 		if (spwan_timer <= 0.f)
 		{
-			auto e = prefab->copy();
-			auto p = node->g_pos + node->g_rot[0] * (nav_obstacle->radius + random01() * 0.5f) + 
-				node->g_rot[2] * (random01() * 6.f - 3.f);
-			e->get_component_i<cNode>(0)->set_pos(p);
-			root->add_child(e);
-			for (auto& cb : callbacks.list)
-				cb.first(e);
+			auto off = spwan_count / 2.f;
+			for (auto i = 0; i < spwan_count; i++)
+			{
+				auto e = prefab->copy();
+				auto p = node->g_pos + node->g_rot[0] * nav_obstacle->radius + node->g_rot[2] * (i - off) * prefab_radius * 2.f;
+				e->get_component_i<cNode>(0)->set_pos(p);
+				root->add_child(e);
+				for (auto& cb : callbacks.list)
+					cb.first(e);
+			}
 			spwan_timer = spwan_interval;
 		}
 	}

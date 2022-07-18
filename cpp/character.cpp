@@ -44,14 +44,15 @@ void cCharacter::on_active()
 				const auto w = 80.f;
 				const auto h = 5.f;
 				ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
-				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | 
+				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 					ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs);
 				//ImGui::Text("%s %d %d", entity->name.c_str(), state, action);
 				ImGui::Dummy(ImVec2(w, h));
 				auto dl = ImGui::GetWindowDrawList();
 				auto p0 = (vec2)ImGui::GetItemRectMin();
 				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * w, h), ImColor(0.f, 1.f, 0.f));
+				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * w, h), 
+					faction == main_player.character->faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
 				dl->AddRect(p0, p0 + vec2(100.f, 5.f), ImColor(1.f, 1.f, 1.f));
 				ImGui::End();
 				ImGui::PopStyleVar(2);
@@ -65,28 +66,45 @@ void cCharacter::on_inactive()
 	graphics::gui_callbacks.remove((uint)this);
 }
 
-std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_timer)
+std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_timer, bool sort)
 {
-	std::vector<cCharacterPtr> enemies;
+	std::vector<cCharacterPtr> ret;
 	if (!ignore_timer)
 	{
 		if (search_timer <= 0.f)
-			search_timer = 0.3f + random01() * 0.1f;
+			search_timer = 0.1f + random01() * 0.05f;
 		else
-			return enemies;
+			return ret;
 	}
 	std::vector<cNodePtr> objs;
 	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 3.5f, objs, CharacterTag);
 	for (auto obj : objs)
 	{
 		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && chr->faction != faction)
-			enemies.push_back(chr);
+			ret.push_back(chr);
 	}
-	return enemies;
+	if (sort)
+	{
+		std::vector<std::pair<float, cCharacterPtr>> dist_list(ret.size());
+		auto self_pos = node->g_pos;
+		for (auto i = 0; i < ret.size(); i++)
+		{
+			auto c = ret[i];
+			dist_list[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
+		}
+		std::sort(dist_list.begin(), dist_list.end(), [](const auto& a, const auto& b) {
+			return a.first < b.first;
+		});
+		for (auto i = 0; i < ret.size(); i++)
+			ret[i] = dist_list[i].second;
+	}
+	return ret;
 }
 
 void cCharacter::change_target(cCharacterPtr character)
 {
+	if (target == character)
+		return;
 	if (target)
 		target->entity->message_listeners.remove((uint)this);
 	target = character;
@@ -120,6 +138,12 @@ void cCharacter::cmd_attack_target(cCharacterPtr character)
 		armature->play("idle"_h, 0.5f);
 }
 
+void cCharacter::cmd_move_attack(const vec3& pos)
+{
+	command = CommandMoveAttack;
+	move_target = pos;
+}
+
 void cCharacter::start()
 {
 	entity->tag |= CharacterTag;
@@ -149,23 +173,14 @@ void cCharacter::update()
 		return;
 	}
 
-	auto dt = delta_time;
 	if (search_timer > 0)
-		search_timer -= dt;
+		search_timer -= delta_time;
 	if (attack_interval_timer > 0)
-		attack_interval_timer -= dt;
+		attack_interval_timer -= delta_time;
 	if (chase_timer > 0)
-		chase_timer -= dt;
+		chase_timer -= delta_time;
 
-	switch (command)
-	{
-	case CommandIdle:
-		if (ai_id == 1)
-		{
-			auto enemies = find_enemies(0.f, false);
-		}
-		break;
-	case CommandMoveTo:
+	auto move_to_traget = [this]() {
 		nav_agent->set_target(move_target);
 		action = ActionMove;
 		if (armature)
@@ -185,117 +200,98 @@ void cCharacter::update()
 			if (armature)
 				armature->play("run"_h);
 		}
+	};
+
+	auto attack_target = [this]() {
+		auto self_pos = node->g_pos;
+		auto tar_pos = target->node->g_pos;
+		auto dir = tar_pos - self_pos;
+		auto dist = length(dir);
+		dir = normalize(dir);
+		auto ang_diff = abs(angle_diff(node->get_eul().x, degrees(atan2(dir.x, dir.z))));
+
+		if (action == ActionNone || action == ActionMove)
+		{
+			if (dist <= atk_distance)
+			{
+				if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
+				{
+					action = ActionAttack;
+					if (armature)
+						armature->play("attack"_h);
+					attack_interval_timer = atk_interval;
+					attack_timer = atk_interval * atk_precast;
+				}
+				else
+				{
+					action = ActionNone;
+					if (armature)
+						armature->play("idle"_h, 0.5f);
+				}
+				nav_agent->set_target(tar_pos, true);
+			}
+			else
+			{
+				action = ActionMove;
+				if (armature)
+					armature->play("run"_h);
+				nav_agent->set_target(tar_pos);
+			}
+		}
+		else if (action == ActionAttack)
+		{
+			if (attack_timer <= 0.f)
+			{
+				if (target->hp > atk)
+					target->hp -= atk;
+				else
+				{
+					target->hp = 0;
+					target->dead = true;
+				}
+
+				action = ActionNone;
+				if (armature)
+					armature->play("idle"_h, 0.5f);
+			}
+			else
+				attack_timer -= delta_time;
+			nav_agent->set_target(tar_pos, true);
+		}
+	};
+
+	switch (command)
+	{
+	case CommandIdle:
+		break;
+	case CommandMoveTo:
+		move_to_traget();
 		break;
 	case CommandAttackTarget:
 	{
 		if (!target)
 			command = CommandIdle;
 		else
-		{
-			auto self_pos = node->g_pos;
-			auto tar_pos = target->node->g_pos;
-			auto dir = tar_pos - self_pos;
-			auto dist = length(dir);
-			dir = normalize(dir);
-			auto ang_diff = abs(angle_diff(node->get_eul().x, degrees(atan2(dir.x, dir.z))));
-
-			if (action == ActionNone || action == ActionMove)
-			{
-				if (dist <= atk_distance)
-				{
-					nav_agent->stop();
-					if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
-					{
-						action = ActionAttack;
-						if (armature)
-							armature->play("attack"_h);
-						attack_interval_timer = atk_interval;
-						attack_timer = atk_interval * atk_precast;
-					}
-					else
-					{
-						action = ActionNone;
-						if (armature)
-							armature->play("idle"_h, 0.5f);
-					}
-				}
-				else
-				{
-					action = ActionMove;
-					if (armature)
-						armature->play("run"_h);
-					nav_agent->set_target(tar_pos);
-				}
-			}
-			else if (action == ActionAttack)
-			{
-				nav_agent->set_target(tar_pos, true);
-				if (attack_timer <= 0.f)
-				{
-					if (target->hp > atk)
-						target->hp -= atk;
-					else
-					{
-						target->hp = 0;
-						target->dead = true;
-					}
-
-					action = ActionNone;
-					if (armature)
-						armature->play("idle"_h, 0.5f);
-				}
-				else
-					attack_timer -= dt;
-			}
-		}
+			attack_target();
 	}
 		break;
 	case CommandMoveAttack:
 	{
-		auto enemies = find_enemies(0.f, false);
-	}
-		break;
-	//case CommandBattle:
-	//{
-	//	if (action == ActionNone)
-	//	{
-	//		if (ai_id != 0)
-	//		{
-	//			auto enemies = find_enemies();
-	//			std::vector<std::pair<float, cCharacterPtr>> enemies_with_dist(enemies.size());
-	//			auto self_pos = node->g_pos;
-	//			for (auto i = 0; i < enemies.size(); i++)
-	//			{
-	//				auto c = enemies[i];
-	//				enemies_with_dist[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
-	//			}
-	//			std::sort(enemies_with_dist.begin(), enemies_with_dist.end(), [](const auto& a, const auto& b) {
-	//				return a.first < b.first;
-	//				});
-	//			auto tar_dist = target ? distance(target->node->g_pos, self_pos) : 100000.f;
-	//			if (tar_dist > 8.f)
-	//				change_target(nullptr);
-	//			if (!target || tar_dist > atk_distance)
-	//			{
-	//				if (!enemies_with_dist.empty())
-	//					change_target(enemies_with_dist.front().second);
-	//				else
-	//					change_target(nullptr);
-	//			}
-	//		}
-	//	}
+		auto dist = target ? distance(node->g_pos, target->node->g_pos) : 10000.f;
+		if (dist > atk_distance + 12.f)
+			change_target(nullptr);
+		if (action != ActionAttack)
+		{
+			auto enemies = find_enemies(0.f, false, true);
+			if (!enemies.empty() && dist > atk_distance)
+				change_target(enemies.front());
+		}
 
-	//	if (!target)
-	//	{
-	//		state = StateIdle;
-	//		action = ActionNone;
-	//		if (armature)
-	//			armature->play("idle"_h, 0.3f);
-	//	}
-	//	else
-	//	{
-	//	}
-	//}
+		if (target)
+			attack_target();
+		else
+			move_to_traget();
+	}
 		break;
 	}
 }

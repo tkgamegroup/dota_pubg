@@ -63,11 +63,12 @@ struct cCharacter : Component
 	void on_init() override;
 	void on_active() override;
 	void on_inactive() override;
-	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true);
+	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
 	void change_target(cCharacterPtr character);
 	void die();
 	void cmd_move_to(const vec3& pos);
 	void cmd_attack_target(cCharacterPtr character);
+	void cmd_move_attack(const vec3& pos);
 
 	void start() override;
 	void update() override;

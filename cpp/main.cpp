@@ -109,28 +109,29 @@ void cMain::start()
 				auto player1_pos = terrain_pos +
 					site_positions[site_centrality.back().second] * terrain->extent;
 				{
-					//auto e = Entity::create();
-					//e->load(L"assets/spawner.prefab");
-					//e->get_component_i<cNode>(0)->set_pos(demon_pos);
-					//auto spawner = e->get_component_t<cSpwaner>();
-					//spawner->spwan_interval = 5.f;
-					//spawner->set_prefab_path(L"assets/monster.prefab");
-					//spawner->callbacks.add([player1_pos](EntityPtr e) {
-					//	auto character = e->get_component_t<cCharacter>();
-					//	character->faction = 2;
-					//	character->nav_agent->separation_group = 2;
-					//	add_event([character, player1_pos]() {
-					//		//character->enter_move_attack_state(player1_pos);
-					//		character->cmd_move_to(player1_pos);
-					//		return false;
-					//	});
-					//});
-					//root->add_child(e);
+					auto e = Entity::create();
+					e->load(L"assets/spawner.prefab");
+					e->get_component_i<cNode>(0)->set_pos(demon_pos);
+					auto spawner = e->get_component_t<cSpwaner>();
+					spawner->spwan_interval = 1.f;
+					spawner->spwan_count = 4;
+					spawner->set_prefab_path(L"assets/monster.prefab");
+					spawner->callbacks.add([spawner, player1_pos](EntityPtr e) {
+						auto character = e->get_component_t<cCharacter>();
+						character->faction = 2;
+						character->nav_agent->separation_group = 2;
+						add_event([character, player1_pos]() {
+							character->cmd_move_attack(player1_pos);
+							return false;
+						});
+						spawner->spwan_interval = 10000.f;
+					});
+					root->add_child(e);
 				}
 				{
 					auto e = Entity::create();
 					e->load(L"assets/main_player.prefab");
-					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -5.f));
+					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -8.f));
 					root->add_child(e);
 					main_player.init(e);
 				}
@@ -140,17 +141,17 @@ void cMain::start()
 					e->get_component_i<cNode>(0)->set_pos(player1_pos);
 					auto spawner = e->get_component_t<cSpwaner>();
 					spawner->spwan_interval = 1.f;
+					spawner->spwan_count = 4;
 					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([demon_pos, spawner](EntityPtr e) {
+					spawner->callbacks.add([spawner, demon_pos](EntityPtr e) {
 						auto character = e->get_component_t<cCharacter>();
-						character->faction = 2;
-						character->nav_agent->separation_group = 2;
-						add_event([character, demon_pos, spawner]() {
-							//character->enter_move_attack_state(demon_pos);
-							//character->cmd_move_to(demon_pos);
-							spawner->spwan_interval = 10000.f;
+						character->faction = 1;
+						character->nav_agent->separation_group = 1;
+						add_event([character, demon_pos]() {
+							character->cmd_move_attack(demon_pos);
 							return false;
 						});
+						spawner->spwan_interval = 10000.f;
 					});
 					root->add_child(e);
 				}
@@ -187,7 +188,7 @@ void cMain::update()
 		case "mesh"_h:
 			if (auto character = n->entity->get_component_t<cCharacter>(); character)
 			{
-				if (character->armature)
+				if (character != main_player.character && character->armature)
 				{
 					for (auto& c : character->armature->entity->children)
 					{
