@@ -13,6 +13,10 @@
 						<item first="assets\animations\sword_shield_run.fani" second="run" />
 						<item first="assets\animations\sword_shield_slash.fani" second="attack" />
 					</animation_names>
+					<animation_transitions>
+						<item item_0="run" item_1="idle" item_2="0.3" />
+						<item item_0="attack" item_1="idle" item_2="0.5" />
+					</animation_transitions>
 				</item>
 			</components>
 			<children>

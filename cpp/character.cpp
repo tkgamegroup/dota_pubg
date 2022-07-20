@@ -135,7 +135,7 @@ void cCharacter::cmd_attack_target(cCharacterPtr character)
 	change_target(character);
 	action = ActionNone;
 	if (armature)
-		armature->play("idle"_h, 0.5f);
+		armature->play("idle"_h);
 }
 
 void cCharacter::cmd_move_attack(const vec3& pos)
@@ -192,7 +192,7 @@ void cCharacter::update()
 			command = CommandIdle;
 			action = ActionNone;
 			if (armature)
-				armature->play("idle"_h, 0.3f);
+				armature->play("idle"_h);
 		}
 		else
 		{
@@ -226,7 +226,7 @@ void cCharacter::update()
 				{
 					action = ActionNone;
 					if (armature)
-						armature->play("idle"_h, 0.5f);
+						armature->play("idle"_h);
 				}
 				nav_agent->set_target(tar_pos, true);
 			}
@@ -252,7 +252,7 @@ void cCharacter::update()
 
 				action = ActionNone;
 				if (armature)
-					armature->play("idle"_h, 0.5f);
+					armature->play("idle"_h);
 			}
 			else
 				attack_timer -= delta_time;
