@@ -1,17 +1,18 @@
 <?xml version="1.0"?>
-<prefab>
+<prefab file_id="c516481b48d0f782c740aca6af208c21">
 	<components>
 		<item type_name="flame::cNode" />
+		<item type_name="flame::cNavObstacle" radius="2.41" height="6.89" />
 	</components>
 	<children>
-		<item name="RootNode">
+		<item file_id="282c62414facb73010853289e1e0aa16" name="RootNode">
 			<components>
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
 			</components>
 			<children>
-				<item name="Circle.009">
+				<item file_id="194c072d4786d69ef6c67aa2a096e2b2" name="Circle.009">
 					<components>
-						<item type_name="flame::cNode" qut="0.557767,-0.557767,0.434622,0.434622" scl="92.0181,92.0181,92.0181" />
+						<item type_name="flame::cNode" eul="75.8528,-90,0" qut="0.557767,-0.557767,0.434622,0.434622" scl="92.0181,92.0181,92.0181" />
 						<item type_name="flame::cMesh" mesh_name="assets\trees\laubbaum.fmod#mesh0" material_name="assets\trees\laubbaum_Material.fmat" />
 					</components>
 				</item>

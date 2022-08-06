@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<prefab file_id="5723a5cb466a70f078a074ab0f0b1aa4" name="rock1.obj">
+	<components>
+		<item type_name="flame::cNode" />
+		<item type_name="flame::cNavObstacle" />
+	</components>
+	<children>
+		<item file_id="f9ab4fc246e831b0b7e0ab8cd5fa9a4b" name="rock_1_Plane.005">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="assets\rocks\rock1.fmod#mesh0" material_name="assets\rocks\rock1_mat_rock_01.fmat" />
+			</components>
+		</item>
+	</children>
+</prefab>

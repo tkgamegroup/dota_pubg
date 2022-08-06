@@ -109,7 +109,7 @@ void cMain::start()
 				auto player1_pos = terrain_pos +
 					site_positions[site_centrality.back().second] * terrain->extent;
 				{
-					auto e = Entity::create();
+					auto e = Entity::create(); 
 					e->load(L"assets/spawner.prefab");
 					e->get_component_i<cNode>(0)->set_pos(demon_pos);
 					auto spawner = e->get_component_t<cSpwaner>();
