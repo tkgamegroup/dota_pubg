@@ -3,7 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavAgent" separate_group="0" />
-		<item type_name="cCharacter" faction="1" />
+		<item type_name="cCharacter" faction="1" atk_distance="10" atk_projectile_name="assets\objects\arrow.prefab" />
 	</components>
 	<children>
 		<item file_id="50d8b05d404569714eaaeebf357f1619" filename="assets\knight\Paladin WProp J Nordstrom.prefab">

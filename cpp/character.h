@@ -44,9 +44,15 @@ struct cCharacter : Component
 	/// Reflect
 	float atk_precast = 0.43f; // 0-1, of the atk_interval
 	/// Reflect
+	std::filesystem::path atk_projectile_name;
+	/// Reflect
+	void set_atk_projectile_name(const std::filesystem::path& name);
+	/// Reflect
 	uint faction = 0;
 	/// Reflect
 	uint ai_id = 0;
+
+	EntityPtr atk_projectile = nullptr;
 
 	bool dead = false;
 	Command command;
@@ -64,7 +70,7 @@ struct cCharacter : Component
 	void on_active() override;
 	void on_inactive() override;
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
-	void change_target(cCharacterPtr character);
+	void set_target(cCharacterPtr character);
 	void die();
 	void cmd_move_to(const vec3& pos);
 	void cmd_attack_target(cCharacterPtr character);

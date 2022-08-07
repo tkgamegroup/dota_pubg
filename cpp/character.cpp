@@ -1,4 +1,5 @@
 #include "character.h"
+#include "projectile.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
@@ -15,6 +16,28 @@
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
+}
+
+void cCharacter::set_atk_projectile_name(const std::filesystem::path& name)
+{
+	if (atk_projectile_name == name)
+		return;
+	atk_projectile_name = name;
+
+	EntityPtr _atk_projectile = nullptr;
+	if (!atk_projectile_name.empty())
+	{
+		_atk_projectile = Entity::create();
+		if (!_atk_projectile->load(atk_projectile_name))
+		{
+			delete _atk_projectile;
+			_atk_projectile = nullptr;
+			return;
+		}
+	}
+
+	delete atk_projectile;
+	atk_projectile = _atk_projectile;
 }
 
 void cCharacter::on_init()
@@ -101,7 +124,7 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 	return ret;
 }
 
-void cCharacter::change_target(cCharacterPtr character)
+void cCharacter::set_target(cCharacterPtr character)
 {
 	if (target == character)
 		return;
@@ -132,7 +155,7 @@ void cCharacter::cmd_move_to(const vec3& pos)
 void cCharacter::cmd_attack_target(cCharacterPtr character)
 {
 	command = CommandAttackTarget;
-	change_target(character);
+	set_target(character);
 	action = ActionNone;
 	if (armature)
 		armature->play("idle"_h);
@@ -242,12 +265,22 @@ void cCharacter::update()
 		{
 			if (attack_timer <= 0.f)
 			{
-				if (target->hp > atk)
-					target->hp -= atk;
+				if (atk_projectile)
+				{
+					auto e = atk_projectile->copy();
+					e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, height, 0.f));
+					e->get_component_t<cProjectile>()->set_target(target);
+					root->add_child(e);
+				}
 				else
 				{
-					target->hp = 0;
-					target->dead = true;
+					if (target->hp > atk)
+						target->hp -= atk;
+					else
+					{
+						target->hp = 0;
+						target->dead = true;
+					}
 				}
 
 				action = ActionNone;
@@ -279,12 +312,12 @@ void cCharacter::update()
 	{
 		auto dist = target ? distance(node->g_pos, target->node->g_pos) : 10000.f;
 		if (dist > atk_distance + 12.f)
-			change_target(nullptr);
+			set_target(nullptr);
 		if (action != ActionAttack)
 		{
 			auto enemies = find_enemies(0.f, false, true);
 			if (!enemies.empty() && dist > atk_distance)
-				change_target(enemies.front());
+				set_target(enemies.front());
 		}
 
 		if (target)

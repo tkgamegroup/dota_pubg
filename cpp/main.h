@@ -7,6 +7,7 @@ using namespace flame;
 FLAME_TYPE(cMain)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cSpwaner)
+FLAME_TYPE(cProjectile)
 
 const auto CharacterTag = 1 << 1;
 
