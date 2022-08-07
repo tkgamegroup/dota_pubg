@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<material color="0.8,0.8,0.8,1" color_map="0" alpha_test="0.5">
+<material opaque="false" color="0.8,0.8,0.8,1" color_map="0" alpha_test="0.5">
 	<textures>
-		<item filename="assets\trees\texture_laubbaum.png" />
+		<item filename="assets\trees\texture_laubbaum.png" auto_mipmap="true" />
 	</textures>
 </material>
