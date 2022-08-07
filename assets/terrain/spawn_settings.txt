@@ -1,2 +1,2 @@
-assets\trees\laubbaum.prefab 1 1000
-assets\rocks\rock1.prefab 1 200
+assets\trees\laubbaum.prefab 1 1500
+assets\rocks\rock1.prefab 1 800
