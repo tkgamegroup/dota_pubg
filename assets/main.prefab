@@ -14,7 +14,7 @@
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">
 			<components>
 				<item type_name="flame::cNode" eul="0,-23.26,0" qut="0.97947,-0.201591,0,0" />
-				<item type_name="flame::cLight" color="1,1,1,3.14" cast_shadow="true" />
+				<item type_name="flame::cLight" color="1,1,1,9" cast_shadow="true" />
 			</components>
 		</item>
 		<item file_id="82f4ac9944dcaea2d43185a721b76f02" name="Environment">
