@@ -34,6 +34,8 @@ struct MainPlayer
 };
 extern MainPlayer main_player;
 
+extern cCharacterPtr selecting_target;
+
 /// Reflect ctor
 struct cMain : Component
 {
@@ -46,6 +48,9 @@ struct cMain : Component
 	float camera_angle = 45.f;
 
 	~cMain();
+	void on_active() override;
+	void on_inactive() override;
+
 	void start() override;
 	void update() override;
 

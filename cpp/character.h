@@ -42,6 +42,16 @@ struct cCharacter : Component
 	/// Reflect
 	uint hp_max = 100;
 	/// Reflect
+	uint mp = 100;
+	/// Reflect
+	uint mp_max = 100;
+	/// Reflect
+	uint STR = 10;
+	/// Reflect
+	uint AGI = 10;
+	/// Reflect
+	uint INT = 10;
+	/// Reflect
 	uint atk = 10;
 	/// Reflect
 	float atk_distance = 1.5f;
@@ -53,6 +63,8 @@ struct cCharacter : Component
 	std::filesystem::path atk_projectile_name;
 	/// Reflect
 	void set_atk_projectile_name(const std::filesystem::path& name);
+	/// Reflect
+	uint armor = 0;
 	/// Reflect
 	uint faction = 0;
 	/// Reflect

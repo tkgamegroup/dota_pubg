@@ -45,6 +45,7 @@ void MainPlayer::init(EntityPtr e)
 
 MainCamera main_camera;
 MainPlayer main_player;
+cCharacterPtr selecting_target = nullptr;
 
 std::vector<vec3> site_positions;
 
@@ -55,10 +56,214 @@ cMain::~cMain()
 	node->drawers.remove("main"_h);
 }
 
+void cMain::on_active()
+{
+	graphics::gui_set_current();
+	graphics::gui_callbacks.add([this]() {
+		auto& tars = sRenderer::instance()->iv_tars;
+		if (!tars.empty())
+		{
+			auto tar_size = vec2(tars.front()->image->size);
+			ImGui::SetNextWindowPos(ImVec2(tar_size.x * 0.5f, tar_size.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+			ImGui::SetNextWindowSize(ImVec2(600.f, 150.f), ImGuiCond_Always);
+			ImGui::SetNextWindowBgAlpha(0.5f);
+			ImGui::Begin("##stats", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs);
+			if (selecting_target)
+			{
+				ImGui::TextUnformatted(selecting_target->entity->name.c_str());
+
+				ImGui::BeginChild("##c1", ImVec2(100.f, -1.f));
+				if (ImGui::BeginTable("##t1", 2));
+				{
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
+					ImGui::Image(img_sword, ImVec2(16, 16));
+					ImGui::TableNextColumn();
+					ImGui::Text("%5d", selecting_target->atk);
+
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
+					ImGui::Image(img_shield, ImVec2(16, 16));
+					ImGui::TableNextColumn();
+					ImGui::Text("%5d", selecting_target->armor);
+
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
+					ImGui::Image(img_str, ImVec2(16, 16));
+					ImGui::TableNextColumn();
+					ImGui::Text("%5d", selecting_target->STR);
+
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
+					ImGui::Image(img_agi, ImVec2(16, 16));
+					ImGui::TableNextColumn();
+					ImGui::Text("%5d", selecting_target->AGI);
+
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
+					ImGui::Image(img_int, ImVec2(16, 16));
+					ImGui::TableNextColumn();
+					ImGui::Text("%5d", selecting_target->INT);
+
+					ImGui::EndTable();
+				}
+				ImGui::EndChild();
+
+				ImGui::SameLine();
+
+				ImGui::BeginGroup();
+				auto dl = ImGui::GetWindowDrawList();
+				const auto bar_width = ImGui::GetContentRegionAvailWidth();
+				const auto bar_height = 16.f;
+				{
+					ImGui::Dummy(ImVec2(bar_width, bar_height));
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddRectFilled(p0, p0 + vec2((float)selecting_target->hp / (float)selecting_target->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					auto str = std::format("{}/{}", selecting_target->hp, selecting_target->hp_max);
+					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+				}
+				{
+					ImGui::Dummy(ImVec2(bar_width, bar_height));
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddRectFilled(p0, p0 + vec2((float)selecting_target->mp / (float)selecting_target->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					auto str = std::format("{}/{}", selecting_target->mp, selecting_target->mp_max);
+					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+				}
+				{
+					ImGui::Dummy(ImVec2(bar_width, bar_height));
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddRectFilled(p0, p0 + vec2((float)selecting_target->exp / (float)selecting_target->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					auto str = std::format("{}/{}", selecting_target->exp, selecting_target->exp_max);
+					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+				}
+				if (selecting_target == main_player.character)
+				{
+					auto icon_size = 48.f;
+					ImGui::BeginGroup();
+					{
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "Q");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "W");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(2.f, 0.f), ImColor(1.f, 1.f, 1.f), "E");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "R");
+					}
+					ImGui::EndGroup();
+					ImGui::SameLine();
+					icon_size = 32.f;
+					ImGui::BeginGroup();
+					{
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "1");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "2");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "3");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "4");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "5");
+					}
+					{
+						ImGui::SameLine();
+						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "6");
+					}
+					ImGui::EndGroup();
+				}
+				ImGui::EndGroup();
+			}
+			ImGui::End();
+		}
+	}, (uint)this);
+}
+
+void cMain::on_inactive()
+{
+	graphics::gui_callbacks.remove((uint)this);
+}
+
 void cMain::start()
 {
 	srand(time(0));
-	graphics::gui_set_current();
 	printf("Hello World\n");
 	add_event([this]() {
 		sScene::instance()->generate_nav_mesh();
@@ -134,6 +339,7 @@ void cMain::start()
 					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -8.f));
 					root->add_child(e);
 					main_player.init(e);
+					selecting_target = main_player.character;
 				}
 				{
 					auto e = Entity::create();
