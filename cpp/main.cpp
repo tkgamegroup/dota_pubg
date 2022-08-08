@@ -65,7 +65,7 @@ void cMain::on_active()
 		{
 			auto tar_size = vec2(tars.front()->image->size);
 			ImGui::SetNextWindowPos(ImVec2(tar_size.x * 0.5f, tar_size.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-			ImGui::SetNextWindowSize(ImVec2(600.f, 150.f), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
 			ImGui::SetNextWindowBgAlpha(0.5f);
 			ImGui::Begin("##stats", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs);
@@ -89,6 +89,13 @@ void cMain::on_active()
 					ImGui::Image(img_shield, ImVec2(16, 16));
 					ImGui::TableNextColumn();
 					ImGui::Text("%5d", selecting_target->armor);
+
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					static auto img_run = graphics::Image::get("assets\\icons\\run.png");
+					ImGui::Image(img_run, ImVec2(16, 16));
+					ImGui::TableNextColumn();
+					ImGui::Text("%5d", selecting_target->mov_sp);
 
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();

@@ -66,6 +66,8 @@ struct cCharacter : Component
 	/// Reflect
 	uint armor = 0;
 	/// Reflect
+	uint mov_sp = 100;
+	/// Reflect
 	uint faction = 0;
 	/// Reflect
 	uint ai_id = 0;
