@@ -13,7 +13,9 @@ struct cProjectile : Component
 	cCharacterPtr target = nullptr;
 	void set_target(cCharacterPtr character);
 
-	std::function<void(bool)> callback;
+	std::function<void(cCharacterPtr t)> callback;
+
+	void setup(cCharacterPtr target, const std::function<void(cCharacterPtr)>& cb);
 
 	void die();
 

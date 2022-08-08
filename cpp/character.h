@@ -32,6 +32,12 @@ struct cCharacter : Component
 	/// Reflect
 	float height = 1.8f;
 	/// Reflect
+	uint lv = 1;
+	/// Reflect
+	uint exp = 0;
+	/// Reflect
+	uint exp_max = 0;
+	/// Reflect
 	uint hp = 100;
 	/// Reflect
 	uint hp_max = 100;
@@ -57,7 +63,6 @@ struct cCharacter : Component
 	bool dead = false;
 	Command command;
 	Action action = ActionNone;
-	vec3 started_pos;
 	vec3 move_target;
 	cCharacterPtr target = nullptr;
 	float search_timer = 0.f;
@@ -71,6 +76,9 @@ struct cCharacter : Component
 	void on_inactive() override;
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
 	void set_target(cCharacterPtr character);
+	void inflict_damage(cCharacterPtr target, uint value);
+	bool take_damage(uint value); // return true if the damage causes the character die
+	void level_up();
 	void die();
 	void cmd_move_to(const vec3& pos);
 	void cmd_attack_target(cCharacterPtr character);

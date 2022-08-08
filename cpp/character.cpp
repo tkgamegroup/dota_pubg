@@ -140,10 +140,57 @@ void cCharacter::set_target(cCharacterPtr character)
 	}
 }
 
+const auto NextLvExpFactor = 1.1f;
+
+uint gain_exp_from_killing(uint lv)
+{
+	return (100.f * (1.f - pow(NextLvExpFactor, lv)) / (1.f - NextLvExpFactor)) * 0.13f;
+}
+
+void cCharacter::inflict_damage(cCharacterPtr target, uint value)
+{
+	if (target->take_damage(value))
+	{
+		if (exp_max > 0)
+		{
+			exp += gain_exp_from_killing(target->lv);
+			while (exp > exp_max)
+			{
+				exp -= exp_max;
+				level_up();
+			}
+		}
+	}
+}
+
+bool cCharacter::take_damage(uint value)
+{
+	if (hp > value)
+	{
+		hp -= value;
+		return false;
+	}
+
+	die();
+	return true;
+}
+
+void cCharacter::level_up()
+{
+	lv++;
+	exp_max *= NextLvExpFactor;
+
+	atk++;
+	hp_max += 10;
+	hp += 10;
+}
+
 void cCharacter::die()
 {
 	if (dead)
 		return;
+	hp = 0;
+	dead = true;
 }
 
 void cCharacter::cmd_move_to(const vec3& pos)
@@ -157,8 +204,6 @@ void cCharacter::cmd_attack_target(cCharacterPtr character)
 	command = CommandAttackTarget;
 	set_target(character);
 	action = ActionNone;
-	if (armature)
-		armature->play("idle"_h);
 }
 
 void cCharacter::cmd_move_attack(const vec3& pos)
@@ -180,9 +225,6 @@ void cCharacter::start()
 			break;
 		e = e->children[0].get();
 	}
-
-	if (armature)
-		armature->play("idle"_h);
 }
 
 void cCharacter::update()
@@ -206,23 +248,15 @@ void cCharacter::update()
 	auto move_to_traget = [this]() {
 		nav_agent->set_target(move_target);
 		action = ActionMove;
-		if (armature)
-			armature->play("run"_h);
 
 		if (length(nav_agent->desire_velocity()) <= 0.f)
 		{
 			nav_agent->stop();
 			command = CommandIdle;
 			action = ActionNone;
-			if (armature)
-				armature->play("idle"_h);
 		}
 		else
-		{
 			action = ActionMove;
-			if (armature)
-				armature->play("run"_h);
-		}
 	};
 
 	auto attack_target = [this]() {
@@ -240,24 +274,16 @@ void cCharacter::update()
 				if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
 				{
 					action = ActionAttack;
-					if (armature)
-						armature->play("attack"_h);
 					attack_interval_timer = atk_interval;
 					attack_timer = atk_interval * atk_precast;
 				}
 				else
-				{
 					action = ActionNone;
-					if (armature)
-						armature->play("idle"_h);
-				}
 				nav_agent->set_target(tar_pos, true);
 			}
 			else
 			{
 				action = ActionMove;
-				if (armature)
-					armature->play("run"_h);
 				nav_agent->set_target(tar_pos);
 			}
 		}
@@ -268,24 +294,17 @@ void cCharacter::update()
 				if (atk_projectile)
 				{
 					auto e = atk_projectile->copy();
-					e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, height, 0.f));
-					e->get_component_t<cProjectile>()->set_target(target);
+					e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, height * 0.5f, 0.f));
+					e->get_component_t<cProjectile>()->setup(target, [this](cCharacterPtr t) {
+						if (t)
+							t->take_damage(atk);
+					});
 					root->add_child(e);
 				}
 				else
-				{
-					if (target->hp > atk)
-						target->hp -= atk;
-					else
-					{
-						target->hp = 0;
-						target->dead = true;
-					}
-				}
+					target->take_damage(atk);
 
 				action = ActionNone;
-				if (armature)
-					armature->play("idle"_h);
 			}
 			else
 				attack_timer -= delta_time;
@@ -326,6 +345,22 @@ void cCharacter::update()
 			move_to_traget();
 	}
 		break;
+	}
+
+	if (armature)
+	{
+		switch (action)
+		{
+		case ActionNone:
+			armature->play("idle"_h);
+			break;
+		case ActionMove:
+			armature->play("run"_h);
+			break;
+		case ActionAttack:
+			armature->play("attack"_h);
+			break;
+		}
 	}
 }
 

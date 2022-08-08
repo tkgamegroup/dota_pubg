@@ -23,6 +23,12 @@ void cProjectile::set_target(cCharacterPtr character)
 	}
 }
 
+void cProjectile::setup(cCharacterPtr target, const std::function<void(cCharacterPtr)>& cb)
+{
+	set_target(target);
+	callback = cb;
+}
+
 void cProjectile::die()
 {
 	if (!ev_delete_projectiles)
@@ -47,18 +53,18 @@ void cProjectile::update()
 	if (!target)
 	{
 		if (callback)
-			callback(false);
+			callback(nullptr);
 		die();
 		return;
 	}
 	else
 	{
 		auto pa = node->g_pos;
-		auto pb = target->node->g_pos + vec3(0.f, target->height, 0.f);
+		auto pb = target->node->g_pos + vec3(0.f, target->height * 0.5f, 0.f);
 		if (distance(pa, pb) < speed)
 		{
 			if (callback)
-				callback(true);
+				callback(target);
 			die();
 			return;
 		}
