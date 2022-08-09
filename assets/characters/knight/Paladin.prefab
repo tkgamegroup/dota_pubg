@@ -469,25 +469,25 @@
 						</item>
 					</children>
 				</item>
-				<item name="Paladin_J_Nordstrom_Shield">
+				<item>
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladinfmod#mesh0" material_name="assets\characters\knight\Paladin.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh0" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
-				<item name="Paladin_J_Nordstrom_Sword">
+				<item>
 					<components>
 						<item type_name="flame::cNode" />
 						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh1" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
-				<item name="Paladin_J_Nordstrom_Helmet">
+				<item>
 					<components>
 						<item type_name="flame::cNode" />
 						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh2" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
-				<item name="Paladin_J_Nordstrom">
+				<item>
 					<components>
 						<item type_name="flame::cNode" />
 						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh3" material_name="assets\characters\knight\Paladin.fmat" />

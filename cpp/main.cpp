@@ -400,14 +400,20 @@ void cMain::update()
 					for (auto& c : character->armature->entity->children)
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh)
-							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+						{
+							if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+								draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+						}
 					}
 				}
 			}
 			break;
 		case "terrain"_h:
 			if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
-				draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
+			{
+				if (terrain->instance_id != -1 && terrain->material_res_id != -1)
+					draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
+			}
 			break;
 		}
 		if (sInput::instance()->kpressed(Keyboard_F12))
