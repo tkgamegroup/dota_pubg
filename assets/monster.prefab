@@ -6,7 +6,7 @@
 		<item type_name="cCharacter" faction="2" ai_id="1" />
 	</components>
 	<children>
-		<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\knight\Paladin WProp J Nordstrom.prefab">
+		<item file_id="e57c2a23470fa23f80484db593c61ab8" filename="assets\characters\knight\Paladin.prefab">
 			<modifications />
 		</item>
 	</children>

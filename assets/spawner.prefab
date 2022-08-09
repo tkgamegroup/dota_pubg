@@ -6,7 +6,7 @@
 		<item type_name="cSpwaner" />
 	</components>
 	<children>
-		<item filename="assets\medieval_house\Medieval_House.prefab">
+		<item filename="assets\models\Medieval_House.prefab">
 			<modifications />
 		</item>
 	</children>

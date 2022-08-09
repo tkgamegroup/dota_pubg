@@ -12,7 +12,7 @@
 				<item name="Mesh_Box291">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\medieval_house\Medieval_House.fmod#mesh0" material_name="assets\medieval_house\Medieval_House_DefaultMaterial.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\models\Medieval_House.fmod#mesh0" material_name="assets\models\Medieval_House_DefaultMaterial.fmat" />
 					</components>
 				</item>
 			</children>

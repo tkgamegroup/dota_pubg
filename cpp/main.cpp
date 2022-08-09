@@ -20,8 +20,6 @@
 
 EntityPtr root = nullptr;
 
-static EntityPtr e_arrow = nullptr;
-
 void MainCamera::init(EntityPtr e)
 {
 	entity = e;
@@ -279,10 +277,6 @@ void cMain::start()
 
 	root = entity;
 
-	e_arrow = Entity::create();
-	e_arrow->load(L"assets/arrow.prefab");
-	entity->add_child(e_arrow);
-
 	main_camera.init(entity->find_child("Camera"));
 
 	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
@@ -436,7 +430,7 @@ void cMain::update()
 		{
 			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 			{
-				e_arrow->get_component_i<cNode>(0)->set_pos(hovering_pos);
+				// e_arrow->get_component_i<cNode>(0)->set_pos(hovering_pos); // TODO
 				main_player.character->cmd_move_to(hovering_pos);
 			}
 		}

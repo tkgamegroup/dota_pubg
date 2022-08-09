@@ -7,7 +7,7 @@
 		<item name="RootNode">
 			<components>
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
-				<item type_name="flame::cArmature" armature_name="assets\knight\Paladin WProp J Nordstrom.fmod">
+				<item type_name="flame::cArmature" armature_name="assets\characters\knight\Paladin.fmod">
 					<animation_names>
 						<item first="assets\animations\sword_shield_idle.fani" second="idle" />
 						<item first="assets\animations\sword_shield_run.fani" second="run" />
@@ -472,25 +472,25 @@
 				<item name="Paladin_J_Nordstrom_Shield">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\Paladin WProp J Nordstrom.fmod#mesh0" material_name="assets\knight\Paladin WProp J Nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladinfmod#mesh0" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
 				<item name="Paladin_J_Nordstrom_Sword">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\Paladin WProp J Nordstrom.fmod#mesh1" material_name="assets\knight\Paladin WProp J Nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh1" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
 				<item name="Paladin_J_Nordstrom_Helmet">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\Paladin WProp J Nordstrom.fmod#mesh2" material_name="assets\knight\Paladin WProp J Nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh2" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
 				<item name="Paladin_J_Nordstrom">
 					<components>
 						<item type_name="flame::cNode" />
-						<item type_name="flame::cMesh" mesh_name="assets\knight\Paladin WProp J Nordstrom.fmod#mesh3" material_name="assets\knight\Paladin WProp J Nordstrom_Paladin_MAT.fmat" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh3" material_name="assets\characters\knight\Paladin.fmat" />
 					</components>
 				</item>
 			</children>
