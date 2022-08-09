@@ -69,7 +69,7 @@ void cProjectile::update()
 			return;
 		}
 		node->add_pos(normalize(pb - pa) * speed);
-		node->set_qut(quat(inverse(mat3(lookAt(pa, pb, vec3(0.f, 1.f, 0.f))))));
+		node->look_at(pb);
 	}
 }
 

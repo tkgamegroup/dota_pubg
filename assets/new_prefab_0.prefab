@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<prefab file_id="b6a81aa744399c2d6d3142ba19ead307">
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item file_id="6a5260ba4e632f38c052cbbcc6554ec5">
+			<components>
+				<item type_name="flame::cNode" pos="0,-0.5,0" scl="10,0.1,10" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="assets\new_material_0.fmat" />
+			</components>
+		</item>
+		<item file_id="1e33bf3f41e2f12162b1da91e86ec8c7">
+			<components>
+				<item type_name="flame::cNode" pos="0,3.56439,0" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="assets\new_material_0.fmat" />
+			</components>
+		</item>
+		<item file_id="150b557a45d90f1022a5af81d5b28795">
+			<components>
+				<item type_name="flame::cNode" eul="0,-44.9999,0" qut="0.92388,-0.382683,0,0" />
+				<item type_name="flame::cLight" />
+			</components>
+		</item>
+		<item file_id="a3dd36254859507ad6aee0b61643267a" name="Entity 0">
+			<components>
+				<item type_name="flame::cNode" pos="-2.41899,2.54708,0" />
+				<item type_name="flame::cMesh" mesh_name="standard_sphere" material_name="assets\new_material_0.fmat" />
+			</components>
+		</item>
+	</children>
+</prefab>
