@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<material color_map="0">
+	<textures>
+		<item filename="assets\characters\alien\Ch44_1002_Diffuse.png" srgb="true" auto_mipmap="true" />
+	</textures>
+</material>

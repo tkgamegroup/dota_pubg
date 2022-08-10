@@ -62,7 +62,7 @@ void cMain::on_active()
 		if (!tars.empty())
 		{
 			auto tar_size = vec2(tars.front()->image->size);
-			ImGui::SetNextWindowPos(ImVec2(tar_size.x * 0.5f, tar_size.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_size.x * 0.5f, tar_size.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 			ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
 			ImGui::SetNextWindowBgAlpha(0.5f);
 			ImGui::Begin("##stats", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |

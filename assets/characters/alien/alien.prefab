@@ -1,0 +1,554 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item name="RootNode">
+			<components>
+				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
+				<item type_name="flame::cArmature" armature_name="assets\characters\alien\alien.fmod">
+					<animation_names>
+						<item first="assets\animations\zombie_running.fani" second="run" />
+					</animation_names>
+					<animation_transitions>
+					</animation_transitions>
+				</item>
+			</components>
+			<children>
+				<item name="mixamorig:Hips">
+					<components>
+						<item type_name="flame::cNode" pos="-0.000573292,104.058,-0.559532" qut="1,-5.58052e-07,-1.47473e-06,4.72552e-05" />
+					</components>
+					<children>
+						<item name="mixamorig:Spine">
+							<components>
+								<item type_name="flame::cNode" pos="9.31323e-10,10.9973,-0.803058" qut="0.999336,-0.0364382,3.19567e-06,-4.71701e-05" scl="1,1,1" />
+							</components>
+							<children>
+								<item name="mixamorig:Spine1">
+									<components>
+										<item type_name="flame::cNode" pos="3.49246e-10,12.8644,0" qut="1,-6.33299e-08,9.21976e-14,-6.77204e-13" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="mixamorig:Spine2">
+											<components>
+												<item type_name="flame::cNode" pos="0,14.7021,0" qut="1,4.09782e-08,4.33681e-19,-5.42101e-20" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="mixamorig:Neck">
+													<components>
+														<item type_name="flame::cNode" pos="1.16415e-10,16.54,1.90735e-06" qut="0.999336,0.0364387,-3.43192e-14,-2.28776e-13" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="mixamorig:Head">
+															<components>
+																<item type_name="flame::cNode" pos="1.16415e-10,6.18848,2.32162" qut="1,-6.00985e-37,-4.33681e-19,-1.16315e-19" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="mixamorig:HeadTop_End">
+																	<components>
+																		<item type_name="flame::cNode" pos="0,23.7178,8.89779" qut="1,-6.00985e-37,-4.33681e-19,-1.16315e-19" scl="1,1,1" />
+																	</components>
+																	<children>
+																		<item name="mixamorig:HeadTop_End_end">
+																			<components>
+																				<item type_name="flame::cNode" pos="0,25.3319,-4.76837e-07" qut="1,-6.00985e-37,-4.33681e-19,-1.16315e-19" scl="1,1,1" />
+																			</components>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+												<item name="mixamorig:LeftShoulder">
+													<components>
+														<item type_name="flame::cNode" pos="7.98533,14.4037,-0.124438" qut="-0.430893,-0.55408,-0.437154,0.562337" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="mixamorig:LeftArm">
+															<components>
+																<item type_name="flame::cNode" pos="-2.38419e-06,16.4434,-1.52588e-05" qut="0.992215,-0.124217,0.00606527,0.00662488" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="mixamorig:LeftForeArm">
+																	<components>
+																		<item type_name="flame::cNode" pos="9.53674e-07,20.7029,0" qut="0.999983,-1.76006e-06,-0.00581272,-2.31092e-07" scl="1,1,1" />
+																	</components>
+																	<children>
+																		<item name="mixamorig:LeftHand">
+																			<components>
+																				<item type_name="flame::cNode" pos="4.76837e-07,28.4808,0" qut="0.998543,0.00709941,0.0192637,-0.049904" scl="1,1,1" />
+																			</components>
+																			<children>
+																				<item name="mixamorig:LeftHandThumb1">
+																					<components>
+																						<item type_name="flame::cNode" pos="-2.77029,3.26046,1.37196" qut="0.931996,0.215742,0.0855094,0.278437" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:LeftHandThumb2">
+																							<components>
+																								<item type_name="flame::cNode" pos="-0.105057,3.5929,1.52588e-05" qut="0.99995,2.66199e-05,-0.00143571,0.00988431" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:LeftHandThumb3">
+																									<components>
+																										<item type_name="flame::cNode" pos="-0.0331306,3.49367,-1.52588e-05" qut="0.999518,1.36705e-05,0.000568731,0.0310553" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:LeftHandThumb4">
+																											<components>
+																												<item type_name="flame::cNode" pos="0.138184,2.62261,-3.05176e-05" qut="1,3.35276e-08,-1.49012e-08,4.47035e-08" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:LeftHandThumb4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="-3.8147e-06,2.62628,-1.52588e-05" qut="1,-2.6077e-08,0,0" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:LeftHandIndex1">
+																					<components>
+																						<item type_name="flame::cNode" pos="-3.25891,10.7565,0.0038147" qut="0.99759,-0.00812694,0.00239776,0.0688675" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:LeftHandIndex2">
+																							<components>
+																								<item type_name="flame::cNode" pos="0.109372,2.85313,0" qut="0.999533,9.53449e-06,0.00125727,-0.0305481" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:LeftHandIndex3">
+																									<components>
+																										<item type_name="flame::cNode" pos="-0.0612378,2.68597,-1.52588e-05" qut="1,-2.44685e-06,8.30685e-05,0.000702454" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:LeftHandIndex4">
+																											<components>
+																												<item type_name="flame::cNode" pos="-0.0481319,2.24982,1.52588e-05" qut="1,-1.83354e-09,7.45058e-09,6.51926e-09" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:LeftHandIndex4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="4.76837e-07,2.25034,0" qut="1,3.46945e-18,1.86265e-09,0" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:LeftHandMiddle1">
+																					<components>
+																						<item type_name="flame::cNode" pos="-1.10499,11.0615,-0.179001" qut="0.99792,-0.00804703,-0.0002347,0.0639638" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:LeftHandMiddle2">
+																							<components>
+																								<item type_name="flame::cNode" pos="0.0886489,3.11291,1.52588e-05" qut="0.999783,1.41261e-05,0.00168768,-0.0207567" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:LeftHandMiddle3">
+																									<components>
+																										<item type_name="flame::cNode" pos="-0.0393755,3.01628,0" qut="0.999994,1.03074e-05,-0.000596207,-0.00345623" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:LeftHandMiddle4">
+																											<components>
+																												<item type_name="flame::cNode" pos="-0.0492737,2.46796,1.52588e-05" qut="1,1.32713e-08,5.21541e-08,2.14204e-08" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:LeftHandMiddle4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="4.76837e-07,2.46847,0" qut="1,0,2.71051e-20,-9.31323e-10" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:LeftHandRing1">
+																					<components>
+																						<item type_name="flame::cNode" pos="1.26088,10.7682,-0.117523" qut="0.998361,-0.00782294,-0.00543127,0.0564388" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:LeftHandRing2">
+																							<components>
+																								<item type_name="flame::cNode" pos="0.0390086,2.93326,-3.05176e-05" qut="0.999973,4.21124e-06,0.000873806,-0.00730934" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:LeftHandRing3">
+																									<components>
+																										<item type_name="flame::cNode" pos="-0.00380282,2.86981,0" qut="0.999981,5.89168e-06,-0.000918161,-0.00615249" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:LeftHandRing4">
+																											<components>
+																												<item type_name="flame::cNode" pos="-0.0352014,2.58246,1.52588e-05" qut="1,-2.21189e-09,-4.28408e-08,-5.16884e-08" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:LeftHandRing4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="3.57628e-07,2.5827,0" qut="1,-1.73472e-18,-1.86265e-09,0" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:LeftHandPinky1">
+																					<components>
+																						<item type_name="flame::cNode" pos="3.103,9.80463,-0.256454" qut="0.998503,-0.00637497,-0.0306295,0.0448695" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:LeftHandPinky2">
+																							<components>
+																								<item type_name="flame::cNode" pos="-0.0286484,2.79308,3.05176e-05" qut="0.999982,2.21688e-06,-0.000671523,0.00587825" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:LeftHandPinky3">
+																									<components>
+																										<item type_name="flame::cNode" pos="0.00350904,2.30757,1.52588e-05" qut="0.999985,4.21247e-06,0.000685695,0.00543112" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:LeftHandPinky4">
+																											<components>
+																												<item type_name="flame::cNode" pos="0.0251408,2.02759,-1.52588e-05" qut="1,3.72529e-09,4.84288e-08,4.65661e-09" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:LeftHandPinky4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="-4.76837e-07,2.02773,-1.52588e-05" qut="1,-5.82077e-11,0,0" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																			</children>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+												<item name="mixamorig:RightShoulder">
+													<components>
+														<item type_name="flame::cNode" pos="-7.98533,14.4082,-0.187224" qut="0.429348,0.551711,-0.438996,0.564409" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="mixamorig:RightArm">
+															<components>
+																<item type_name="flame::cNode" pos="1.43051e-06,16.4434,-1.52588e-05" qut="0.992222,-0.123926,-0.00470817,-0.0107762" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="mixamorig:RightForeArm">
+																	<components>
+																		<item type_name="flame::cNode" pos="-4.76837e-07,20.688,-3.05176e-05" qut="0.999985,-3.57153e-07,0.00556745,8.17336e-08" />
+																	</components>
+																	<children>
+																		<item name="mixamorig:RightHand">
+																			<components>
+																				<item type_name="flame::cNode" pos="-4.76837e-07,28.4835,-3.05176e-05" qut="0.998154,0.0104041,-0.0292755,0.0521882" scl="1,1,1" />
+																			</components>
+																			<children>
+																				<item name="mixamorig:RightHandThumb1">
+																					<components>
+																						<item type_name="flame::cNode" pos="2.69872,3.05863,1.29982" qut="0.931164,0.208097,-0.0858002,-0.286823" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:RightHandThumb2">
+																							<components>
+																								<item type_name="flame::cNode" pos="0.0783043,3.424,4.57764e-05" qut="0.999822,1.8318e-06,0.000321038,-0.0188637" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:RightHandThumb3">
+																									<components>
+																										<item type_name="flame::cNode" pos="-0.0530434,3.56464,0" qut="0.999994,2.38328e-06,-0.000256599,0.00333554" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:RightHandThumb4">
+																											<components>
+																												<item type_name="flame::cNode" pos="-0.0252686,3.08701,-3.05176e-05" qut="1,2.98023e-08,3.72529e-08,1.49012e-08" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:RightHandThumb4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="3.8147e-06,3.08714,3.05176e-05" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:RightHandIndex1">
+																					<components>
+																						<item type_name="flame::cNode" pos="3.32937,10.7569,-0.00823975" qut="0.997756,-0.0120292,-0.0028485,-0.0658087" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:RightHandIndex2">
+																							<components>
+																								<item type_name="flame::cNode" pos="-0.0778222,2.77663,-3.05176e-05" qut="0.999701,1.23768e-06,-0.000512535,0.0244482" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:RightHandIndex3">
+																									<components>
+																										<item type_name="flame::cNode" pos="0.0571796,2.73764,1.52588e-05" qut="0.999983,-8.56656e-06,-0.000481172,-0.00573289" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:RightHandIndex4">
+																											<components>
+																												<item type_name="flame::cNode" pos="0.0206436,2.18555,1.52588e-05" qut="1,1.82699e-08,-2.28174e-08,-4.19095e-08" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:RightHandIndex4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="-2.98023e-08,2.18564,1.52588e-05" qut="1,-3.63798e-12,-4.65661e-10,0" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:RightHandMiddle1">
+																					<components>
+																						<item type_name="flame::cNode" pos="1.14719,11.0134,-0.263947" qut="0.997816,-0.011882,0.00108014,-0.0649665" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:RightHandMiddle2">
+																							<components>
+																								<item type_name="flame::cNode" pos="-0.0850313,3.24001,0" qut="0.999841,1.50527e-05,-0.0016267,0.017744" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:RightHandMiddle3">
+																									<components>
+																										<item type_name="flame::cNode" pos="0.0277693,3.00196,1.52588e-05" qut="0.999977,1.75234e-05,0.00113696,0.0066535" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:RightHandMiddle4">
+																											<components>
+																												<item type_name="flame::cNode" pos="0.0572584,2.53847,-1.52588e-05" qut="1,-3.80824e-08,-2.04891e-08,-9.31323e-10" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:RightHandMiddle4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="4.17233e-07,2.53909,-1.52588e-05" qut="1,-1.45519e-11,0,0" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:RightHandRing1">
+																					<components>
+																						<item type_name="flame::cNode" pos="-1.31844,11.0959,-0.178818" qut="0.998204,-0.0116744,0.00555013,-0.0584896" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:RightHandRing2">
+																							<components>
+																								<item type_name="flame::cNode" pos="-0.0377684,2.87523,-1.52588e-05" qut="0.999966,4.41506e-06,-0.000804816,0.0081688" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:RightHandRing3">
+																									<components>
+																										<item type_name="flame::cNode" pos="0.00858259,2.69488,0" qut="0.999989,6.04794e-06,0.000684547,0.00458933" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:RightHandRing4">
+																											<components>
+																												<item type_name="flame::cNode" pos="0.0291859,2.36042,-3.05176e-05" qut="1,-6.54837e-09,-1.45286e-07,-3.86499e-08" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:RightHandRing4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="-1.19209e-07,2.36057,-3.05176e-05" qut="1,0,0,4.65661e-10" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																				<item name="mixamorig:RightHandPinky1">
+																					<components>
+																						<item type_name="flame::cNode" pos="-3.15812,9.80988,-0.152374" qut="0.998542,-0.0108704,0.0193425,-0.049215" scl="1,1,1" />
+																					</components>
+																					<children>
+																						<item name="mixamorig:RightHandPinky2">
+																							<components>
+																								<item type_name="flame::cNode" pos="0.0163994,2.85593,1.52588e-05" qut="0.999992,1.70202e-06,0.000343373,-0.00406441" scl="1,1,1" />
+																							</components>
+																							<children>
+																								<item name="mixamorig:RightHandPinky3">
+																									<components>
+																										<item type_name="flame::cNode" pos="-0.0055329,2.30433,1.52588e-05" qut="0.999999,9.7635e-07,-0.00044331,-0.00153915" scl="1,1,1" />
+																									</components>
+																									<children>
+																										<item name="mixamorig:RightHandPinky4">
+																											<components>
+																												<item type_name="flame::cNode" pos="-0.0108702,1.99463,1.52588e-05" qut="1,-3.80096e-08,-8.56817e-08,4.65661e-09" scl="1,1,1" />
+																											</components>
+																											<children>
+																												<item name="mixamorig:RightHandPinky4_end">
+																													<components>
+																														<item type_name="flame::cNode" pos="4.17233e-07,1.99464,1.52588e-05" qut="1,0,3.38813e-21,2.32831e-10" scl="1,1,1" />
+																													</components>
+																												</item>
+																											</children>
+																										</item>
+																									</children>
+																								</item>
+																							</children>
+																						</item>
+																					</children>
+																				</item>
+																			</children>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+							</children>
+						</item>
+						<item name="mixamorig:LeftUpLeg">
+							<components>
+								<item type_name="flame::cNode" pos="9.64074,-6.11928,0.586611" qut="0.00339103,-0.00322693,-0.000781932,0.999989" scl="1.00001,1,1" />
+							</components>
+							<children>
+								<item name="mixamorig:LeftLeg">
+									<components>
+										<item type_name="flame::cNode" pos="-1.90735e-06,45.0533,0" qut="0.999487,-0.0313441,-2.31208e-06,0.0066563" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="mixamorig:LeftFoot">
+											<components>
+												<item type_name="flame::cNode" pos="-1.90735e-06,42.8238,0" qut="0.865701,0.484121,-0.0698863,0.106319" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="mixamorig:LeftToeBase">
+													<components>
+														<item type_name="flame::cNode" pos="9.53674e-07,16.5883,4.76837e-07" qut="0.957682,0.283969,-0.0450441,0.0133561" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="mixamorig:LeftToe_End">
+															<components>
+																<item type_name="flame::cNode" pos="0,6.71485,1.19209e-07" qut="1,2.79397e-08,4.42378e-07,-1.24345e-14" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="mixamorig:LeftToe_End_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="-9.53674e-07,6.71492,-8.9407e-08" qut="1,-1.38778e-17,4.65661e-10,-1.49012e-08" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+							</children>
+						</item>
+						<item name="mixamorig:RightUpLeg">
+							<components>
+								<item type_name="flame::cNode" pos="-9.64074,-6.11928,0.35886" qut="-0.00329091,0.00285134,0.00116612,0.99999" scl="0.999994,1,0.999998" />
+							</components>
+							<children>
+								<item name="mixamorig:RightLeg">
+									<components>
+										<item type_name="flame::cNode" pos="0,45.0356,0" qut="0.999444,-0.0326656,2.61118e-05,-0.00667381" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="mixamorig:RightFoot">
+											<components>
+												<item type_name="flame::cNode" pos="-2.86102e-06,42.8346,-2.38419e-07" qut="0.864675,0.486358,0.0677843,-0.105819" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="mixamorig:RightToeBase">
+													<components>
+														<item type_name="flame::cNode" pos="0,16.736,4.76837e-07" qut="0.9584,0.280976,0.0481905,-0.0141283" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="mixamorig:RightToe_End">
+															<components>
+																<item type_name="flame::cNode" pos="0,6.71318,1.19209e-07" qut="1,4.65662e-08,-1.42027e-07,2.98023e-07" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="mixamorig:RightToe_End_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="-9.53674e-07,6.71316,0" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+							</children>
+						</item>
+					</children>
+				</item>
+				<item name="0">
+					<components>
+						<item type_name="flame::cNode" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\alien\alien.fmod#mesh0" material_name="assets\characters\alien\alien_Ch44_Body.fmat" />
+					</components>
+				</item>
+				<item name="1">
+					<components>
+						<item type_name="flame::cNode" />
+						<item type_name="flame::cMesh" mesh_name="assets\characters\alien\alien.fmod#mesh1" material_name="assets\characters\alien\alien_Ch44_body1.fmat" />
+					</components>
+				</item>
+			</children>
+		</item>
+	</children>
+</prefab>
