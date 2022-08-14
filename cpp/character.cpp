@@ -56,7 +56,7 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 	if (!ignore_timer)
 	{
 		if (search_timer <= 0.f)
-			search_timer = 0.1f + random01() * 0.05f;
+			search_timer = 0.1f + linearRand(0.f, 0.05f);
 		else
 			return ret;
 	}

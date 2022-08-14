@@ -60,4 +60,3 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
-float random01();
