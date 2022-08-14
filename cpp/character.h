@@ -86,8 +86,6 @@ struct cCharacter : Component
 
 	~cCharacter();
 	void on_init() override;
-	void on_active() override;
-	void on_inactive() override;
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
 	void set_target(cCharacterPtr character);
 	void inflict_damage(cCharacterPtr target, uint value);

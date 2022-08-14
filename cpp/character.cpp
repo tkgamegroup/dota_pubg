@@ -16,6 +16,8 @@
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
+
+	graphics::gui_callbacks.remove((uint)this);
 }
 
 void cCharacter::set_atk_projectile_name(const std::filesystem::path& name)
@@ -46,42 +48,6 @@ void cCharacter::on_init()
 		*ret = AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform));
 		return true;
 	}, "character"_h);
-}
-
-void cCharacter::on_active()
-{
-	graphics::gui_callbacks.add([this]() {
-		if (main_camera.camera)
-		{
-			auto p = main_camera.camera->world_to_screen(node->g_pos + vec3(0.f, height + 0.1f, 0.f));
-			if (p.x > 0.f && p.y > 0.f)
-			{
-				p.xy += sInput::instance()->offset;
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
-				ImGui::SetNextWindowPos(p.xy(), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-				const auto bar_width = 80.f;
-				const auto bar_height = 5.f;
-				ImGui::SetNextWindowSize(ImVec2(bar_width, bar_height), ImGuiCond_Always);
-				ImGui::Begin(str(this).c_str(), nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-					ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs);
-				//ImGui::Text("%s %d %d", entity->name.c_str(), state, action);
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto dl = ImGui::GetWindowDrawList();
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)hp / (float)hp_max * bar_width, bar_height), 
-					faction == main_player.character->faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
-				ImGui::End();
-				ImGui::PopStyleVar(2);
-			}
-		}
-	}, (uint)this);
-}
-
-void cCharacter::on_inactive()
-{
-	graphics::gui_callbacks.remove((uint)this);
 }
 
 std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_timer, bool sort)
@@ -220,6 +186,24 @@ void cCharacter::start()
 			break;
 		e = e->children[0].get();
 	}
+
+	graphics::gui_set_current();
+	graphics::gui_callbacks.add([this]() {
+		if (main_camera.camera)
+		{
+			auto p = main_camera.camera->world_to_screen(node->g_pos + vec3(0.f, height + 0.1f, 0.f));
+			if (p.x > 0.f && p.y > 0.f)
+			{
+				p += sInput::instance()->offset;
+				auto dl = ImGui::GetForegroundDrawList();
+				const auto bar_width = 80.f;
+				const auto bar_height = 5.f;
+				p.x -= bar_width * 0.5f;
+				dl->AddRectFilled(p, p + vec2((float)hp / (float)hp_max * bar_width, bar_height),
+					faction == main_player.character->faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
+			}
+		}
+	}, (uint)this);
 }
 
 void cCharacter::update()

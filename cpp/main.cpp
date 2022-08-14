@@ -1,6 +1,7 @@
 #define FLAME_NO_XML
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
+#include <flame/foundation/window.h>
 #include <flame/graphics/window.h>
 #include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
@@ -45,16 +46,144 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainPlayer main_player;
 cCharacterPtr selecting_target = nullptr;
-
 cCharacterPtr hovering_character = nullptr;
+
+enum SelectMode
+{
+	SelectNull,
+	SelectAttack
+};
+SelectMode select_mode = SelectNull;
 
 cMain::~cMain()
 {
 	node->drawers.remove("main"_h);
+
+	graphics::gui_callbacks.remove((uint)this);
+	graphics::gui_cursor_callbacks.remove((uint)this);
 }
 
-void cMain::on_active()
+void cMain::start()
 {
+	srand(time(0));
+	
+	printf("main started\n");
+
+	add_event([this]() {
+		sScene::instance()->generate_nav_mesh();
+		return false;
+	});
+
+	root = entity;
+
+	main_camera.init(entity->find_child("Camera"));
+
+	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
+	{
+		if (auto terrain = e_terrain->get_component_t<cTerrain>(); terrain)
+		{
+			std::vector<vec3> site_positions;
+			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
+			{
+				height_map_info_fn += L".info";
+				std::ifstream file(height_map_info_fn);
+				if (file.good())
+				{
+					LineReader info(file);
+					info.read_block("sites:");
+					unserialize_text(info, &site_positions);
+					file.close();
+				}
+			}
+
+			if (!site_positions.empty())
+			{
+				std::vector<std::pair<float, int>> site_centrality(site_positions.size());
+				for (auto i = 0; i < site_positions.size(); i++)
+				{
+					auto x = abs(site_positions[i].x * 2.f - 1.f);
+					auto z = abs(site_positions[i].z * 2.f - 1.f);
+					site_centrality[i] = std::make_pair(x * z, i);
+				}
+				std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
+					return a.first < b.first;
+				});
+
+				auto terrain_pos = terrain->node->pos;
+				auto demon_pos = terrain_pos +
+					site_positions[site_centrality.front().second] * terrain->extent;
+				auto player1_pos = terrain_pos +
+					site_positions[site_centrality.back().second] * terrain->extent;
+				{
+					auto e = Entity::create(); 
+					e->load(L"assets/spawner.prefab");
+					e->get_component_i<cNode>(0)->set_pos(demon_pos);
+					auto spawner = e->get_component_t<cSpwaner>();
+					spawner->spwan_interval = 1.f;
+					spawner->spwan_count = 4;
+					spawner->set_prefab_path(L"assets/monster.prefab");
+					spawner->callbacks.add([spawner, player1_pos](EntityPtr e) {
+						auto character = e->get_component_t<cCharacter>();
+						character->faction = 2;
+						character->nav_agent->separation_group = 2;
+						add_event([character, player1_pos]() {
+							character->cmd_move_attack(player1_pos);
+							return false;
+						});
+						spawner->spwan_interval = 10000.f;
+					});
+					root->add_child(e);
+				}
+				{
+					auto e = Entity::create();
+					e->load(L"assets/main_player.prefab");
+					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -8.f));
+					root->add_child(e);
+					main_player.init(e);
+					selecting_target = main_player.character;
+				}
+				{
+					auto e = Entity::create();
+					e->load(L"assets/spawner.prefab");
+					e->get_component_i<cNode>(0)->set_pos(player1_pos);
+					auto spawner = e->get_component_t<cSpwaner>();
+					spawner->spwan_interval = 1.f;
+					spawner->spwan_count = 4;
+					spawner->set_prefab_path(L"assets/monster.prefab");
+					spawner->callbacks.add([spawner, demon_pos](EntityPtr e) {
+						auto character = e->get_component_t<cCharacter>();
+						character->faction = 1;
+						character->nav_agent->separation_group = 1;
+						add_event([character, demon_pos]() {
+							character->cmd_move_attack(demon_pos);
+							return false;
+						});
+						spawner->spwan_interval = 10000.f;
+					});
+					root->add_child(e);
+				}
+			}
+		}
+	}
+
+	node->drawers.add([](DrawData& draw_data) {
+		if (draw_data.pass == "outline"_h)
+		{
+			if (hovering_character)
+			{
+				if (auto armature = hovering_character->armature; armature && armature->model)
+				{
+					for (auto& c : armature->entity->children)
+					{
+						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, 
+								hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
+					}
+				}
+			}
+		}
+	}, "main"_h);
+
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
 		auto tar_sz = sRenderer::instance()->target_size();
@@ -255,133 +384,34 @@ void cMain::on_active()
 				ImGui::EndGroup();
 			}
 			ImGui::End();
+
+			static graphics::ImagePtr icon_cursors = nullptr;
+			if (!icon_cursors)
+				icon_cursors = graphics::Image::get(L"assets\\icons\\rpg_cursor_set.png");
+			const auto cursor_cx = 6U;
+			const auto cursor_cy = 3U;
+			int cursor_x = 0, cursor_y = 0;
+			switch (select_mode)
+			{
+			case SelectAttack:
+				cursor_x = 3;
+				cursor_y = 0;
+				break;
+			}
+			auto pos = sInput::instance()->mpos;
+			auto dl = ImGui::GetForegroundDrawList();
+			dl->AddImage(icon_cursors, pos + vec2(-32.f), pos + vec2(32.f),
+				vec2((float)cursor_x / cursor_cx, (float)cursor_y / cursor_cy),
+				vec2((float)(cursor_x + 1) / cursor_cx, (float)(cursor_y + 1) / cursor_cy));
 		}
 	}, (uint)this);
-}
-
-void cMain::on_inactive()
-{
-	graphics::gui_callbacks.remove((uint)this);
-}
-
-void cMain::start()
-{
-	srand(time(0));
-	printf("Hello World\n");
-	add_event([this]() {
-		sScene::instance()->generate_nav_mesh();
-		return false;
-	});
-
-	root = entity;
-
-	main_camera.init(entity->find_child("Camera"));
-
-	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
-	{
-		if (auto terrain = e_terrain->get_component_t<cTerrain>(); terrain)
-		{
-			std::vector<vec3> site_positions;
-			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
-			{
-				height_map_info_fn += L".info";
-				std::ifstream file(height_map_info_fn);
-				if (file.good())
-				{
-					LineReader info(file);
-					info.read_block("sites:");
-					unserialize_text(info, &site_positions);
-					file.close();
-				}
-			}
-
-			if (!site_positions.empty())
-			{
-				std::vector<std::pair<float, int>> site_centrality(site_positions.size());
-				for (auto i = 0; i < site_positions.size(); i++)
-				{
-					auto x = abs(site_positions[i].x * 2.f - 1.f);
-					auto z = abs(site_positions[i].z * 2.f - 1.f);
-					site_centrality[i] = std::make_pair(x * z, i);
-				}
-				std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
-					return a.first < b.first;
-				});
-
-				auto terrain_pos = terrain->node->pos;
-				auto demon_pos = terrain_pos +
-					site_positions[site_centrality.front().second] * terrain->extent;
-				auto player1_pos = terrain_pos +
-					site_positions[site_centrality.back().second] * terrain->extent;
-				{
-					auto e = Entity::create(); 
-					e->load(L"assets/spawner.prefab");
-					e->get_component_i<cNode>(0)->set_pos(demon_pos);
-					auto spawner = e->get_component_t<cSpwaner>();
-					spawner->spwan_interval = 1.f;
-					spawner->spwan_count = 4;
-					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([spawner, player1_pos](EntityPtr e) {
-						auto character = e->get_component_t<cCharacter>();
-						character->faction = 2;
-						character->nav_agent->separation_group = 2;
-						add_event([character, player1_pos]() {
-							character->cmd_move_attack(player1_pos);
-							return false;
-						});
-						spawner->spwan_interval = 10000.f;
-					});
-					root->add_child(e);
-				}
-				{
-					auto e = Entity::create();
-					e->load(L"assets/main_player.prefab");
-					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -8.f));
-					root->add_child(e);
-					main_player.init(e);
-					selecting_target = main_player.character;
-				}
-				{
-					auto e = Entity::create();
-					e->load(L"assets/spawner.prefab");
-					e->get_component_i<cNode>(0)->set_pos(player1_pos);
-					auto spawner = e->get_component_t<cSpwaner>();
-					spawner->spwan_interval = 1.f;
-					spawner->spwan_count = 4;
-					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([spawner, demon_pos](EntityPtr e) {
-						auto character = e->get_component_t<cCharacter>();
-						character->faction = 1;
-						character->nav_agent->separation_group = 1;
-						add_event([character, demon_pos]() {
-							character->cmd_move_attack(demon_pos);
-							return false;
-						});
-						spawner->spwan_interval = 10000.f;
-					});
-					root->add_child(e);
-				}
-			}
-		}
-	}
-
-	node->drawers.add([](DrawData& draw_data) {
-		if (draw_data.pass == "outline"_h)
-		{
-			if (hovering_character)
-			{
-				if (auto armature = hovering_character->armature; armature && armature->model)
-				{
-					for (auto& c : armature->entity->children)
-					{
-						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
-							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, 
-								hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
-					}
-				}
-			}
-		}
-	}, "main"_h);
+	graphics::gui_cursor_callbacks.add([this](CursorType cursor) {
+		auto mpos = sInput::instance()->mpos;
+		auto screen_sz = sRenderer::instance()->target_size();
+		if (mpos.x < 0.f || mpos.x > screen_sz.x || mpos.y < 0.f || mpos.y > screen_sz.y)
+			return cursor;
+		return CursorNone;
+	}, (uint)this);
 }
 
 void cMain::update()
@@ -424,56 +454,89 @@ void cMain::update()
 		if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
 			hovering_character = character;
 	}
-	if (input->mpressed(Mouse_Right))
-	{
-		if (hovering_character)
-		{
-			if (hovering_character->faction != main_player.character->faction)
-				main_player.character->cmd_attack_target(hovering_character);
-		}
-		else if (hovering_node)
-		{
-			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+	auto add_location_icon = [](const vec3& pos, const vec3& color) {
+		static graphics::ImagePtr icon_location = nullptr;
+		if (!icon_location)
+			icon_location = graphics::Image::get(L"assets\\icons\\location.png");
+		static int icon_location_id = 0;
+		auto ticks = 30;
+		auto _id = icon_location_id;
+		graphics::gui_callbacks.add([pos, color, ticks, _id]() mutable {
+			auto p = main_camera.camera->world_to_screen(pos);
+			if (p.x > 0.f && p.y > 0.f)
 			{
-				main_player.character->cmd_move_to(hovering_pos);
-
-				static graphics::ImagePtr icon_move;
-				if (!icon_move)
-					icon_move = graphics::Image::get(L"assets\\icons\\move_location.png");
-				static int icon_id = 0;
-				auto pos = hovering_pos;
-				auto ticks = 30;
-				auto _id = icon_id;
-				graphics::gui_callbacks.add([pos, ticks, _id]() mutable {
-					auto p = main_camera.camera->world_to_screen(pos);
-					if (p.x > 0.f && p.y > 0.f)
+				p.xy += sInput::instance()->offset;
+				auto dl = ImGui::GetForegroundDrawList();
+				auto sz = (vec2)icon_location->size;
+				dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(color.r, color.g, color.b, max(0.f, ticks / 30.f)));
+			}
+			if (ticks-- <= 0)
+			{
+				auto h = sh(("icon_location_" + str(_id)).c_str());
+				add_event([h]() {
+					graphics::gui_callbacks.remove(h);
+					return false;
+				});
+			}
+		}, sh(("icon_location_" + str(_id)).c_str()));
+		icon_location_id++;
+	};
+	if (input->mpressed(Mouse_Left))
+	{
+		if (select_mode == SelectNull)
+			;
+		else
+		{
+			switch (select_mode)
+			{
+			case SelectAttack:
+				if (hovering_character)
+				{
+					if (hovering_character->faction != main_player.character->faction)
 					{
-						auto dl = ImGui::GetForegroundDrawList();
-						auto sz = (vec2)icon_move->size;
-						dl->AddImage(icon_move, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(0.f, 1.f, 0.f, max(0.f, ticks / 30.f)));
+						main_player.character->cmd_attack_target(hovering_character);
+						select_mode = SelectNull;
 					}
-					if (ticks-- <= 0)
+				}
+				else if (hovering_node)
+				{
+					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 					{
-						auto h = sh(("icon_move_" + str(_id)).c_str());
-						add_event([h]() {
-							graphics::gui_callbacks.remove(h);
-							return false;
-						});
+						main_player.character->cmd_move_attack(hovering_pos);
+						add_location_icon(hovering_pos, vec3(1.f, 0.f, 0.f));
+						select_mode = SelectNull;
 					}
-				}, sh(("icon_move_" + str(_id)).c_str()));
-				icon_id++;
+				}
+				break;
 			}
 		}
 	}
-	if (input->kpressed(Keyboard_A))
+	if (input->mpressed(Mouse_Right))
 	{
-		if (main_player.node)
+		if (select_mode == SelectNull)
 		{
-			//auto enemies = main_player.character->find_enemies();
-			//if (!enemies.empty())
-			//	main_player.character->enter_battle_state(enemies.front());
+			if (hovering_character)
+			{
+				if (hovering_character->faction != main_player.character->faction)
+					main_player.character->cmd_attack_target(hovering_character);
+			}
+			else if (hovering_node)
+			{
+				if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+				{
+					main_player.character->cmd_move_to(hovering_pos);
+					add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
+				}
+			}
 		}
+		else
+			select_mode = SelectNull;
 	}
+
+	if (input->kpressed(Keyboard_Esc))
+		select_mode = SelectNull;
+	if (input->kpressed(Keyboard_A))
+		select_mode = SelectAttack;
 
 	if (main_camera.node && main_player.node)
 	{
