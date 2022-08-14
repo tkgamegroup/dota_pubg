@@ -7,6 +7,7 @@
 #include <flame/universe/draw_data.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/mesh.h>
+#include <flame/universe/components/camera.h>
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/terrain.h>
 #include <flame/universe/components/nav_agent.h>
@@ -45,8 +46,6 @@ MainCamera main_camera;
 MainPlayer main_player;
 cCharacterPtr selecting_target = nullptr;
 
-std::vector<vec3> site_positions;
-
 cCharacterPtr hovering_character = nullptr;
 
 cMain::~cMain()
@@ -58,11 +57,10 @@ void cMain::on_active()
 {
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
-		auto& tars = sRenderer::instance()->iv_tars;
-		if (!tars.empty())
+		auto tar_sz = sRenderer::instance()->target_size();
+		if (tar_sz.x > 0.f && tar_sz.y > 0.f)
 		{
-			auto tar_size = vec2(tars.front()->image->size);
-			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_size.x * 0.5f, tar_size.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 			ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
 			ImGui::SetNextWindowBgAlpha(0.5f);
 			ImGui::Begin("##stats", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
@@ -283,6 +281,7 @@ void cMain::start()
 	{
 		if (auto terrain = e_terrain->get_component_t<cTerrain>(); terrain)
 		{
+			std::vector<vec3> site_positions;
 			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
 			{
 				height_map_info_fn += L".info";
@@ -436,8 +435,33 @@ void cMain::update()
 		{
 			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 			{
-				// e_arrow->get_component_i<cNode>(0)->set_pos(hovering_pos); // TODO
 				main_player.character->cmd_move_to(hovering_pos);
+
+				static graphics::ImagePtr icon_move;
+				if (!icon_move)
+					icon_move = graphics::Image::get(L"assets\\icons\\move_location.png");
+				static int icon_id = 0;
+				auto pos = hovering_pos;
+				auto ticks = 30;
+				auto _id = icon_id;
+				graphics::gui_callbacks.add([pos, ticks, _id]() mutable {
+					auto p = main_camera.camera->world_to_screen(pos);
+					if (p.x > 0.f && p.y > 0.f)
+					{
+						auto dl = ImGui::GetForegroundDrawList();
+						auto sz = (vec2)icon_move->size;
+						dl->AddImage(icon_move, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(0.f, 1.f, 0.f, max(0.f, ticks / 30.f)));
+					}
+					if (ticks-- <= 0)
+					{
+						auto h = sh(("icon_move_" + str(_id)).c_str());
+						add_event([h]() {
+							graphics::gui_callbacks.remove(h);
+							return false;
+						});
+					}
+				}, sh(("icon_move_" + str(_id)).c_str()));
+				icon_id++;
 			}
 		}
 	}

@@ -51,14 +51,11 @@ void cCharacter::on_init()
 void cCharacter::on_active()
 {
 	graphics::gui_callbacks.add([this]() {
-		auto& tars = sRenderer::instance()->iv_tars;
-		if (!tars.empty() && main_camera.camera)
+		if (main_camera.camera)
 		{
-			auto p = main_camera.camera->proj_view_mat * vec4(node->g_pos + vec3(0.f, height + 0.1f, 0.f), 1.f);
-			p /= p.w;
-			if (p.x > -1.f && p.x < 1.f && p.y > -1.f && p.y < 1.f && p.z > 0.f && p.z < 1.f)
+			auto p = main_camera.camera->world_to_screen(node->g_pos + vec3(0.f, height + 0.1f, 0.f));
+			if (p.x > 0.f && p.y > 0.f)
 			{
-				p.xy = (p.xy * 0.5f + 0.5f) * vec2(tars.front()->image->size);
 				p.xy += sInput::instance()->offset;
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 				ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
