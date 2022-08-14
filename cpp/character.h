@@ -56,9 +56,9 @@ struct cCharacter : Component
 	/// Reflect
 	float atk_distance = 1.5f;
 	/// Reflect
-	float atk_interval = 1.8f; // time
+	float atk_interval = 2.f; // time
 	/// Reflect
-	float atk_precast = 0.43f; // 0-1, of the atk_interval
+	float atk_precast = 0.5f; // 0-1, of the atk_interval
 	/// Reflect
 	std::filesystem::path atk_projectile_name;
 	/// Reflect

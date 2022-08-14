@@ -9,9 +9,9 @@
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
 				<item type_name="flame::cArmature" armature_name="assets\characters\knight\Paladin.fmod">
 					<animation_names>
-						<item first="assets\animations\sword_shield_idle.fani" second="idle" />
-						<item first="assets\animations\sword_shield_run.fani" second="run" />
-						<item first="assets\animations\sword_shield_slash.fani" second="attack" />
+						<item first="assets\characters\knight\idle.fani" second="idle" />
+						<item first="assets\characters\knight\run.fani" second="run" />
+						<item first="assets\characters\knight\slash.fani" second="attack" />
 					</animation_names>
 					<animation_transitions>
 						<item item_0="run" item_1="idle" item_2="0.3" />
