@@ -6,7 +6,7 @@ std::vector<Item> items;
 
 Item& Item::get(uint id)
 {
-	assert(id >= items.size());
+	assert(id < items.size());
 	return items[id];
 }
 
