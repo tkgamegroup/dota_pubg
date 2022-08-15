@@ -1,4 +1,5 @@
 #include "character.h"
+#include "item.h"
 #include "projectile.h"
 
 #include <flame/graphics/image.h>
@@ -45,6 +46,8 @@ void cCharacter::set_atk_projectile_name(const std::filesystem::path& name)
 void cCharacter::on_init()
 {
 	node->measurers.add([this](AABB* ret) {
+		auto radius = nav_agent->radius;
+		auto height = nav_agent->height;
 		*ret = AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform));
 		return true;
 	}, "character"_h);
@@ -136,6 +139,11 @@ bool cCharacter::take_damage(uint value)
 	return true;
 }
 
+void cCharacter::manipulate_item(int idx0, int idx1, int item_id)
+{
+
+}
+
 void cCharacter::level_up()
 {
 	lv++;
@@ -157,7 +165,7 @@ void cCharacter::die()
 void cCharacter::cmd_move_to(const vec3& pos)
 {
 	command = CommandMoveTo;
-	move_target = pos;
+	move_location = pos;
 }
 
 void cCharacter::cmd_attack_target(cCharacterPtr character)
@@ -167,10 +175,10 @@ void cCharacter::cmd_attack_target(cCharacterPtr character)
 	action = ActionNone;
 }
 
-void cCharacter::cmd_move_attack(const vec3& pos)
+void cCharacter::cmd_attack_location(const vec3& pos)
 {
-	command = CommandMoveAttack;
-	move_target = pos;
+	command = CommandAttackLocation;
+	move_location = pos;
 }
 
 void cCharacter::start()
@@ -191,7 +199,7 @@ void cCharacter::start()
 	graphics::gui_callbacks.add([this]() {
 		if (main_camera.camera)
 		{
-			auto p = main_camera.camera->world_to_screen(node->g_pos + vec3(0.f, height + 0.1f, 0.f));
+			auto p = main_camera.camera->world_to_screen(node->g_pos + vec3(0.f, nav_agent->height + 0.1f, 0.f));
 			if (p.x > 0.f && p.y > 0.f)
 			{
 				p += sInput::instance()->offset;
@@ -217,15 +225,31 @@ void cCharacter::update()
 		return;
 	}
 
+	if (stats_dirty)
+	{
+		mov_sp = 100;
+		atk_sp = 100;
+
+		for (auto& id : inventory)
+		{
+			if (id != -1)
+			{
+				auto& item = Item::get(id);
+				mov_sp += item.add_mov_sp;
+				atk_sp += item.add_atk_sp;
+			}
+		}
+
+		stats_dirty = false;
+	}
+
 	if (search_timer > 0)
 		search_timer -= delta_time;
 	if (attack_interval_timer > 0)
 		attack_interval_timer -= delta_time;
-	if (chase_timer > 0)
-		chase_timer -= delta_time;
 
 	auto move_to_traget = [this]() {
-		nav_agent->set_target(move_target);
+		nav_agent->set_target(move_location);
 		action = ActionMove;
 
 		if (length(nav_agent->desire_velocity()) <= 0.f)
@@ -253,8 +277,9 @@ void cCharacter::update()
 				if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
 				{
 					action = ActionAttack;
-					attack_interval_timer = atk_interval;
-					attack_timer = atk_interval * atk_precast;
+					attack_speed = max(0.01f, atk_sp / 100.f);
+					attack_interval_timer = atk_interval / attack_speed;
+					attack_timer = attack_interval_timer * atk_precast;
 				}
 				else
 					action = ActionNone;
@@ -273,7 +298,7 @@ void cCharacter::update()
 				if (atk_projectile)
 				{
 					auto e = atk_projectile->copy();
-					e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, height * 0.5f, 0.f));
+					e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f));
 					e->get_component_t<cProjectile>()->setup(target, [this](cCharacterPtr t) {
 						if (t)
 							t->take_damage(atk);
@@ -306,7 +331,7 @@ void cCharacter::update()
 			attack_target();
 	}
 		break;
-	case CommandMoveAttack:
+	case CommandAttackLocation:
 	{
 		auto dist = target ? distance(node->g_pos, target->node->g_pos) : 10000.f;
 		if (dist > atk_distance + 12.f)
@@ -331,12 +356,17 @@ void cCharacter::update()
 		switch (action)
 		{
 		case ActionNone:
+			armature->playing_speed = 1.f;
 			armature->play("idle"_h);
 			break;
 		case ActionMove:
+			move_speed = max(0.1f, mov_sp / 100.f);
+			armature->playing_speed = move_speed;
 			armature->play("run"_h);
+			nav_agent->set_speed_scale(move_speed);
 			break;
 		case ActionAttack:
+			armature->playing_speed = attack_speed;
 			armature->play("attack"_h);
 			break;
 		}

@@ -17,6 +17,7 @@
 #include <flame/universe/systems/renderer.h>
 
 #include "main.h"
+#include "item.h"
 #include "character.h"
 #include "spwaner.h"
 
@@ -127,7 +128,7 @@ void cMain::start()
 						character->faction = 2;
 						character->nav_agent->separation_group = 2;
 						add_event([character, player1_pos]() {
-							character->cmd_move_attack(player1_pos);
+							character->cmd_attack_location(player1_pos);
 							return false;
 						});
 						spawner->spwan_interval = 10000.f;
@@ -155,7 +156,7 @@ void cMain::start()
 						character->faction = 1;
 						character->nav_agent->separation_group = 1;
 						add_event([character, demon_pos]() {
-							character->cmd_move_attack(demon_pos);
+							character->cmd_attack_location(demon_pos);
 							return false;
 						});
 						spawner->spwan_interval = 10000.f;
@@ -412,6 +413,8 @@ void cMain::start()
 			return cursor;
 		return CursorNone;
 	}, (uint)this);
+
+	load_items();
 }
 
 void cMain::update()
@@ -502,7 +505,7 @@ void cMain::update()
 				{
 					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 					{
-						main_player.character->cmd_move_attack(hovering_pos);
+						main_player.character->cmd_attack_location(hovering_pos);
 						add_location_icon(hovering_pos, vec3(1.f, 0.f, 0.f));
 						select_mode = SelectNull;
 					}

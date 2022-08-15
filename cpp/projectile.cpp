@@ -3,6 +3,7 @@
 
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
+#include <flame/universe/components/nav_agent.h>
 
 static void* ev_delete_projectiles;
 static std::vector<cProjectilePtr> dead_projectiles;
@@ -60,7 +61,7 @@ void cProjectile::update()
 	else
 	{
 		auto pa = node->g_pos;
-		auto pb = target->node->g_pos + vec3(0.f, target->height * 0.5f, 0.f);
+		auto pb = target->node->g_pos + vec3(0.f, target->nav_agent->height * 0.5f, 0.f);
 		if (distance(pa, pb) < speed)
 		{
 			if (callback)

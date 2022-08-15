@@ -7,7 +7,7 @@ enum Command
 	CommandIdle,
 	CommandMoveTo,
 	CommandAttackTarget,
-	CommandMoveAttack
+	CommandAttackLocation
 };
 
 enum Action
@@ -27,10 +27,6 @@ struct cCharacter : Component
 
 	cArmaturePtr armature = nullptr;
 
-	/// Reflect
-	float radius = 0.3f;
-	/// Reflect
-	float height = 1.8f;
 	/// Reflect
 	uint lv = 1;
 	/// Reflect
@@ -68,33 +64,42 @@ struct cCharacter : Component
 	/// Reflect
 	uint mov_sp = 100;
 	/// Reflect
+	uint atk_sp = 100;
+	/// Reflect
 	uint faction = 0;
 	/// Reflect
 	uint ai_id = 0;
 
-	EntityPtr atk_projectile = nullptr;
+	int inventory[6] = { -1 };
 
 	bool dead = false;
+	bool stats_dirty = true;
 	Command command;
 	Action action = ActionNone;
-	vec3 move_target;
+	vec3 move_location;
 	cCharacterPtr target = nullptr;
+	float move_speed = 1.f;
+	float attack_speed = 1.f;
 	float search_timer = 0.f;
-	float chase_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
+	EntityPtr atk_projectile = nullptr;
 
 	~cCharacter();
 	void on_init() override;
+
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
+
 	void set_target(cCharacterPtr character);
 	void inflict_damage(cCharacterPtr target, uint value);
 	bool take_damage(uint value); // return true if the damage causes the character die
+	void manipulate_item(int idx0, int idx1, int item_id);
 	void level_up();
 	void die();
+
 	void cmd_move_to(const vec3& pos);
 	void cmd_attack_target(cCharacterPtr character);
-	void cmd_move_attack(const vec3& pos);
+	void cmd_attack_location(const vec3& pos);
 
 	void start() override;
 	void update() override;
