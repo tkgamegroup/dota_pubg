@@ -7,7 +7,7 @@
 	<children>
 		<item file_id="f9ab4fc246e831b0b7e0ab8cd5fa9a4b" name="rock_1_Plane.005">
 			<components>
-				<item type_name="flame::cNode" scl="2,2,2" />
+				<item type_name="flame::cNode" pos="0,0.41,0" scl="2,2,2" />
 				<item type_name="flame::cMesh" mesh_name="assets\models\rock1.fmod#mesh0" material_name="assets\models\rock1_mat_rock_01.fmat" />
 			</components>
 		</item>

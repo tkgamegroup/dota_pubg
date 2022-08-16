@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<material color="0.8,0.8,0.8,1" color_map="0">
+	<textures>
+		<item filename="assets\models\Chest3.jpg" srgb="true" auto_mipmap="true" />
+	</textures>
+</material>
