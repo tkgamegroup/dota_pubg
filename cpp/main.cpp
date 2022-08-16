@@ -33,6 +33,21 @@ void MainCamera::init(EntityPtr e)
 	}
 }
 
+void MainTerrain::init(EntityPtr e)
+{
+	entity = e;
+	if (e)
+	{
+		node = e->get_component_i<cNode>(0);
+		terrain = e->get_component_t<cTerrain>();
+	}
+}
+
+vec3 MainTerrain::get_coord(const vec2& uv)
+{
+	return node->pos + vec3(uv.x, terrain->height_map->linear_sample(uv).x, uv.y) * terrain->extent;
+}
+
 void MainPlayer::init(EntityPtr e)
 {
 	entity = e;
@@ -45,6 +60,7 @@ void MainPlayer::init(EntityPtr e)
 }
 
 MainCamera main_camera;
+MainTerrain main_terrain;
 MainPlayer main_player;
 cCharacterPtr selecting_target = nullptr;
 cCharacterPtr hovering_character = nullptr;
@@ -72,97 +88,98 @@ void cMain::start()
 
 	add_event([this]() {
 		sScene::instance()->generate_nav_mesh();
+
 		return false;
 	});
 
 	root = entity;
 
 	main_camera.init(entity->find_child("Camera"));
-
-	if (auto e_terrain = entity->find_child("terrain"); e_terrain)
+	main_terrain.init(entity->find_child("terrain"));
 	{
-		if (auto terrain = e_terrain->get_component_t<cTerrain>(); terrain)
+		auto e = Entity::create();
+		e->load(L"assets/main_player.prefab");
+		root->add_child(e);
+		main_player.init(e);
+		selecting_target = main_player.character;
+	}
+
+	if (main_terrain.terrain)
+	{
+		std::vector<vec3> site_positions;
+		if (auto height_map_info_fn = main_terrain.terrain->height_map->filename; !height_map_info_fn.empty())
 		{
-			std::vector<vec3> site_positions;
-			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
+			height_map_info_fn += L".info";
+			std::ifstream file(height_map_info_fn);
+			if (file.good())
 			{
-				height_map_info_fn += L".info";
-				std::ifstream file(height_map_info_fn);
-				if (file.good())
-				{
-					LineReader info(file);
-					info.read_block("sites:");
-					unserialize_text(info, &site_positions);
-					file.close();
-				}
+				LineReader info(file);
+				info.read_block("sites:");
+				unserialize_text(info, &site_positions);
+				file.close();
+			}
+		}
+
+		if (!site_positions.empty())
+		{
+			std::vector<std::pair<float, int>> site_centrality(site_positions.size());
+			for (auto i = 0; i < site_positions.size(); i++)
+			{
+				auto x = abs(site_positions[i].x * 2.f - 1.f);
+				auto z = abs(site_positions[i].z * 2.f - 1.f);
+				site_centrality[i] = std::make_pair(x * z, i);
+			}
+			std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
+				return a.first < b.first;
+			});
+
+			auto demon_pos = site_positions[site_centrality.front().second].xz();
+			auto player1_pos = site_positions[site_centrality.back().second].xz();
+			auto demon_coord = main_terrain.get_coord(demon_pos);
+			auto player1_coord = main_terrain.get_coord(player1_pos);
+
+			{
+				auto e = Entity::create();
+				e->load(L"assets/spawner.prefab");
+				e->get_component_i<cNode>(0)->set_pos(demon_coord);
+				auto spawner = e->get_component_t<cSpwaner>();
+				spawner->spwan_interval = 1.f;
+				spawner->spwan_count = 4;
+				spawner->set_prefab_path(L"assets/monster.prefab");
+				spawner->callbacks.add([spawner, player1_coord](EntityPtr e) {
+					auto character = e->get_component_t<cCharacter>();
+					character->faction = 2;
+					character->nav_agent->separation_group = 2;
+					add_event([character, player1_coord]() {
+						character->cmd_attack_location(player1_coord);
+						return false;
+					});
+					spawner->spwan_interval = 10000.f;
+				});
+				root->add_child(e);
 			}
 
-			if (!site_positions.empty())
-			{
-				std::vector<std::pair<float, int>> site_centrality(site_positions.size());
-				for (auto i = 0; i < site_positions.size(); i++)
-				{
-					auto x = abs(site_positions[i].x * 2.f - 1.f);
-					auto z = abs(site_positions[i].z * 2.f - 1.f);
-					site_centrality[i] = std::make_pair(x * z, i);
-				}
-				std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
-					return a.first < b.first;
-				});
+			main_player.node->set_pos(main_terrain.get_coord(player1_pos + vec2(0.f, -8.f / main_terrain.terrain->extent.z)));
 
-				auto terrain_pos = terrain->node->pos;
-				auto demon_pos = terrain_pos +
-					site_positions[site_centrality.front().second] * terrain->extent;
-				auto player1_pos = terrain_pos +
-					site_positions[site_centrality.back().second] * terrain->extent;
-				{
-					auto e = Entity::create(); 
-					e->load(L"assets/spawner.prefab");
-					e->get_component_i<cNode>(0)->set_pos(demon_pos);
-					auto spawner = e->get_component_t<cSpwaner>();
-					spawner->spwan_interval = 1.f;
-					spawner->spwan_count = 4;
-					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([spawner, player1_pos](EntityPtr e) {
-						auto character = e->get_component_t<cCharacter>();
-						character->faction = 2;
-						character->nav_agent->separation_group = 2;
-						add_event([character, player1_pos]() {
-							character->cmd_attack_location(player1_pos);
-							return false;
-						});
-						spawner->spwan_interval = 10000.f;
+			{
+				auto e = Entity::create();
+				e->load(L"assets/spawner.prefab");
+				e->get_component_i<cNode>(0)->set_pos(player1_coord);
+				auto spawner = e->get_component_t<cSpwaner>();
+				spawner->spwan_interval = 1.f;
+				spawner->spwan_count = 4;
+				spawner->set_prefab_path(L"assets/monster.prefab");
+				spawner->callbacks.add([spawner, demon_coord](EntityPtr e) {
+					auto character = e->get_component_t<cCharacter>();
+					character->faction = 1;
+					character->nav_agent->separation_group = 1;
+					add_event([character, demon_coord]() {
+						character->cmd_attack_location(demon_coord);
+						return false;
 					});
-					root->add_child(e);
-				}
-				{
-					auto e = Entity::create();
-					e->load(L"assets/main_player.prefab");
-					e->get_component_i<cNode>(0)->set_pos(player1_pos + vec3(0.f, 0.f, -8.f));
-					root->add_child(e);
-					main_player.init(e);
-					selecting_target = main_player.character;
-				}
-				{
-					auto e = Entity::create();
-					e->load(L"assets/spawner.prefab");
-					e->get_component_i<cNode>(0)->set_pos(player1_pos);
-					auto spawner = e->get_component_t<cSpwaner>();
-					spawner->spwan_interval = 1.f;
-					spawner->spwan_count = 4;
-					spawner->set_prefab_path(L"assets/monster.prefab");
-					spawner->callbacks.add([spawner, demon_pos](EntityPtr e) {
-						auto character = e->get_component_t<cCharacter>();
-						character->faction = 1;
-						character->nav_agent->separation_group = 1;
-						add_event([character, demon_pos]() {
-							character->cmd_attack_location(demon_pos);
-							return false;
-						});
-						spawner->spwan_interval = 10000.f;
-					});
-					root->add_child(e);
-				}
+					spawner->spwan_interval = 10000.f;
+				});
+				root->add_child(e);
 			}
 		}
 	}
@@ -288,97 +305,41 @@ void cMain::start()
 				{
 					auto icon_size = 48.f;
 					ImGui::BeginGroup();
+					for (auto i = 0; i < 4; i++)
 					{
+						if (i > 0) ImGui::SameLine();
 						ImGui::Dummy(ImVec2(icon_size, icon_size));
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "Q");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "W");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(2.f, 0.f), ImColor(1.f, 1.f, 1.f), "E");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "R");
+						const char* hot_keys[] = {
+							"Q", "W", "E", "R"
+						};
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
 					}
 					ImGui::EndGroup();
 					ImGui::SameLine();
 					icon_size = 32.f;
 					ImGui::BeginGroup();
+					for (auto i = 0; i < 6; i++)
 					{
+						if (i > 0) ImGui::SameLine();
 						ImGui::Dummy(ImVec2(icon_size, icon_size));
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "1");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "2");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "3");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "4");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "5");
-					}
-					{
-						ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), "6");
+						auto id = selecting_target->inventory[i];
+						if (id != -1)
+						{
+							auto& item = Item::get(id);
+							dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
+						}
+						const char* hot_keys[] = {
+							"1", "2", "3", "4", "5", "6"
+						};
+						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
 					}
 					ImGui::EndGroup();
 				}

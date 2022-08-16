@@ -70,7 +70,7 @@ struct cCharacter : Component
 	/// Reflect
 	uint ai_id = 0;
 
-	int inventory[6] = { -1 };
+	int inventory[6] = { -1, -1, -1, -1, -1, -1 };
 
 	bool dead = false;
 	bool stats_dirty = true;

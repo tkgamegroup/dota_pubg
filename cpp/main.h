@@ -23,6 +23,17 @@ struct MainCamera
 };
 extern MainCamera main_camera;
 
+struct MainTerrain
+{
+	EntityPtr entity = nullptr;
+	cNodePtr node = nullptr;
+	cTerrainPtr terrain = nullptr;
+
+	void init(EntityPtr e);
+	vec3 get_coord(const vec2& uv);
+};
+extern MainTerrain main_terrain;
+
 struct MainPlayer
 {
 	EntityPtr entity = nullptr;
