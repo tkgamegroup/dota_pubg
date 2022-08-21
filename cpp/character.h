@@ -2,12 +2,89 @@
 
 #include "main.h"
 
-enum Command
+template<typename T>
+struct Tracker
 {
-	CommandIdle,
-	CommandMoveTo,
-	CommandAttackTarget,
-	CommandAttackLocation
+	uint hash;
+	T obj = nullptr;
+
+	Tracker()
+	{
+		hash = rand();
+	}
+
+	~Tracker()
+	{
+		if (obj)
+			obj->entity->message_listeners.remove(hash);
+	}
+
+	void set(T oth)
+	{
+		if (obj)
+			obj->entity->message_listeners.remove((uint)this);
+		obj = oth;
+		if (oth)
+		{
+			oth->entity->message_listeners.add([this](uint h, void*, void*) {
+				if (h == "destroyed"_h)
+					obj = nullptr;
+			}, hash);
+		}
+	}
+};
+
+struct Command
+{
+	cCharacterPtr character;
+
+	Command(cCharacterPtr character);
+	virtual ~Command() {}
+	virtual void update() = 0;
+};
+
+struct CommandIdle : Command
+{
+	CommandIdle(cCharacterPtr character);
+
+	void update() override;
+};
+
+struct CommandMoveTo : Command
+{
+	vec3 location;
+
+	CommandMoveTo(cCharacterPtr character, const vec3& _location);
+
+	void update() override;
+};
+
+struct CommandAttackTarget : Command
+{
+	Tracker<cCharacterPtr> target;
+
+	CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target);
+
+	void update() override;
+};
+
+struct CommandAttackLocation : Command
+{
+	Tracker<cCharacterPtr> target;
+	vec3 location;
+
+	CommandAttackLocation(cCharacterPtr character, const vec3& _location);
+
+	void update() override;
+};
+
+struct CommandPickUp : Command
+{
+	Tracker<cChestPtr> target;
+
+	CommandPickUp(cCharacterPtr character, cChestPtr _target);
+
+	void update() override;
 };
 
 enum Action
@@ -74,10 +151,8 @@ struct cCharacter : Component
 
 	bool dead = false;
 	bool stats_dirty = true;
-	Command command;
+	std::unique_ptr<Command> command;
 	Action action = ActionNone;
-	vec3 move_location;
-	cCharacterPtr target = nullptr;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
 	float search_timer = 0.f;
@@ -90,16 +165,14 @@ struct cCharacter : Component
 
 	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
 
-	void set_target(cCharacterPtr character);
 	void inflict_damage(cCharacterPtr target, uint value);
 	bool take_damage(uint value); // return true if the damage causes the character die
 	void manipulate_item(int idx0, int idx1, int item_id);
 	void level_up();
 	void die();
 
-	void cmd_move_to(const vec3& pos);
-	void cmd_attack_target(cCharacterPtr character);
-	void cmd_attack_location(const vec3& pos);
+	void move_to(const vec3& target);
+	void attack_target(cCharacterPtr target);
 
 	void start() override;
 	void update() override;

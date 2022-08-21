@@ -8,6 +8,7 @@ FLAME_TYPE(cMain)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cSpwaner)
 FLAME_TYPE(cProjectile)
+FLAME_TYPE(cChest)
 
 const auto CharacterTag = 1 << 1;
 
@@ -28,9 +29,11 @@ struct MainTerrain
 	EntityPtr entity = nullptr;
 	cNodePtr node = nullptr;
 	cTerrainPtr terrain = nullptr;
+	vec3 extent;
 
 	void init(EntityPtr e);
 	vec3 get_coord(const vec2& uv);
+	vec3 get_coord(const vec3& pos);
 };
 extern MainTerrain main_terrain;
 
@@ -70,4 +73,7 @@ struct cMain : Component
 	/// Reflect static
 	EXPORT static Create& create;
 };
+
+cChestPtr add_chest(const vec3& pos);
+void pick_up_chest(cCharacterPtr character, cChestPtr chest);
 

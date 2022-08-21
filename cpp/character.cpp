@@ -1,6 +1,7 @@
 #include "character.h"
 #include "item.h"
 #include "projectile.h"
+#include "chest.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
@@ -13,6 +14,101 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
+
+Command::Command(cCharacterPtr character) :
+	character(character)
+{
+	character->command.reset(this);
+	character->action = ActionNone;
+}
+
+CommandIdle::CommandIdle(cCharacterPtr character) :
+	Command(character)
+{
+}
+
+void CommandIdle::update()
+{
+	character->action = ActionNone;
+}
+
+CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
+	Command(character)
+{
+	location = _location;
+}
+
+void CommandMoveTo::update()
+{
+	character->move_to(location);
+}
+
+CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
+	Command(character)
+{
+	target.set(_target);
+}
+
+void CommandAttackTarget::update()
+{
+	if (!target.obj)
+		new CommandIdle(character);
+	else
+		character->attack_target(target.obj);
+}
+
+CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3& _location) :
+	Command(character)
+{
+	location = _location;
+}
+
+void CommandAttackLocation::update()
+{
+	auto dist = target.obj ? distance(character->node->g_pos, target.obj->node->g_pos) : 10000.f;
+	if (dist > character->atk_distance + 12.f)
+		target.set(nullptr);
+	if (character->action != ActionAttack)
+	{
+		auto enemies = character->find_enemies(0.f, false, true);
+		if (!enemies.empty() && dist > character->atk_distance)
+			target.set(enemies.front());
+	}
+
+	if (target.obj)
+		character->attack_target(target.obj);
+	else
+		character->move_to(location);
+}
+
+CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
+	Command(character)
+{
+	target.set(_target);
+}
+
+void CommandPickUp::update()
+{
+	if (!target.obj)
+		new CommandIdle(character);
+	else
+	{
+		auto self_pos = character->node->g_pos;
+		auto tar_pos = target.obj->node->g_pos;
+		if (distance(self_pos, tar_pos) <= 1.f)
+		{
+			pick_up_chest(character, target.obj);
+
+			character->nav_agent->stop();
+			new CommandIdle(character);
+		}
+		else
+		{
+			character->nav_agent->set_target(tar_pos);
+			character->action = ActionMove;
+		}
+	}
+}
 
 cCharacter::~cCharacter()
 {
@@ -88,22 +184,6 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 	return ret;
 }
 
-void cCharacter::set_target(cCharacterPtr character)
-{
-	if (target == character)
-		return;
-	if (target)
-		target->entity->message_listeners.remove((uint)this);
-	target = character;
-	if (target)
-	{
-		target->entity->message_listeners.add([this](uint h, void*, void*) {
-			if (h == "destroyed"_h)
-				target = nullptr;
-		}, (uint)this);
-	}
-}
-
 const auto NextLvExpFactor = 1.1f;
 
 uint gain_exp_from_killing(uint lv)
@@ -162,25 +242,6 @@ void cCharacter::die()
 	dead = true;
 }
 
-void cCharacter::cmd_move_to(const vec3& pos)
-{
-	command = CommandMoveTo;
-	move_location = pos;
-}
-
-void cCharacter::cmd_attack_target(cCharacterPtr character)
-{
-	command = CommandAttackTarget;
-	set_target(character);
-	action = ActionNone;
-}
-
-void cCharacter::cmd_attack_location(const vec3& pos)
-{
-	command = CommandAttackLocation;
-	move_location = pos;
-}
-
 void cCharacter::start()
 {
 	entity->tag |= CharacterTag;
@@ -212,6 +273,74 @@ void cCharacter::start()
 			}
 		}
 	}, (uint)this);
+}
+
+void cCharacter::move_to(const vec3& target)
+{
+	nav_agent->set_target(target);
+
+	if (length(nav_agent->desire_velocity()) <= 0.f)
+	{
+		nav_agent->stop();
+		new CommandIdle(this);
+	}
+	else
+		action = ActionMove;
+}
+
+void cCharacter::attack_target(cCharacterPtr target)
+{
+	auto self_pos = node->g_pos;
+	auto tar_pos = target->node->g_pos;
+	auto dir = tar_pos - self_pos;
+	auto dist = length(dir);
+	dir = normalize(dir);
+	auto ang_diff = abs(angle_diff(node->get_eul().x, degrees(atan2(dir.x, dir.z))));
+
+	if (action == ActionNone || action == ActionMove)
+	{
+		if (dist <= atk_distance)
+		{
+			if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
+			{
+				action = ActionAttack;
+				attack_speed = max(0.01f, atk_sp / 100.f);
+				attack_interval_timer = atk_interval / attack_speed;
+				attack_timer = attack_interval_timer * atk_precast;
+			}
+			else
+				action = ActionNone;
+			nav_agent->set_target(tar_pos, true);
+		}
+		else
+		{
+			action = ActionMove;
+			nav_agent->set_target(tar_pos);
+		}
+	}
+	else if (action == ActionAttack)
+	{
+		if (attack_timer <= 0.f)
+		{
+			if (atk_projectile)
+			{
+				auto e = atk_projectile->copy();
+				e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f));
+				e->get_component_t<cProjectile>()->setup(target, [this](cCharacterPtr t) {
+					if (t)
+						t->take_damage(atk);
+				});
+				root->add_child(e);
+			}
+			else
+				target->take_damage(atk);
+
+			action = ActionNone;
+		}
+		else
+			attack_timer -= delta_time;
+		nav_agent->set_target(tar_pos, true);
+	}
 }
 
 void cCharacter::update()
@@ -248,108 +377,8 @@ void cCharacter::update()
 	if (attack_interval_timer > 0)
 		attack_interval_timer -= delta_time;
 
-	auto move_to_traget = [this]() {
-		nav_agent->set_target(move_location);
-		action = ActionMove;
-
-		if (length(nav_agent->desire_velocity()) <= 0.f)
-		{
-			nav_agent->stop();
-			command = CommandIdle;
-			action = ActionNone;
-		}
-		else
-			action = ActionMove;
-	};
-
-	auto attack_target = [this]() {
-		auto self_pos = node->g_pos;
-		auto tar_pos = target->node->g_pos;
-		auto dir = tar_pos - self_pos;
-		auto dist = length(dir);
-		dir = normalize(dir);
-		auto ang_diff = abs(angle_diff(node->get_eul().x, degrees(atan2(dir.x, dir.z))));
-
-		if (action == ActionNone || action == ActionMove)
-		{
-			if (dist <= atk_distance)
-			{
-				if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
-				{
-					action = ActionAttack;
-					attack_speed = max(0.01f, atk_sp / 100.f);
-					attack_interval_timer = atk_interval / attack_speed;
-					attack_timer = attack_interval_timer * atk_precast;
-				}
-				else
-					action = ActionNone;
-				nav_agent->set_target(tar_pos, true);
-			}
-			else
-			{
-				action = ActionMove;
-				nav_agent->set_target(tar_pos);
-			}
-		}
-		else if (action == ActionAttack)
-		{
-			if (attack_timer <= 0.f)
-			{
-				if (atk_projectile)
-				{
-					auto e = atk_projectile->copy();
-					e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f));
-					e->get_component_t<cProjectile>()->setup(target, [this](cCharacterPtr t) {
-						if (t)
-							t->take_damage(atk);
-					});
-					root->add_child(e);
-				}
-				else
-					target->take_damage(atk);
-
-				action = ActionNone;
-			}
-			else
-				attack_timer -= delta_time;
-			nav_agent->set_target(tar_pos, true);
-		}
-	};
-
-	switch (command)
-	{
-	case CommandIdle:
-		break;
-	case CommandMoveTo:
-		move_to_traget();
-		break;
-	case CommandAttackTarget:
-	{
-		if (!target)
-			command = CommandIdle;
-		else
-			attack_target();
-	}
-		break;
-	case CommandAttackLocation:
-	{
-		auto dist = target ? distance(node->g_pos, target->node->g_pos) : 10000.f;
-		if (dist > atk_distance + 12.f)
-			set_target(nullptr);
-		if (action != ActionAttack)
-		{
-			auto enemies = find_enemies(0.f, false, true);
-			if (!enemies.empty() && dist > atk_distance)
-				set_target(enemies.front());
-		}
-
-		if (target)
-			attack_target();
-		else
-			move_to_traget();
-	}
-		break;
-	}
+	if (command)
+		command->update();
 
 	if (armature)
 	{

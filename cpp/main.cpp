@@ -20,6 +20,7 @@
 #include "item.h"
 #include "character.h"
 #include "spwaner.h"
+#include "chest.h"
 
 EntityPtr root = nullptr;
 
@@ -40,12 +41,18 @@ void MainTerrain::init(EntityPtr e)
 	{
 		node = e->get_component_i<cNode>(0);
 		terrain = e->get_component_t<cTerrain>();
+		extent = terrain->extent;
 	}
 }
 
 vec3 MainTerrain::get_coord(const vec2& uv)
 {
-	return node->pos + vec3(uv.x, terrain->height_map->linear_sample(uv).x, uv.y) * terrain->extent;
+	return node->pos + vec3(uv.x, terrain->height_map->linear_sample(uv).x, uv.y) * extent;
+}
+
+vec3 MainTerrain::get_coord(const vec3& pos)
+{
+	return get_coord(vec2((pos.x - node->pos.x) / extent.x, (pos.z - node->pos.z) / extent.z));
 }
 
 void MainPlayer::init(EntityPtr e)
@@ -62,8 +69,9 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainTerrain main_terrain;
 MainPlayer main_player;
-cCharacterPtr selecting_target = nullptr;
+cCharacterPtr selecting_character = nullptr;
 cCharacterPtr hovering_character = nullptr;
+cChestPtr hovering_chest = nullptr;
 
 enum SelectMode
 {
@@ -101,7 +109,7 @@ void cMain::start()
 		e->load(L"assets/main_player.prefab");
 		root->add_child(e);
 		main_player.init(e);
-		selecting_target = main_player.character;
+		main_player.character = main_player.character;
 	}
 
 	if (main_terrain.terrain)
@@ -151,7 +159,7 @@ void cMain::start()
 					character->faction = 2;
 					character->nav_agent->separation_group = 2;
 					add_event([character, player1_coord]() {
-						character->cmd_attack_location(player1_coord);
+						new CommandAttackLocation(character, player1_coord);
 						return false;
 					});
 					spawner->spwan_interval = 10000.f;
@@ -159,7 +167,8 @@ void cMain::start()
 				root->add_child(e);
 			}
 
-			main_player.node->set_pos(main_terrain.get_coord(player1_pos + vec2(0.f, -8.f / main_terrain.terrain->extent.z)));
+			main_player.node->set_pos(main_terrain.get_coord(player1_coord + vec3(0.f, 0.f, -8.f)));
+			add_chest(player1_coord + vec3(0.f, 0.f, -9.f))->item_id = 0;;
 
 			{
 				auto e = Entity::create();
@@ -174,7 +183,7 @@ void cMain::start()
 					character->faction = 1;
 					character->nav_agent->separation_group = 1;
 					add_event([character, demon_coord]() {
-						character->cmd_attack_location(demon_coord);
+						new CommandAttackLocation(character, demon_coord);
 						return false;
 					});
 					spawner->spwan_interval = 10000.f;
@@ -199,6 +208,14 @@ void cMain::start()
 					}
 				}
 			}
+			if (hovering_chest)
+			{
+				for (auto& c : hovering_chest->entity->get_all_children())
+				{
+					if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+						draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(64, 128, 64, 255));
+				}
+			}
 		}
 	}, "main"_h);
 
@@ -211,10 +228,10 @@ void cMain::start()
 			ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
 			ImGui::SetNextWindowBgAlpha(0.5f);
 			ImGui::Begin("##stats", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs);
-			if (selecting_target)
+				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+			if (main_player.character)
 			{
-				ImGui::TextUnformatted(selecting_target->entity->name.c_str());
+				ImGui::TextUnformatted(main_player.character->entity->name.c_str());
 
 				ImGui::BeginChild("##c1", ImVec2(100.f, -1.f));
 				if (ImGui::BeginTable("##t1", 2));
@@ -224,42 +241,42 @@ void cMain::start()
 					static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
 					ImGui::Image(img_sword, ImVec2(16, 16));
 					ImGui::TableNextColumn();
-					ImGui::Text("%5d", selecting_target->atk);
+					ImGui::Text("%5d", main_player.character->atk);
 
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
 					static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
 					ImGui::Image(img_shield, ImVec2(16, 16));
 					ImGui::TableNextColumn();
-					ImGui::Text("%5d", selecting_target->armor);
+					ImGui::Text("%5d", main_player.character->armor);
 
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
 					static auto img_run = graphics::Image::get("assets\\icons\\run.png");
 					ImGui::Image(img_run, ImVec2(16, 16));
 					ImGui::TableNextColumn();
-					ImGui::Text("%5d", selecting_target->mov_sp);
+					ImGui::Text("%5d", main_player.character->mov_sp);
 
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
 					static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
 					ImGui::Image(img_str, ImVec2(16, 16));
 					ImGui::TableNextColumn();
-					ImGui::Text("%5d", selecting_target->STR);
+					ImGui::Text("%5d", main_player.character->STR);
 
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
 					static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
 					ImGui::Image(img_agi, ImVec2(16, 16));
 					ImGui::TableNextColumn();
-					ImGui::Text("%5d", selecting_target->AGI);
+					ImGui::Text("%5d", main_player.character->AGI);
 
 					ImGui::TableNextRow();
 					ImGui::TableNextColumn();
 					static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
 					ImGui::Image(img_int, ImVec2(16, 16));
 					ImGui::TableNextColumn();
-					ImGui::Text("%5d", selecting_target->INT);
+					ImGui::Text("%5d", main_player.character->INT);
 
 					ImGui::EndTable();
 				}
@@ -275,9 +292,9 @@ void cMain::start()
 					ImGui::Dummy(ImVec2(bar_width, bar_height));
 					auto p0 = (vec2)ImGui::GetItemRectMin();
 					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)selecting_target->hp / (float)selecting_target->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
+					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->hp / (float)main_player.character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
 					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", selecting_target->hp, selecting_target->hp_max);
+					auto str = std::format("{}/{}", main_player.character->hp, main_player.character->hp_max);
 					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 				}
@@ -285,9 +302,9 @@ void cMain::start()
 					ImGui::Dummy(ImVec2(bar_width, bar_height));
 					auto p0 = (vec2)ImGui::GetItemRectMin();
 					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)selecting_target->mp / (float)selecting_target->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
+					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->mp / (float)main_player.character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
 					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", selecting_target->mp, selecting_target->mp_max);
+					auto str = std::format("{}/{}", main_player.character->mp, main_player.character->mp_max);
 					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 				}
@@ -295,25 +312,28 @@ void cMain::start()
 					ImGui::Dummy(ImVec2(bar_width, bar_height));
 					auto p0 = (vec2)ImGui::GetItemRectMin();
 					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)selecting_target->exp / (float)selecting_target->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
+					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
 					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", selecting_target->exp, selecting_target->exp_max);
+					auto str = std::format("{}/{}", main_player.character->exp, main_player.character->exp_max);
 					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 				}
-				if (selecting_target == main_player.character)
+				if (main_player.character == main_player.character)
 				{
 					auto icon_size = 48.f;
 					ImGui::BeginGroup();
 					for (auto i = 0; i < 4; i++)
 					{
 						if (i > 0) ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						static const char* names[] = {
+							"ability_1", "ability_2", "ability_3", "ability_4", "ability_5", "ability_6"
+						};
+						ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						const char* hot_keys[] = {
+						static const char* hot_keys[] = {
 							"Q", "W", "E", "R"
 						};
 						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
@@ -325,18 +345,51 @@ void cMain::start()
 					for (auto i = 0; i < 6; i++)
 					{
 						if (i > 0) ImGui::SameLine();
-						ImGui::Dummy(ImVec2(icon_size, icon_size));
+						static const char* names[] = {
+							"item_1", "item_2", "item_3", "item_4", "item_5", "item_6"
+						};
+						ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						auto id = selecting_target->inventory[i];
+						auto id = main_player.character->inventory[i];
 						if (id != -1)
 						{
 							auto& item = Item::get(id);
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::BeginTooltip();
+								ImGui::TextUnformatted(item.name.c_str());
+								ImGui::EndTooltip();
+							}
+							if (ImGui::BeginDragDropSource())
+							{
+								ImGui::SetDragDropPayload("item", &i, sizeof(int));
+								ImGui::EndDragDropSource();
+							}
+							if (ImGui::BeginPopupContextItem())
+							{
+								if (ImGui::Selectable("Drop"))
+								{
+									main_player.character->inventory[i] = -1;
+									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)))->item_id = id;
+								}
+								ImGui::EndPopup();
+							}
 							dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
 						}
-						const char* hot_keys[] = {
+						if (ImGui::BeginDragDropTarget())
+						{
+							if (auto payload = ImGui::AcceptDragDropPayload("item"); payload)
+							{
+								auto j = *(int*)payload->Data;
+								if (i != j)
+									std::swap(main_player.character->inventory[i], main_player.character->inventory[j]);
+							}
+							ImGui::EndDragDropTarget();
+						}
+						static const char* hot_keys[] = {
 							"1", "2", "3", "4", "5", "6"
 						};
 						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
@@ -380,17 +433,31 @@ void cMain::start()
 
 void cMain::update()
 {
-	auto input = sInput::instance();
-	vec3 hovering_pos;
-	auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
-		switch (draw_data.category)
-		{
-		case "mesh"_h:
-			if (auto character = n->entity->get_component_t<cCharacter>(); character)
+	if (!graphics::gui_want_mouse())
+	{
+		auto input = sInput::instance();
+		vec3 hovering_pos;
+		auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
+			switch (draw_data.category)
 			{
-				if (character != main_player.character && character->armature)
+			case "mesh"_h:
+				if (auto character = n->entity->get_component_t<cCharacter>(); character)
 				{
-					for (auto& c : character->armature->entity->children)
+					if (character != main_player.character && character->armature)
+					{
+						for (auto& c : character->armature->entity->children)
+						{
+							if (auto mesh = c->get_component_t<cMesh>(); mesh)
+							{
+								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+							}
+						}
+					}
+				}
+				if (auto chest = n->entity->get_component_t<cChest>(); chest)
+				{
+					for (auto& c : chest->entity->get_all_children())
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh)
 						{
@@ -399,108 +466,115 @@ void cMain::update()
 						}
 					}
 				}
+				break;
+			case "terrain"_h:
+				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
+				{
+					if (terrain->instance_id != -1 && terrain->material_res_id != -1)
+						draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
+				}
+				break;
 			}
-			break;
-		case "terrain"_h:
-			if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
-			{
-				if (terrain->instance_id != -1 && terrain->material_res_id != -1)
-					draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
-			}
-			break;
-		}
-		if (sInput::instance()->kpressed(Keyboard_F12))
-			draw_data.graphics_debug = true;
-	});
-	hovering_character = nullptr;
-	if (hovering_node)
-	{
-		if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
-			hovering_character = character;
-	}
-	auto add_location_icon = [](const vec3& pos, const vec3& color) {
-		static graphics::ImagePtr icon_location = nullptr;
-		if (!icon_location)
-			icon_location = graphics::Image::get(L"assets\\icons\\location.png");
-		static int icon_location_id = 0;
-		auto ticks = 30;
-		auto _id = icon_location_id;
-		graphics::gui_callbacks.add([pos, color, ticks, _id]() mutable {
-			auto p = main_camera.camera->world_to_screen(pos);
-			if (p.x > 0.f && p.y > 0.f)
-			{
-				p.xy += sInput::instance()->offset;
-				auto dl = ImGui::GetForegroundDrawList();
-				auto sz = (vec2)icon_location->size;
-				dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(color.r, color.g, color.b, max(0.f, ticks / 30.f)));
-			}
-			if (ticks-- <= 0)
-			{
-				auto h = sh(("icon_location_" + str(_id)).c_str());
-				add_event([h]() {
-					graphics::gui_callbacks.remove(h);
-					return false;
-				});
-			}
-		}, sh(("icon_location_" + str(_id)).c_str()));
-		icon_location_id++;
-	};
-	if (input->mpressed(Mouse_Left))
-	{
-		if (select_mode == SelectNull)
-			;
-		else
+			if (sInput::instance()->kpressed(Keyboard_F12))
+				draw_data.graphics_debug = true;
+		});
+		hovering_character = nullptr;
+		hovering_chest = nullptr;
+		if (hovering_node)
 		{
-			switch (select_mode)
+			if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
+				hovering_character = character;
+			if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
+				hovering_chest = chest;
+		}
+		auto add_location_icon = [](const vec3& pos, const vec3& color) {
+			static graphics::ImagePtr icon_location = nullptr;
+			if (!icon_location)
+				icon_location = graphics::Image::get(L"assets\\icons\\location.png");
+			static int icon_location_id = 0;
+			auto ticks = 30;
+			auto _id = icon_location_id;
+			graphics::gui_callbacks.add([pos, color, ticks, _id]() mutable {
+				auto p = main_camera.camera->world_to_screen(pos);
+				if (p.x > 0.f && p.y > 0.f)
+				{
+					p.xy += sInput::instance()->offset;
+					auto dl = ImGui::GetForegroundDrawList();
+					auto sz = (vec2)icon_location->size;
+					dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(color.r, color.g, color.b, max(0.f, ticks / 30.f)));
+				}
+				if (ticks-- <= 0)
+				{
+					auto h = sh(("icon_location_" + str(_id)).c_str());
+					add_event([h]() {
+						graphics::gui_callbacks.remove(h);
+						return false;
+					});
+				}
+			}, sh(("icon_location_" + str(_id)).c_str()));
+			icon_location_id++;
+		};
+		if (input->mpressed(Mouse_Left))
+		{
+			if (select_mode == SelectNull)
+				;
+			else
 			{
-			case SelectAttack:
+				switch (select_mode)
+				{
+				case SelectAttack:
+					if (hovering_character)
+					{
+						if (hovering_character->faction != main_player.character->faction)
+						{
+							new CommandAttackTarget(main_player.character, hovering_character);
+							select_mode = SelectNull;
+						}
+					}
+					else if (hovering_node)
+					{
+						if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+						{
+							new CommandMoveTo(main_player.character, hovering_pos);
+							add_location_icon(hovering_pos, vec3(1.f, 0.f, 0.f));
+							select_mode = SelectNull;
+						}
+					}
+					break;
+				}
+			}
+		}
+		if (input->mpressed(Mouse_Right))
+		{
+			if (select_mode == SelectNull)
+			{
 				if (hovering_character)
 				{
 					if (hovering_character->faction != main_player.character->faction)
-					{
-						main_player.character->cmd_attack_target(hovering_character);
-						select_mode = SelectNull;
-					}
+						new CommandAttackTarget(main_player.character, hovering_character);
+				}
+				else if (hovering_chest)
+				{
+					new CommandPickUp(main_player.character, hovering_chest);
 				}
 				else if (hovering_node)
 				{
 					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 					{
-						main_player.character->cmd_attack_location(hovering_pos);
-						add_location_icon(hovering_pos, vec3(1.f, 0.f, 0.f));
-						select_mode = SelectNull;
+						new CommandMoveTo(main_player.character, hovering_pos);
+						add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
 					}
 				}
-				break;
 			}
+			else
+				select_mode = SelectNull;
 		}
-	}
-	if (input->mpressed(Mouse_Right))
-	{
-		if (select_mode == SelectNull)
-		{
-			if (hovering_character)
-			{
-				if (hovering_character->faction != main_player.character->faction)
-					main_player.character->cmd_attack_target(hovering_character);
-			}
-			else if (hovering_node)
-			{
-				if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
-				{
-					main_player.character->cmd_move_to(hovering_pos);
-					add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
-				}
-			}
-		}
-		else
-			select_mode = SelectNull;
-	}
 
-	if (input->kpressed(Keyboard_Esc))
-		select_mode = SelectNull;
-	if (input->kpressed(Keyboard_A))
-		select_mode = SelectAttack;
+		if (input->kpressed(Keyboard_Esc))
+			select_mode = SelectNull;
+		if (input->kpressed(Keyboard_A))
+			select_mode = SelectAttack;
+	}
 
 	if (main_camera.node && main_player.node)
 	{
@@ -520,6 +594,43 @@ struct cMainCreate : cMain::Create
 	}
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
+
+cChestPtr add_chest(const vec3& pos)
+{
+	static EntityPtr e_chest = nullptr;
+	if (!e_chest)
+	{
+		e_chest = Entity::create();
+		e_chest->load(L"assets\\models\\chest.prefab");
+	}
+	auto e = e_chest->copy();
+	e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(pos));
+	root->add_child(e);
+	return e->get_component_t<cChest>();
+}
+
+void pick_up_chest(cCharacterPtr character, cChestPtr chest)
+{
+	auto ok = false;
+	for (auto i = 0; i < countof(character->inventory); i++)
+	{
+		if (character->inventory[i] == -1)
+		{
+			character->inventory[i] = chest->item_id;
+			character->stats_dirty = true;
+			ok = true;
+			break;
+		}
+	}
+	if (ok)
+	{
+		auto e = chest->entity;
+		add_event([e]() {
+			e->remove_from_parent();
+			return false;
+		});
+	}
+}
 
 EXPORT void* cpp_info()
 {
