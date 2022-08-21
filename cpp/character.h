@@ -87,11 +87,31 @@ struct CommandPickUp : Command
 	void update() override;
 };
 
+struct CommandCast : Command
+{
+	Tracker<cCharacterPtr> target;
+
+	CommandCast(cCharacterPtr character, cCharacterPtr _target);
+
+	void update() override;
+};
+
 enum Action
 {
 	ActionNone,
 	ActionMove,
-	ActionAttack
+	ActionAttack,
+	ActionCast
+};
+
+struct ItemInstance
+{
+
+};
+
+struct AbilityInstance
+{
+
 };
 
 /// Reflect ctor
@@ -158,6 +178,7 @@ struct cCharacter : Component
 	float search_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
+	float cast_timer = 0.f;
 	EntityPtr atk_projectile = nullptr;
 
 	~cCharacter();
@@ -167,12 +188,12 @@ struct cCharacter : Component
 
 	void inflict_damage(cCharacterPtr target, uint value);
 	bool take_damage(uint value); // return true if the damage causes the character die
-	void manipulate_item(int idx0, int idx1, int item_id);
 	void level_up();
 	void die();
 
 	void move_to(const vec3& target);
 	void attack_target(cCharacterPtr target);
+	void cast_to_target(cCharacterPtr target);
 
 	void start() override;
 	void update() override;

@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-struct Item
+struct Ability
 {
 	uint					id;
 	std::string				name;
@@ -10,11 +10,9 @@ struct Item
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	graphics::ImagePtr		icon_image = nullptr;
 
-	void(*active)(cCharacterPtr) = nullptr;
-	void(*passive)(cCharacterPtr) = nullptr;
-	void(*show)() = nullptr;
+	void(*active)(cCharacterPtr, cCharacterPtr) = nullptr;
 
-	static Item& get(uint id);
+	static Ability& get(uint id);
 };
 
-void load_items();
+void load_abilities();

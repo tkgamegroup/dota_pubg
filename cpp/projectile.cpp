@@ -24,12 +24,6 @@ void cProjectile::set_target(cCharacterPtr character)
 	}
 }
 
-void cProjectile::setup(cCharacterPtr target, const std::function<void(cCharacterPtr)>& cb)
-{
-	set_target(target);
-	callback = cb;
-}
-
 void cProjectile::die()
 {
 	if (!ev_delete_projectiles)

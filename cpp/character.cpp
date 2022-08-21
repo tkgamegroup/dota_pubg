@@ -110,6 +110,20 @@ void CommandPickUp::update()
 	}
 }
 
+CommandCast::CommandCast(cCharacterPtr character, cCharacterPtr _target) :
+	Command(character)
+{
+	target.set(_target);
+}
+
+void CommandCast::update()
+{
+	if (!target.obj)
+		new CommandIdle(character);
+	else
+		;
+}
+
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
@@ -219,11 +233,6 @@ bool cCharacter::take_damage(uint value)
 	return true;
 }
 
-void cCharacter::manipulate_item(int idx0, int idx1, int item_id)
-{
-
-}
-
 void cCharacter::level_up()
 {
 	lv++;
@@ -324,13 +333,10 @@ void cCharacter::attack_target(cCharacterPtr target)
 		{
 			if (atk_projectile)
 			{
-				auto e = atk_projectile->copy();
-				e->get_component_t<cNode>()->set_pos(node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f));
-				e->get_component_t<cProjectile>()->setup(target, [this](cCharacterPtr t) {
+				add_projectile(atk_projectile, node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, [this](cCharacterPtr t) {
 					if (t)
 						t->take_damage(atk);
 				});
-				root->add_child(e);
 			}
 			else
 				target->take_damage(atk);
@@ -364,8 +370,8 @@ void cCharacter::update()
 			if (id != -1)
 			{
 				auto& item = Item::get(id);
-				mov_sp += item.add_mov_sp;
-				atk_sp += item.add_atk_sp;
+				if (item.passive)
+					item.passive(this);
 			}
 		}
 
@@ -397,6 +403,10 @@ void cCharacter::update()
 		case ActionAttack:
 			armature->playing_speed = attack_speed;
 			armature->play("attack"_h);
+			break;
+		case ActionCast:
+			armature->playing_speed = 1.f;
+			armature->play("cast"_h);
 			break;
 		}
 	}

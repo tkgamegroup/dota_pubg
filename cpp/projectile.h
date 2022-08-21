@@ -15,8 +15,6 @@ struct cProjectile : Component
 
 	std::function<void(cCharacterPtr t)> callback;
 
-	void setup(cCharacterPtr target, const std::function<void(cCharacterPtr)>& cb);
-
 	void die();
 
 	void start() override;

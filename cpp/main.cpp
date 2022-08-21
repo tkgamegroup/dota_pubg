@@ -20,6 +20,7 @@
 #include "item.h"
 #include "character.h"
 #include "spwaner.h"
+#include "projectile.h"
 #include "chest.h"
 
 EntityPtr root = nullptr;
@@ -594,6 +595,16 @@ struct cMainCreate : cMain::Create
 	}
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
+
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb)
+{
+	auto e = prefab->copy();
+	e->get_component_t<cNode>()->set_pos(pos);
+	auto projectile = e->get_component_t<cProjectile>();
+	projectile->target = target;
+	projectile->callback = cb;
+	root->add_child(e);
+}
 
 cChestPtr add_chest(const vec3& pos)
 {
