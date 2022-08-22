@@ -104,14 +104,44 @@ enum Action
 	ActionCast
 };
 
+struct CharacterPreset
+{
+	uint					id;
+	std::string				name;
+
+	uint hp = 100;
+	uint mp = 100;
+	uint STR = 0;
+	uint AGI = 0;
+	uint INT = 0;
+	uint STR_GROW = 0;
+	uint AGI_GROW = 0;
+	uint INT_GROW = 0;
+	uint atk = 0;
+	float atk_distance = 1.5f;
+	float atk_interval = 2.f; // time
+	float atk_precast = 0.5f; // 0-1, of the atk_interval
+	std::filesystem::path atk_projectile_name;
+	EntityPtr atk_projectile = nullptr;
+	uint armor = 0;
+	uint mov_sp = 100;
+	uint atk_sp = 100;
+
+	static const CharacterPreset& get(uint id);
+};
+
+void load_character_presets();
+
 struct ItemInstance
 {
-
+	uint id;
+	uint num;
 };
 
 struct AbilityInstance
 {
-
+	uint id;
+	float cooldown_timer;
 };
 
 /// Reflect ctor
@@ -125,49 +155,41 @@ struct cCharacter : Component
 	cArmaturePtr armature = nullptr;
 
 	/// Reflect
-	uint lv = 1;
-	/// Reflect
-	uint exp = 0;
-	/// Reflect
-	uint exp_max = 0;
-	/// Reflect
-	uint hp = 100;
-	/// Reflect
-	uint hp_max = 100;
-	/// Reflect
-	uint mp = 100;
-	/// Reflect
-	uint mp_max = 100;
-	/// Reflect
-	uint STR = 10;
-	/// Reflect
-	uint AGI = 10;
-	/// Reflect
-	uint INT = 10;
-	/// Reflect
-	uint atk = 10;
-	/// Reflect
-	float atk_distance = 1.5f;
-	/// Reflect
-	float atk_interval = 2.f; // time
-	/// Reflect
-	float atk_precast = 0.5f; // 0-1, of the atk_interval
-	/// Reflect
-	std::filesystem::path atk_projectile_name;
-	/// Reflect
-	void set_atk_projectile_name(const std::filesystem::path& name);
-	/// Reflect
-	uint armor = 0;
-	/// Reflect
-	uint mov_sp = 100;
-	/// Reflect
-	uint atk_sp = 100;
-	/// Reflect
 	uint faction = 0;
 	/// Reflect
 	uint ai_id = 0;
+	/// Reflect
+	uint preset_id = 0;
+	inline const CharacterPreset& get_preset()
+	{
+		return CharacterPreset::get(preset_id);
+	}
 
-	int inventory[6] = { -1, -1, -1, -1, -1, -1 };
+	/// Reflect
+	uint lv = 1;
+	/// Reflect
+	uint exp = 0;
+	uint exp_max = 0;
+
+	/// Reflect
+	uint hp = 1;
+	uint hp_max = 1;
+
+	/// Reflect
+	uint mp = 1;
+	uint mp_max = 1;
+
+	uint STR = 0;
+	uint AGI = 0;
+	uint INT = 0;
+
+	uint atk = 0;
+	uint armor = 0;
+	uint mov_sp = 0;
+	uint atk_sp = 0;
+
+	std::unique_ptr<ItemInstance> inventory[6];
+	std::unique_ptr<AbilityInstance> abilities[4];
 
 	bool dead = false;
 	bool stats_dirty = true;
@@ -179,7 +201,6 @@ struct cCharacter : Component
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
-	EntityPtr atk_projectile = nullptr;
 
 	~cCharacter();
 	void on_init() override;
@@ -188,12 +209,15 @@ struct cCharacter : Component
 
 	void inflict_damage(cCharacterPtr target, uint value);
 	bool take_damage(uint value); // return true if the damage causes the character die
-	void level_up();
+	void gain_exp(uint v);
+	void gain_item(uint id, uint num);
+	void gain_ability(uint id);
+	void use_item(uint idx); 
 	void die();
 
-	void move_to(const vec3& target);
-	void attack_target(cCharacterPtr target);
-	void cast_to_target(cCharacterPtr target);
+	void process_move_to(const vec3& target);
+	void process_attack_target(cCharacterPtr target);
+	void process_cast_to_target(cCharacterPtr target);
 
 	void start() override;
 	void update() override;

@@ -3,7 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavAgent" radius="0.3" height="1.8" speed="7" separate_group="0" />
-		<item type_name="cCharacter" faction="1" atk_interval="1.8" atk_precast="0.43" />
+		<item type_name="cCharacter" faction="1" preset_id="0" />
 	</components>
 	<children>
 		<item file_id="50d8b05d404569714eaaeebf357f1619" filename="assets\characters\knight\Paladin.prefab">

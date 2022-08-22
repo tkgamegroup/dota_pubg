@@ -10,11 +10,11 @@ struct Item
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	graphics::ImagePtr		icon_image = nullptr;
 
-	void(*active)(cCharacterPtr) = nullptr;
+	bool(*active)(cCharacterPtr) = nullptr;
 	void(*passive)(cCharacterPtr) = nullptr;
 	void(*show)() = nullptr;
 
-	static Item& get(uint id);
+	static const Item& get(uint id);
 };
 
 void load_items();

@@ -40,7 +40,7 @@ CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
 
 void CommandMoveTo::update()
 {
-	character->move_to(location);
+	character->process_move_to(location);
 }
 
 CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
@@ -54,7 +54,7 @@ void CommandAttackTarget::update()
 	if (!target.obj)
 		new CommandIdle(character);
 	else
-		character->attack_target(target.obj);
+		character->process_attack_target(target.obj);
 }
 
 CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3& _location) :
@@ -65,20 +65,21 @@ CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3
 
 void CommandAttackLocation::update()
 {
+	auto atk_dist = character->get_preset().atk_distance;
 	auto dist = target.obj ? distance(character->node->g_pos, target.obj->node->g_pos) : 10000.f;
-	if (dist > character->atk_distance + 12.f)
+	if (dist > atk_dist + 12.f)
 		target.set(nullptr);
 	if (character->action != ActionAttack)
 	{
 		auto enemies = character->find_enemies(0.f, false, true);
-		if (!enemies.empty() && dist > character->atk_distance)
+		if (!enemies.empty() && dist > atk_dist)
 			target.set(enemies.front());
 	}
 
 	if (target.obj)
-		character->attack_target(target.obj);
+		character->process_attack_target(target.obj);
 	else
-		character->move_to(location);
+		character->process_move_to(location);
 }
 
 CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
@@ -124,33 +125,37 @@ void CommandCast::update()
 		;
 }
 
+std::vector<CharacterPreset> character_presets;
+
+const CharacterPreset& CharacterPreset::get(uint id)
+{
+	assert(id < character_presets.size());
+	return character_presets[id];
+}
+
+void load_character_presets()
+{
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
+		preset.name = "";
+		preset.atk_interval = 1.8f;
+		preset.atk_precast = 0.43f;
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
+		preset.name = "";
+		preset.atk_interval = 3.f;
+		preset.atk_precast = 0.49f;
+	}
+}
+
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
 
 	graphics::gui_callbacks.remove((uint)this);
-}
-
-void cCharacter::set_atk_projectile_name(const std::filesystem::path& name)
-{
-	if (atk_projectile_name == name)
-		return;
-	atk_projectile_name = name;
-
-	EntityPtr _atk_projectile = nullptr;
-	if (!atk_projectile_name.empty())
-	{
-		_atk_projectile = Entity::create();
-		if (!_atk_projectile->load(atk_projectile_name))
-		{
-			delete _atk_projectile;
-			_atk_projectile = nullptr;
-			return;
-		}
-	}
-
-	delete atk_projectile;
-	atk_projectile = _atk_projectile;
 }
 
 void cCharacter::on_init()
@@ -200,7 +205,7 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 
 const auto NextLvExpFactor = 1.1f;
 
-uint gain_exp_from_killing(uint lv)
+static uint calc_exp(uint lv)
 {
 	return (100.f * (1.f - pow(NextLvExpFactor, lv)) / (1.f - NextLvExpFactor)) * 0.13f;
 }
@@ -210,19 +215,14 @@ void cCharacter::inflict_damage(cCharacterPtr target, uint value)
 	if (target->take_damage(value))
 	{
 		if (exp_max > 0)
-		{
-			exp += gain_exp_from_killing(target->lv);
-			while (exp > exp_max)
-			{
-				exp -= exp_max;
-				level_up();
-			}
-		}
+			gain_exp(calc_exp(target->lv));
 	}
 }
 
 bool cCharacter::take_damage(uint value)
 {
+	if (dead)
+		return false;
 	if (hp > value)
 	{
 		hp -= value;
@@ -233,14 +233,16 @@ bool cCharacter::take_damage(uint value)
 	return true;
 }
 
-void cCharacter::level_up()
+void cCharacter::gain_exp(uint v)
 {
-	lv++;
-	exp_max *= NextLvExpFactor;
+	exp += v;
+	while (exp > exp_max)
+	{
+		exp -= exp_max;
+		lv++;
+		exp_max *= NextLvExpFactor;
 
-	atk++;
-	hp_max += 10;
-	hp += 10;
+	}
 }
 
 void cCharacter::die()
@@ -284,7 +286,7 @@ void cCharacter::start()
 	}, (uint)this);
 }
 
-void cCharacter::move_to(const vec3& target)
+void cCharacter::process_move_to(const vec3& target)
 {
 	nav_agent->set_target(target);
 
@@ -297,8 +299,9 @@ void cCharacter::move_to(const vec3& target)
 		action = ActionMove;
 }
 
-void cCharacter::attack_target(cCharacterPtr target)
+void cCharacter::process_attack_target(cCharacterPtr target)
 {
+	auto& preset = get_preset();
 	auto self_pos = node->g_pos;
 	auto tar_pos = target->node->g_pos;
 	auto dir = tar_pos - self_pos;
@@ -308,14 +311,14 @@ void cCharacter::attack_target(cCharacterPtr target)
 
 	if (action == ActionNone || action == ActionMove)
 	{
-		if (dist <= atk_distance)
+		if (dist <= preset.atk_distance)
 		{
 			if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
 			{
 				action = ActionAttack;
 				attack_speed = max(0.01f, atk_sp / 100.f);
-				attack_interval_timer = atk_interval / attack_speed;
-				attack_timer = attack_interval_timer * atk_precast;
+				attack_interval_timer = preset.atk_interval / attack_speed;
+				attack_timer = attack_interval_timer * preset.atk_precast;
 			}
 			else
 				action = ActionNone;
@@ -331,10 +334,10 @@ void cCharacter::attack_target(cCharacterPtr target)
 	{
 		if (attack_timer <= 0.f)
 		{
-			if (atk_projectile)
+			if (preset.atk_projectile)
 			{
-				add_projectile(atk_projectile, node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, [this](cCharacterPtr t) {
-					if (t)
+				add_projectile(preset.atk_projectile, node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, [this](cCharacterPtr t) {
+					if (t) 
 						t->take_damage(atk);
 				});
 			}
@@ -347,6 +350,11 @@ void cCharacter::attack_target(cCharacterPtr target)
 			attack_timer -= delta_time;
 		nav_agent->set_target(tar_pos, true);
 	}
+}
+
+void cCharacter::process_cast_to_target(cCharacterPtr target)
+{
+
 }
 
 void cCharacter::update()
@@ -365,11 +373,11 @@ void cCharacter::update()
 		mov_sp = 100;
 		atk_sp = 100;
 
-		for (auto& id : inventory)
+		for (auto& ins : inventory)
 		{
-			if (id != -1)
+			if (ins)
 			{
-				auto& item = Item::get(id);
+				auto& item = Item::get(ins->id);
 				if (item.passive)
 					item.passive(this);
 			}

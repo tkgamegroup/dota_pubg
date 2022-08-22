@@ -18,6 +18,7 @@
 
 #include "main.h"
 #include "item.h"
+#include "ability.h"
 #include "character.h"
 #include "spwaner.h"
 #include "projectile.h"
@@ -354,10 +355,10 @@ void cMain::start()
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						auto id = main_player.character->inventory[i];
-						if (id != -1)
+						auto& ins = main_player.character->inventory[i];
+						if (ins)
 						{
-							auto& item = Item::get(id);
+							auto& item = Item::get(ins->id);
 							if (ImGui::IsItemHovered())
 							{
 								ImGui::BeginTooltip();
@@ -373,8 +374,8 @@ void cMain::start()
 							{
 								if (ImGui::Selectable("Drop"))
 								{
-									main_player.character->inventory[i] = -1;
-									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)))->item_id = id;
+									main_player.character->inventory[i].reset(nullptr);
+									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)))->item_id = ins->id;
 								}
 								ImGui::EndPopup();
 							}
@@ -430,6 +431,8 @@ void cMain::start()
 	}, (uint)this);
 
 	load_items();
+	load_abilities();
+	load_character_presets();
 }
 
 void cMain::update()
@@ -623,11 +626,12 @@ cChestPtr add_chest(const vec3& pos)
 void pick_up_chest(cCharacterPtr character, cChestPtr chest)
 {
 	auto ok = false;
-	for (auto i = 0; i < countof(character->inventory); i++)
+	for (auto& ins : character->inventory)
 	{
-		if (character->inventory[i] == -1)
+		if (!ins)
 		{
-			character->inventory[i] = chest->item_id;
+			ins.reset(new ItemInstance);
+			ins->id = chest->item_id;
 			character->stats_dirty = true;
 			ok = true;
 			break;
