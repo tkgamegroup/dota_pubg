@@ -71,16 +71,13 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainTerrain main_terrain;
 MainPlayer main_player;
-cCharacterPtr selecting_character = nullptr;
-cCharacterPtr hovering_character = nullptr;
-cChestPtr hovering_chest = nullptr;
 
-enum SelectMode
-{
-	SelectNull,
-	SelectAttack
-};
-SelectMode select_mode = SelectNull;
+cCharacterPtr	hovering_character = nullptr;
+cChestPtr		hovering_chest = nullptr;
+
+TargetType select_mode = TargetNull;
+std::function<void(cCharacterPtr)>		select_enemy_callback;
+std::function<void(const vec3& pos)>	select_location_callback;
 
 cMain::~cMain()
 {
@@ -349,7 +346,7 @@ void cMain::start()
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						auto& ins = main_player.character->abilities[i];
+						auto ins = main_player.character->abilities[i].get();
 						if (ins)
 						{
 							auto& ability = Ability::get(ins->id);
@@ -360,6 +357,17 @@ void cMain::start()
 								ImGui::EndTooltip();
 							}
 							dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+
+							if (pressed)
+							{
+								select_mode = ability.target_type;
+								if (ability.target_type == TargetEnemy)
+								{
+									select_enemy_callback = [ins](cCharacterPtr character) {
+										new CommandCastAbilityToTarget(main_player.character, ins, character);
+									};
+								}
+							}
 						}
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
 						static const char* hot_keys[] = {
@@ -438,12 +446,10 @@ void cMain::start()
 			const auto cursor_cx = 6U;
 			const auto cursor_cy = 3U;
 			int cursor_x = 0, cursor_y = 0;
-			switch (select_mode)
+			if (select_mode != TargetNull)
 			{
-			case SelectAttack:
 				cursor_x = 3;
 				cursor_y = 0;
-				break;
 			}
 			auto pos = sInput::instance()->mpos;
 			auto dl = ImGui::GetForegroundDrawList();
@@ -546,37 +552,39 @@ void cMain::update()
 		};
 		if (input->mpressed(Mouse_Left))
 		{
-			if (select_mode == SelectNull)
+			if (select_mode == TargetNull)
 				;
 			else
 			{
-				switch (select_mode)
+				if (select_mode & TargetEnemy)
 				{
-				case SelectAttack:
-					if (hovering_character)
+					if (hovering_character && main_player.character->faction != hovering_character->faction)
 					{
-						if (hovering_character->faction != main_player.character->faction)
+						if (select_enemy_callback)
 						{
-							new CommandAttackTarget(main_player.character, hovering_character);
-							select_mode = SelectNull;
+							select_enemy_callback(hovering_character);
+							select_enemy_callback = nullptr;
 						}
+						select_mode = TargetNull;
 					}
-					else if (hovering_node)
+				}
+				if (select_mode & TargetLocation)
+				{
+					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 					{
-						if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+						if (select_location_callback)
 						{
-							new CommandMoveTo(main_player.character, hovering_pos);
-							add_location_icon(hovering_pos, vec3(1.f, 0.f, 0.f));
-							select_mode = SelectNull;
+							select_location_callback(hovering_pos);
+							select_location_callback = nullptr;
 						}
+						select_mode = TargetNull;
 					}
-					break;
 				}
 			}
 		}
 		if (input->mpressed(Mouse_Right))
 		{
-			if (select_mode == SelectNull)
+			if (select_mode == TargetNull)
 			{
 				if (hovering_character)
 				{
@@ -597,13 +605,25 @@ void cMain::update()
 				}
 			}
 			else
-				select_mode = SelectNull;
+				select_mode = TargetNull;
 		}
 
 		if (input->kpressed(Keyboard_Esc))
-			select_mode = SelectNull;
+		{
+			select_mode = TargetNull;
+			select_enemy_callback = nullptr;
+			select_location_callback = nullptr;
+		}
 		if (input->kpressed(Keyboard_A))
-			select_mode = SelectAttack;
+		{
+			select_mode = TargetType(TargetEnemy | TargetLocation);
+			select_enemy_callback = [](cCharacterPtr character) {
+				new CommandAttackTarget(main_player.character, character);
+			};
+			select_location_callback = [](const vec3& pos) {
+				new CommandMoveTo(main_player.character, pos);
+			};
+		}
 	}
 
 	if (main_camera.node && main_player.node)

@@ -20,6 +20,8 @@ void load_abilities()
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
 		ability.mana = 50;
+		ability.distance = 5.f;
+		ability.cast_time = 0.5f;
 		ability.active = [](cCharacterPtr caster, cCharacterPtr target) {
 
 		};

@@ -34,6 +34,18 @@ struct Tracker
 	}
 };
 
+struct ItemInstance
+{
+	uint id;
+	uint num = 1;
+};
+
+struct AbilityInstance
+{
+	uint id;
+	float cooldown_timer = 0.f;
+};
+
 struct Command
 {
 	cCharacterPtr character;
@@ -87,11 +99,12 @@ struct CommandPickUp : Command
 	void update() override;
 };
 
-struct CommandCast : Command
+struct CommandCastAbilityToTarget : Command
 {
 	Tracker<cCharacterPtr> target;
+	AbilityInstance* ins;
 
-	CommandCast(cCharacterPtr character, cCharacterPtr _target);
+	CommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target);
 
 	void update() override;
 };
@@ -120,11 +133,11 @@ struct CharacterPreset
 	uint INT_GROW = 0;
 	uint atk = 0;
 	float atk_distance = 1.5f;
-	float atk_interval = 2.f; // time
-	float atk_precast = 0.5f; // 0-1, of the atk_interval
+	float atk_interval = 2.f;
+	float atk_time = 1.f; // of animation time
 	std::filesystem::path atk_projectile_name;
 	EntityPtr atk_projectile = nullptr;
-	float cast_time;
+	float cast_time = 0.5f; // of animation time
 	uint armor = 0;
 	uint mov_sp = 100;
 	uint atk_sp = 100;
@@ -133,18 +146,6 @@ struct CharacterPreset
 };
 
 void load_character_presets();
-
-struct ItemInstance
-{
-	uint id;
-	uint num = 1;
-};
-
-struct AbilityInstance
-{
-	uint id;
-	float cooldown_timer = 0.f;
-};
 
 /// Reflect ctor
 struct cCharacter : Component
@@ -199,6 +200,7 @@ struct cCharacter : Component
 	Action action = ActionNone;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
+	float cast_speed = 1.f;
 	float search_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
@@ -215,12 +217,14 @@ struct cCharacter : Component
 	bool gain_item(uint id, uint num);
 	bool gain_ability(uint id);
 	void use_item(ItemInstance* ins);
-	void cast_ability(AbilityInstance* ins);
+	void cast_ability(AbilityInstance* ins, cCharacterPtr target);
 	void die();
 
 	bool process_approach(const vec3& target, float dist = 0.1f, float ang = 0.f);
 	void process_attack_target(cCharacterPtr target);
-	void process_cast_to_target(cCharacterPtr target);
+	void process_cast_ability(AbilityInstance* ins);
+	void process_cast_ability_to_location(AbilityInstance* ins, const vec3& location);
+	void process_cast_ability_to_target(AbilityInstance* ins, cCharacterPtr target);
 
 	void start() override;
 	void update() override;

@@ -1,5 +1,6 @@
 #include "character.h"
 #include "item.h"
+#include "ability.h"
 #include "projectile.h"
 #include "chest.h"
 
@@ -115,18 +116,19 @@ void CommandPickUp::update()
 	}
 }
 
-CommandCast::CommandCast(cCharacterPtr character, cCharacterPtr _target) :
-	Command(character)
+CommandCastAbilityToTarget::CommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target) :
+	Command(character),
+	ins(ins)
 {
 	target.set(_target);
 }
 
-void CommandCast::update()
+void CommandCastAbilityToTarget::update()
 {
 	if (!target.obj)
 		new CommandIdle(character);
 	else
-		;
+		character->process_cast_ability_to_target(ins, target.obj);
 }
 
 std::vector<CharacterPreset> character_presets;
@@ -145,14 +147,14 @@ void load_character_presets()
 		preset.name = "Knight";
 		preset.exp = 200;
 		preset.atk_interval = 1.8f;
-		preset.atk_precast = 0.43f;
+		preset.atk_time = 0.77f;
 	}
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
 		preset.name = "Mutant";
 		preset.atk_interval = 3.f;
-		preset.atk_precast = 0.49f;
+		preset.atk_time = 1.47f;
 	}
 }
 
@@ -308,6 +310,11 @@ void cCharacter::use_item(ItemInstance* ins)
 	item.active(this);
 }
 
+void cCharacter::cast_ability(AbilityInstance* ins, cCharacterPtr target)
+{
+
+}
+
 void cCharacter::die()
 {
 	if (dead)
@@ -374,7 +381,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 				action = ActionAttack;
 				attack_speed = max(0.01f, atk_sp / 100.f);
 				attack_interval_timer = preset.atk_interval / attack_speed;
-				attack_timer = attack_interval_timer * preset.atk_precast;
+				attack_timer = preset.atk_time;
 			}
 			else
 				action = ActionNone;
@@ -404,9 +411,42 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 	}
 }
 
-void cCharacter::process_cast_to_target(cCharacterPtr target)
+void cCharacter::process_cast_ability_to_target(AbilityInstance* ins, cCharacterPtr target)
 {
+	auto& preset = get_preset();
+	auto& ability = Ability::get(ins->id);
 
+	if (process_approach(target->node->g_pos, ability.distance, 15.f))
+	{
+		if (action == ActionNone || action == ActionMove)
+		{
+			action = ActionCast;
+			if (ability.cast_time == 0.f)
+			{
+				cast_ability(ins, target);
+				nav_agent->stop();
+				new CommandIdle(this);
+				return;
+			}
+			cast_speed = preset.cast_time / ability.cast_time;
+			cast_timer = ability.cast_time;
+			nav_agent->set_speed_scale(0.f);
+		}
+	}
+
+	if (action == ActionCast)
+	{
+		if (cast_timer <= 0.f)
+		{
+			cast_ability(ins, target);
+			nav_agent->stop();
+			new CommandIdle(this);
+			return;
+		}
+		else
+			cast_timer -= delta_time;
+		nav_agent->set_speed_scale(0.f);
+	}
 }
 
 void cCharacter::update()

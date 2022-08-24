@@ -17,6 +17,7 @@
 					<animation_transitions>
 						<item item_0="run" item_1="idle" item_2="0.3" />
 						<item item_0="attack" item_1="idle" item_2="0.5" />
+						<item item_0="cast" item_1="idle" item_2="0.3" />
 					</animation_transitions>
 				</item>
 			</components>

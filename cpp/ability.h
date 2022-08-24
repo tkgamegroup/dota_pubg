@@ -12,6 +12,8 @@ struct Ability
 
 	TargetType target_type = TargetNull;
 	uint mana = 0;
+	float distance = 0.f;
+	float cast_time = 0.f;
 
 	void(*active)(cCharacterPtr, cCharacterPtr) = nullptr;
 
