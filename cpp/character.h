@@ -109,6 +109,7 @@ struct CharacterPreset
 	uint					id;
 	std::string				name;
 
+	uint exp = 0;
 	uint hp = 100;
 	uint mp = 100;
 	uint STR = 0;
@@ -123,6 +124,7 @@ struct CharacterPreset
 	float atk_precast = 0.5f; // 0-1, of the atk_interval
 	std::filesystem::path atk_projectile_name;
 	EntityPtr atk_projectile = nullptr;
+	float cast_time;
 	uint armor = 0;
 	uint mov_sp = 100;
 	uint atk_sp = 100;
@@ -135,13 +137,13 @@ void load_character_presets();
 struct ItemInstance
 {
 	uint id;
-	uint num;
+	uint num = 1;
 };
 
 struct AbilityInstance
 {
 	uint id;
-	float cooldown_timer;
+	float cooldown_timer = 0.f;
 };
 
 /// Reflect ctor
@@ -210,12 +212,13 @@ struct cCharacter : Component
 	void inflict_damage(cCharacterPtr target, uint value);
 	bool take_damage(uint value); // return true if the damage causes the character die
 	void gain_exp(uint v);
-	void gain_item(uint id, uint num);
-	void gain_ability(uint id);
-	void use_item(uint idx); 
+	bool gain_item(uint id, uint num);
+	bool gain_ability(uint id);
+	void use_item(ItemInstance* ins);
+	void cast_ability(AbilityInstance* ins);
 	void die();
 
-	void process_move_to(const vec3& target);
+	bool process_approach(const vec3& target, float dist = 0.1f, float ang = 0.f);
 	void process_attack_target(cCharacterPtr target);
 	void process_cast_to_target(cCharacterPtr target);
 

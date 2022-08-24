@@ -12,6 +12,14 @@ FLAME_TYPE(cChest)
 
 const auto CharacterTag = 1 << 1;
 
+enum TargetType
+{
+	TargetNull = 0,
+	TargetEnemy = 1 << 0,
+	TargetFriendly = 1 << 1,
+	TargetLocation = 1 << 2
+};
+
 extern EntityPtr root;
 
 struct MainCamera
@@ -74,8 +82,6 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb);
-
-cChestPtr add_chest(const vec3& pos);
-void pick_up_chest(cCharacterPtr character, cChestPtr chest);
+void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb);
+void add_chest(const vec3& pos, uint item_id, uint item_num = 1);
 

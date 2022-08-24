@@ -40,7 +40,11 @@ CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
 
 void CommandMoveTo::update()
 {
-	character->process_move_to(location);
+	if (character->process_approach(location, 0.6f))
+	{
+		character->nav_agent->stop();
+		new CommandIdle(character);
+	}
 }
 
 CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
@@ -79,7 +83,7 @@ void CommandAttackLocation::update()
 	if (target.obj)
 		character->process_attack_target(target.obj);
 	else
-		character->process_move_to(location);
+		character->process_approach(location);
 }
 
 CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
@@ -94,19 +98,19 @@ void CommandPickUp::update()
 		new CommandIdle(character);
 	else
 	{
-		auto self_pos = character->node->g_pos;
-		auto tar_pos = target.obj->node->g_pos;
-		if (distance(self_pos, tar_pos) <= 1.f)
+		if (character->process_approach(target.obj->node->g_pos, 1.f))
 		{
-			pick_up_chest(character, target.obj);
+			if (character->gain_item(target.obj->item_id, target.obj->item_num))
+			{
+				auto e = target.obj->entity;
+				add_event([e]() {
+					e->remove_from_parent();
+					return false;
+				});
+			}
 
 			character->nav_agent->stop();
 			new CommandIdle(character);
-		}
-		else
-		{
-			character->nav_agent->set_target(tar_pos);
-			character->action = ActionMove;
 		}
 	}
 }
@@ -138,14 +142,15 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.name = "";
+		preset.name = "Knight";
+		preset.exp = 200;
 		preset.atk_interval = 1.8f;
 		preset.atk_precast = 0.43f;
 	}
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.name = "";
+		preset.name = "Mutant";
 		preset.atk_interval = 3.f;
 		preset.atk_precast = 0.49f;
 	}
@@ -236,13 +241,71 @@ bool cCharacter::take_damage(uint value)
 void cCharacter::gain_exp(uint v)
 {
 	exp += v;
-	while (exp > exp_max)
+	while (exp >= exp_max)
 	{
 		exp -= exp_max;
 		lv++;
 		exp_max *= NextLvExpFactor;
 
+		if (lv == 2)
+			gain_ability(0);
 	}
+}
+
+bool cCharacter::gain_item(uint id, uint num)
+{
+	for (auto& ins : inventory)
+	{
+		if (!ins)
+		{
+			ins.reset(new ItemInstance);
+			ins->id = id;
+			ins->num = num;
+			stats_dirty = true;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool cCharacter::gain_ability(uint id)
+{
+	for (auto& ins : abilities)
+	{
+		if (!ins)
+		{
+			ins.reset(new AbilityInstance);
+			ins->id = id;
+			stats_dirty = true;
+			return true;
+		}
+	}
+	return false;
+}
+
+void cCharacter::use_item(ItemInstance* ins)
+{
+	auto& item = Item::get(ins->id);
+	if (!item.active)
+		return;
+	if (item.type == ItemConsumable)
+	{
+		if (ins->num == 0)
+			return;
+		ins->num--;
+		if (ins->num == 0)
+		{
+			for (auto i = 0; i < countof(inventory); i++)
+			{
+				if (inventory[i].get() == ins)
+				{
+					inventory[i].reset(nullptr);
+					break;
+				}
+			}
+		}
+	}
+	item.active(this);
 }
 
 void cCharacter::die()
@@ -286,34 +349,27 @@ void cCharacter::start()
 	}, (uint)this);
 }
 
-void cCharacter::process_move_to(const vec3& target)
+bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 {
+	move_speed = max(0.1f, mov_sp / 100.f);
 	nav_agent->set_target(target);
+	nav_agent->set_speed_scale(move_speed);
 
-	if (length(nav_agent->desire_velocity()) <= 0.f)
-	{
-		nav_agent->stop();
-		new CommandIdle(this);
-	}
-	else
-		action = ActionMove;
+	if (nav_agent->dist <= dist && (ang == 0.f || abs(nav_agent->ang_diff) <= ang))
+		return true;
+	action = ActionMove;
+	return false;
 }
 
 void cCharacter::process_attack_target(cCharacterPtr target)
 {
 	auto& preset = get_preset();
-	auto self_pos = node->g_pos;
-	auto tar_pos = target->node->g_pos;
-	auto dir = tar_pos - self_pos;
-	auto dist = length(dir);
-	dir = normalize(dir);
-	auto ang_diff = abs(angle_diff(node->get_eul().x, degrees(atan2(dir.x, dir.z))));
 
-	if (action == ActionNone || action == ActionMove)
+	if (process_approach(target->node->g_pos, preset.atk_distance, 60.f))
 	{
-		if (dist <= preset.atk_distance)
+		if (action == ActionNone || action == ActionMove)
 		{
-			if (ang_diff <= 60.f && attack_interval_timer <= 0.f)
+			if (attack_interval_timer <= 0.f)
 			{
 				action = ActionAttack;
 				attack_speed = max(0.01f, atk_sp / 100.f);
@@ -322,15 +378,11 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			}
 			else
 				action = ActionNone;
-			nav_agent->set_target(tar_pos, true);
-		}
-		else
-		{
-			action = ActionMove;
-			nav_agent->set_target(tar_pos);
+			nav_agent->set_speed_scale(0.f);
 		}
 	}
-	else if (action == ActionAttack)
+
+	if (action == ActionAttack)
 	{
 		if (attack_timer <= 0.f)
 		{
@@ -348,7 +400,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		}
 		else
 			attack_timer -= delta_time;
-		nav_agent->set_target(tar_pos, true);
+		nav_agent->set_speed_scale(0.f);
 	}
 }
 
@@ -370,6 +422,11 @@ void cCharacter::update()
 
 	if (stats_dirty)
 	{
+		auto& preset = get_preset();
+
+		if (exp_max == 0)
+			exp_max = preset.exp;
+
 		mov_sp = 100;
 		atk_sp = 100;
 
@@ -403,10 +460,8 @@ void cCharacter::update()
 			armature->play("idle"_h);
 			break;
 		case ActionMove:
-			move_speed = max(0.1f, mov_sp / 100.f);
 			armature->playing_speed = move_speed;
 			armature->play("run"_h);
-			nav_agent->set_speed_scale(move_speed);
 			break;
 		case ActionAttack:
 			armature->playing_speed = attack_speed;

@@ -114,6 +114,10 @@ void cMain::start()
 		main_player.character = main_player.character;
 	}
 
+	load_items();
+	load_abilities();
+	load_character_presets();
+
 	if (main_terrain.terrain)
 	{
 		std::vector<vec3> site_positions;
@@ -154,7 +158,7 @@ void cMain::start()
 				e->get_component_i<cNode>(0)->set_pos(demon_coord);
 				auto spawner = e->get_component_t<cSpwaner>();
 				spawner->spwan_interval = 1.f;
-				spawner->spwan_count = 4;
+				spawner->spwan_count = 0;
 				spawner->set_prefab_path(L"assets/monster.prefab");
 				spawner->callbacks.add([spawner, player1_coord](EntityPtr e) {
 					auto character = e->get_component_t<cCharacter>();
@@ -170,7 +174,18 @@ void cMain::start()
 			}
 
 			main_player.node->set_pos(main_terrain.get_coord(player1_coord + vec3(0.f, 0.f, -8.f)));
-			add_chest(player1_coord + vec3(0.f, 0.f, -9.f))->item_id = 0;;
+			add_chest(player1_coord + vec3(0.f, 0.f, -9.f), Item::find("Boots of Speed"));
+			add_chest(player1_coord + vec3(1.f, 0.f, -9.f), Item::find("Magic Candy"));
+
+			{
+				auto e = Entity::create();
+				e->load(L"assets\\monster.prefab");
+				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -8.f)));
+				auto character = e->get_component_t<cCharacter>();
+				character->faction = 2;
+				character->nav_agent->separation_group = 2;
+				root->add_child(e);
+			}
 
 			{
 				auto e = Entity::create();
@@ -178,7 +193,7 @@ void cMain::start()
 				e->get_component_i<cNode>(0)->set_pos(player1_coord);
 				auto spawner = e->get_component_t<cSpwaner>();
 				spawner->spwan_interval = 1.f;
-				spawner->spwan_count = 4;
+				spawner->spwan_count = 0;
 				spawner->set_prefab_path(L"assets/monster.prefab");
 				spawner->callbacks.add([spawner, demon_coord](EntityPtr e) {
 					auto character = e->get_component_t<cCharacter>();
@@ -316,11 +331,11 @@ void cMain::start()
 					auto p1 = (vec2)ImGui::GetItemRectMax();
 					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
 					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", main_player.character->exp, main_player.character->exp_max);
+					auto str = std::format("LV {}  {}/{}", main_player.character->lv, main_player.character->exp, main_player.character->exp_max);
 					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 				}
-				if (main_player.character == main_player.character)
+
 				{
 					auto icon_size = 48.f;
 					ImGui::BeginGroup();
@@ -330,10 +345,22 @@ void cMain::start()
 						static const char* names[] = {
 							"ability_1", "ability_2", "ability_3", "ability_4", "ability_5", "ability_6"
 						};
-						ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
+						auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+						auto& ins = main_player.character->abilities[i];
+						if (ins)
+						{
+							auto& ability = Ability::get(ins->id);
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::BeginTooltip();
+								ImGui::TextUnformatted(ability.name.c_str());
+								ImGui::EndTooltip();
+							}
+							dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+						}
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
 						static const char* hot_keys[] = {
 							"Q", "W", "E", "R"
@@ -350,11 +377,10 @@ void cMain::start()
 						static const char* names[] = {
 							"item_1", "item_2", "item_3", "item_4", "item_5", "item_6"
 						};
-						ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
+						auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
 						auto p0 = (vec2)ImGui::GetItemRectMin();
 						auto p1 = (vec2)ImGui::GetItemRectMax();
 						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
 						auto& ins = main_player.character->inventory[i];
 						if (ins)
 						{
@@ -375,11 +401,14 @@ void cMain::start()
 								if (ImGui::Selectable("Drop"))
 								{
 									main_player.character->inventory[i].reset(nullptr);
-									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)))->item_id = ins->id;
+									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
 								}
 								ImGui::EndPopup();
 							}
 							dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
+
+							if (pressed)
+								main_player.character->use_item(ins.get());
 						}
 						if (ImGui::BeginDragDropTarget())
 						{
@@ -391,6 +420,7 @@ void cMain::start()
 							}
 							ImGui::EndDragDropTarget();
 						}
+						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
 						static const char* hot_keys[] = {
 							"1", "2", "3", "4", "5", "6"
 						};
@@ -429,10 +459,6 @@ void cMain::start()
 			return cursor;
 		return CursorNone;
 	}, (uint)this);
-
-	load_items();
-	load_abilities();
-	load_character_presets();
 }
 
 void cMain::update()
@@ -599,7 +625,7 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb)
+void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb)
 {
 	auto e = prefab->copy();
 	e->get_component_t<cNode>()->set_pos(pos);
@@ -609,7 +635,7 @@ cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr t
 	root->add_child(e);
 }
 
-cChestPtr add_chest(const vec3& pos)
+void add_chest(const vec3& pos, uint item_id, uint item_num)
 {
 	static EntityPtr e_chest = nullptr;
 	if (!e_chest)
@@ -620,31 +646,9 @@ cChestPtr add_chest(const vec3& pos)
 	auto e = e_chest->copy();
 	e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
-	return e->get_component_t<cChest>();
-}
-
-void pick_up_chest(cCharacterPtr character, cChestPtr chest)
-{
-	auto ok = false;
-	for (auto& ins : character->inventory)
-	{
-		if (!ins)
-		{
-			ins.reset(new ItemInstance);
-			ins->id = chest->item_id;
-			character->stats_dirty = true;
-			ok = true;
-			break;
-		}
-	}
-	if (ok)
-	{
-		auto e = chest->entity;
-		add_event([e]() {
-			e->remove_from_parent();
-			return false;
-		});
-	}
+	auto chest = e->get_component_t<cChest>();
+	chest->item_id = item_id;
+	chest->item_num = item_num;
 }
 
 EXPORT void* cpp_info()

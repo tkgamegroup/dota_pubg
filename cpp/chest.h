@@ -9,6 +9,7 @@ struct cChest : Component
 	cNodePtr node;
 
 	int item_id = -1;
+	uint item_num = 1;
 
 	void on_init() override;
 
