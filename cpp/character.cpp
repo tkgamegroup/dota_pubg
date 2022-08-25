@@ -146,15 +146,17 @@ void load_character_presets()
 		preset.id = character_presets.size() - 1;
 		preset.name = "Knight";
 		preset.exp = 200;
-		preset.atk_interval = 1.8f;
-		preset.atk_time = 0.77f;
+		preset.atk_time = 1.8f;
+		preset.atk_point = 0.68f;
+		preset.cast_time = 0.5f;
+		preset.cast_point = 0.3f;
 	}
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
 		preset.name = "Mutant";
-		preset.atk_interval = 3.f;
-		preset.atk_time = 1.47f;
+		preset.atk_time = 3.f;
+		preset.atk_point = 1.47f;
 	}
 }
 
@@ -312,7 +314,9 @@ void cCharacter::use_item(ItemInstance* ins)
 
 void cCharacter::cast_ability(AbilityInstance* ins, cCharacterPtr target)
 {
-
+	auto& ability = Ability::get(ins->id);
+	if (ability.active)
+		ability.active(this, target);
 }
 
 void cCharacter::die()
@@ -380,8 +384,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			{
 				action = ActionAttack;
 				attack_speed = max(0.01f, atk_sp / 100.f);
-				attack_interval_timer = preset.atk_interval / attack_speed;
-				attack_timer = preset.atk_time;
+				attack_interval_timer = preset.atk_time / attack_speed;
+				attack_timer = preset.atk_point / attack_speed;
 			}
 			else
 				action = ActionNone;
@@ -429,7 +433,7 @@ void cCharacter::process_cast_ability_to_target(AbilityInstance* ins, cCharacter
 				return;
 			}
 			cast_speed = preset.cast_time / ability.cast_time;
-			cast_timer = ability.cast_time;
+			cast_timer = preset.cast_point / cast_speed;
 			nav_agent->set_speed_scale(0.f);
 		}
 	}

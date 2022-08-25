@@ -1,6 +1,10 @@
 #include "ability.h"
+#include "character.h"
 
 #include <flame/graphics/image.h>
+#include <flame/universe/entity.h>
+#include <flame/universe/components/node.h>
+#include <flame/universe/components/nav_agent.h>
 
 std::vector<Ability> abilities;
 
@@ -23,7 +27,18 @@ void load_abilities()
 		ability.distance = 5.f;
 		ability.cast_time = 0.5f;
 		ability.active = [](cCharacterPtr caster, cCharacterPtr target) {
+			static EntityPtr projectile = nullptr;
+			if (!projectile)
+			{
+				projectile = Entity::create();
+				projectile->load(L"assets\\models\\fireball.prefab");
+			}
+			add_projectile(projectile, caster->node->g_pos + 
+				vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
+				caster->node->g_rot[2] * 0.3f,
+				target, [](cCharacterPtr t) {
 
+			});
 		};
 	}
 }

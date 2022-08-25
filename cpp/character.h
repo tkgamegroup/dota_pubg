@@ -133,11 +133,12 @@ struct CharacterPreset
 	uint INT_GROW = 0;
 	uint atk = 0;
 	float atk_distance = 1.5f;
-	float atk_interval = 2.f;
-	float atk_time = 1.f; // of animation time
+	float atk_time = 2.f; // animation time (interval)
+	float atk_point = 1.f; // hit point
 	std::filesystem::path atk_projectile_name;
 	EntityPtr atk_projectile = nullptr;
-	float cast_time = 0.5f; // of animation time
+	float cast_time = 1.f; // animation time
+	float cast_point = 0.5f; // hit point
 	uint armor = 0;
 	uint mov_sp = 100;
 	uint atk_sp = 100;
@@ -175,8 +176,8 @@ struct cCharacter : Component
 	uint exp_max = 0;
 
 	/// Reflect
-	uint hp = 1;
-	uint hp_max = 1;
+	uint hp = 100;
+	uint hp_max = 100;
 
 	/// Reflect
 	uint mp = 1;
@@ -186,7 +187,7 @@ struct cCharacter : Component
 	uint AGI = 0;
 	uint INT = 0;
 
-	uint atk = 0;
+	uint atk = 10;
 	uint armor = 0;
 	uint mov_sp = 0;
 	uint atk_sp = 0;
