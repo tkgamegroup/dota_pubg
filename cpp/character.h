@@ -122,15 +122,15 @@ struct CharacterPreset
 	uint					id;
 	std::string				name;
 
-	uint exp = 0;
+	std::vector<uint> exp_list;
 	uint hp = 100;
 	uint mp = 100;
 	uint STR = 0;
 	uint AGI = 0;
 	uint INT = 0;
-	uint STR_GROW = 0;
-	uint AGI_GROW = 0;
-	uint INT_GROW = 0;
+	uint STR_GROW = 0; // multiped by 10
+	uint AGI_GROW = 0; // multiped by 10
+	uint INT_GROW = 0; // multiped by 10
 	uint atk = 0;
 	float atk_distance = 1.5f;
 	float atk_time = 2.f; // animation time (interval)

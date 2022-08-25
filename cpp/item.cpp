@@ -44,8 +44,7 @@ void load_items()
 		item.icon_uvs = vec4(0.f / 13, 3.f / 15.f, 1.f / 13, 4.f / 15.f);
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.active = [](cCharacterPtr character) {
-			if (character->exp_max > 0)
-				character->gain_exp(character->exp_max);
+			character->gain_exp(character->exp_max);
 		};
 	}
 }

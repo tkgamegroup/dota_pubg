@@ -145,7 +145,16 @@ void load_character_presets()
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
 		preset.name = "Knight";
-		preset.exp = 200;
+		preset.exp_list = { 200, 0 };
+		preset.hp = 200;
+		preset.mp = 75;
+		preset.STR = 21;
+		preset.AGI = 16;
+		preset.INT = 18;
+		preset.STR_GROW = 34;
+		preset.AGI_GROW = 20;
+		preset.INT_GROW = 17;
+		preset.atk = 32;
 		preset.atk_time = 1.8f;
 		preset.atk_point = 0.68f;
 		preset.cast_time = 0.5f;
@@ -212,20 +221,15 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 	return ret;
 }
 
-const auto NextLvExpFactor = 1.1f;
-
 static uint calc_exp(uint lv)
 {
-	return (100.f * (1.f - pow(NextLvExpFactor, lv)) / (1.f - NextLvExpFactor)) * 0.13f;
+	return lv * 10;
 }
 
 void cCharacter::inflict_damage(cCharacterPtr target, uint value)
 {
 	if (target->take_damage(value))
-	{
-		if (exp_max > 0)
-			gain_exp(calc_exp(target->lv));
-	}
+		gain_exp(calc_exp(target->lv));
 }
 
 bool cCharacter::take_damage(uint value)
@@ -244,12 +248,15 @@ bool cCharacter::take_damage(uint value)
 
 void cCharacter::gain_exp(uint v)
 {
+	if (exp_max == 0)
+		return;
 	exp += v;
-	while (exp >= exp_max)
+	while (exp_max > 0 && exp >= exp_max)
 	{
 		exp -= exp_max;
 		lv++;
-		exp_max *= NextLvExpFactor;
+		exp_max = get_preset().exp_list[lv - 1];
+		stats_dirty = true;
 
 		if (lv == 2)
 			gain_ability(0);
@@ -468,11 +475,22 @@ void cCharacter::update()
 	{
 		auto& preset = get_preset();
 
-		if (exp_max == 0)
-			exp_max = preset.exp;
+		exp_max = preset.exp_list.empty() ? 0 : preset.exp_list[lv - 1];
 
-		mov_sp = 100;
-		atk_sp = 100;
+		auto pre_hp_max = hp_max;
+		auto pre_mp_max = mp_max;
+
+		hp_max = preset.hp;
+		mp_max = preset.mp;
+
+		STR = preset.STR + round(preset.STR_GROW * (lv - 1) / 10);
+		AGI = preset.AGI + round(preset.AGI_GROW * (lv - 1) / 10);
+		INT = preset.INT + round(preset.INT_GROW * (lv - 1) / 10);
+
+		atk = preset.atk;
+
+		mov_sp = preset.mov_sp;
+		atk_sp = preset.atk_sp;
 
 		for (auto& ins : inventory)
 		{
@@ -483,6 +501,24 @@ void cCharacter::update()
 					item.passive(this);
 			}
 		}
+
+		for (auto& ins : abilities)
+		{
+			if (ins)
+			{
+
+			}
+		}
+
+		hp_max += STR * 20;
+		mp_max += INT * 12;
+
+		if (hp_max != pre_hp_max)
+			hp *= (float)hp_max / pre_hp_max;
+		if (mp_max != pre_mp_max)
+			mp *= (float)mp_max / pre_mp_max;
+
+		atk += STR;
 
 		stats_dirty = false;
 	}

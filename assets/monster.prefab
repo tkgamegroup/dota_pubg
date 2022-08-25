@@ -2,7 +2,7 @@
 <prefab file_id="944e2c0c4ab810e04bc801ba75b18c09" name="monster" tag="4">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavAgent" radius="0.3" height="1.8" speed="5" />
+		<item type_name="flame::cNavAgent" radius="0.5" height="1.8" speed="5" />
 		<item type_name="cCharacter" faction="2" ai_id="1" preset_id="1" />
 	</components>
 	<children>
