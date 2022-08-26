@@ -408,8 +408,8 @@ void cMain::start()
 							{
 								if (ImGui::Selectable("Drop"))
 								{
-									main_player.character->inventory[i].reset(nullptr);
 									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
+									main_player.character->inventory[i].reset(nullptr);
 								}
 								ImGui::EndPopup();
 							}
