@@ -54,8 +54,8 @@ void cProjectile::update()
 	}
 	else
 	{
-		auto pa = node->g_pos;
-		auto pb = target->node->g_pos + vec3(0.f, target->nav_agent->height * 0.5f, 0.f);
+		auto pa = node->pos;
+		auto pb = target->node->pos + vec3(0.f, target->nav_agent->height * 0.5f, 0.f);
 		if (distance(pa, pb) < speed)
 		{
 			if (callback)

@@ -15,7 +15,9 @@ struct Ability
 	float distance = 0.f;
 	float cast_time = 0.f;
 
-	void(*active)(cCharacterPtr, cCharacterPtr) = nullptr;
+	void(*active)(cCharacterPtr) = nullptr;
+	void(*active_l)(cCharacterPtr, const vec3&) = nullptr;
+	void(*active_t)(cCharacterPtr, cCharacterPtr) = nullptr;
 
 	static const Ability& get(uint id);
 };

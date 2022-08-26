@@ -361,7 +361,13 @@ void cMain::start()
 							if (pressed)
 							{
 								select_mode = ability.target_type;
-								if (ability.target_type == TargetEnemy)
+								if (ability.target_type & TargetLocation)
+								{
+									select_location_callback = [ins](const vec3& location) {
+										new CommandCastAbilityToLocation(main_player.character, ins, location);
+									};
+								}
+								if (ability.target_type & TargetEnemy)
 								{
 									select_enemy_callback = [ins](cCharacterPtr character) {
 										new CommandCastAbilityToTarget(main_player.character, ins, character);
@@ -408,7 +414,7 @@ void cMain::start()
 							{
 								if (ImGui::Selectable("Drop"))
 								{
-									add_chest(main_player.character->node->g_pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
+									add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
 									main_player.character->inventory[i].reset(nullptr);
 								}
 								ImGui::EndPopup();
@@ -621,7 +627,7 @@ void cMain::update()
 				new CommandAttackTarget(main_player.character, character);
 			};
 			select_location_callback = [](const vec3& pos) {
-				new CommandMoveTo(main_player.character, pos);
+				new CommandAttackLocation(main_player.character, pos);
 			};
 		}
 	}
@@ -630,7 +636,7 @@ void cMain::update()
 	{
 		static vec3 velocity(0.f);
 		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
-		main_camera.node->set_pos(smooth_damp(main_camera.node->pos, main_player.node->g_pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
+		main_camera.node->set_pos(smooth_damp(main_camera.node->pos, main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
 	}
 }
 
@@ -669,6 +675,12 @@ void add_chest(const vec3& pos, uint item_id, uint item_num)
 	auto chest = e->get_component_t<cChest>();
 	chest->item_id = item_id;
 	chest->item_num = item_num;
+}
+
+void teleport(cCharacterPtr character, const vec3& location)
+{
+	character->node->set_pos(location);
+	character->nav_agent->update_pos();
 }
 
 EXPORT void* cpp_info()

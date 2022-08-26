@@ -99,6 +99,25 @@ struct CommandPickUp : Command
 	void update() override;
 };
 
+struct CommandCastAbility : Command
+{
+	AbilityInstance* ins;
+
+	CommandCastAbility(cCharacterPtr character, AbilityInstance* ins);
+
+	void update() override;
+};
+
+struct CommandCastAbilityToLocation : Command
+{
+	vec3 location;
+	AbilityInstance* ins;
+
+	CommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location);
+
+	void update() override;
+};
+
 struct CommandCastAbilityToTarget : Command
 {
 	Tracker<cCharacterPtr> target;
@@ -218,14 +237,12 @@ struct cCharacter : Component
 	bool gain_item(uint id, uint num);
 	bool gain_ability(uint id);
 	void use_item(ItemInstance* ins);
-	void cast_ability(AbilityInstance* ins, cCharacterPtr target);
+	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
 	void die();
 
 	bool process_approach(const vec3& target, float dist = 0.1f, float ang = 0.f);
 	void process_attack_target(cCharacterPtr target);
-	void process_cast_ability(AbilityInstance* ins);
-	void process_cast_ability_to_location(AbilityInstance* ins, const vec3& location);
-	void process_cast_ability_to_target(AbilityInstance* ins, cCharacterPtr target);
+	void process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
 
 	void start() override;
 	void update() override;

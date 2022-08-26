@@ -71,7 +71,7 @@ CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3
 void CommandAttackLocation::update()
 {
 	auto atk_dist = character->get_preset().atk_distance;
-	auto dist = target.obj ? distance(character->node->g_pos, target.obj->node->g_pos) : 10000.f;
+	auto dist = target.obj ? distance(character->node->pos, target.obj->node->pos) : 10000.f;
 	if (dist > atk_dist + 12.f)
 		target.set(nullptr);
 	if (character->action != ActionAttack)
@@ -99,7 +99,7 @@ void CommandPickUp::update()
 		new CommandIdle(character);
 	else
 	{
-		if (character->process_approach(target.obj->node->g_pos, 1.f))
+		if (character->process_approach(target.obj->node->pos, 1.f))
 		{
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
 			{
@@ -116,6 +116,18 @@ void CommandPickUp::update()
 	}
 }
 
+CommandCastAbilityToLocation::CommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location) :
+	Command(character),
+	ins(ins)
+{
+	location = _location;
+}
+
+void CommandCastAbilityToLocation::update()
+{
+	character->process_cast_ability(ins, location, nullptr);
+}
+
 CommandCastAbilityToTarget::CommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target) :
 	Command(character),
 	ins(ins)
@@ -128,7 +140,7 @@ void CommandCastAbilityToTarget::update()
 	if (!target.obj)
 		new CommandIdle(character);
 	else
-		character->process_cast_ability_to_target(ins, target.obj);
+		character->process_cast_ability(ins, vec3(0.f), target.obj);
 }
 
 std::vector<CharacterPreset> character_presets;
@@ -197,7 +209,7 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 			return ret;
 	}
 	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(node->g_pos, radius ? radius : 3.5f, objs, CharacterTag);
+	sScene::instance()->octree->get_colliding(node->pos, radius ? radius : 3.5f, objs, CharacterTag);
 	for (auto obj : objs)
 	{
 		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && chr->faction != faction)
@@ -206,11 +218,11 @@ std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_ti
 	if (sort)
 	{
 		std::vector<std::pair<float, cCharacterPtr>> dist_list(ret.size());
-		auto self_pos = node->g_pos;
+		auto self_pos = node->pos;
 		for (auto i = 0; i < ret.size(); i++)
 		{
 			auto c = ret[i];
-			dist_list[i] = std::make_pair(distance(c->node->g_pos, self_pos), c);
+			dist_list[i] = std::make_pair(distance(c->node->pos, self_pos), c);
 		}
 		std::sort(dist_list.begin(), dist_list.end(), [](const auto& a, const auto& b) {
 			return a.first < b.first;
@@ -259,7 +271,7 @@ void cCharacter::gain_exp(uint v)
 		stats_dirty = true;
 
 		if (lv == 2)
-			gain_ability(0);
+			gain_ability(1);
 	}
 }
 
@@ -319,11 +331,15 @@ void cCharacter::use_item(ItemInstance* ins)
 	item.active(this);
 }
 
-void cCharacter::cast_ability(AbilityInstance* ins, cCharacterPtr target)
+void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
 {
 	auto& ability = Ability::get(ins->id);
 	if (ability.active)
-		ability.active(this, target);
+		ability.active(this);
+	else if (ability.active_l)
+		ability.active_l(this, location);
+	else if (ability.active_t)
+		ability.active_t(this, target);
 }
 
 void cCharacter::die()
@@ -352,7 +368,7 @@ void cCharacter::start()
 	graphics::gui_callbacks.add([this]() {
 		if (main_camera.camera)
 		{
-			auto p = main_camera.camera->world_to_screen(node->g_pos + vec3(0.f, nav_agent->height + 0.1f, 0.f));
+			auto p = main_camera.camera->world_to_screen(node->pos + vec3(0.f, nav_agent->height + 0.1f, 0.f));
 			if (p.x > 0.f && p.y > 0.f)
 			{
 				p += sInput::instance()->offset;
@@ -383,7 +399,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 {
 	auto& preset = get_preset();
 
-	if (process_approach(target->node->g_pos, preset.atk_distance, 60.f))
+	if (process_approach(target->node->pos, preset.atk_distance, 60.f))
 	{
 		if (action == ActionNone || action == ActionMove)
 		{
@@ -406,7 +422,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		{
 			if (preset.atk_projectile)
 			{
-				add_projectile(preset.atk_projectile, node->g_pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, [this](cCharacterPtr t) {
+				add_projectile(preset.atk_projectile, node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, [this](cCharacterPtr t) {
 					if (t) 
 						t->take_damage(atk);
 				});
@@ -422,19 +438,20 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 	}
 }
 
-void cCharacter::process_cast_ability_to_target(AbilityInstance* ins, cCharacterPtr target)
+void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
 {
 	auto& preset = get_preset();
 	auto& ability = Ability::get(ins->id);
+	auto pos = target ? target->node->pos : location;
 
-	if (process_approach(target->node->g_pos, ability.distance, 15.f))
+	if (process_approach(pos, ability.distance, 15.f))
 	{
 		if (action == ActionNone || action == ActionMove)
 		{
 			action = ActionCast;
 			if (ability.cast_time == 0.f)
 			{
-				cast_ability(ins, target);
+				cast_ability(ins, pos, target);
 				nav_agent->stop();
 				new CommandIdle(this);
 				return;
@@ -449,7 +466,7 @@ void cCharacter::process_cast_ability_to_target(AbilityInstance* ins, cCharacter
 	{
 		if (cast_timer <= 0.f)
 		{
-			cast_ability(ins, target);
+			cast_ability(ins, pos, target);
 			nav_agent->stop();
 			new CommandIdle(this);
 			return;
