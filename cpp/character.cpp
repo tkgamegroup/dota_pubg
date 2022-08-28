@@ -145,18 +145,12 @@ void CommandCastAbilityToTarget::update()
 
 std::vector<CharacterPreset> character_presets;
 
-const CharacterPreset& CharacterPreset::get(uint id)
-{
-	assert(id < character_presets.size());
-	return character_presets[id];
-}
-
 void load_character_presets()
 {
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.name = "Knight";
+		preset.name = "Dragon Knight";
 		preset.exp_list = { 200, 0 };
 		preset.hp = 200;
 		preset.mp = 75;
@@ -175,10 +169,47 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.name = "Mutant";
-		preset.atk_time = 3.f;
+		preset.name = "Blood Seeker";
+		preset.exp_list = { 200, 0 };
+		preset.hp = 200;
+		preset.mp = 75;
+		preset.STR = 24;
+		preset.AGI = 22;
+		preset.INT = 17;
+		preset.STR_GROW = 27;
+		preset.AGI_GROW = 31;
+		preset.INT_GROW = 20;
+		preset.atk = 35;
+		preset.atk_time = 1.7f;
 		preset.atk_point = 1.47f;
 	}
+}
+
+int CharacterPreset::find(const std::string& name)
+{
+	if (character_presets.empty())
+		load_character_presets();
+	for (auto i = 0; i < character_presets.size(); i++)
+	{
+		if (character_presets[i].name == name)
+			return i;
+	}
+	return -1;
+}
+
+const CharacterPreset& CharacterPreset::get(uint id)
+{
+	if (character_presets.empty())
+		load_character_presets();
+	return character_presets[id];
+}
+
+void cCharacter::set_preset_name(const std::string& name)
+{
+	if (preset_name == name)
+		return;
+	preset_name = name;
+	preset_id = CharacterPreset::find(preset_name);
 }
 
 cCharacter::~cCharacter()

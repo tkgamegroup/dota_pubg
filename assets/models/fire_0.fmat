@@ -1,13 +1,6 @@
 <?xml version="1.0"?>
-<material color="1,0.3,0,1" filename="D:\dota_pubg\assets\models\fire_0.fmat">
+<material color="1,0.3,0,1">
 	<textures>
-		<item />
-		<item />
-		<item />
-		<item />
-		<item />
-		<item />
-		<item />
 		<item />
 	</textures>
 </material>

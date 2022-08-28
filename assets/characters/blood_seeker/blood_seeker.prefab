@@ -1,17 +1,19 @@
 <?xml version="1.0"?>
-<prefab>
+<prefab file_id="944e2c0c4ab810e04bc801ba75b18c09" tag="4">
 	<components>
 		<item type_name="flame::cNode" />
+		<item type_name="flame::cNavAgent" radius="0.5" height="1.8" speed="5" separation_group="2" />
+		<item type_name="cCharacter" faction="2" ai_id="1" preset_name="Blood Seeker" />
 	</components>
 	<children>
 		<item name="RootNode">
 			<components>
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
-				<item type_name="flame::cArmature" armature_name="assets\characters\mutant\mutant.fmod">
+				<item type_name="flame::cArmature" armature_name="blood_seeker.fmod">
 					<animation_names>
-						<item first="assets\characters\mutant\idle.fani" second="idle" />
-						<item first="assets\characters\mutant\run.fani" second="run" />
-						<item first="assets\characters\mutant\attack.fani" second="attack" />
+						<item first="idle.fani" second="idle" />
+						<item first="run.fani" second="run" />
+						<item first="attack.fani" second="attack" />
 					</animation_names>
 					<animation_transitions>
 						<item item_0="run" item_1="idle" item_2="0.3" />
@@ -324,7 +326,7 @@
 				<item name="MutantMesh">
 					<components>
 						<item type_name="flame::cNode" pos="4.0928e-10,1.06866e-11,-3.24718e-12" qut="1,8.14603e-08,0,1.72499e-29" />
-						<item type_name="flame::cMesh" mesh_name="assets\characters\mutant\mutant.fmod#mesh0" material_name="assets\characters\mutant\mutant_mutant_M.001.fmat" />
+						<item type_name="flame::cMesh" mesh_name="blood_seeker.fmod#mesh0" material_name="blood_seeker.fmat" />
 					</components>
 				</item>
 			</children>

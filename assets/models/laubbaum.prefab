@@ -13,7 +13,7 @@
 				<item file_id="194c072d4786d69ef6c67aa2a096e2b2" name="Circle.009">
 					<components>
 						<item type_name="flame::cNode" eul="75.8528,-90,0" qut="0.557767,-0.557767,0.434622,0.434622" scl="92.0181,92.0181,92.0181" />
-						<item type_name="flame::cMesh" mesh_name="assets\models\laubbaum.fmod#mesh0" material_name="assets\models\laubbaum_Material.fmat" />
+						<item type_name="flame::cMesh" mesh_name="laubbaum.fmod#mesh0" material_name="laubbaum_Material.fmat" />
 					</components>
 				</item>
 			</children>

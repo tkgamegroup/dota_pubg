@@ -5,22 +5,6 @@
 
 std::vector<Item> items;
 
-int Item::find(const std::string& name)
-{
-	for (auto i = 0; i < items.size(); i++)
-	{
-		if (items[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const Item& Item::get(uint id)
-{
-	assert(id < items.size());
-	return items[id];
-}
-
 void load_items()
 {
 	{
@@ -47,4 +31,23 @@ void load_items()
 			character->gain_exp(character->exp_max);
 		};
 	}
+}
+
+int Item::find(const std::string& name)
+{
+	if (items.empty())
+		load_items();
+	for (auto i = 0; i < items.size(); i++)
+	{
+		if (items[i].name == name)
+			return i;
+	}
+	return -1;
+}
+
+const Item& Item::get(uint id)
+{
+	if (items.empty())
+		load_items();
+	return items[id];
 }

@@ -162,10 +162,9 @@ struct CharacterPreset
 	uint mov_sp = 100;
 	uint atk_sp = 100;
 
+	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);
 };
-
-void load_character_presets();
 
 /// Reflect ctor
 struct cCharacter : Component
@@ -183,6 +182,10 @@ struct cCharacter : Component
 	uint ai_id = 0;
 	/// Reflect
 	uint preset_id = 0;
+	/// Reflect
+	std::string preset_name;
+	/// Reflect
+	void set_preset_name(const std::string& name);
 	inline const CharacterPreset& get_preset()
 	{
 		return CharacterPreset::get(preset_id);

@@ -19,7 +19,6 @@ struct Ability
 	void(*active_l)(cCharacterPtr, const vec3&) = nullptr;
 	void(*active_t)(cCharacterPtr, cCharacterPtr) = nullptr;
 
+	static int find(const std::string& name);
 	static const Ability& get(uint id);
 };
-
-void load_abilities();

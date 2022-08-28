@@ -13,7 +13,7 @@
 				<item file_id="5e5e78c142887a162818299cb633cc34" name="Arrow00_mesh">
 					<components>
 						<item type_name="flame::cNode" eul="-0,2.50448e-06,0" qut="1,2.18557e-08,0,0" />
-						<item type_name="flame::cMesh" mesh_name="assets\models\Arrow00_mesh.fmod#mesh0" material_name="assets\models\Arrow00_mesh_Arrow00_mat.fmat" />
+						<item type_name="flame::cMesh" mesh_name="Arrow00_mesh.fmod#mesh0" material_name="Arrow00_mesh_Arrow00_mat.fmat" />
 					</components>
 				</item>
 			</children>

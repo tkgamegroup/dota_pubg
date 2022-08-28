@@ -105,15 +105,11 @@ void cMain::start()
 	main_terrain.init(entity->find_child("terrain"));
 	{
 		auto e = Entity::create();
-		e->load(L"assets/main_player.prefab");
+		e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
 		root->add_child(e);
 		main_player.init(e);
 		main_player.character = main_player.character;
 	}
-
-	load_items();
-	load_abilities();
-	load_character_presets();
 
 	if (main_terrain.terrain)
 	{
@@ -149,59 +145,14 @@ void cMain::start()
 			auto demon_coord = main_terrain.get_coord(demon_pos);
 			auto player1_coord = main_terrain.get_coord(player1_pos);
 
-			{
-				auto e = Entity::create();
-				e->load(L"assets/spawner.prefab");
-				e->get_component_i<cNode>(0)->set_pos(demon_coord);
-				auto spawner = e->get_component_t<cSpwaner>();
-				spawner->spwan_interval = 1.f;
-				spawner->spwan_count = 0;
-				spawner->set_prefab_path(L"assets/monster.prefab");
-				spawner->callbacks.add([spawner, player1_coord](EntityPtr e) {
-					auto character = e->get_component_t<cCharacter>();
-					character->faction = 2;
-					character->nav_agent->separation_group = 2;
-					add_event([character, player1_coord]() {
-						new CommandAttackLocation(character, player1_coord);
-						return false;
-					});
-					spawner->spwan_interval = 10000.f;
-				});
-				root->add_child(e);
-			}
-
 			main_player.node->set_pos(main_terrain.get_coord(player1_coord + vec3(0.f, 0.f, -8.f)));
 			add_chest(player1_coord + vec3(0.f, 0.f, -9.f), Item::find("Boots of Speed"));
 			add_chest(player1_coord + vec3(1.f, 0.f, -9.f), Item::find("Magic Candy"));
 
 			{
 				auto e = Entity::create();
-				e->load(L"assets\\monster.prefab");
+				e->load(L"assets\\characters\\dragon_knight\\dragon_knight.prefab");
 				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -8.f)));
-				auto character = e->get_component_t<cCharacter>();
-				character->faction = 2;
-				character->nav_agent->separation_group = 2;
-				root->add_child(e);
-			}
-
-			{
-				auto e = Entity::create();
-				e->load(L"assets/spawner.prefab");
-				e->get_component_i<cNode>(0)->set_pos(player1_coord);
-				auto spawner = e->get_component_t<cSpwaner>();
-				spawner->spwan_interval = 1.f;
-				spawner->spwan_count = 0;
-				spawner->set_prefab_path(L"assets/monster.prefab");
-				spawner->callbacks.add([spawner, demon_coord](EntityPtr e) {
-					auto character = e->get_component_t<cCharacter>();
-					character->faction = 1;
-					character->nav_agent->separation_group = 1;
-					add_event([character, demon_coord]() {
-						new CommandAttackLocation(character, demon_coord);
-						return false;
-					});
-					spawner->spwan_interval = 10000.f;
-				});
 				root->add_child(e);
 			}
 		}

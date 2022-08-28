@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<prefab file_id="318a777f4d3654d1e5786f8e1326b6b9" name="terrain">
+	<components>
+		<item type_name="flame::cNode" />
+		<item type_name="flame::cTerrain" extent="256,16,256" height_map_name="height.png" splash_map_name="splash.png" material_name="terrain.fmat" use_grass_field="true" grass_field_tess_level="6" grass_channel="1" grass_texture_name="grass.png" />
+	</components>
+</prefab>

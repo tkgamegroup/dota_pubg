@@ -26,4 +26,3 @@ struct Item
 	static const Item& get(uint id);
 };
 
-void load_items();

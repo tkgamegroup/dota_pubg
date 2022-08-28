@@ -1,18 +1,20 @@
 <?xml version="1.0"?>
-<prefab>
+<prefab file_id="5ccdadde44f9fd98e684f6baa6717ce7" tag="2">
 	<components>
 		<item type_name="flame::cNode" />
+		<item type_name="flame::cNavAgent" radius="0.5" height="1.8" speed="7" separation_group="1" />
+		<item type_name="cCharacter" faction="1" preset_name="Dragon Knight" />
 	</components>
 	<children>
 		<item name="RootNode">
 			<components>
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
-				<item type_name="flame::cArmature" armature_name="assets\characters\knight\Paladin.fmod">
+				<item type_name="flame::cArmature" armature_name="dragon_knight.fmod">
 					<animation_names>
-						<item first="assets\characters\knight\idle.fani" second="idle" />
-						<item first="assets\characters\knight\run.fani" second="run" />
-						<item first="assets\characters\knight\attack.fani" second="attack" />
-						<item first="assets\characters\knight\cast.fani" second="cast" />
+						<item first="idle.fani" second="idle" />
+						<item first="run.fani" second="run" />
+						<item first="attack.fani" second="attack" />
+						<item first="cast.fani" second="cast" />
 					</animation_names>
 					<animation_transitions>
 						<item item_0="run" item_1="idle" item_2="0.3" />
@@ -600,25 +602,25 @@
 				<item name="Paladin_J_Nordstrom_shield">
 					<components>
 						<item type_name="flame::cNode" pos="9.34993e-07,-2.26276e-09,-3.98919e-07" qut="1,8.14603e-08,-5.55111e-17,-6.245e-17" scl="1,1,1" />
-						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh0" material_name="assets\characters\knight\Paladin.fmat" />
+						<item type_name="flame::cMesh" mesh_name="dragon_knight.fmod#mesh0" material_name="dragon_knight.fmat" />
 					</components>
 				</item>
 				<item name="Paladin_J_Nordstrom_helmet">
 					<components>
 						<item type_name="flame::cNode" pos="9.32423e-07,-4.12449e-09,-4.39875e-07" qut="1,8.14603e-08,-5.55111e-17,-6.245e-17" scl="1,1,1" />
-						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh1" material_name="assets\characters\knight\Paladin.fmat" />
+						<item type_name="flame::cMesh" mesh_name="dragon_knight.fmod#mesh1" material_name="dragon_knight.fmat" />
 					</components>
 				</item>
 				<item name="Paladin_J_Nordstrom_sword">
 					<components>
 						<item type_name="flame::cNode" pos="9.34993e-07,-2.26276e-09,-3.98919e-07" qut="1,8.14603e-08,-5.55111e-17,-6.245e-17" scl="1,1,1" />
-						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh2" material_name="assets\characters\knight\Paladin.fmat" />
+						<item type_name="flame::cMesh" mesh_name="dragon_knight.fmod#mesh2" material_name="dragon_knight.fmat" />
 					</components>
 				</item>
 				<item name="Paladin_J_Nordstrom">
 					<components>
 						<item type_name="flame::cNode" pos="9.34993e-07,-2.26276e-09,-3.98919e-07" qut="1,8.14603e-08,-5.55111e-17,-6.245e-17" scl="1,1,1" />
-						<item type_name="flame::cMesh" mesh_name="assets\characters\knight\Paladin.fmod#mesh3" material_name="assets\characters\knight\Paladin.fmat" />
+						<item type_name="flame::cMesh" mesh_name="dragon_knight.fmod#mesh3" material_name="dragon_knight.fmat" />
 					</components>
 				</item>
 			</children>

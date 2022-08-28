@@ -8,12 +8,6 @@
 
 std::vector<Ability> abilities;
 
-const Ability& Ability::get(uint id)
-{
-	assert(id < abilities.size());
-	return abilities[id];
-}
-
 void load_abilities()
 {
 	{
@@ -33,7 +27,7 @@ void load_abilities()
 				projectile = Entity::create();
 				projectile->load(L"assets\\models\\fireball.prefab");
 			}
-			add_projectile(projectile, caster->node->pos + 
+			add_projectile(projectile, caster->node->pos +
 				vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
 				caster->node->g_rot[2] * 0.3f,
 				target, [](cCharacterPtr t) {
@@ -55,4 +49,21 @@ void load_abilities()
 			teleport(caster, location);
 		};
 	}
+}
+
+int Ability::find(const std::string& name)
+{
+	for (auto i = 0; i < abilities.size(); i++)
+	{
+		if (abilities[i].name == name)
+			return i;
+	}
+	return -1;
+}
+
+const Ability& Ability::get(uint id)
+{
+	if (abilities.empty())
+		load_abilities();
+	return abilities[id];
 }
