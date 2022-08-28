@@ -82,6 +82,6 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
-void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb);
+void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(cCharacterPtr t)>& cb);
 void add_chest(const vec3& pos, uint item_id, uint item_num = 1);
 void teleport(cCharacterPtr character, const vec3& location);

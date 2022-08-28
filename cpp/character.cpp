@@ -462,7 +462,10 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		{
 			if (preset.atk_projectile)
 			{
-				add_projectile(preset.atk_projectile, node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, [this](cCharacterPtr t) {
+				add_projectile(preset.atk_projectile, 
+					node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), 
+					target, 0.1f, 
+				[this](cCharacterPtr t) {
 					if (t) 
 						t->take_damage(atk);
 				});
@@ -507,23 +510,6 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
-	if (process_approach(pos, ability.distance, 15.f))
-	{
-		if (cast_timer <= 0.f)
-		{
-			if (ability.cast_time == 0.f)
-			{
-				cast_ability(ins, pos, target);
-				nav_agent->stop();
-				new CommandIdle(this);
-				return;
-			}
-			cast_speed = preset.cast_time / ability.cast_time;
-			cast_timer = preset.cast_point / cast_speed;
-			nav_agent->set_speed_scale(0.f);
-		}
-	}
-
 	if (cast_timer > 0.f)
 	{
 		cast_timer -= delta_time;
@@ -536,6 +522,22 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 		}
 		action = ActionCast;
 		nav_agent->set_speed_scale(0.f);
+	}
+	else
+	{
+		if (process_approach(pos, ability.distance, 15.f))
+		{
+			if (ability.cast_time == 0.f)
+			{
+				cast_ability(ins, pos, target);
+				nav_agent->stop();
+				new CommandIdle(this);
+				return;
+			}
+			cast_speed = preset.cast_time / ability.cast_time;
+			cast_timer = preset.cast_point / cast_speed;
+			nav_agent->set_speed_scale(0.f);
+		}
 	}
 }
 

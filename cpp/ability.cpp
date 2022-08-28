@@ -30,9 +30,10 @@ void load_abilities()
 			add_projectile(projectile, caster->node->pos +
 				vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
 				caster->node->g_rot[2] * 0.3f,
-				target, [](cCharacterPtr t) {
+				target, 0.3f,
+			[](cCharacterPtr t) {
 					t->add_buff(0, 2.f);
-				});
+			});
 		};
 	}
 	{

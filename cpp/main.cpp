@@ -126,7 +126,7 @@ void cMain::start()
 	main_terrain.init(entity->find_child("terrain"));
 	{
 		auto e = Entity::create();
-		e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
+		e->load(L"assets\\characters\\dragon_knight\\dragon_knight.prefab");
 		root->add_child(e);
 		main_player.init(e);
 		main_player.character = main_player.character;
@@ -172,7 +172,7 @@ void cMain::start()
 
 			{
 				auto e = Entity::create();
-				e->load(L"assets\\characters\\dragon_knight\\dragon_knight.prefab");
+				e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
 				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -8.f)));
 				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
 				root->add_child(e);
@@ -689,12 +689,13 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
-void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, const std::function<void(cCharacterPtr t)>& cb)
+void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(cCharacterPtr t)>& cb)
 {
 	auto e = prefab->copy();
 	e->get_component_t<cNode>()->set_pos(pos);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectile->target = target;
+	projectile->speed = speed;
 	projectile->callback = cb;
 	root->add_child(e);
 }
