@@ -1,6 +1,7 @@
 #include "character.h"
 #include "item.h"
 #include "ability.h"
+#include "buff.h"
 #include "projectile.h"
 #include "chest.h"
 
@@ -157,11 +158,11 @@ void load_character_presets()
 		preset.STR = 21;
 		preset.AGI = 16;
 		preset.INT = 18;
-		preset.STR_GROW = 34;
-		preset.AGI_GROW = 20;
-		preset.INT_GROW = 17;
+		preset.STR_GROW = 3;
+		preset.AGI_GROW = 2;
+		preset.INT_GROW = 1;
 		preset.atk = 32;
-		preset.atk_time = 1.8f;
+		preset.atk_time = 1.5f;
 		preset.atk_point = 0.68f;
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
@@ -176,12 +177,12 @@ void load_character_presets()
 		preset.STR = 24;
 		preset.AGI = 22;
 		preset.INT = 17;
-		preset.STR_GROW = 27;
-		preset.AGI_GROW = 31;
-		preset.INT_GROW = 20;
+		preset.STR_GROW = 2;
+		preset.AGI_GROW = 3;
+		preset.INT_GROW = 2;
 		preset.atk = 35;
-		preset.atk_time = 1.7f;
-		preset.atk_point = 1.47f;
+		preset.atk_time = 2.6f;
+		preset.atk_point = 1.5f;
 	}
 }
 
@@ -302,7 +303,7 @@ void cCharacter::gain_exp(uint v)
 		stats_dirty = true;
 
 		if (lv == 2)
-			gain_ability(1);
+			gain_ability(0);
 	}
 }
 
@@ -373,6 +374,15 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 		ability.active_t(this, target);
 }
 
+void cCharacter::add_buff(uint id, float time)
+{
+	auto ins = new BuffInstance;
+	ins->id = id;
+	ins->timer = time;
+	buffs.emplace_back(ins);
+	stats_dirty = true;
+}
+
 void cCharacter::die()
 {
 	if (dead)
@@ -416,6 +426,13 @@ void cCharacter::start()
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 {
+	if (state & StateStun)
+	{
+		nav_agent->stop();
+		action = ActionNone;
+		return false;
+	}
+
 	move_speed = max(0.1f, mov_sp / 100.f);
 	nav_agent->set_target(target);
 	nav_agent->set_speed_scale(move_speed);
@@ -428,27 +445,19 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 
 void cCharacter::process_attack_target(cCharacterPtr target)
 {
-	auto& preset = get_preset();
-
-	if (process_approach(target->node->pos, preset.atk_distance, 60.f))
+	if (state & StateStun)
 	{
-		if (action == ActionNone || action == ActionMove)
-		{
-			if (attack_interval_timer <= 0.f)
-			{
-				action = ActionAttack;
-				attack_speed = max(0.01f, atk_sp / 100.f);
-				attack_interval_timer = preset.atk_time / attack_speed;
-				attack_timer = preset.atk_point / attack_speed;
-			}
-			else
-				action = ActionNone;
-			nav_agent->set_speed_scale(0.f);
-		}
+		attack_timer = -1.f;
+		nav_agent->stop();
+		action = ActionNone;
+		return;
 	}
 
-	if (action == ActionAttack)
+	auto& preset = get_preset();
+
+	if (attack_timer > 0.f)
 	{
+		attack_timer -= delta_time;
 		if (attack_timer <= 0.f)
 		{
 			if (preset.atk_projectile)
@@ -461,25 +470,47 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			else
 				target->take_damage(atk);
 
+			attack_interval_timer = (preset.atk_time - preset.atk_point) / attack_speed;
+
 			action = ActionNone;
 		}
-		else
-			attack_timer -= delta_time;
+		action = ActionAttack;
 		nav_agent->set_speed_scale(0.f);
+	}
+	else
+	{
+		if (attack_interval_timer <= 0.f)
+		{
+			if (process_approach(target->node->pos, preset.atk_distance, 60.f))
+			{
+				attack_speed = max(0.01f, atk_sp / 100.f);
+				attack_timer = preset.atk_point / attack_speed;
+				nav_agent->set_speed_scale(0.f);
+			}
+		}
+		else
+			action = ActionAttack;
 	}
 }
 
 void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
 {
+	if (state & StateStun)
+	{
+		cast_timer = -1.f;
+		nav_agent->stop();
+		action = ActionNone;
+		return;
+	}
+
 	auto& preset = get_preset();
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
 	if (process_approach(pos, ability.distance, 15.f))
 	{
-		if (action == ActionNone || action == ActionMove)
+		if (cast_timer <= 0.f)
 		{
-			action = ActionCast;
 			if (ability.cast_time == 0.f)
 			{
 				cast_ability(ins, pos, target);
@@ -493,8 +524,9 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 		}
 	}
 
-	if (action == ActionCast)
+	if (cast_timer > 0.f)
 	{
+		cast_timer -= delta_time;
 		if (cast_timer <= 0.f)
 		{
 			cast_ability(ins, pos, target);
@@ -502,8 +534,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 			new CommandIdle(this);
 			return;
 		}
-		else
-			cast_timer -= delta_time;
+		action = ActionCast;
 		nav_agent->set_speed_scale(0.f);
 	}
 }
@@ -525,15 +556,17 @@ void cCharacter::update()
 
 		exp_max = preset.exp_list.empty() ? 0 : preset.exp_list[lv - 1];
 
+		state = StateNormal;
+
 		auto pre_hp_max = hp_max;
 		auto pre_mp_max = mp_max;
 
 		hp_max = preset.hp;
 		mp_max = preset.mp;
 
-		STR = preset.STR + round(preset.STR_GROW * (lv - 1) / 10);
-		AGI = preset.AGI + round(preset.AGI_GROW * (lv - 1) / 10);
-		INT = preset.INT + round(preset.INT_GROW * (lv - 1) / 10);
+		STR = preset.STR + round(preset.STR_GROW * (lv - 1));
+		AGI = preset.AGI + round(preset.AGI_GROW * (lv - 1));
+		INT = preset.INT + round(preset.INT_GROW * (lv - 1));
 
 		atk = preset.atk;
 
@@ -549,13 +582,18 @@ void cCharacter::update()
 					item.passive(this);
 			}
 		}
-
 		for (auto& ins : abilities)
 		{
 			if (ins)
 			{
 
 			}
+		}
+		for (auto& ins : buffs)
+		{
+			auto& buff = Buff::get(ins->id);
+			if (buff.passive)
+				buff.passive(this);
 		}
 
 		hp_max += STR * 20;
@@ -575,6 +613,21 @@ void cCharacter::update()
 		search_timer -= delta_time;
 	if (attack_interval_timer > 0)
 		attack_interval_timer -= delta_time;
+
+	for (auto it = buffs.begin(); it != buffs.end();)
+	{
+		if ((*it)->timer > 0)
+		{
+			(*it)->timer -= delta_time;
+			if ((*it)->timer <= 0)
+			{
+				it = buffs.erase(it);
+				stats_dirty = true;
+				continue;
+			}
+		}
+		it++;
+	}
 
 	if (command)
 		command->update();

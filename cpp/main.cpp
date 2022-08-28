@@ -19,6 +19,7 @@
 #include "main.h"
 #include "item.h"
 #include "ability.h"
+#include "buff.h"
 #include "character.h"
 #include "spwaner.h"
 #include "projectile.h"
@@ -79,12 +80,32 @@ TargetType select_mode = TargetNull;
 std::function<void(cCharacterPtr)>		select_enemy_callback;
 std::function<void(const vec3& pos)>	select_location_callback;
 
+cCharacterPtr focus_character = nullptr;
+
 cMain::~cMain()
 {
 	node->drawers.remove("main"_h);
 
 	graphics::gui_callbacks.remove((uint)this);
 	graphics::gui_cursor_callbacks.remove((uint)this);
+}
+
+void click_ability(AbilityInstance* ins)
+{
+	auto& ability = Ability::get(ins->id);
+	select_mode = ability.target_type;
+	if (ability.target_type & TargetLocation)
+	{
+		select_location_callback = [ins](const vec3& location) {
+			new CommandCastAbilityToLocation(main_player.character, ins, location);
+		};
+	}
+	if (ability.target_type & TargetEnemy)
+	{
+		select_enemy_callback = [ins](cCharacterPtr character) {
+			new CommandCastAbilityToTarget(main_player.character, ins, character);
+		};
+	}
 }
 
 void cMain::start()
@@ -153,6 +174,7 @@ void cMain::start()
 				auto e = Entity::create();
 				e->load(L"assets\\characters\\dragon_knight\\dragon_knight.prefab");
 				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -8.f)));
+				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
 				root->add_child(e);
 			}
 		}
@@ -189,10 +211,9 @@ void cMain::start()
 		auto tar_sz = sRenderer::instance()->target_size();
 		if (tar_sz.x > 0.f && tar_sz.y > 0.f)
 		{
-			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(0.f, tar_sz.y), ImGuiCond_Always, ImVec2(0.f, 1.f));
 			ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
-			ImGui::SetNextWindowBgAlpha(0.5f);
-			ImGui::Begin("##stats", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGui::Begin("##main", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 			if (main_player.character)
 			{
@@ -310,21 +331,7 @@ void cMain::start()
 							dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
 
 							if (pressed)
-							{
-								select_mode = ability.target_type;
-								if (ability.target_type & TargetLocation)
-								{
-									select_location_callback = [ins](const vec3& location) {
-										new CommandCastAbilityToLocation(main_player.character, ins, location);
-									};
-								}
-								if (ability.target_type & TargetEnemy)
-								{
-									select_enemy_callback = [ins](cCharacterPtr character) {
-										new CommandCastAbilityToTarget(main_player.character, ins, character);
-									};
-								}
-							}
+								click_ability(ins);
 						}
 						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
 						static const char* hot_keys[] = {
@@ -396,6 +403,57 @@ void cMain::start()
 				ImGui::EndGroup();
 			}
 			ImGui::End();
+
+			if (focus_character)
+			{
+				ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x, tar_sz.y), ImGuiCond_Always, ImVec2(1.f, 1.f));
+				ImGui::SetNextWindowSize(ImVec2(200.f, 160.f), ImGuiCond_Always);
+				ImGui::Begin("##focus", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+					ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+
+				auto dl = ImGui::GetWindowDrawList();
+				const auto bar_width = ImGui::GetContentRegionAvailWidth();
+				const auto bar_height = 16.f;
+				{
+					ImGui::Dummy(ImVec2(bar_width, bar_height));
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddRectFilled(p0, p0 + vec2((float)focus_character->hp / (float)focus_character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					auto str = std::format("{}/{}", focus_character->hp, focus_character->hp_max);
+					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+				}
+				{
+					ImGui::Dummy(ImVec2(bar_width, bar_height));
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddRectFilled(p0, p0 + vec2((float)focus_character->mp / (float)focus_character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					auto str = std::format("{}/{}", focus_character->mp, focus_character->mp_max);
+					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+				}
+				auto icon_size = 32.f;
+				for (auto i = 0; i < focus_character->buffs.size(); i++)
+				{
+					if (i > 0) ImGui::SameLine();
+					auto& ins = focus_character->buffs[i];
+					auto& buff = Buff::get(ins->id);
+					ImGui::Dummy(ImVec2(icon_size, icon_size));
+					if (ImGui::IsItemHovered())
+					{
+						ImGui::BeginTooltip();
+						ImGui::TextUnformatted(buff.name.c_str());
+						ImGui::EndTooltip();
+					}
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
+				}
+
+				ImGui::End();
+			}
 
 			static graphics::ImagePtr icon_cursors = nullptr;
 			if (!icon_cursors)
@@ -510,7 +568,12 @@ void cMain::update()
 		if (input->mpressed(Mouse_Left))
 		{
 			if (select_mode == TargetNull)
-				;
+			{
+				if (hovering_character)
+					focus_character = hovering_character;
+				else
+					focus_character = nullptr;
+			}
 			else
 			{
 				if (select_mode & TargetEnemy)
@@ -580,6 +643,30 @@ void cMain::update()
 			select_location_callback = [](const vec3& pos) {
 				new CommandAttackLocation(main_player.character, pos);
 			};
+		}
+		if (input->kpressed(Keyboard_Q))
+		{
+			auto ins = main_player.character->abilities[0].get();
+			if (ins)
+				click_ability(ins);
+		}
+		if (input->kpressed(Keyboard_W))
+		{
+			auto ins = main_player.character->abilities[1].get();
+			if (ins)
+				click_ability(ins);
+		}
+		if (input->kpressed(Keyboard_E))
+		{
+			auto ins = main_player.character->abilities[2].get();
+			if (ins)
+				click_ability(ins);
+		}
+		if (input->kpressed(Keyboard_R))
+		{
+			auto ins = main_player.character->abilities[3].get();
+			if (ins)
+				click_ability(ins);
 		}
 	}
 

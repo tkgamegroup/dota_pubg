@@ -43,7 +43,13 @@ struct ItemInstance
 struct AbilityInstance
 {
 	uint id;
-	float cooldown_timer = 0.f;
+	float cd_timer = 0.f;
+};
+
+struct BuffInstance
+{
+	uint id;
+	float timer;
 };
 
 struct Command
@@ -147,9 +153,9 @@ struct CharacterPreset
 	uint STR = 0;
 	uint AGI = 0;
 	uint INT = 0;
-	uint STR_GROW = 0; // multiped by 10
-	uint AGI_GROW = 0; // multiped by 10
-	uint INT_GROW = 0; // multiped by 10
+	uint STR_GROW = 0;
+	uint AGI_GROW = 0;
+	uint INT_GROW = 0;
 	uint atk = 0;
 	float atk_distance = 1.5f;
 	float atk_time = 2.f; // animation time (interval)
@@ -164,6 +170,14 @@ struct CharacterPreset
 
 	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);
+};
+
+enum State
+{
+	StateNormal = 0,
+	StateStun = 1 << 0,
+	StateRoot = 1 << 1,
+	StateSilence = 1 << 2
 };
 
 /// Reflect ctor
@@ -197,6 +211,8 @@ struct cCharacter : Component
 	uint exp = 0;
 	uint exp_max = 0;
 
+	State state = StateNormal;
+
 	/// Reflect
 	uint hp = 100;
 	uint hp_max = 100;
@@ -216,6 +232,7 @@ struct cCharacter : Component
 
 	std::unique_ptr<ItemInstance> inventory[6];
 	std::unique_ptr<AbilityInstance> abilities[4];
+	std::vector<std::unique_ptr<BuffInstance>> buffs;
 
 	bool dead = false;
 	bool stats_dirty = true;
@@ -241,6 +258,7 @@ struct cCharacter : Component
 	bool gain_ability(uint id);
 	void use_item(ItemInstance* ins);
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
+	void add_buff(uint id, float time);
 	void die();
 
 	bool process_approach(const vec3& target, float dist = 0.1f, float ang = 0.f);
