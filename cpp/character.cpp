@@ -38,6 +38,7 @@ CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
 	Command(character)
 {
 	location = _location;
+	character->nav_timer = 0.f;
 }
 
 void CommandMoveTo::update()
@@ -53,6 +54,7 @@ CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr 
 	Command(character)
 {
 	target.set(_target);
+	character->nav_timer = 0.f;
 }
 
 void CommandAttackTarget::update()
@@ -67,6 +69,7 @@ CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3
 	Command(character)
 {
 	location = _location;
+	character->nav_timer = 0.f;
 }
 
 void CommandAttackLocation::update()
@@ -97,6 +100,7 @@ CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
 	Command(character)
 {
 	target.set(_target);
+	character->nav_timer = 0.f;
 }
 
 void CommandPickUp::update()
@@ -416,8 +420,6 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 		nav_agent->set_target(target);
 		nav_timer = linearRand(0.09f, 0.11f);
 	}
-	else
-		dist_ang_diff(node->pos, target, 90.f - node->get_eul().x, nav_agent->dist, nav_agent->ang_diff);
 	nav_agent->set_speed_scale(move_speed);
 
 	if (nav_agent->dist <= dist && (ang == 0.f || abs(nav_agent->ang_diff) <= ang))
