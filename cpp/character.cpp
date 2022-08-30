@@ -473,7 +473,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		}
 		else
 		{
-			action = ActionAttack;
+			action = ActionNone;
 			nav_agent->set_speed_scale(0.f);
 		}
 	}

@@ -273,8 +273,7 @@ void cMain::start()
 			return;
 		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 		ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
-		ImGui::SetNextWindowBgAlpha(0.f);
-		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 		if (main_player.character)
 		{
@@ -471,8 +470,7 @@ void cMain::start()
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(200.f, 100.f), ImGuiCond_Always);
-			ImGui::SetNextWindowBgAlpha(0.f);
-			ImGui::Begin("##main_player", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGui::Begin("##main_player", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 
 			auto dl = ImGui::GetWindowDrawList();
@@ -486,8 +484,7 @@ void cMain::start()
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(100.f, 100.f), ImGuiCond_Always);
-			ImGui::SetNextWindowBgAlpha(0.f);
-			ImGui::Begin("##focus_character", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGui::Begin("##focus_character", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 
 			auto dl = ImGui::GetWindowDrawList();
