@@ -94,17 +94,24 @@ void reset_select()
 
 cCharacterPtr focus_character = nullptr;
 
-cMain::~cMain()
-{
-	node->drawers.remove("main"_h);
-
-	graphics::gui_callbacks.remove((uint)this);
-	graphics::gui_cursor_callbacks.remove((uint)this);
-}
+std::string illegal_op_str;
+float illegal_op_str_timer = 0.f;
 
 void click_ability(AbilityInstance* ins)
 {
+	if (ins->cd_timer > 0.f)
+	{
+		illegal_op_str = "Cooldowning.";
+		illegal_op_str_timer = 3.f;
+		return;
+	}
 	auto& ability = Ability::get(ins->id);
+	if (main_player.character->mp < ability.mana)
+	{
+		illegal_op_str = "Not Enough Mana.";
+		illegal_op_str_timer = 3.f;
+		return;
+	}
 	select_mode = ability.target_type;
 	if (ability.target_type & TargetLocation)
 	{
@@ -119,6 +126,14 @@ void click_ability(AbilityInstance* ins)
 		};
 		select_distance = ability.distance;
 	}
+}
+
+cMain::~cMain()
+{
+	node->drawers.remove("main"_h);
+
+	graphics::gui_callbacks.remove((uint)this);
+	graphics::gui_cursor_callbacks.remove((uint)this);
 }
 
 void cMain::start()
@@ -254,252 +269,281 @@ void cMain::start()
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
 		auto tar_sz = sRenderer::instance()->target_size();
-		if (tar_sz.x > 0.f && tar_sz.y > 0.f)
+		if (tar_sz.x <= 0.f || tar_sz.y <= 0.f)
+			return;
+		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+		ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
+		ImGui::SetNextWindowBgAlpha(0.f);
+		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+		if (main_player.character)
 		{
-			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(0.f, tar_sz.y), ImGuiCond_Always, ImVec2(0.f, 1.f));
-			ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
-			ImGui::Begin("##main", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
-			if (main_player.character)
+			ImGui::TextUnformatted(main_player.character->entity->name.c_str());
+
+			ImGui::BeginChild("##c1", ImVec2(100.f, -1.f));
+			if (ImGui::BeginTable("##t1", 2));
 			{
-				ImGui::TextUnformatted(main_player.character->entity->name.c_str());
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
+				ImGui::Image(img_sword, ImVec2(16, 16));
+				ImGui::TableNextColumn();
+				ImGui::Text("%5d", main_player.character->atk);
 
-				ImGui::BeginChild("##c1", ImVec2(100.f, -1.f));
-				if (ImGui::BeginTable("##t1", 2));
-				{
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
-					ImGui::Image(img_sword, ImVec2(16, 16));
-					ImGui::TableNextColumn();
-					ImGui::Text("%5d", main_player.character->atk);
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
+				ImGui::Image(img_shield, ImVec2(16, 16));
+				ImGui::TableNextColumn();
+				ImGui::Text("%5d", main_player.character->armor);
 
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
-					ImGui::Image(img_shield, ImVec2(16, 16));
-					ImGui::TableNextColumn();
-					ImGui::Text("%5d", main_player.character->armor);
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				static auto img_run = graphics::Image::get("assets\\icons\\run.png");
+				ImGui::Image(img_run, ImVec2(16, 16));
+				ImGui::TableNextColumn();
+				ImGui::Text("%5d", main_player.character->mov_sp);
 
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					static auto img_run = graphics::Image::get("assets\\icons\\run.png");
-					ImGui::Image(img_run, ImVec2(16, 16));
-					ImGui::TableNextColumn();
-					ImGui::Text("%5d", main_player.character->mov_sp);
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
+				ImGui::Image(img_str, ImVec2(16, 16));
+				ImGui::TableNextColumn();
+				ImGui::Text("%5d", main_player.character->STR);
 
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
-					ImGui::Image(img_str, ImVec2(16, 16));
-					ImGui::TableNextColumn();
-					ImGui::Text("%5d", main_player.character->STR);
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
+				ImGui::Image(img_agi, ImVec2(16, 16));
+				ImGui::TableNextColumn();
+				ImGui::Text("%5d", main_player.character->AGI);
 
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
-					ImGui::Image(img_agi, ImVec2(16, 16));
-					ImGui::TableNextColumn();
-					ImGui::Text("%5d", main_player.character->AGI);
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
+				ImGui::Image(img_int, ImVec2(16, 16));
+				ImGui::TableNextColumn();
+				ImGui::Text("%5d", main_player.character->INT);
 
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
-					ImGui::Image(img_int, ImVec2(16, 16));
-					ImGui::TableNextColumn();
-					ImGui::Text("%5d", main_player.character->INT);
+				ImGui::EndTable();
+			}
+			ImGui::EndChild();
 
-					ImGui::EndTable();
-				}
-				ImGui::EndChild();
+			ImGui::SameLine();
 
-				ImGui::SameLine();
+			ImGui::BeginGroup();
+			auto dl = ImGui::GetWindowDrawList();
+			const auto bar_width = ImGui::GetContentRegionAvailWidth();
+			const auto bar_height = 16.f;
+			{
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->hp / (float)main_player.character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("{}/{}", main_player.character->hp, main_player.character->hp_max);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
+			{
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->mp / (float)main_player.character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("{}/{}", main_player.character->mp, main_player.character->mp_max);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
+			{
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("LV {}  {}/{}", main_player.character->lv, main_player.character->exp, main_player.character->exp_max);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
 
+			{
+				auto icon_size = 48.f;
 				ImGui::BeginGroup();
-				auto dl = ImGui::GetWindowDrawList();
-				const auto bar_width = ImGui::GetContentRegionAvailWidth();
-				const auto bar_height = 16.f;
+				for (auto i = 0; i < 4; i++)
 				{
-					ImGui::Dummy(ImVec2(bar_width, bar_height));
+					if (i > 0) ImGui::SameLine();
+					static const char* names[] = {
+						"ability_1", "ability_2", "ability_3", "ability_4", "ability_5", "ability_6"
+					};
+					auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
 					auto p0 = (vec2)ImGui::GetItemRectMin();
 					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->hp / (float)main_player.character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", main_player.character->hp, main_player.character->hp_max);
-					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-				}
-				{
-					ImGui::Dummy(ImVec2(bar_width, bar_height));
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->mp / (float)main_player.character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", main_player.character->mp, main_player.character->mp_max);
-					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-				}
-				{
-					ImGui::Dummy(ImVec2(bar_width, bar_height));
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("LV {}  {}/{}", main_player.character->lv, main_player.character->exp, main_player.character->exp_max);
-					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-				}
-
-				{
-					auto icon_size = 48.f;
-					ImGui::BeginGroup();
-					for (auto i = 0; i < 4; i++)
+					dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+					auto ins = main_player.character->abilities[i].get();
+					if (ins)
 					{
-						if (i > 0) ImGui::SameLine();
-						static const char* names[] = {
-							"ability_1", "ability_2", "ability_3", "ability_4", "ability_5", "ability_6"
-						};
-						auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						auto ins = main_player.character->abilities[i].get();
-						if (ins)
+						auto& ability = Ability::get(ins->id);
+						if (ImGui::IsItemHovered())
 						{
-							auto& ability = Ability::get(ins->id);
-							if (ImGui::IsItemHovered())
-							{
-								ImGui::BeginTooltip();
-								ImGui::TextUnformatted(ability.name.c_str());
-								ImGui::EndTooltip();
-							}
-							dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-
-							if (pressed)
-								click_ability(ins);
+							ImGui::BeginTooltip();
+							ImGui::TextUnformatted(ability.name.c_str());
+							ImGui::EndTooltip();
 						}
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						static const char* hot_keys[] = {
-							"Q", "W", "E", "R"
-						};
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
+						dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+
+						if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
+							dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
+
+						if (pressed)
+							click_ability(ins);
 					}
-					ImGui::EndGroup();
-					ImGui::SameLine();
-					icon_size = 32.f;
-					ImGui::BeginGroup();
-					for (auto i = 0; i < 6; i++)
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					static const char* hot_keys[] = {
+						"Q", "W", "E", "R"
+					};
+					dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
+				}
+				ImGui::EndGroup();
+				ImGui::SameLine();
+				icon_size = 32.f;
+				ImGui::BeginGroup();
+				for (auto i = 0; i < 6; i++)
+				{
+					if (i > 0) ImGui::SameLine();
+					static const char* names[] = {
+						"item_1", "item_2", "item_3", "item_4", "item_5", "item_6"
+					};
+					auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
+					auto p0 = (vec2)ImGui::GetItemRectMin();
+					auto p1 = (vec2)ImGui::GetItemRectMax();
+					dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+					auto& ins = main_player.character->inventory[i];
+					if (ins)
 					{
-						if (i > 0) ImGui::SameLine();
-						static const char* names[] = {
-							"item_1", "item_2", "item_3", "item_4", "item_5", "item_6"
-						};
-						auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
-						auto p0 = (vec2)ImGui::GetItemRectMin();
-						auto p1 = (vec2)ImGui::GetItemRectMax();
-						dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-						auto& ins = main_player.character->inventory[i];
-						if (ins)
+						auto& item = Item::get(ins->id);
+						if (ImGui::IsItemHovered())
 						{
-							auto& item = Item::get(ins->id);
-							if (ImGui::IsItemHovered())
+							ImGui::BeginTooltip();
+							ImGui::TextUnformatted(item.name.c_str());
+							ImGui::EndTooltip();
+						}
+						if (ImGui::BeginDragDropSource())
+						{
+							ImGui::SetDragDropPayload("item", &i, sizeof(int));
+							ImGui::EndDragDropSource();
+						}
+						if (ImGui::BeginPopupContextItem())
+						{
+							if (ImGui::Selectable("Drop"))
 							{
-								ImGui::BeginTooltip();
-								ImGui::TextUnformatted(item.name.c_str());
-								ImGui::EndTooltip();
+								add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
+								main_player.character->inventory[i].reset(nullptr);
 							}
-							if (ImGui::BeginDragDropSource())
-							{
-								ImGui::SetDragDropPayload("item", &i, sizeof(int));
-								ImGui::EndDragDropSource();
-							}
-							if (ImGui::BeginPopupContextItem())
-							{
-								if (ImGui::Selectable("Drop"))
-								{
-									add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
-									main_player.character->inventory[i].reset(nullptr);
-								}
-								ImGui::EndPopup();
-							}
-							dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
+							ImGui::EndPopup();
+						}
+						dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
 
-							if (pressed)
-								main_player.character->use_item(ins.get());
-						}
-						if (ImGui::BeginDragDropTarget())
-						{
-							if (auto payload = ImGui::AcceptDragDropPayload("item"); payload)
-							{
-								auto j = *(int*)payload->Data;
-								if (i != j)
-									std::swap(main_player.character->inventory[i], main_player.character->inventory[j]);
-							}
-							ImGui::EndDragDropTarget();
-						}
-						dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-						static const char* hot_keys[] = {
-							"1", "2", "3", "4", "5", "6"
-						};
-						dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
+						if (pressed)
+							main_player.character->use_item(ins.get());
 					}
-					ImGui::EndGroup();
+					if (ImGui::BeginDragDropTarget())
+					{
+						if (auto payload = ImGui::AcceptDragDropPayload("item"); payload)
+						{
+							auto j = *(int*)payload->Data;
+							if (i != j)
+								std::swap(main_player.character->inventory[i], main_player.character->inventory[j]);
+						}
+						ImGui::EndDragDropTarget();
+					}
+					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+					static const char* hot_keys[] = {
+						"1", "2", "3", "4", "5", "6"
+					};
+					dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
 				}
 				ImGui::EndGroup();
 			}
+			ImGui::EndGroup();
+		}
+		ImGui::End();
+
+		{
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
+			ImGui::SetNextWindowSize(ImVec2(200.f, 100.f), ImGuiCond_Always);
+			ImGui::SetNextWindowBgAlpha(0.f);
+			ImGui::Begin("##main_player", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+
+			auto dl = ImGui::GetWindowDrawList();
+			const auto bar_width = ImGui::GetContentRegionAvailWidth();
+			const auto bar_height = 16.f;
+
 			ImGui::End();
+		}
 
-			if (focus_character)
+		if (focus_character)
+		{
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
+			ImGui::SetNextWindowSize(ImVec2(100.f, 100.f), ImGuiCond_Always);
+			ImGui::SetNextWindowBgAlpha(0.f);
+			ImGui::Begin("##focus_character", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+
+			auto dl = ImGui::GetWindowDrawList();
+			const auto bar_width = ImGui::GetContentRegionAvailWidth();
+			const auto bar_height = 16.f;
 			{
-				ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x, tar_sz.y), ImGuiCond_Always, ImVec2(1.f, 1.f));
-				ImGui::SetNextWindowSize(ImVec2(200.f, 160.f), ImGuiCond_Always);
-				ImGui::Begin("##focus", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-					ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
-
-				auto dl = ImGui::GetWindowDrawList();
-				const auto bar_width = ImGui::GetContentRegionAvailWidth();
-				const auto bar_height = 16.f;
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)focus_character->hp / (float)focus_character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("{}/{}", focus_character->hp, focus_character->hp_max);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
+			auto icon_size = 32.f;
+			for (auto i = 0; i < focus_character->buffs.size(); i++)
+			{
+				if (i > 0) ImGui::SameLine();
+				auto& ins = focus_character->buffs[i];
+				auto& buff = Buff::get(ins->id);
+				ImGui::Dummy(ImVec2(icon_size, icon_size));
+				if (ImGui::IsItemHovered())
 				{
-					ImGui::Dummy(ImVec2(bar_width, bar_height));
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)focus_character->hp / (float)focus_character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", focus_character->hp, focus_character->hp_max);
-					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+					ImGui::BeginTooltip();
+					ImGui::TextUnformatted(buff.name.c_str());
+					ImGui::EndTooltip();
 				}
-				{
-					ImGui::Dummy(ImVec2(bar_width, bar_height));
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p0 + vec2((float)focus_character->mp / (float)focus_character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					auto str = std::format("{}/{}", focus_character->mp, focus_character->mp_max);
-					auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-					dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-				}
-				auto icon_size = 32.f;
-				for (auto i = 0; i < focus_character->buffs.size(); i++)
-				{
-					if (i > 0) ImGui::SameLine();
-					auto& ins = focus_character->buffs[i];
-					auto& buff = Buff::get(ins->id);
-					ImGui::Dummy(ImVec2(icon_size, icon_size));
-					if (ImGui::IsItemHovered())
-					{
-						ImGui::BeginTooltip();
-						ImGui::TextUnformatted(buff.name.c_str());
-						ImGui::EndTooltip();
-					}
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
-				}
-
-				ImGui::End();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
 			}
 
+			ImGui::End();
+		}
+
+		if (illegal_op_str_timer > 0.f)
+		{
+			auto dl = ImGui::GetForegroundDrawList();
+			auto text_size = (vec2)ImGui::CalcTextSize(illegal_op_str.c_str());
+			auto p = vec2((tar_sz.x - text_size.x) * 0.5f, tar_sz.y - 160.f - text_size.y);
+			p.xy += sInput::instance()->offset;
+			auto alpha = 1.f;
+			if (illegal_op_str_timer < 1.f)
+				alpha *= mix(1.f, 0.f, illegal_op_str_timer);
+			auto border = 0.f;
+			if (illegal_op_str_timer > 2.7f)
+				border = mix(0.f, 8.f, (illegal_op_str_timer - 2.7f) / 0.3f);
+			else if (illegal_op_str_timer > 2.f)
+				border = mix(8.f, 0.f, (illegal_op_str_timer - 2.f) / 0.7f);
+			dl->AddRectFilled(p - vec2(2.f + border), p + text_size + vec2(2.f + border), ImColor(1.f, 0.f, 0.f, 0.5f * alpha));
+			dl->AddText(p, ImColor(1.f, 1.f, 1.f, 1.f * alpha), illegal_op_str.c_str());
+			illegal_op_str_timer -= delta_time;
+		}
+
+		{
 			static graphics::ImagePtr icon_cursors = nullptr;
 			if (!icon_cursors)
 				icon_cursors = graphics::Image::get(L"assets\\icons\\rpg_cursor_set.png");
@@ -762,6 +806,32 @@ struct cMainCreate : cMain::Create
 	}
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
+
+std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint faction)
+{
+	std::vector<cCharacterPtr> ret;
+
+	std::vector<cNodePtr> objs;
+	sScene::instance()->octree->get_colliding(pos, radius, objs, CharacterTag);
+	for (auto obj : objs)
+	{
+		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
+			ret.push_back(chr);
+	}
+
+	std::vector<std::pair<float, cCharacterPtr>> dist_list(ret.size());
+	for (auto i = 0; i < ret.size(); i++)
+	{
+		auto c = ret[i];
+		dist_list[i] = std::make_pair(distance(c->node->pos, pos), c);
+	}
+	std::sort(dist_list.begin(), dist_list.end(), [](const auto& a, const auto& b) {
+		return a.first < b.first;
+	});
+	for (auto i = 0; i < ret.size(); i++)
+		ret[i] = dist_list[i].second;
+	return ret;
+}
 
 void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(cCharacterPtr t)>& cb)
 {

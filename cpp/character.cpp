@@ -77,9 +77,14 @@ void CommandAttackLocation::update()
 		target.set(nullptr);
 	if (character->action != ActionAttack)
 	{
-		auto enemies = character->find_enemies(0.f, false, true);
-		if (!enemies.empty() && dist > atk_dist)
-			target.set(enemies.front());
+		if (character->search_timer <= 0.f)
+		{
+			auto enemies = get_characters(character->node->g_pos, 3.5f, ~character->faction);
+			if (!enemies.empty() && dist > atk_dist)
+				target.set(enemies.front());
+
+			character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+		}
 	}
 
 	if (target.obj)
@@ -230,41 +235,6 @@ void cCharacter::on_init()
 	}, "character"_h);
 }
 
-std::vector<cCharacterPtr> cCharacter::find_enemies(float radius, bool ignore_timer, bool sort)
-{
-	std::vector<cCharacterPtr> ret;
-	if (!ignore_timer)
-	{
-		if (search_timer <= 0.f)
-			search_timer = 0.1f + linearRand(0.f, 0.05f);
-		else
-			return ret;
-	}
-	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(node->pos, radius ? radius : 3.5f, objs, CharacterTag);
-	for (auto obj : objs)
-	{
-		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && chr->faction != faction)
-			ret.push_back(chr);
-	}
-	if (sort)
-	{
-		std::vector<std::pair<float, cCharacterPtr>> dist_list(ret.size());
-		auto self_pos = node->pos;
-		for (auto i = 0; i < ret.size(); i++)
-		{
-			auto c = ret[i];
-			dist_list[i] = std::make_pair(distance(c->node->pos, self_pos), c);
-		}
-		std::sort(dist_list.begin(), dist_list.end(), [](const auto& a, const auto& b) {
-			return a.first < b.first;
-		});
-		for (auto i = 0; i < ret.size(); i++)
-			ret[i] = dist_list[i].second;
-	}
-	return ret;
-}
-
 static uint calc_exp(uint lv)
 {
 	return lv * 10;
@@ -303,7 +273,7 @@ void cCharacter::gain_exp(uint v)
 		stats_dirty = true;
 
 		if (lv == 2)
-			gain_ability(0);
+			gain_ability(Ability::find("Blink"));
 	}
 }
 
@@ -365,13 +335,20 @@ void cCharacter::use_item(ItemInstance* ins)
 
 void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
 {
+	if (ins->cd_timer > 0.f)
+		return;
 	auto& ability = Ability::get(ins->id);
+	if (mp < ability.mana)
+		return;
 	if (ability.active)
 		ability.active(this);
 	else if (ability.active_l)
 		ability.active_l(this, location);
 	else if (ability.active_t)
 		ability.active_t(this, target);
+	ins->cd_max = ability.cd;
+	ins->cd_timer = ins->cd_max;
+	mp -= ability.mana;
 }
 
 void cCharacter::add_buff(uint id, float time)
@@ -434,7 +411,11 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	}
 
 	move_speed = max(0.1f, mov_sp / 100.f);
-	nav_agent->set_target(target);
+	if (nav_timer <= 0.f)
+	{
+		nav_agent->set_target(target);
+		nav_timer = linearRand(0.09f, 0.11f);
+	}
 	nav_agent->set_speed_scale(move_speed);
 
 	if (nav_agent->dist <= dist && (ang == 0.f || abs(nav_agent->ang_diff) <= ang))
@@ -613,8 +594,16 @@ void cCharacter::update()
 
 	if (search_timer > 0)
 		search_timer -= delta_time;
+	if (nav_timer > 0)
+		nav_timer -= delta_time;
 	if (attack_interval_timer > 0)
 		attack_interval_timer -= delta_time;
+
+	for (auto& ins : abilities)
+	{
+		if (ins && ins->cd_timer > 0.f)
+			ins->cd_timer -= delta_time;
+	}
 
 	for (auto it = buffs.begin(); it != buffs.end();)
 	{

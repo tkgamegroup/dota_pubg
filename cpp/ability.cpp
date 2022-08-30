@@ -1,5 +1,6 @@
 #include "ability.h"
 #include "character.h"
+#include "buff.h"
 
 #include <flame/graphics/image.h>
 #include <flame/universe/entity.h>
@@ -17,9 +18,10 @@ void load_abilities()
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma seizmic.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
-		ability.mana = 50;
-		ability.distance = 5.f;
 		ability.cast_time = 0.5f;
+		ability.mana = 50;
+		ability.cd = 3.f;
+		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
 			static EntityPtr projectile = nullptr;
 			if (!projectile)
@@ -32,7 +34,7 @@ void load_abilities()
 				caster->node->g_rot[2] * 0.3f,
 				target, 0.3f,
 			[](cCharacterPtr t) {
-					t->add_buff(0, 2.f);
+				t->add_buff(Buff::find("Stun"), 2.f);
 			});
 		};
 	}
@@ -43,9 +45,9 @@ void load_abilities()
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\Tactical Flight.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
+		ability.cast_time = 0.f;
 		ability.mana = 50;
 		ability.distance = 5.f;
-		ability.cast_time = 0.f;
 		ability.active_l = [](cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);
 		};

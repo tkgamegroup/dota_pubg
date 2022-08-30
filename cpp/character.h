@@ -43,6 +43,7 @@ struct ItemInstance
 struct AbilityInstance
 {
 	uint id;
+	float cd_max = 0.f;
 	float cd_timer = 0.f;
 };
 
@@ -242,14 +243,13 @@ struct cCharacter : Component
 	float attack_speed = 1.f;
 	float cast_speed = 1.f;
 	float search_timer = 0.f;
+	float nav_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
 
 	~cCharacter();
 	void on_init() override;
-
-	std::vector<cCharacterPtr> find_enemies(float radius = 0.f, bool ignore_timer = true, bool sort = false);
 
 	void inflict_damage(cCharacterPtr target, uint value);
 	bool take_damage(uint value); // return true if the damage causes the character die
