@@ -6,6 +6,7 @@
 #include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/draw_data.h>
+#include <flame/universe/octree.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/mesh.h>
 #include <flame/universe/components/camera.h>
@@ -75,10 +76,21 @@ MainPlayer main_player;
 
 cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
+cTerrainPtr		hovering_terrain = nullptr;
 
-TargetType select_mode = TargetNull;
+TargetType								select_mode = TargetNull;
 std::function<void(cCharacterPtr)>		select_enemy_callback;
 std::function<void(const vec3& pos)>	select_location_callback;
+float									select_distance = 0.f;
+float									select_range = 0.f;
+void reset_select()
+{
+	select_mode = TargetNull;
+	select_enemy_callback = nullptr;
+	select_location_callback = nullptr;
+	select_distance = 0.f;
+	select_range = 0.f;
+}
 
 cCharacterPtr focus_character = nullptr;
 
@@ -105,6 +117,7 @@ void click_ability(AbilityInstance* ins)
 		select_enemy_callback = [ins](cCharacterPtr character) {
 			new CommandCastAbilityToTarget(main_player.character, ins, character);
 		};
+		select_distance = ability.distance;
 	}
 }
 
@@ -177,6 +190,20 @@ void cMain::start()
 				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
 				root->add_child(e);
 			}
+			{
+				auto e = Entity::create();
+				e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
+				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -9.f)));
+				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
+				root->add_child(e);
+			}
+			{
+				auto e = Entity::create();
+				e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
+				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -10.f)));
+				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
+				root->add_child(e);
+			}
 		}
 	}
 
@@ -202,6 +229,24 @@ void cMain::start()
 					if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
 						draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(64, 128, 64, 255));
 				}
+			}
+		}
+		else if (draw_data.pass == "primitive"_h)
+		{
+			if (select_distance > 0.f)
+			{
+				auto r = select_distance;
+				auto circle_pts = graphics::get_circle_points(r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0))));
+				auto n = (int)circle_pts.size();
+				circle_pts.push_back(circle_pts[0]);
+				std::vector<vec3> pts(n * 2);
+				auto center = main_player.character->node->g_pos;
+				for (auto i = 0; i < n; i++)
+				{
+					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
+					pts[i * 2 + 1] = center + vec3(r * circle_pts[i + 1], 0.f).xzy();
+				}
+				draw_data.primitives.emplace_back("LineList"_h, pts.data(), (uint)pts.size(), cvec4(0, 255, 0, 255));
 			}
 		}
 	}, "main"_h);
@@ -531,12 +576,54 @@ void cMain::update()
 		});
 		hovering_character = nullptr;
 		hovering_chest = nullptr;
+		hovering_terrain = nullptr;
 		if (hovering_node)
 		{
+			auto can_select = [](cCharacterPtr character) {
+				if (!(select_mode & TargetEnemy) && main_player.character->faction != character->faction)
+					return false;
+				if (!(select_mode & TargetFriendly) && main_player.character->faction == character->faction)
+					return false;
+				return true;
+			};
 			if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
-				hovering_character = character;
+			{
+				if (select_mode == TargetNull || can_select(character))
+					hovering_character = character;
+			}
 			if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
 				hovering_chest = chest;
+			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+			{
+				hovering_terrain = terrain;
+
+				if (!(select_mode & TargetLocation))
+				{
+					if ((select_mode & TargetEnemy) || (select_mode & TargetFriendly))
+					{
+						std::vector<cNodePtr> objs;
+						sScene::instance()->octree->get_colliding(hovering_pos, 5.f, objs, CharacterTag);
+						if (!objs.empty())
+						{
+							auto min_dist = 10000.f;
+							for (auto n : objs)
+							{
+								if (auto character = n->entity->get_component_t<cCharacter>(); character)
+								{
+									if (!can_select(character))
+										continue;
+									auto dist = distance(n->g_pos, hovering_pos);
+									if (dist < min_dist)
+									{
+										hovering_character = character;
+										min_dist = dist;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 		auto add_location_icon = [](const vec3& pos, const vec3& color) {
 			static graphics::ImagePtr icon_location = nullptr;
@@ -581,23 +668,17 @@ void cMain::update()
 					if (hovering_character && main_player.character->faction != hovering_character->faction)
 					{
 						if (select_enemy_callback)
-						{
 							select_enemy_callback(hovering_character);
-							select_enemy_callback = nullptr;
-						}
-						select_mode = TargetNull;
+						reset_select();
 					}
 				}
 				if (select_mode & TargetLocation)
 				{
-					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+					if (hovering_terrain)
 					{
 						if (select_location_callback)
-						{
 							select_location_callback(hovering_pos);
-							select_location_callback = nullptr;
-						}
-						select_mode = TargetNull;
+						reset_select();
 					}
 				}
 			}
@@ -615,25 +696,18 @@ void cMain::update()
 				{
 					new CommandPickUp(main_player.character, hovering_chest);
 				}
-				else if (hovering_node)
+				else if (hovering_terrain)
 				{
-					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
-					{
-						new CommandMoveTo(main_player.character, hovering_pos);
-						add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
-					}
+					new CommandMoveTo(main_player.character, hovering_pos);
+					add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
 				}
 			}
 			else
-				select_mode = TargetNull;
+				reset_select();
 		}
 
 		if (input->kpressed(Keyboard_Esc))
-		{
-			select_mode = TargetNull;
-			select_enemy_callback = nullptr;
-			select_location_callback = nullptr;
-		}
+			reset_select();
 		if (input->kpressed(Keyboard_A))
 		{
 			select_mode = TargetType(TargetEnemy | TargetLocation);
