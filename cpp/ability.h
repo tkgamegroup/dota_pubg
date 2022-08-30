@@ -15,6 +15,8 @@ struct Ability
 	uint mana = 0;
 	float cd = 0.f;
 	float distance = 0.f;
+	float range = 0.f;
+	float angle = 0.f;
 
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*active_l)(cCharacterPtr, const vec3&) = nullptr;

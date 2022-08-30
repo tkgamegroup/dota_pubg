@@ -416,6 +416,8 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 		nav_agent->set_target(target);
 		nav_timer = linearRand(0.09f, 0.11f);
 	}
+	else
+		dist_ang_diff(node->pos, target, 90.f - node->get_eul().x, nav_agent->dist, nav_agent->ang_diff);
 	nav_agent->set_speed_scale(move_speed);
 
 	if (nav_agent->dist <= dist && (ang == 0.f || abs(nav_agent->ang_diff) <= ang))
