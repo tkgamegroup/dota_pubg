@@ -38,7 +38,6 @@ CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
 	Command(character)
 {
 	location = _location;
-	character->nav_timer = 0.f;
 }
 
 void CommandMoveTo::update()
@@ -54,7 +53,6 @@ CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr 
 	Command(character)
 {
 	target.set(_target);
-	character->nav_timer = 0.f;
 }
 
 void CommandAttackTarget::update()
@@ -69,7 +67,6 @@ CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3
 	Command(character)
 {
 	location = _location;
-	character->nav_timer = 0.f;
 }
 
 void CommandAttackLocation::update()
@@ -82,7 +79,7 @@ void CommandAttackLocation::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = get_characters(character->node->g_pos, 3.5f, ~character->faction);
+			auto enemies = get_characters(character->node->pos, 3.5f, ~character->faction);
 			if (!enemies.empty() && dist > atk_dist)
 				target.set(enemies.front());
 
@@ -100,7 +97,6 @@ CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
 	Command(character)
 {
 	target.set(_target);
-	character->nav_timer = 0.f;
 }
 
 void CommandPickUp::update()
@@ -415,11 +411,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	}
 
 	move_speed = max(0.1f, mov_sp / 100.f);
-	if (nav_timer <= 0.f)
-	{
-		nav_agent->set_target(target);
-		nav_timer = linearRand(0.09f, 0.11f);
-	}
+	nav_agent->set_target(target);
 	nav_agent->set_speed_scale(move_speed);
 
 	if (nav_agent->dist <= dist && (ang == 0.f || abs(nav_agent->ang_diff) <= ang))
@@ -440,23 +432,27 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 
 	auto& preset = get_preset();
 
+	auto approached = process_approach(target->node->pos, preset.atk_distance, 60.f);
 	if (attack_timer > 0.f)
 	{
 		attack_timer -= delta_time;
 		if (attack_timer <= 0.f)
 		{
-			if (preset.atk_projectile)
+			if (distance(node->pos, target->node->pos) <= preset.atk_distance + 1.f)
 			{
-				add_projectile(preset.atk_projectile, 
-					node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), 
-					target, 0.1f, 
-				[this](cCharacterPtr t) {
-					if (t) 
-						t->take_damage(atk);
-				});
+				if (preset.atk_projectile)
+				{
+					add_projectile(preset.atk_projectile,
+						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f),
+						target, 0.1f,
+						[this](cCharacterPtr t) {
+							if (t)
+								t->take_damage(atk);
+						});
+				}
+				else
+					target->take_damage(atk);
 			}
-			else
-				target->take_damage(atk);
 
 			attack_interval_timer = (preset.atk_time - preset.atk_point) / attack_speed;
 
@@ -469,15 +465,17 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 	{
 		if (attack_interval_timer <= 0.f)
 		{
-			if (process_approach(target->node->pos, preset.atk_distance, 60.f))
+			if (approached)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f);
 				attack_timer = preset.atk_point / attack_speed;
-				nav_agent->set_speed_scale(0.f);
 			}
 		}
 		else
+		{
 			action = ActionAttack;
+			nav_agent->set_speed_scale(0.f);
+		}
 	}
 }
 
@@ -495,6 +493,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
+	auto approached = process_approach(pos, ability.distance, 15.f);
 	if (cast_timer > 0.f)
 	{
 		cast_timer -= delta_time;
@@ -510,7 +509,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 	}
 	else
 	{
-		if (process_approach(pos, ability.distance, 15.f))
+		if (approached)
 		{
 			if (ability.cast_time == 0.f)
 			{
@@ -521,7 +520,6 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 			}
 			cast_speed = preset.cast_time / ability.cast_time;
 			cast_timer = preset.cast_point / cast_speed;
-			nav_agent->set_speed_scale(0.f);
 		}
 	}
 }
@@ -598,8 +596,6 @@ void cCharacter::update()
 
 	if (search_timer > 0)
 		search_timer -= delta_time;
-	if (nav_timer > 0)
-		nav_timer -= delta_time;
 	if (attack_interval_timer > 0)
 		attack_interval_timer -= delta_time;
 

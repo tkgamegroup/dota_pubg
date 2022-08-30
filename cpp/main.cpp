@@ -255,7 +255,7 @@ void cMain::start()
 				auto n = (int)circle_pts.size();
 				circle_pts.push_back(circle_pts[0]);
 				std::vector<vec3> pts(n * 2);
-				auto center = main_player.character->node->g_pos;
+				auto center = main_player.character->node->pos;
 				for (auto i = 0; i < n; i++)
 				{
 					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
@@ -532,12 +532,12 @@ void cMain::start()
 			p.xy += sInput::instance()->offset;
 			auto alpha = 1.f;
 			if (illegal_op_str_timer < 1.f)
-				alpha *= mix(1.f, 0.f, illegal_op_str_timer);
+				alpha *= mix(0.f, 1.f, illegal_op_str_timer);
 			auto border = 0.f;
-			if (illegal_op_str_timer > 2.7f)
-				border = mix(0.f, 8.f, (illegal_op_str_timer - 2.7f) / 0.3f);
-			else if (illegal_op_str_timer > 2.f)
-				border = mix(8.f, 0.f, (illegal_op_str_timer - 2.f) / 0.7f);
+			if (illegal_op_str_timer > 2.9f)
+				border = mix(8.f, 0.f, (illegal_op_str_timer - 2.9f) / 0.1f);
+			else if (illegal_op_str_timer > 2.5f)
+				border = mix(0.f, 8.f, (illegal_op_str_timer - 2.5f) / 0.4f);
 			dl->AddRectFilled(p - vec2(2.f + border), p + text_size + vec2(2.f + border), ImColor(1.f, 0.f, 0.f, 0.5f * alpha));
 			dl->AddText(p, ImColor(1.f, 1.f, 1.f, 1.f * alpha), illegal_op_str.c_str());
 			illegal_op_str_timer -= delta_time;
@@ -656,7 +656,7 @@ void cMain::update()
 								{
 									if (!can_select(character))
 										continue;
-									auto dist = distance(n->g_pos, hovering_pos);
+									auto dist = distance(n->pos, hovering_pos);
 									if (dist < min_dist)
 									{
 										hovering_character = character;

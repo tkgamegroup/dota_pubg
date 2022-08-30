@@ -243,7 +243,6 @@ struct cCharacter : Component
 	float attack_speed = 1.f;
 	float cast_speed = 1.f;
 	float search_timer = 0.f;
-	float nav_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
