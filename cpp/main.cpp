@@ -154,7 +154,7 @@ void cMain::start()
 	main_terrain.init(entity->find_child("terrain"));
 	{
 		auto e = Entity::create();
-		e->load(L"assets\\characters\\dragon_knight\\dragon_knight.prefab");
+		e->load(L"assets\\characters\\dragon_knight\\main.prefab");
 		root->add_child(e);
 		main_player.init(e);
 		main_player.character = main_player.character;
