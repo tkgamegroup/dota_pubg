@@ -200,21 +200,21 @@ void cMain::start()
 
 			{
 				auto e = Entity::create();
-				e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
+				e->load(L"assets\\characters\\life_stealer\\main.prefab");
 				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -8.f)));
 				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
 				root->add_child(e);
 			}
 			{
 				auto e = Entity::create();
-				e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
+				e->load(L"assets\\characters\\life_stealer\\main.prefab");
 				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -9.f)));
 				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
 				root->add_child(e);
 			}
 			{
 				auto e = Entity::create();
-				e->load(L"assets\\characters\\blood_seeker\\blood_seeker.prefab");
+				e->load(L"assets\\characters\\life_stealer\\main.prefab");
 				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -10.f)));
 				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
 				root->add_child(e);

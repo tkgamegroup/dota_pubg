@@ -167,15 +167,15 @@ void load_character_presets()
 		preset.AGI_GROW = 2;
 		preset.INT_GROW = 1;
 		preset.atk = 32;
-		preset.atk_time = 1.5f;
-		preset.atk_point = 0.68f;
+		preset.atk_time = 1.7f;
+		preset.atk_point = 0.5f;
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
 	}
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.name = "Blood Seeker";
+		preset.name = "Life Stealer";
 		preset.exp_list = { 200, 0 };
 		preset.hp = 200;
 		preset.mp = 75;
@@ -186,8 +186,8 @@ void load_character_presets()
 		preset.AGI_GROW = 3;
 		preset.INT_GROW = 2;
 		preset.atk = 35;
-		preset.atk_time = 2.6f;
-		preset.atk_point = 1.5f;
+		preset.atk_time = 1.7f;
+		preset.atk_point = 0.39f;
 	}
 }
 
@@ -221,6 +221,9 @@ void cCharacter::set_preset_name(const std::string& name)
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
+
+	if (armature)
+		armature->playing_callbacks.remove("character"_h);
 
 	graphics::gui_callbacks.remove((uint)this);
 }
@@ -381,6 +384,25 @@ void cCharacter::start()
 			break;
 		e = e->children[0].get();
 	}
+	if (armature)
+	{
+		armature->playing_callbacks.add([this](uint ev, uint anim) {
+			if (ev == "end"_h)
+			{
+				switch (anim)
+				{
+				case "attack"_h:
+					attack_timer = -2.f;
+					action = ActionNone;
+					break;
+				case "cast"_h:
+					cast_timer = -2.f;
+					action = ActionNone;
+					break;
+				}
+			}
+		}, "character"_h);
+	}
 
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
@@ -438,7 +460,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		attack_timer -= delta_time;
 		if (attack_timer <= 0.f)
 		{
-			if (distance(node->pos, target->node->pos) <= preset.atk_distance + 1.f)
+			if (distance(node->pos, target->node->pos) <= preset.atk_distance + 3.5f)
 			{
 				if (preset.atk_projectile)
 				{
@@ -455,8 +477,6 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			}
 
 			attack_interval_timer = (preset.atk_time - preset.atk_point) / attack_speed;
-
-			action = ActionNone;
 		}
 		action = ActionAttack;
 		nav_agent->set_speed_scale(0.f);
@@ -467,14 +487,17 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		{
 			if (approached)
 			{
-				attack_speed = max(0.01f, atk_sp / 100.f);
+				attack_speed = max(0.01f, atk_sp / 100.f); 
 				attack_timer = preset.atk_point / attack_speed;
 			}
 		}
 		else
 		{
-			action = ActionNone;
-			nav_agent->set_speed_scale(0.f);
+			if (attack_timer > -1.f)
+			{
+				action = ActionAttack;
+				nav_agent->set_speed_scale(0.f);
+			}
 		}
 	}
 }
@@ -502,10 +525,12 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 			cast_ability(ins, pos, target);
 			nav_agent->stop();
 			new CommandIdle(this);
-			return;
 		}
-		action = ActionCast;
-		nav_agent->set_speed_scale(0.f);
+		else
+		{
+			action = ActionCast;
+			nav_agent->set_speed_scale(0.f);
+		}
 	}
 	else
 	{
@@ -516,10 +541,12 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 				cast_ability(ins, pos, target);
 				nav_agent->stop();
 				new CommandIdle(this);
-				return;
 			}
-			cast_speed = preset.cast_time / ability.cast_time;
-			cast_timer = preset.cast_point / cast_speed;
+			else
+			{
+				cast_speed = preset.cast_time / ability.cast_time;
+				cast_timer = preset.cast_point / cast_speed;
+			}
 		}
 	}
 }
@@ -628,18 +655,22 @@ void cCharacter::update()
 		switch (action)
 		{
 		case ActionNone:
+			armature->loop = true;
 			armature->playing_speed = 1.f;
 			armature->play("idle"_h);
 			break;
 		case ActionMove:
+			armature->loop = true;
 			armature->playing_speed = move_speed;
 			armature->play("run"_h);
 			break;
 		case ActionAttack:
+			armature->loop = false;
 			armature->playing_speed = attack_speed;
 			armature->play("attack"_h);
 			break;
 		case ActionCast:
+			armature->loop = false;
 			armature->playing_speed = 1.f;
 			armature->play("cast"_h);
 			break;
