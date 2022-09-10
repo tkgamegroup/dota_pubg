@@ -79,7 +79,7 @@ void CommandAttackLocation::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = get_characters(character->node->pos, 3.5f, ~character->faction);
+			auto enemies = get_characters(character->node->pos, 5.f, ~character->faction);
 			if (!enemies.empty() && dist > atk_dist)
 				target.set(enemies.front());
 
@@ -163,9 +163,6 @@ void load_character_presets()
 		preset.STR = 21;
 		preset.AGI = 16;
 		preset.INT = 18;
-		preset.STR_GROW = 3;
-		preset.AGI_GROW = 2;
-		preset.INT_GROW = 1;
 		preset.atk = 32;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
@@ -182,10 +179,18 @@ void load_character_presets()
 		preset.STR = 24;
 		preset.AGI = 22;
 		preset.INT = 17;
-		preset.STR_GROW = 2;
-		preset.AGI_GROW = 3;
-		preset.INT_GROW = 2;
 		preset.atk = 35;
+		preset.atk_time = 1.7f;
+		preset.atk_point = 0.39f;
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
+		preset.name = "Creep";
+		preset.exp_list = { 200, 0 };
+		preset.hp = 550;
+		preset.mp = 0;
+		preset.atk = 21;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
 	}
@@ -210,6 +215,15 @@ const CharacterPreset& CharacterPreset::get(uint id)
 	return character_presets[id];
 }
 
+void cCharacter::set_faction(uint _faction)
+{
+	if (faction == _faction)
+		return;
+	faction = _faction;
+	if (nav_agent)
+		nav_agent->separation_group = faction;
+}
+
 void cCharacter::set_preset_name(const std::string& name)
 {
 	if (preset_name == name)
@@ -230,6 +244,8 @@ cCharacter::~cCharacter()
 
 void cCharacter::on_init()
 {
+	nav_agent->separation_group = faction;
+
 	node->measurers.add([this](AABB* ret) {
 		auto radius = nav_agent->radius;
 		auto height = nav_agent->height;
@@ -498,6 +514,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 				action = ActionAttack;
 				nav_agent->set_speed_scale(0.f);
 			}
+			if (approached)
+				nav_agent->set_speed_scale(0.f);
 		}
 	}
 }
@@ -575,10 +593,6 @@ void cCharacter::update()
 
 		hp_max = preset.hp;
 		mp_max = preset.mp;
-
-		STR = preset.STR + round(preset.STR_GROW * (lv - 1));
-		AGI = preset.AGI + round(preset.AGI_GROW * (lv - 1));
-		INT = preset.INT + round(preset.INT_GROW * (lv - 1));
 
 		atk = preset.atk;
 

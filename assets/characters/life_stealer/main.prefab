@@ -2,13 +2,13 @@
 <prefab>
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavAgent" radius="0.6" height="1.8" speed="8.12" separation_group="2" />
-		<item type_name="cCharacter" faction="2" preset_name="Life Stealer" />
+		<item type_name="flame::cNavAgent" radius="0.6" height="1.8" speed="8.12" />
+		<item type_name="cCharacter" preset_name="Life Stealer" />
 	</components>
 	<children>
 		<item name="RootNode">
 			<components>
-				<item type_name="flame::cNode" scl="0.0001,0.0001,0.0001" />>
+				<item type_name="flame::cNode" scl="0.0001,0.0001,0.0001" />
 				<item type_name="flame::cArmature" armature_name="main.fmod">
 					<animation_names>
 						<item first="idle.fani" second="idle" />

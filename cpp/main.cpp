@@ -33,7 +33,7 @@ void MainCamera::init(EntityPtr e)
 	entity = e;
 	if (e)
 	{
-		node = e->get_component_i<cNode>(0);
+		node = e->node();
 		camera = e->get_component_t<cCamera>();
 	}
 }
@@ -43,7 +43,7 @@ void MainTerrain::init(EntityPtr e)
 	entity = e;
 	if (e)
 	{
-		node = e->get_component_i<cNode>(0);
+		node = e->node();
 		terrain = e->get_component_t<cTerrain>();
 		extent = terrain->extent;
 	}
@@ -64,7 +64,7 @@ void MainPlayer::init(EntityPtr e)
 	entity = e;
 	if (e)
 	{
-		node = e->get_component_i<cNode>(0);
+		node = e->node();
 		nav_agent = e->get_component_t<cNavAgent>();
 		character = e->get_component_t<cCharacter>();
 	}
@@ -157,7 +157,7 @@ void cMain::start()
 		e->load(L"assets\\characters\\dragon_knight\\main.prefab");
 		root->add_child(e);
 		main_player.init(e);
-		main_player.character = main_player.character;
+		main_player.character->set_faction(1);
 	}
 
 	if (main_terrain.terrain)
@@ -189,34 +189,24 @@ void cMain::start()
 				return a.first < b.first;
 			});
 
-			auto demon_pos = site_positions[site_centrality.front().second].xz();
 			auto player1_pos = site_positions[site_centrality.back().second].xz();
-			auto demon_coord = main_terrain.get_coord(demon_pos);
 			auto player1_coord = main_terrain.get_coord(player1_pos);
 
-			main_player.node->set_pos(main_terrain.get_coord(player1_coord + vec3(0.f, 0.f, -8.f)));
-			add_chest(player1_coord + vec3(0.f, 0.f, -9.f), Item::find("Boots of Speed"));
-			add_chest(player1_coord + vec3(1.f, 0.f, -9.f), Item::find("Magic Candy"));
+			main_player.node->set_pos(main_terrain.get_coord(player1_coord));
+			add_chest(player1_coord + vec3(2.f, 0.f, 0.f), Item::find("Boots of Speed"));
+			add_chest(player1_coord + vec3(0.f, 0.f, 2.f), Item::find("Magic Candy"));
 
+			for (auto i = 1; i < site_centrality.size() - 1; i++)
 			{
+				auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
+
 				auto e = Entity::create();
 				e->load(L"assets\\characters\\life_stealer\\main.prefab");
-				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -8.f)));
-				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
-				root->add_child(e);
-			}
-			{
-				auto e = Entity::create();
-				e->load(L"assets\\characters\\life_stealer\\main.prefab");
-				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -9.f)));
-				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
-				root->add_child(e);
-			}
-			{
-				auto e = Entity::create();
-				e->load(L"assets\\characters\\life_stealer\\main.prefab");
-				e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(player1_coord + vec3(10.f, 0.f, -10.f)));
-				new CommandAttackLocation(e->get_component_t<cCharacter>(), player1_coord);
+				e->node()->set_pos(coord);
+				auto character = e->get_component_t<cCharacter>();
+				character->set_faction(2);
+				character->set_preset_name("Creep");
+				new CommandAttackLocation(character, coord);
 				root->add_child(e);
 			}
 		}
@@ -850,7 +840,7 @@ void add_chest(const vec3& pos, uint item_id, uint item_num)
 		e_chest->load(L"assets\\models\\chest.prefab");
 	}
 	auto e = e_chest->copy();
-	e->get_component_i<cNode>(0)->set_pos(main_terrain.get_coord(pos));
+	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
 	auto chest = e->get_component_t<cChest>();
 	chest->item_id = item_id;

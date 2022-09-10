@@ -154,9 +154,6 @@ struct CharacterPreset
 	uint STR = 0;
 	uint AGI = 0;
 	uint INT = 0;
-	uint STR_GROW = 0;
-	uint AGI_GROW = 0;
-	uint INT_GROW = 0;
 	uint atk = 0;
 	float atk_distance = 1.5f;
 	float atk_time = 2.f; // animation time (interval)
@@ -193,6 +190,8 @@ struct cCharacter : Component
 
 	/// Reflect
 	uint faction = 0;
+	/// Reflect
+	void set_faction(uint _faction);
 	/// Reflect
 	uint ai_id = 0;
 	/// Reflect
