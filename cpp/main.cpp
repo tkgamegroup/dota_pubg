@@ -270,52 +270,52 @@ void cMain::start()
 			ImGui::TextUnformatted(main_player.character->entity->name.c_str());
 
 			ImGui::BeginChild("##c1", ImVec2(100.f, -1.f));
-			if (ImGui::BeginTable("##t1", 2));
-			{
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
-				ImGui::Image(img_sword, ImVec2(16, 16));
-				ImGui::TableNextColumn();
-				ImGui::Text("%5d", main_player.character->atk);
+			//if (ImGui::BeginTable("##t1", 2));
+			//{
+			//	ImGui::TableNextRow();
+			//	ImGui::TableNextColumn();
+			//	static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
+			//	ImGui::Image(img_sword, ImVec2(16, 16));
+			//	ImGui::TableNextColumn();
+			//	ImGui::Text("%5d", main_player.character->atk);
 
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
-				ImGui::Image(img_shield, ImVec2(16, 16));
-				ImGui::TableNextColumn();
-				ImGui::Text("%5d", main_player.character->armor);
+			//	ImGui::TableNextRow();
+			//	ImGui::TableNextColumn();
+			//	static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
+			//	ImGui::Image(img_shield, ImVec2(16, 16));
+			//	ImGui::TableNextColumn();
+			//	ImGui::Text("%5d", main_player.character->armor);
 
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				static auto img_run = graphics::Image::get("assets\\icons\\run.png");
-				ImGui::Image(img_run, ImVec2(16, 16));
-				ImGui::TableNextColumn();
-				ImGui::Text("%5d", main_player.character->mov_sp);
+			//	ImGui::TableNextRow();
+			//	ImGui::TableNextColumn();
+			//	static auto img_run = graphics::Image::get("assets\\icons\\run.png");
+			//	ImGui::Image(img_run, ImVec2(16, 16));
+			//	ImGui::TableNextColumn();
+			//	ImGui::Text("%5d", main_player.character->mov_sp);
 
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
-				ImGui::Image(img_str, ImVec2(16, 16));
-				ImGui::TableNextColumn();
-				ImGui::Text("%5d", main_player.character->STR);
+			//	ImGui::TableNextRow();
+			//	ImGui::TableNextColumn();
+			//	static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
+			//	ImGui::Image(img_str, ImVec2(16, 16));
+			//	ImGui::TableNextColumn();
+			//	ImGui::Text("%5d", main_player.character->STR);
 
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
-				ImGui::Image(img_agi, ImVec2(16, 16));
-				ImGui::TableNextColumn();
-				ImGui::Text("%5d", main_player.character->AGI);
+			//	ImGui::TableNextRow();
+			//	ImGui::TableNextColumn();
+			//	static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
+			//	ImGui::Image(img_agi, ImVec2(16, 16));
+			//	ImGui::TableNextColumn();
+			//	ImGui::Text("%5d", main_player.character->AGI);
 
-				ImGui::TableNextRow();
-				ImGui::TableNextColumn();
-				static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
-				ImGui::Image(img_int, ImVec2(16, 16));
-				ImGui::TableNextColumn();
-				ImGui::Text("%5d", main_player.character->INT);
+			//	ImGui::TableNextRow();
+			//	ImGui::TableNextColumn();
+			//	static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
+			//	ImGui::Image(img_int, ImVec2(16, 16));
+			//	ImGui::TableNextColumn();
+			//	ImGui::Text("%5d", main_player.character->INT);
 
-				ImGui::EndTable();
-			}
+			//	ImGui::EndTable();
+			//}
 			ImGui::EndChild();
 
 			ImGui::SameLine();

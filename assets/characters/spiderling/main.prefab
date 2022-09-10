@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item name="RootNode">
+			<components>
+				<item type_name="flame::cNode" scl="0.0001,0.0001,0.0001" />
+				<item type_name="flame::cArmature" armature_name="main.fmod">
+					<animation_names>
+						<item first="idle.fani" second="idle" />
+						<item first="run.fani" second="run" />
+						<item first="attack.fani" second="attack" />
+					</animation_names>
+					<animation_transitions>
+					</animation_transitions>
+				</item>
+			</components>
+			<children>
+				<item name="spiderling_base">
+					<components>
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="370,370,370" />
+						<item type_name="flame::cMesh" mesh_name="main.fmod#mesh0" material_name="main_blinn1.fmat" />
+					</components>
+				</item>
+				<item name="spiderling1.002">
+					<components>
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
+					</components>
+					<children>
+						<item name="root">
+							<components>
+								<item type_name="flame::cNode" pos="6.0063e-06,18.8125,25.9375" qut="0.707107,-5.98943e-22,5.98943e-22,-0.707107" />
+							</components>
+							<children>
+								<item name="SimpleBugLeg_base_A_R">
+									<components>
+										<item type_name="flame::cNode" pos="13.7139,-19.888,-5.53543" qut="0.274883,-0.53258,-0.344286,0.722679" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="SimpleBugLeg_0_A_R">
+											<components>
+												<item type_name="flame::cNode" pos="-17.9591,7.62939e-05,-1.14441e-05" qut="0.776716,-0.553565,0.0227425,0.299602" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_1_A_R">
+													<components>
+														<item type_name="flame::cNode" pos="-54.7924,0.000172615,9.82285e-05" qut="0.601666,0.0434934,0.797064,0.0281923" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_2_A_R">
+															<components>
+																<item type_name="flame::cNode" pos="-61.1393,1.04904e-05,0.000167847" qut="-0.00690341,0.974001,0.00160258,-0.226433" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_A_R_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="3.42727e-06,0.849135,0" qut="1,-1.49012e-08,2.23517e-08,7.45058e-09" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="SimpleBugLeg_base_R">
+									<components>
+										<item type_name="flame::cNode" pos="-0.00902557,-17.1303,-8.77237" qut="-0.372123,0.653839,0.0926421,-0.652255" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="SimpleBugLeg_0_R">
+											<components>
+												<item type_name="flame::cNode" pos="-28.372,-2.28882e-05,-5.53131e-05" qut="0.869089,-0.448063,0.0946485,0.186994" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_1_R">
+													<components>
+														<item type_name="flame::cNode" pos="-57.1592,1.90735e-05,-0.00049305" qut="0.694221,0.0265171,0.718911,0.0228527" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_2_R">
+															<components>
+																<item type_name="flame::cNode" pos="-79.2224,-0.000177383,0.0011673" qut="0.0464058,0.917626,-0.0199368,-0.394223" scl="1,1,1.00003" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_R_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="1.90735e-06,0.849144,1.52588e-05" qut="1,-3.33067e-16,2.98023e-08,-7.45058e-09" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="SimpleBugLeg_base_L">
+									<components>
+										<item type_name="flame::cNode" pos="-0.00901222,17.1302,-8.77238" qut="0.0926417,0.652254,0.372123,0.65384" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="SimpleBugLeg_0_L">
+											<components>
+												<item type_name="flame::cNode" pos="28.372,1.81198e-05,0.000118256" qut="0.869089,-0.448063,0.0946462,0.186994" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_1_L">
+													<components>
+														<item type_name="flame::cNode" pos="57.1591,2.86102e-05,0.000312805" qut="0.694214,0.0265127,0.718917,0.0228584" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_2_L">
+															<components>
+																<item type_name="flame::cNode" pos="79.2222,9.91821e-05,0.000106812" qut="0.917632,-0.0463945,0.394211,-0.0199358" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_L_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="1.90735e-06,0.849136,1.52588e-05" qut="1,-1.49012e-08,-1.49012e-08,-2.22045e-16" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="SimpleBugLeg_base_A_L">
+									<components>
+										<item type_name="flame::cNode" pos="13.7139,19.8881,-5.53543" qut="0.344287,0.722679,0.274884,0.53258" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="SimpleBugLeg_0_A_L">
+											<components>
+												<item type_name="flame::cNode" pos="17.9591,-3.40939e-05,-9.53674e-06" qut="0.776716,-0.553565,0.0227419,0.299601" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_1_A_L">
+													<components>
+														<item type_name="flame::cNode" pos="54.7924,-1.62125e-05,1.71661e-05" qut="0.601666,0.0434927,0.797064,0.0281914" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_2_A_L">
+															<components>
+																<item type_name="flame::cNode" pos="61.1393,9.72748e-05,0.000114441" qut="0.974001,0.00690076,0.226434,0.00160427" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_A_L_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="1.13249e-06,0.849133,-7.62939e-06" qut="1,-2.22045e-16,1.49012e-08,-7.45058e-09" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="butt_start">
+									<components>
+										<item type_name="flame::cNode" pos="-12.0218,3.57628e-06,3.73417" qut="-0.347217,0.347216,0.615987,0.615988" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="butt_R0C0">
+											<components>
+												<item type_name="flame::cNode" pos="22.8714,-1.90735e-06,4.42386e-05" qut="0.992908,1.97506e-07,-8.77404e-08,-0.118884" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="butt_R1C0">
+													<components>
+														<item type_name="flame::cNode" pos="33.6424,-6.48499e-05,4.95638e-05" qut="0.904293,2.33441e-07,-2.92098e-07,-0.426912" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="butt_R2C0">
+															<components>
+																<item type_name="flame::cNode" pos="45.8119,-0.000114441,3.21647e-05" qut="0.946725,-0.00582624,0.0129979,-0.321729" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="butt_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="45.9428,0.000114441,0.000216007" qut="1,-1.28498e-07,-5.39515e-06,4.50015e-06" scl="1,1,1" />
+																	</components>
+																	<children>
+																		<item name="butt_end_end">
+																			<components>
+																				<item type_name="flame::cNode" pos="1.52588e-05,0.849129,2.38419e-07" qut="1,-1.38778e-17,9.31323e-10,-1.49012e-08" scl="1,1,1" />
+																			</components>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="spine1">
+									<components>
+										<item type_name="flame::cNode" pos="10.1729,-2.38418e-07,0.976765" qut="0.968237,-7.17585e-22,-0.250034,-1.85306e-22" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="head">
+											<components>
+												<item type_name="flame::cNode" pos="29.9539,4.70877e-06,1.75229" qut="0.968237,3.33106e-15,0.250034,-8.60198e-16" />
+											</components>
+											<children>
+												<item name="big_teeth2_0_A_L">
+													<components>
+														<item type_name="flame::cNode" pos="20.7003,11.4684,-7.76512" qut="0.956291,0.024196,0.2794,0.0828139" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="big_teeth2_0_A_L_end">
+															<components>
+																<item type_name="flame::cNode" pos="3.8147e-06,0.849138,3.8147e-06" qut="1,3.72529e-09,1.49012e-08,-1.11022e-16" scl="1,1,1" />
+															</components>
+														</item>
+													</children>
+												</item>
+												<item name="big_teeth3_0_A_R">
+													<components>
+														<item type_name="flame::cNode" pos="20.7003,-11.4684,-7.7651" qut="0.0782709,0.279524,0.0228686,0.95667" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="big_teeth3_0_A_R_end">
+															<components>
+																<item type_name="flame::cNode" pos="-2.86102e-06,0.849136,3.8147e-06" qut="1,3.72529e-09,-1.49012e-08,7.45058e-09" scl="1,1,1" />
+															</components>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+										<item name="SimpleBugLeg_base_B_L">
+											<components>
+												<item type_name="flame::cNode" pos="12.7703,19.0435,-10.392" qut="0.409064,0.841607,0.265494,0.232117" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_0_B_L">
+													<components>
+														<item type_name="flame::cNode" pos="13.451,-1.23978e-05,-1.14441e-05" qut="0.649285,-0.705744,-0.0369219,0.281054" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_1_B_L">
+															<components>
+																<item type_name="flame::cNode" pos="38.5778,4.14848e-05,7.24792e-05" qut="0.75902,0.0595227,0.646598,0.0475045" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_B_L">
+																	<components>
+																		<item type_name="flame::cNode" pos="35.0477,3.00407e-05,6.86646e-05" qut="0.90788,-0.0471299,0.416215,0.0172523" />
+																	</components>
+																	<children>
+																		<item name="SimpleBugLeg_2_B_L_end">
+																			<components>
+																				<item type_name="flame::cNode" pos="0,0.849139,7.62939e-06" qut="1,-6.93889e-17,-1.86265e-08,3.72529e-09" scl="1,1,1" />
+																			</components>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+										<item name="SimpleBugLeg_base_B_R">
+											<components>
+												<item type_name="flame::cNode" pos="12.7703,-19.0434,-10.392" qut="0.265492,-0.232117,-0.409065,0.841606" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_0_B_R">
+													<components>
+														<item type_name="flame::cNode" pos="-13.451,1.43051e-05,2.86102e-06" qut="0.649288,-0.705741,-0.0369229,0.281054" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_1_B_R">
+															<components>
+																<item type_name="flame::cNode" pos="-38.5778,-7.39098e-05,4.29153e-05" qut="0.75902,0.0595212,0.646598,0.0475062" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_B_R">
+																	<components>
+																		<item type_name="flame::cNode" pos="-35.0475,2.38419e-06,1.52588e-05" qut="0.0471285,0.90788,0.0172529,-0.416215" scl="1.00001,1,1.00001" />
+																	</components>
+																	<children>
+																		<item name="SimpleBugLeg_2_B_R_end">
+																			<components>
+																				<item type_name="flame::cNode" pos="-1.90735e-06,0.849135,0" qut="1,-5.89806e-17,1.58325e-08,3.72529e-09" scl="1,1,1" />
+																			</components>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+										<item name="SimpleBugLeg_0_C_L">
+											<components>
+												<item type_name="flame::cNode" pos="31.75,20.7123,-8.25811" qut="0.895814,-0.322924,-0.265081,0.15156" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_1_C_L">
+													<components>
+														<item type_name="flame::cNode" pos="41.2277,-4.56572e-05,-1.65701e-05" qut="0.882228,0.105163,0.396955,0.230307" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_2_C_L">
+															<components>
+																<item type_name="flame::cNode" pos="35.247,-0.000125885,-2.28882e-05" qut="0.903818,0.265895,0.334855,-0.0168867" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_C_L_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="0,0.849136,0" qut="1,-1.49012e-08,-1.49012e-08,3.72529e-09" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+										<item name="SimpleBugLeg_0_C_R">
+											<components>
+												<item type_name="flame::cNode" pos="31.75,-20.7123,-8.25811" qut="0.265081,0.151559,0.895814,0.322924" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_1_C_R">
+													<components>
+														<item type_name="flame::cNode" pos="-41.2277,2.96831e-05,-2.53916e-05" qut="0.883192,0.105675,0.394858,0.22998" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="SimpleBugLeg_2_C_R">
+															<components>
+																<item type_name="flame::cNode" pos="-35.247,6.48499e-05,2.28882e-05" qut="-0.265414,0.904064,-0.0154453,-0.334643" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="SimpleBugLeg_2_C_R_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="-5.72205e-06,0.849144,-7.62939e-06" qut="1,-7.45058e-09,-1.38778e-17,3.72529e-09" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+										<item name="SimpleBugLeg_base_C_L">
+											<components>
+												<item type_name="flame::cNode" pos="23.411,16.6799,-11.2739" qut="0.422057,0.865961,0.12273,0.238572" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_base_C_L_end">
+													<components>
+														<item type_name="flame::cNode" pos="-3.8147e-06,0.849138,0" qut="1,1.11022e-16,-1.49012e-08,7.45058e-09" scl="1,1,1" />
+													</components>
+												</item>
+											</children>
+										</item>
+										<item name="SimpleBugLeg_base_C_R">
+											<components>
+												<item type_name="flame::cNode" pos="23.411,-16.6799,-11.2739" qut="0.122729,-0.238571,-0.422056,0.865962" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="SimpleBugLeg_base_C_R_end">
+													<components>
+														<item type_name="flame::cNode" pos="-3.8147e-06,0.849136,4.76837e-07" qut="1,0,1.65436e-24,-7.45058e-09" scl="1,1,1" />
+													</components>
+												</item>
+											</children>
+										</item>
+										<item name="neck1">
+											<components>
+												<item type_name="flame::cNode" pos="18.0272,2.6226e-06,1.90735e-06" qut="0.997341,-1.03011e-15,-0.0728744,-7.52686e-17" />
+											</components>
+											<children>
+												<item name="neck1_end">
+													<components>
+														<item type_name="flame::cNode" pos="1.90735e-06,0.849138,0" qut="1,7.10543e-15,0,0" />
+													</components>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+							</children>
+						</item>
+					</children>
+				</item>
+			</children>
+		</item>
+	</children>
+</prefab>

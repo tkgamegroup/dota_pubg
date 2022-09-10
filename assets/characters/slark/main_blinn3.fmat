@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<material color_map="0">
+	<textures>
+		<item filename="__slark_base_color.jpg" srgb="true" auto_mipmap="true" />
+	</textures>
+</material>
