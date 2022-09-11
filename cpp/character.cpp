@@ -73,7 +73,7 @@ void CommandAttackLocation::update()
 {
 	auto atk_dist = character->get_preset().atk_distance;
 	auto dist = target.obj ? distance(character->node->pos, target.obj->node->pos) : 10000.f;
-	if (dist > atk_dist + 12.f)
+	if (dist > atk_dist + 10.f)
 		target.set(nullptr);
 	if (character->action != ActionAttack)
 	{
@@ -157,12 +157,15 @@ void load_character_presets()
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
 		preset.name = "Dragon Knight";
-		preset.exp_list = { 200, 0 };
-		preset.hp = 200;
-		preset.mp = 75;
+		preset.exp_base = 200;
+		preset.hp = 2000;
+		preset.mp = 500;
+		preset.VIG = 20;
+		preset.MND = 10;
 		preset.STR = 21;
-		preset.AGI = 16;
-		preset.INT = 18;
+		preset.DEX = 16;
+		preset.INT = 10;
+		preset.LUK = 10;
 		preset.atk = 32;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
@@ -173,12 +176,15 @@ void load_character_presets()
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
 		preset.name = "Life Stealer";
-		preset.exp_list = { 200, 0 };
-		preset.hp = 200;
-		preset.mp = 75;
+		preset.exp_base = 200;
+		preset.hp = 2000;
+		preset.mp = 500;
+		preset.VIG = 20;
+		preset.MND = 10;
 		preset.STR = 24;
-		preset.AGI = 22;
-		preset.INT = 17;
+		preset.DEX = 22;
+		preset.INT = 10;
+		preset.LUK = 10;
 		preset.atk = 35;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
@@ -186,13 +192,44 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.name = "Slark";
+		preset.exp_base = 200;
+		preset.hp = 2000;
+		preset.mp = 500;
+		preset.VIG = 20;
+		preset.MND = 10;
+		preset.STR = 20;
+		preset.DEX = 21;
+		preset.INT = 10;
+		preset.LUK = 10;
+		preset.atk = 37;
+		preset.atk_time = 1.7f;
+		preset.atk_point = 0.5f;
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
+		preset.name = "Spiderling";
+		preset.exp_base = 200;
+		preset.hp = 4500;
+		preset.mp = 0;
+		preset.atk = 14;
+		preset.atk_time = 1.35f;
+		preset.atk_point = 0.5f;
+		preset.hp_rec = 5;
+		preset.mov_sp = 400;
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
 		preset.name = "Creep";
-		preset.exp_list = { 200, 0 };
-		preset.hp = 550;
+		preset.exp_base = 200;
+		preset.hp = 5000;
 		preset.mp = 0;
 		preset.atk = 21;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
+		preset.hp_rec = 5;
 	}
 }
 
@@ -254,21 +291,17 @@ void cCharacter::on_init()
 	}, "character"_h);
 }
 
-static uint calc_exp(uint lv)
-{
-	return lv * 10;
-}
-
 void cCharacter::inflict_damage(cCharacterPtr target, uint value)
 {
 	if (target->take_damage(value))
-		gain_exp(calc_exp(target->lv));
+		gain_exp(target->exp_max * 0.15f);
 }
 
 bool cCharacter::take_damage(uint value)
 {
 	if (dead)
 		return false;
+	value *= 10;
 	if (hp > value)
 	{
 		hp -= value;
@@ -288,11 +321,8 @@ void cCharacter::gain_exp(uint v)
 	{
 		exp -= exp_max;
 		lv++;
-		exp_max = get_preset().exp_list[lv - 1];
+		exp_max *= 1.1f;
 		stats_dirty = true;
-
-		if (lv == 2)
-			gain_ability(Ability::find("Blink"));
 	}
 }
 
@@ -429,7 +459,7 @@ void cCharacter::start()
 			{
 				p += sInput::instance()->offset;
 				auto dl = ImGui::GetForegroundDrawList();
-				const auto bar_width = 80.f;
+				const auto bar_width = 80.f * (nav_agent->radius / 0.6f);
 				const auto bar_height = 5.f;
 				p.x -= bar_width * 0.5f;
 				dl->AddRectFilled(p, p + vec2((float)hp / (float)hp_max * bar_width, bar_height),
@@ -485,11 +515,11 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 						target, 0.1f,
 						[this](cCharacterPtr t) {
 							if (t)
-								t->take_damage(atk);
+								inflict_damage(t, atk);
 						});
 				}
 				else
-					target->take_damage(atk);
+					inflict_damage(target, atk);
 			}
 
 			attack_interval_timer = (preset.atk_time - preset.atk_point) / attack_speed;
@@ -584,7 +614,8 @@ void cCharacter::update()
 	{
 		auto& preset = get_preset();
 
-		exp_max = preset.exp_list.empty() ? 0 : preset.exp_list[lv - 1];
+		if (exp_max == 0)
+			exp_max = preset.exp_base;
 
 		state = StateNormal;
 
@@ -594,8 +625,17 @@ void cCharacter::update()
 		hp_max = preset.hp;
 		mp_max = preset.mp;
 
+		VIG = preset.VIG;
+		MND = preset.MND;
+		STR = preset.STR;
+		DEX = preset.DEX;
+		INT = preset.INT;
+		LUK = preset.LUK;
+
 		atk = preset.atk;
 
+		hp_rec = preset.hp_rec;
+		mp_rec = preset.mp_rec;
 		mov_sp = preset.mov_sp;
 		atk_sp = preset.atk_sp;
 
@@ -612,6 +652,7 @@ void cCharacter::update()
 		{
 			if (ins)
 			{
+				auto& ability = Ability::get(ins->id);
 
 			}
 		}
@@ -622,8 +663,10 @@ void cCharacter::update()
 				buff.passive(this);
 		}
 
-		hp_max += STR * 20;
-		mp_max += INT * 12;
+		hp_max += VIG * 200;
+		hp_rec += VIG;
+		mp_max += MND * 200;
+		mp_rec += MND;
 
 		if (hp_max != pre_hp_max)
 			hp *= (float)hp_max / pre_hp_max;
@@ -633,6 +676,17 @@ void cCharacter::update()
 		atk += STR;
 
 		stats_dirty = false;
+	}
+
+	if (recover_timer > 0)
+		recover_timer -= delta_time;
+	else
+	{
+		hp += hp_rec;
+		if (hp > hp_max) hp = hp_max;
+		mp += mp_rec;
+		if (mp > mp_max) mp = mp_max;
+		recover_timer = 1.f;
 	}
 
 	if (search_timer > 0)

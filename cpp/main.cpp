@@ -200,12 +200,29 @@ void cMain::start()
 			{
 				auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
 
+				static const wchar_t* prefabs[] = {
+					L"assets\\characters\\life_stealer\\main.prefab",
+					L"assets\\characters\\slark\\main.prefab"
+				};
+
 				auto e = Entity::create();
-				e->load(L"assets\\characters\\life_stealer\\main.prefab");
+				e->load(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]);
 				e->node()->set_pos(coord);
 				auto character = e->get_component_t<cCharacter>();
 				character->set_faction(2);
-				character->set_preset_name("Creep");
+				new CommandAttackLocation(character, coord);
+				root->add_child(e);
+			}
+			for (auto i = 0; i < 100; i++)
+			{
+				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
+
+				auto e = Entity::create();
+				e->load(L"assets\\characters\\spiderling\\main.prefab");
+				e->node()->set_pos(coord);
+				auto character = e->get_component_t<cCharacter>();
+				character->set_faction(2);
+				character->set_preset_name("Spiderling");
 				new CommandAttackLocation(character, coord);
 				root->add_child(e);
 			}
@@ -262,7 +279,7 @@ void cMain::start()
 		if (tar_sz.x <= 0.f || tar_sz.y <= 0.f)
 			return;
 		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-		ImGui::SetNextWindowSize(ImVec2(600.f, 160.f), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(600.f, 100.f), ImGuiCond_Always);
 		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 		if (main_player.character)
@@ -324,36 +341,6 @@ void cMain::start()
 			auto dl = ImGui::GetWindowDrawList();
 			const auto bar_width = ImGui::GetContentRegionAvailWidth();
 			const auto bar_height = 16.f;
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->hp / (float)main_player.character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("{}/{}", main_player.character->hp, main_player.character->hp_max);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->mp / (float)main_player.character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("{}/{}", main_player.character->mp, main_player.character->mp_max);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("LV {}  {}/{}", main_player.character->lv, main_player.character->exp, main_player.character->exp_max);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
 
 			{
 				auto icon_size = 48.f;
@@ -466,6 +453,36 @@ void cMain::start()
 			auto dl = ImGui::GetWindowDrawList();
 			const auto bar_width = ImGui::GetContentRegionAvailWidth();
 			const auto bar_height = 16.f;
+			{
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->hp / (float)main_player.character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("{}/{}", main_player.character->hp / 10, main_player.character->hp_max / 10);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
+			{
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->mp / (float)main_player.character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("{}/{}", main_player.character->mp / 10, main_player.character->mp_max / 10);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
+			{
+				ImGui::Dummy(ImVec2(bar_width, bar_height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				auto str = std::format("LV {}  {}/{}", main_player.character->lv, main_player.character->exp, main_player.character->exp_max);
+				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+			}
 
 			ImGui::End();
 		}
@@ -486,7 +503,7 @@ void cMain::start()
 				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p0 + vec2((float)focus_character->hp / (float)focus_character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
 				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("{}/{}", focus_character->hp, focus_character->hp_max);
+				auto str = std::format("{}/{}", focus_character->hp / 10, focus_character->hp_max / 10);
 				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 			}

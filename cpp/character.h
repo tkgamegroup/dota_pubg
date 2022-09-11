@@ -148,23 +148,29 @@ struct CharacterPreset
 	uint					id;
 	std::string				name;
 
-	std::vector<uint> exp_list;
-	uint hp = 100;
-	uint mp = 100;
-	uint STR = 0;
-	uint AGI = 0;
-	uint INT = 0;
+	uint exp_base = 0;
+	uint hp = 1000;
+	uint mp = 1000;
+	uint VIG = 0; // vigor
+	uint MND = 0; // mind
+	uint STR = 0; // strength
+	uint DEX = 0; // dexterity
+	uint INT = 0; // intelligence
+	uint LUK = 0; // luck
 	uint atk = 0;
 	float atk_distance = 1.5f;
-	float atk_time = 2.f; // animation time (interval)
+	float atk_time = 2.f; // attack interval
 	float atk_point = 1.f; // hit point
 	std::filesystem::path atk_projectile_name;
 	EntityPtr atk_projectile = nullptr;
 	float cast_time = 1.f; // animation time
 	float cast_point = 0.5f; // hit point
-	uint armor = 0;
-	uint mov_sp = 100;
-	uint atk_sp = 100;
+	uint phy_def = 0; // physical defense
+	uint mag_def = 0; // magic defense
+	uint hp_rec = 0; // hp recover
+	uint mp_rec = 0; // mp recover
+	uint mov_sp = 100; // movement speed
+	uint atk_sp = 100; // attack speed
 
 	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);
@@ -214,19 +220,25 @@ struct cCharacter : Component
 	State state = StateNormal;
 
 	/// Reflect
-	uint hp = 100;
-	uint hp_max = 100;
+	uint hp = 1000;
+	uint hp_max = 1000;
 
 	/// Reflect
-	uint mp = 1;
-	uint mp_max = 1;
+	uint mp = 10;
+	uint mp_max = 10;
 
+	uint VIG = 0;
+	uint MND = 0;
 	uint STR = 0;
-	uint AGI = 0;
+	uint DEX = 0;
 	uint INT = 0;
+	uint LUK = 0;
 
 	uint atk = 10;
-	uint armor = 0;
+	uint phy_def = 0;
+	uint mag_def = 0;
+	uint hp_rec = 0;
+	uint mp_rec = 0;
 	uint mov_sp = 0;
 	uint atk_sp = 0;
 
@@ -241,6 +253,7 @@ struct cCharacter : Component
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
 	float cast_speed = 1.f;
+	float recover_timer = 1.f;
 	float search_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;
