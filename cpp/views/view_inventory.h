@@ -4,7 +4,11 @@
 
 #include <flame/graphics/gui.h>
 
-struct ViewStorage : graphics::GuiView
+struct ViewInventory : graphics::GuiView
 {
+	ViewInventory();
+
 	void on_draw() override;
 };
+
+extern ViewInventory view_inventory;

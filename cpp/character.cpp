@@ -387,7 +387,7 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	if (ins->cd_timer > 0.f)
 		return;
 	auto& ability = Ability::get(ins->id);
-	if (mp < ability.mana)
+	if (mp < ability.mp)
 		return;
 	if (ability.active)
 		ability.active(this);
@@ -397,7 +397,7 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 		ability.active_t(this, target);
 	ins->cd_max = ability.cd;
 	ins->cd_timer = ins->cd_max;
-	mp -= ability.mana;
+	mp -= ability.mp;
 }
 
 void cCharacter::add_buff(uint id, float time)
@@ -458,7 +458,7 @@ void cCharacter::start()
 			if (p.x > 0.f && p.y > 0.f)
 			{
 				p += sInput::instance()->offset;
-				auto dl = ImGui::GetForegroundDrawList();
+				auto dl = ImGui::GetBackgroundDrawList();
 				const auto bar_width = 80.f * (nav_agent->radius / 0.6f);
 				const auto bar_height = 5.f;
 				p.x -= bar_width * 0.5f;

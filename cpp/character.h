@@ -242,7 +242,7 @@ struct cCharacter : Component
 	uint mov_sp = 0;
 	uint atk_sp = 0;
 
-	std::unique_ptr<ItemInstance> inventory[6];
+	std::unique_ptr<ItemInstance> inventory[16];
 	std::unique_ptr<AbilityInstance> abilities[4];
 	std::vector<std::unique_ptr<BuffInstance>> buffs;
 

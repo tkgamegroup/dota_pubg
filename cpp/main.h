@@ -20,6 +20,16 @@ enum TargetType
 	TargetLocation = 1 << 2
 };
 
+enum EquipPart
+{
+	EquipHead,
+	EquipChest,
+	EquipLeg,
+	EquipFoot,
+	EquipHand,
+	EquipWeapon
+};
+
 extern EntityPtr root;
 
 struct MainCamera

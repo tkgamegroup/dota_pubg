@@ -25,6 +25,9 @@
 #include "spwaner.h"
 #include "projectile.h"
 #include "chest.h"
+#include "views/view_equipment.h"
+#include "views/view_ability.h"
+#include "views/view_inventory.h"
 
 EntityPtr root = nullptr;
 
@@ -92,41 +95,93 @@ void reset_select()
 	select_range = 0.f;
 }
 
-cCharacterPtr focus_character = nullptr;
-
 std::string illegal_op_str;
 float illegal_op_str_timer = 0.f;
 
-void click_ability(AbilityInstance* ins)
+struct Shortcut
 {
-	if (ins->cd_timer > 0.f)
+	KeyboardKey key = KeyboardKey_Count;
+
+	virtual void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) = 0;
+	virtual void click() = 0;
+};
+
+struct ItemShortcut : Shortcut
+{
+	ItemInstance* ins = nullptr;
+
+	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override
 	{
-		illegal_op_str = "Cooldowning.";
-		illegal_op_str_timer = 3.f;
-		return;
+		auto& item = Item::get(ins->id);
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted(item.name.c_str());
+			ImGui::EndTooltip();
+		}
+		dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
 	}
-	auto& ability = Ability::get(ins->id);
-	if (main_player.character->mp < ability.mana)
+
+	void click() override
 	{
-		illegal_op_str = "Not Enough Mana.";
-		illegal_op_str_timer = 3.f;
-		return;
+		main_player.character->use_item(ins);
 	}
-	select_mode = ability.target_type;
-	if (ability.target_type & TargetLocation)
+};
+
+struct AbilityShortcut : Shortcut
+{
+	AbilityInstance* ins = nullptr;
+
+	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override
 	{
-		select_location_callback = [ins](const vec3& location) {
-			new CommandCastAbilityToLocation(main_player.character, ins, location);
-		};
+		auto& ability = Ability::get(ins->id);
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted(ability.name.c_str());
+			ImGui::EndTooltip();
+		}
+		dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+
+		if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
+			dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
 	}
-	if (ability.target_type & TargetEnemy)
+
+	void click() override
 	{
-		select_enemy_callback = [ins](cCharacterPtr character) {
-			new CommandCastAbilityToTarget(main_player.character, ins, character);
-		};
-		select_distance = ability.distance;
+		if (ins->cd_timer > 0.f)
+		{
+			illegal_op_str = "Cooldowning.";
+			illegal_op_str_timer = 3.f;
+			return;
+		}
+		auto& ability = Ability::get(ins->id);
+		if (main_player.character->mp < ability.mp)
+		{
+			illegal_op_str = "Not Enough MP.";
+			illegal_op_str_timer = 3.f;
+			return;
+		}
+		select_mode = ability.target_type;
+		if (ability.target_type & TargetLocation)
+		{
+			select_location_callback = [this](const vec3& location) {
+				new CommandCastAbilityToLocation(main_player.character, ins, location);
+			};
+		}
+		if (ability.target_type & TargetEnemy)
+		{
+			select_enemy_callback = [this](cCharacterPtr character) {
+				new CommandCastAbilityToTarget(main_player.character, ins, character);
+			};
+			select_distance = ability.distance;
+		}
 	}
-}
+};
+
+std::unique_ptr<Shortcut> shortcuts[10];
+
+cCharacterPtr focus_character = nullptr;
 
 cMain::~cMain()
 {
@@ -279,166 +334,92 @@ void cMain::start()
 		if (tar_sz.x <= 0.f || tar_sz.y <= 0.f)
 			return;
 		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-		ImGui::SetNextWindowSize(ImVec2(600.f, 100.f), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(600.f, 42.f), ImGuiCond_Always);
 		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 		if (main_player.character)
 		{
-			ImGui::TextUnformatted(main_player.character->entity->name.c_str());
+			ImGui::BeginGroup();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1.f, 1.f));
+			auto dl = ImGui::GetWindowDrawList();
+			const auto icon_size = 32.f;
+			for (auto i = 0; i < countof(shortcuts); i++)
+			{
+				if (i > 0) ImGui::SameLine();
+				auto pressed = ImGui::InvisibleButton(("shortcut" + str(i)).c_str(), ImVec2(icon_size, icon_size));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+				auto shortcut = shortcuts[i].get();
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+				if (shortcut)
+				{
+					shortcut->draw(dl, p0, p1);
 
-			ImGui::BeginChild("##c1", ImVec2(100.f, -1.f));
-			//if (ImGui::BeginTable("##t1", 2));
-			//{
-			//	ImGui::TableNextRow();
-			//	ImGui::TableNextColumn();
-			//	static auto img_sword = graphics::Image::get("assets\\icons\\sword.png");
-			//	ImGui::Image(img_sword, ImVec2(16, 16));
-			//	ImGui::TableNextColumn();
-			//	ImGui::Text("%5d", main_player.character->atk);
+					if (ImGui::BeginDragDropSource())
+					{
+						ImGui::SetDragDropPayload("shortcut", &i, sizeof(int));
+						ImGui::EndDragDropSource();
+					}
 
-			//	ImGui::TableNextRow();
-			//	ImGui::TableNextColumn();
-			//	static auto img_shield = graphics::Image::get("assets\\icons\\shield.png");
-			//	ImGui::Image(img_shield, ImVec2(16, 16));
-			//	ImGui::TableNextColumn();
-			//	ImGui::Text("%5d", main_player.character->armor);
-
-			//	ImGui::TableNextRow();
-			//	ImGui::TableNextColumn();
-			//	static auto img_run = graphics::Image::get("assets\\icons\\run.png");
-			//	ImGui::Image(img_run, ImVec2(16, 16));
-			//	ImGui::TableNextColumn();
-			//	ImGui::Text("%5d", main_player.character->mov_sp);
-
-			//	ImGui::TableNextRow();
-			//	ImGui::TableNextColumn();
-			//	static auto img_str = graphics::Image::get("assets\\icons\\strength.png");
-			//	ImGui::Image(img_str, ImVec2(16, 16));
-			//	ImGui::TableNextColumn();
-			//	ImGui::Text("%5d", main_player.character->STR);
-
-			//	ImGui::TableNextRow();
-			//	ImGui::TableNextColumn();
-			//	static auto img_agi = graphics::Image::get("assets\\icons\\agility.png");
-			//	ImGui::Image(img_agi, ImVec2(16, 16));
-			//	ImGui::TableNextColumn();
-			//	ImGui::Text("%5d", main_player.character->AGI);
-
-			//	ImGui::TableNextRow();
-			//	ImGui::TableNextColumn();
-			//	static auto img_int = graphics::Image::get("assets\\icons\\intelligence.png");
-			//	ImGui::Image(img_int, ImVec2(16, 16));
-			//	ImGui::TableNextColumn();
-			//	ImGui::Text("%5d", main_player.character->INT);
-
-			//	ImGui::EndTable();
-			//}
-			ImGui::EndChild();
+					if (pressed)
+						shortcut->click();
+				}
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (auto payload = ImGui::AcceptDragDropPayload("shortcut"); payload)
+					{
+						auto j = *(int*)payload->Data;
+						if (i != j)
+							std::swap(shortcuts[i], shortcuts[j]);
+					}
+					ImGui::EndDragDropTarget();
+				}
+				if (shortcut && shortcut->key != KeyboardKey_Count)
+					dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), TypeInfo::serialize_t(shortcut->key).c_str());
+			}
+			ImGui::PopStyleVar();
+			ImGui::EndGroup();
 
 			ImGui::SameLine();
-
 			ImGui::BeginGroup();
-			auto dl = ImGui::GetWindowDrawList();
-			const auto bar_width = ImGui::GetContentRegionAvailWidth();
-			const auto bar_height = 16.f;
-
 			{
-				auto icon_size = 48.f;
-				ImGui::BeginGroup();
-				for (auto i = 0; i < 4; i++)
-				{
-					if (i > 0) ImGui::SameLine();
-					static const char* names[] = {
-						"ability_1", "ability_2", "ability_3", "ability_4", "ability_5", "ability_6"
-					};
-					auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-					auto ins = main_player.character->abilities[i].get();
-					if (ins)
-					{
-						auto& ability = Ability::get(ins->id);
-						if (ImGui::IsItemHovered())
-						{
-							ImGui::BeginTooltip();
-							ImGui::TextUnformatted(ability.name.c_str());
-							ImGui::EndTooltip();
-						}
-						dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-
-						if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
-							dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
-
-						if (pressed)
-							click_ability(ins);
-					}
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					static const char* hot_keys[] = {
-						"Q", "W", "E", "R"
-					};
-					dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
-				}
-				ImGui::EndGroup();
-				ImGui::SameLine();
-				icon_size = 32.f;
-				ImGui::BeginGroup();
-				for (auto i = 0; i < 6; i++)
-				{
-					if (i > 0) ImGui::SameLine();
-					static const char* names[] = {
-						"item_1", "item_2", "item_3", "item_4", "item_5", "item_6"
-					};
-					auto pressed = ImGui::InvisibleButton(names[i], ImVec2(icon_size, icon_size));
-					auto p0 = (vec2)ImGui::GetItemRectMin();
-					auto p1 = (vec2)ImGui::GetItemRectMax();
-					dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-					auto& ins = main_player.character->inventory[i];
-					if (ins)
-					{
-						auto& item = Item::get(ins->id);
-						if (ImGui::IsItemHovered())
-						{
-							ImGui::BeginTooltip();
-							ImGui::TextUnformatted(item.name.c_str());
-							ImGui::EndTooltip();
-						}
-						if (ImGui::BeginDragDropSource())
-						{
-							ImGui::SetDragDropPayload("item", &i, sizeof(int));
-							ImGui::EndDragDropSource();
-						}
-						if (ImGui::BeginPopupContextItem())
-						{
-							if (ImGui::Selectable("Drop"))
-							{
-								add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
-								main_player.character->inventory[i].reset(nullptr);
-							}
-							ImGui::EndPopup();
-						}
-						dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
-
-						if (pressed)
-							main_player.character->use_item(ins.get());
-					}
-					if (ImGui::BeginDragDropTarget())
-					{
-						if (auto payload = ImGui::AcceptDragDropPayload("item"); payload)
-						{
-							auto j = *(int*)payload->Data;
-							if (i != j)
-								std::swap(main_player.character->inventory[i], main_player.character->inventory[j]);
-						}
-						ImGui::EndDragDropTarget();
-					}
-					dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-					static const char* hot_keys[] = {
-						"1", "2", "3", "4", "5", "6"
-					};
-					dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), hot_keys[i]);
-				}
-				ImGui::EndGroup();
+				static auto img = graphics::Image::get("assets\\icons\\head.png");
+				auto pressed = ImGui::InvisibleButton("btn_equipment", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					view_equipment.open();
+			}
+			ImGui::SameLine();
+			{
+				static auto img = graphics::Image::get("assets\\icons\\book.png");
+				auto pressed = ImGui::InvisibleButton("btn_ability", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					view_ability.open();
+			}
+			ImGui::SameLine();
+			{
+				static auto img = graphics::Image::get("assets\\icons\\bag.png");
+				auto pressed = ImGui::InvisibleButton("btn_bag", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					view_inventory.open();
 			}
 			ImGui::EndGroup();
 		}
@@ -766,29 +747,11 @@ void cMain::update()
 				new CommandAttackLocation(main_player.character, pos);
 			};
 		}
-		if (input->kpressed(Keyboard_Q))
+		for (auto i = 0; i < countof(shortcuts); i++)
 		{
-			auto ins = main_player.character->abilities[0].get();
-			if (ins)
-				click_ability(ins);
-		}
-		if (input->kpressed(Keyboard_W))
-		{
-			auto ins = main_player.character->abilities[1].get();
-			if (ins)
-				click_ability(ins);
-		}
-		if (input->kpressed(Keyboard_E))
-		{
-			auto ins = main_player.character->abilities[2].get();
-			if (ins)
-				click_ability(ins);
-		}
-		if (input->kpressed(Keyboard_R))
-		{
-			auto ins = main_player.character->abilities[3].get();
-			if (ins)
-				click_ability(ins);
+			auto shortcut = shortcuts[i].get();
+			if (shortcut && shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
+				shortcut->click();
 		}
 	}
 

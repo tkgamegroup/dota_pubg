@@ -6,5 +6,9 @@
 
 struct ViewEquipment : graphics::GuiView
 {
+	ViewEquipment();
+
 	void on_draw() override;
 };
+
+extern ViewEquipment view_equipment;

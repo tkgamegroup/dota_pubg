@@ -12,7 +12,7 @@ struct Ability
 
 	TargetType target_type = TargetNull;
 	float cast_time = 0.f;
-	uint mana = 0;
+	uint mp = 0;
 	float cd = 0.f;
 	float distance = 0.f;
 	float range = 0.f;

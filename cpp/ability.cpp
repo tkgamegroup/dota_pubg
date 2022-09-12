@@ -19,7 +19,7 @@ void load_abilities()
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
-		ability.mana = 50;
+		ability.mp = 50;
 		ability.cd = 3.f;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
@@ -46,7 +46,7 @@ void load_abilities()
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.f;
-		ability.mana = 50;
+		ability.mp = 50;
 		ability.distance = 5.f;
 		ability.active_l = [](cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);
