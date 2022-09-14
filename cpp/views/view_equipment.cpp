@@ -10,6 +10,15 @@ ViewEquipment::ViewEquipment() :
 {
 }
 
+bool ViewEquipment::on_open()
+{
+	bool open = true;
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(40, 40, 40));
+	ImGui::Begin(name.c_str(), &open, ImGuiWindowFlags_NoCollapse);
+	ImGui::PopStyleColor();
+	return !open;
+}
+
 void ViewEquipment::on_draw()
 {
 	auto offset = (vec2)ImGui::GetCursorPos();
@@ -42,7 +51,7 @@ void ViewEquipment::on_draw()
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
-			ImGui::TextUnformatted("Increase your max MP and MP recover.");
+			ImGui::TextUnformatted("Increase your max MP and MP regeneration.");
 			ImGui::EndTooltip();
 		}
 		ImGui::TableNextColumn();
@@ -51,62 +60,134 @@ void ViewEquipment::on_draw()
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("Strength");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Increase your physical attack damage and physical ability damage.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->STR);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("Dexterity");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Increase your attack speed and cast speed.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->DEX);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("Intelligence");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Increase your magic attack damage and magic ability damage.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->INT);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("Luck");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Increase your chance to perform a Critical hit.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->LUK);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("ATK DMG");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Attack damage.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->atk);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("Physical DEF");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Physical Defense.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->phy_def);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
 		ImGui::TextUnformatted("Magic DEF");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Magic Defense.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->mag_def);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("Movement Speed");
+		ImGui::TextUnformatted("Move SP");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Move speed.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->mov_sp);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("HP Recover");
+		ImGui::TextUnformatted("ATK SP");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("Attack speed.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
-		ImGui::Text("%5.1f", main_player.character->hp_rec / 10.f);
+		ImGui::Text("%5d", main_player.character->atk_sp);
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("MP Recover");
+		ImGui::TextUnformatted("HP REG");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("HP regeneration pre second.");
+			ImGui::EndTooltip();
+		}
 		ImGui::TableNextColumn();
-		ImGui::Text("%5.1f", main_player.character->mp_rec / 10.f);
+		ImGui::Text("%5.1f", main_player.character->hp_reg / 10.f);
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn();
+		ImGui::TextUnformatted("MP REG");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted("MP regeneration pre second.");
+			ImGui::EndTooltip();
+		}
+		ImGui::TableNextColumn();
+		ImGui::Text("%5.1f", main_player.character->mp_reg / 10.f);
 
 		ImGui::EndTable();
 	}

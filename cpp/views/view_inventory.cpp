@@ -11,6 +11,15 @@ ViewInventory::ViewInventory() :
 {
 }
 
+bool ViewInventory::on_open()
+{
+	bool open = true;
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(40, 40, 40));
+	ImGui::Begin(name.c_str(), &open, ImGuiWindowFlags_NoCollapse);
+	ImGui::PopStyleColor();
+	return !open;
+}
+
 void ViewInventory::on_draw()
 {
 	if (main_player.character)
@@ -49,7 +58,9 @@ void ViewInventory::on_draw()
 						if (ImGui::Selectable("Equip"))
 						{
 							int id = ins->id;
-							std::swap(id, main_player.character->equipments[item.equip_part]);
+							EquipPart part;
+							item.equipment_info(&part);
+							std::swap(id, main_player.character->equipments[part]);
 							main_player.character->inventory[i].reset(nullptr);
 							if (id != -1)
 								main_player.character->gain_item(id, 1);

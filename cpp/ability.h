@@ -21,6 +21,7 @@ struct Ability
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*active_l)(cCharacterPtr, const vec3&) = nullptr;
 	void(*active_t)(cCharacterPtr, cCharacterPtr) = nullptr;
+	void(*show)() = nullptr;
 
 	static int find(const std::string& name);
 	static const Ability& get(uint id);

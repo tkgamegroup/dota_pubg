@@ -44,6 +44,7 @@ struct ItemInstance
 struct AbilityInstance
 {
 	uint id;
+	uint lv = 0;
 	float cd_max = 0.f;
 	float cd_timer = 0.f;
 };
@@ -168,9 +169,9 @@ struct CharacterPreset
 	float cast_point = 0.5f; // hit point
 	uint phy_def = 0; // physical defense
 	uint mag_def = 0; // magic defense
-	uint hp_rec = 0; // hp recover
-	uint mp_rec = 0; // mp recover
-	uint mov_sp = 100; // movement speed
+	uint hp_reg = 0; // hp regeneration
+	uint mp_reg = 0; // mp regeneration
+	uint mov_sp = 100; // move speed
 	uint atk_sp = 100; // attack speed
 
 	static int find(const std::string& name);
@@ -238,11 +239,12 @@ struct cCharacter : Component
 	uint atk = 10;
 	uint phy_def = 0;
 	uint mag_def = 0;
-	uint hp_rec = 0;
-	uint mp_rec = 0;
+	uint hp_reg = 0;
+	uint mp_reg = 0;
 	uint mov_sp = 0;
 	uint atk_sp = 0;
 
+	uint abilities_points = 0;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
 	int												equipments[EquipPart_Count];
@@ -255,7 +257,7 @@ struct cCharacter : Component
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
 	float cast_speed = 1.f;
-	float recover_timer = 1.f;
+	float regeneration_timer = 1.f;
 	float search_timer = 0.f;
 	float attack_interval_timer = 0.f;
 	float attack_timer = 0.f;

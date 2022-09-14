@@ -98,17 +98,24 @@ void reset_select()
 std::string illegal_op_str;
 float illegal_op_str_timer = 0.f;
 
+std::string tooltip;
+
 struct Shortcut
 {
 	KeyboardKey key = KeyboardKey_Count;
 
-	virtual void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) = 0;
-	virtual void click() = 0;
+	virtual void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) {}
+	virtual void click() {}
 };
 
 struct ItemShortcut : Shortcut
 {
-	ItemInstance* ins = nullptr;
+	ItemInstance* ins;
+
+	ItemShortcut(ItemInstance* ins) :
+		ins(ins)
+	{
+	}
 
 	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override
 	{
@@ -117,6 +124,8 @@ struct ItemShortcut : Shortcut
 		{
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(item.name.c_str());
+			if (item.show)
+				item.show();
 			ImGui::EndTooltip();
 		}
 		dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
@@ -130,7 +139,12 @@ struct ItemShortcut : Shortcut
 
 struct AbilityShortcut : Shortcut
 {
-	AbilityInstance* ins = nullptr;
+	AbilityInstance* ins;
+
+	AbilityShortcut(AbilityInstance* ins) :
+		ins(ins)
+	{
+	}
 
 	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override
 	{
@@ -139,6 +153,8 @@ struct AbilityShortcut : Shortcut
 		{
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(ability.name.c_str());
+			if (ability.show)
+				ability.show();
 			ImGui::EndTooltip();
 		}
 		dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
@@ -213,6 +229,14 @@ void cMain::start()
 		root->add_child(e);
 		main_player.init(e);
 		main_player.character->set_faction(1);
+		main_player.character->gain_ability(Ability::find("Shield Bash"));
+
+		for (auto i = 0; i < countof(shortcuts); i++)
+		{
+			auto shortcut = new Shortcut;
+			shortcut->key = KeyboardKey(Keyboard_1 + i);
+			shortcuts[i].reset(shortcut);
+		}
 	}
 
 	if (main_terrain.terrain)
@@ -352,26 +376,36 @@ void cMain::start()
 				dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
 				auto shortcut = shortcuts[i].get();
 				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				if (shortcut)
+
+				shortcut->draw(dl, p0, p1);
+
+				if (ImGui::BeginDragDropSource())
 				{
-					shortcut->draw(dl, p0, p1);
-
-					if (ImGui::BeginDragDropSource())
-					{
-						ImGui::SetDragDropPayload("shortcut", &i, sizeof(int));
-						ImGui::EndDragDropSource();
-					}
-
-					if (pressed)
-						shortcut->click();
+					ImGui::SetDragDropPayload("shortcut", &i, sizeof(int));
+					ImGui::EndDragDropSource();
 				}
+
+				if (pressed)
+					shortcut->click();
+
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (auto payload = ImGui::AcceptDragDropPayload("shortcut"); payload)
 					{
 						auto j = *(int*)payload->Data;
 						if (i != j)
+						{
+							std::swap(shortcuts[i]->key, shortcuts[j]->key);
 							std::swap(shortcuts[i], shortcuts[j]);
+						}
+					}
+					if (auto payload = ImGui::AcceptDragDropPayload("ability"); payload)
+					{
+						auto j = *(int*)payload->Data;
+						auto key = shortcut->key;
+						shortcut = new AbilityShortcut(main_player.character->abilities[j].get());
+						shortcut->key = key;
+						shortcuts[i].reset(shortcut);
 					}
 					ImGui::EndDragDropTarget();
 				}
@@ -393,7 +427,12 @@ void cMain::start()
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
 				if (pressed)
-					view_equipment.open();
+				{
+					if (!view_equipment.opened)
+						view_equipment.open();
+					else
+						view_equipment.close();
+				}
 			}
 			ImGui::SameLine();
 			{
@@ -406,7 +445,12 @@ void cMain::start()
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
 				if (pressed)
-					view_ability.open();
+				{
+					if (!view_ability.opened)
+						view_ability.open();
+					else
+						view_ability.close();
+				}
 			}
 			ImGui::SameLine();
 			{
@@ -419,7 +463,12 @@ void cMain::start()
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
 				if (pressed)
-					view_inventory.open();
+				{
+					if (!view_inventory.opened)
+						view_inventory.open();
+					else
+						view_inventory.close();
+				}
 			}
 			ImGui::EndGroup();
 		}
@@ -507,6 +556,14 @@ void cMain::start()
 			}
 
 			ImGui::End();
+		}
+
+		if (!tooltip.empty())
+		{
+			auto dl = ImGui::GetBackgroundDrawList();
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted(tooltip.c_str());
+			ImGui::EndTooltip();
 		}
 
 		if (illegal_op_str_timer > 0.f)
@@ -606,6 +663,7 @@ void cMain::update()
 		hovering_character = nullptr;
 		hovering_chest = nullptr;
 		hovering_terrain = nullptr;
+		tooltip.clear();
 		if (hovering_node)
 		{
 			auto can_select = [](cCharacterPtr character) {
@@ -621,7 +679,10 @@ void cMain::update()
 					hovering_character = character;
 			}
 			if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
+			{
 				hovering_chest = chest;
+				tooltip = Item::get(hovering_chest->item_id).name;
+			}
 			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
 			{
 				hovering_terrain = terrain;
@@ -654,6 +715,7 @@ void cMain::update()
 				}
 			}
 		}
+
 		auto add_location_icon = [](const vec3& pos, const vec3& color) {
 			static graphics::ImagePtr icon_location = nullptr;
 			if (!icon_location)
@@ -666,7 +728,7 @@ void cMain::update()
 				if (p.x > 0.f && p.y > 0.f)
 				{
 					p.xy += sInput::instance()->offset;
-					auto dl = ImGui::GetForegroundDrawList();
+					auto dl = ImGui::GetBackgroundDrawList();
 					auto sz = (vec2)icon_location->size;
 					dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(color.r, color.g, color.b, max(0.f, ticks / 30.f)));
 				}
@@ -750,7 +812,7 @@ void cMain::update()
 		for (auto i = 0; i < countof(shortcuts); i++)
 		{
 			auto shortcut = shortcuts[i].get();
-			if (shortcut && shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
+			if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
 				shortcut->click();
 		}
 	}

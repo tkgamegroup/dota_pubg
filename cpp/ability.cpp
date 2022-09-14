@@ -3,6 +3,7 @@
 #include "buff.h"
 
 #include <flame/graphics/image.h>
+#include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
@@ -19,7 +20,7 @@ void load_abilities()
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
-		ability.mp = 50;
+		ability.mp = 500;
 		ability.cd = 3.f;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
@@ -42,14 +43,19 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Shield Bash";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\shield_alpha.png";
+		ability.icon_name = L"assets\\icons\\abilities\\shield_alpha.png";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
-		ability.mp = 50;
+		ability.mp = 500;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
-
+			caster->inflict_damage(target, caster->STR * 10);
+			target->add_buff(Buff::find("Stun"), 2.f);
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
+				"dealing damage base on your strength and stunning it.");
 		};
 	}
 	{

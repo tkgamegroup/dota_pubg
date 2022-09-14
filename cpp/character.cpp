@@ -216,7 +216,7 @@ void load_character_presets()
 		preset.atk = 14;
 		preset.atk_time = 1.35f;
 		preset.atk_point = 0.5f;
-		preset.hp_rec = 5;
+		preset.hp_reg = 5;
 		preset.mov_sp = 400;
 	}
 	{
@@ -229,7 +229,7 @@ void load_character_presets()
 		preset.atk = 21;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
-		preset.hp_rec = 5;
+		preset.hp_reg = 5;
 	}
 }
 
@@ -344,17 +344,11 @@ bool cCharacter::gain_item(uint id, uint num)
 
 bool cCharacter::gain_ability(uint id)
 {
-	for (auto& ins : abilities)
-	{
-		if (!ins)
-		{
-			ins.reset(new AbilityInstance);
-			ins->id = id;
-			stats_dirty = true;
-			return true;
-		}
-	}
-	return false;
+	auto ins = new AbilityInstance;
+	ins->id = id;
+	abilities.emplace_back(ins);
+	stats_dirty = true;
+	return true;
 }
 
 void cCharacter::use_item(ItemInstance* ins)
@@ -638,8 +632,8 @@ void cCharacter::update()
 
 		atk = preset.atk;
 
-		hp_rec = preset.hp_rec;
-		mp_rec = preset.mp_rec;
+		hp_reg = preset.hp_reg;
+		mp_reg = preset.mp_reg;
 		mov_sp = preset.mov_sp;
 		atk_sp = preset.atk_sp;
 
@@ -668,9 +662,9 @@ void cCharacter::update()
 		}
 
 		hp_max += VIG * 200;
-		hp_rec += VIG;
+		hp_reg += VIG;
 		mp_max += MND * 200;
-		mp_rec += MND;
+		mp_reg += MND;
 
 		if (hp_max != pre_hp_max)
 			hp *= (float)hp_max / pre_hp_max;
@@ -682,15 +676,15 @@ void cCharacter::update()
 		stats_dirty = false;
 	}
 
-	if (recover_timer > 0)
-		recover_timer -= delta_time;
+	if (regeneration_timer > 0)
+		regeneration_timer -= delta_time;
 	else
 	{
-		hp += hp_rec;
+		hp += hp_reg;
 		if (hp > hp_max) hp = hp_max;
-		mp += mp_rec;
+		mp += mp_reg;
 		if (mp > mp_max) mp = mp_max;
-		recover_timer = 1.f;
+		regeneration_timer = 1.f;
 	}
 
 	if (search_timer > 0)

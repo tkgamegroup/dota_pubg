@@ -8,6 +8,7 @@ struct ViewInventory : graphics::GuiView
 {
 	ViewInventory();
 
+	bool on_open() override;
 	void on_draw() override;
 };
 

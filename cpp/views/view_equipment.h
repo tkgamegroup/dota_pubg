@@ -8,6 +8,7 @@ struct ViewEquipment : graphics::GuiView
 {
 	ViewEquipment();
 
+	bool on_open() override;
 	void on_draw() override;
 };
 

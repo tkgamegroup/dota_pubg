@@ -8,6 +8,7 @@ struct ViewAbility : graphics::GuiView
 {
 	ViewAbility();
 
+	bool on_open() override;
 	void on_draw() override;
 };
 

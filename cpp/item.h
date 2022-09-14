@@ -36,8 +36,8 @@ struct Item
 	graphics::ImagePtr		icon_image = nullptr;
 
 	ItemType				type = ItemItem;
-	EquipPart equip_part = EquipPart_Count;
 
+	void(*equipment_info)(EquipPart* part) = nullptr;
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*passive)(cCharacterPtr) = nullptr;
 	void(*show)() = nullptr;
@@ -45,4 +45,3 @@ struct Item
 	static int find(const std::string& name);
 	static const Item& get(uint id);
 };
-
