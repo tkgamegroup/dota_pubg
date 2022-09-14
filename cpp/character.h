@@ -1,6 +1,7 @@
 #pragma once
 
 #include "main.h"
+#include "item.h"
 
 template<typename T>
 struct Tracker
@@ -242,9 +243,10 @@ struct cCharacter : Component
 	uint mov_sp = 0;
 	uint atk_sp = 0;
 
-	std::unique_ptr<ItemInstance> inventory[16];
-	std::unique_ptr<AbilityInstance> abilities[4];
-	std::vector<std::unique_ptr<BuffInstance>> buffs;
+	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
+	std::vector<std::unique_ptr<ItemInstance>>		inventory;
+	int												equipments[EquipPart_Count];
+	std::vector<std::unique_ptr<BuffInstance>>		buffs;
 
 	bool dead = false;
 	bool stats_dirty = true;

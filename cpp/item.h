@@ -9,14 +9,34 @@ enum ItemType
 	ItemConsumable
 };
 
+enum EquipPart
+{
+	EquipHead,
+	EquipNeck,
+	EquipShoulder,
+	EquipChest,
+	EquipBack,
+	EquipHand,
+	EquipLeg,
+	EquipFoot,
+	EquipFinger0,
+	EquipFinger1,
+	EquipWeapon0,
+	EquipWeapon1,
+
+	EquipPart_Count
+};
+
 struct Item
 {
 	uint					id;
 	std::string				name;
-	ItemType				type = ItemItem;
 	std::filesystem::path	icon_name;
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	graphics::ImagePtr		icon_image = nullptr;
+
+	ItemType				type = ItemItem;
+	EquipPart equip_part = EquipPart_Count;
 
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*passive)(cCharacterPtr) = nullptr;

@@ -369,7 +369,7 @@ void cCharacter::use_item(ItemInstance* ins)
 		ins->num--;
 		if (ins->num == 0)
 		{
-			for (auto i = 0; i < countof(inventory); i++)
+			for (auto i = 0; i < inventory.size(); i++)
 			{
 				if (inventory[i].get() == ins)
 				{
@@ -467,6 +467,10 @@ void cCharacter::start()
 			}
 		}
 	}, (uint)this);
+
+	inventory.resize(16);
+	for (auto& id : equipments)
+		id = -1;
 }
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
@@ -639,21 +643,21 @@ void cCharacter::update()
 		mov_sp = preset.mov_sp;
 		atk_sp = preset.atk_sp;
 
-		for (auto& ins : inventory)
-		{
-			if (ins)
-			{
-				auto& item = Item::get(ins->id);
-				if (item.passive)
-					item.passive(this);
-			}
-		}
 		for (auto& ins : abilities)
 		{
 			if (ins)
 			{
 				auto& ability = Ability::get(ins->id);
 
+			}
+		}
+		for (auto id : equipments)
+		{
+			if (id != -1)
+			{
+				auto& item = Item::get(id);
+				if (item.passive)
+					item.passive(this);
 			}
 		}
 		for (auto& ins : buffs)

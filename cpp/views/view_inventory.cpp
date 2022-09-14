@@ -17,7 +17,7 @@ void ViewInventory::on_draw()
 	{
 		auto dl = ImGui::GetWindowDrawList();
 		const auto icon_size = 48.f;
-		for (auto i = 0; i < countof(main_player.character->inventory); i++)
+		for (auto i = 0; i < main_player.character->inventory.size(); i++)
 		{
 			if (i % 10 != 0) ImGui::SameLine();
 			auto pressed = ImGui::InvisibleButton(("inventory" + str(i)).c_str(), ImVec2(icon_size, icon_size));
@@ -44,6 +44,18 @@ void ViewInventory::on_draw()
 
 				if (ImGui::BeginPopupContextItem())
 				{
+					if (item.type == ItemEquipment)
+					{
+						if (ImGui::Selectable("Equip"))
+						{
+							int id = ins->id;
+							std::swap(id, main_player.character->equipments[item.equip_part]);
+							main_player.character->inventory[i].reset(nullptr);
+							if (id != -1)
+								main_player.character->gain_item(id, 1);
+							main_player.character->stats_dirty = true;
+						}
+					}
 					if (ImGui::Selectable("Drop"))
 					{
 						add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);

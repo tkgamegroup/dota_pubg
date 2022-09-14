@@ -41,6 +41,20 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
+		ability.name = "Shield Bash";
+		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\shield_alpha.png";
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.target_type = TargetEnemy;
+		ability.cast_time = 0.5f;
+		ability.mp = 50;
+		ability.distance = 5.f;
+		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
+
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
 		ability.name = "Blink";
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\Tactical Flight.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
