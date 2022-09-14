@@ -44,11 +44,24 @@ void ViewAbility::on_draw()
 					ImGui::EndTooltip();
 				}
 				dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+				if (ins->lv == 0)
+					dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+				dl->AddRectFilled(p1 - vec2(8, 15), p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+				dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(ins->lv).c_str());
 
-				if (ImGui::BeginDragDropSource())
+				if (ins->lv > 0)
 				{
-					ImGui::SetDragDropPayload("ability", &i, sizeof(int));
-					ImGui::EndDragDropSource();
+					if (ImGui::BeginDragDropSource())
+					{
+						ImGui::SetDragDropPayload("ability", &i, sizeof(int));
+						ImGui::EndDragDropSource();
+					}
+				}
+
+				if (pressed && main_player.character->abilities_points > 0)
+				{
+					ins->lv++;
+					main_player.character->abilities_points--;
 				}
 			}
 		}

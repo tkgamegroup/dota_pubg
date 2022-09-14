@@ -31,7 +31,7 @@ void ViewEquipment::on_draw()
 	ImGui::SameLine();
 
 	ImGui::SetCursorPos(offset + vec2(195.f, 20.f));
-	if (ImGui::BeginTable("##t1", 2));
+	if (ImGui::BeginTable("##t1", 3));
 	{
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -44,6 +44,16 @@ void ViewEquipment::on_draw()
 		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->VIG);
+		if (main_player.character->attribute_points > 0)
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::Button("+"))
+			{
+				main_player.character->VIG_PTS++;
+				main_player.character->attribute_points--;
+				main_player.character->stats_dirty = true;
+			}
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -56,6 +66,16 @@ void ViewEquipment::on_draw()
 		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->MND);
+		if (main_player.character->attribute_points > 0)
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::Button("+"))
+			{
+				main_player.character->MND_PTS++;
+				main_player.character->attribute_points--;
+				main_player.character->stats_dirty = true;
+			}
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -68,6 +88,16 @@ void ViewEquipment::on_draw()
 		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->STR);
+		if (main_player.character->attribute_points > 0)
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::Button("+"))
+			{
+				main_player.character->STR_PTS++;
+				main_player.character->attribute_points--;
+				main_player.character->stats_dirty = true;
+			}
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -80,6 +110,16 @@ void ViewEquipment::on_draw()
 		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->DEX);
+		if (main_player.character->attribute_points > 0)
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::Button("+"))
+			{
+				main_player.character->DEX_PTS++;
+				main_player.character->attribute_points--;
+				main_player.character->stats_dirty = true;
+			}
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -92,6 +132,16 @@ void ViewEquipment::on_draw()
 		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->INT);
+		if (main_player.character->attribute_points > 0)
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::Button("+"))
+			{
+				main_player.character->INT_PTS++;
+				main_player.character->attribute_points--;
+				main_player.character->stats_dirty = true;
+			}
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
@@ -104,6 +154,16 @@ void ViewEquipment::on_draw()
 		}
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->LUK);
+		if (main_player.character->attribute_points > 0)
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::Button("+"))
+			{
+				main_player.character->LUK_PTS++;
+				main_player.character->attribute_points--;
+				main_player.character->stats_dirty = true;
+			}
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();

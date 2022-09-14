@@ -236,6 +236,13 @@ struct cCharacter : Component
 	uint INT = 0;
 	uint LUK = 0;
 
+	uint VIG_PTS = 0;
+	uint MND_PTS = 0;
+	uint STR_PTS = 0;
+	uint DEX_PTS = 0;
+	uint INT_PTS = 0;
+	uint LUK_PTS = 0;
+
 	uint atk = 10;
 	uint phy_def = 0;
 	uint mag_def = 0;
@@ -244,6 +251,7 @@ struct cCharacter : Component
 	uint mov_sp = 0;
 	uint atk_sp = 0;
 
+	uint attribute_points = 0;
 	uint abilities_points = 0;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;

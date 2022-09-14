@@ -321,6 +321,8 @@ void cCharacter::gain_exp(uint v)
 	{
 		exp -= exp_max;
 		lv++;
+		attribute_points += 5;
+		abilities_points++;
 		exp_max *= 1.1f;
 		stats_dirty = true;
 	}
@@ -623,12 +625,12 @@ void cCharacter::update()
 		hp_max = preset.hp;
 		mp_max = preset.mp;
 
-		VIG = preset.VIG;
-		MND = preset.MND;
-		STR = preset.STR;
-		DEX = preset.DEX;
-		INT = preset.INT;
-		LUK = preset.LUK;
+		VIG = preset.VIG + VIG_PTS;
+		MND = preset.MND + MND_PTS;
+		STR = preset.STR + STR_PTS;
+		DEX = preset.DEX + DEX_PTS;
+		INT = preset.INT + INT_PTS;
+		LUK = preset.LUK + LUK_PTS;
 
 		atk = preset.atk;
 

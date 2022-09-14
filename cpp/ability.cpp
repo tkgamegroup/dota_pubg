@@ -50,7 +50,7 @@ void load_abilities()
 		ability.mp = 500;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
-			caster->inflict_damage(target, caster->STR * 10);
+			caster->inflict_damage(target, caster->STR);
 			target->add_buff(Buff::find("Stun"), 2.f);
 		};
 		ability.show = []() {
@@ -66,7 +66,7 @@ void load_abilities()
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.f;
-		ability.mp = 50;
+		ability.mp = 500;
 		ability.distance = 5.f;
 		ability.active_l = [](cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);

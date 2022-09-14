@@ -45,6 +45,9 @@ void ViewInventory::on_draw()
 				}
 				dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
 
+				if (pressed && item.type == ItemConsumable)
+					main_player.character->use_item(ins);
+
 				if (ImGui::BeginDragDropSource())
 				{
 					ImGui::SetDragDropPayload("item", &i, sizeof(int));
