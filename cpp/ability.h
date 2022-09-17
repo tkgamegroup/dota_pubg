@@ -25,6 +25,7 @@ struct Ability
 	void(*active_t)(cCharacterPtr, cCharacterPtr) = nullptr;
 	void(*channel_l)(cCharacterPtr, const vec3&) = nullptr;
 	void(*channel_t)(cCharacterPtr, cCharacterPtr) = nullptr;
+	void(*passive)(cCharacterPtr) = nullptr;
 	void(*show)() = nullptr;
 
 	static int find(const std::string& name);

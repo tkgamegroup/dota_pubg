@@ -184,19 +184,24 @@ struct AbilityShortcut : Shortcut
 				return;
 		}
 		select_mode = ability.target_type;
-		if (ability.target_type & TargetLocation)
+		if (select_mode == TargetNull)
+			main_player.character->cast_ability(ins, vec3(0.f), nullptr);
+		else
 		{
-			select_location_callback = [this](const vec3& location) {
-				new CommandCastAbilityToLocation(main_player.character, ins, location);
-			};
-			select_distance = ability.distance;
-		}
-		if (ability.target_type & TargetEnemy)
-		{
-			select_enemy_callback = [this](cCharacterPtr character) {
-				new CommandCastAbilityToTarget(main_player.character, ins, character);
-			};
-			select_distance = ability.distance;
+			if (ability.target_type & TargetLocation)
+			{
+				select_location_callback = [this](const vec3& location) {
+					new CommandCastAbilityToLocation(main_player.character, ins, location);
+				};
+				select_distance = ability.distance;
+			}
+			if (ability.target_type & TargetEnemy)
+			{
+				select_enemy_callback = [this](cCharacterPtr character) {
+					new CommandCastAbilityToTarget(main_player.character, ins, character);
+				};
+				select_distance = ability.distance;
+			}
 		}
 	}
 };
@@ -280,8 +285,11 @@ void cMain::start()
 			auto player1_coord = main_terrain.get_coord(player1_pos);
 
 			main_player.node->set_pos(main_terrain.get_coord(player1_coord));
-			add_chest(player1_coord + vec3(2.f, 0.f, 0.f), Item::find("Boots of Speed"));
-			add_chest(player1_coord + vec3(0.f, 0.f, 2.f), Item::find("Magic Candy"));
+			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
+			add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
+			add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
+			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
+			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
 			for (auto i = 1; i < site_centrality.size() - 1; i++)
 			{
@@ -555,17 +563,18 @@ void cMain::start()
 				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 			}
-			auto icon_size = 32.f;
+
 			for (auto i = 0; i < focus_character->buffs.size(); i++)
 			{
 				if (i > 0) ImGui::SameLine();
 				auto& ins = focus_character->buffs[i];
 				auto& buff = Buff::get(ins->id);
-				ImGui::Dummy(ImVec2(icon_size, icon_size));
+				ImGui::Dummy(ImVec2(16, 16));
 				if (ImGui::IsItemHovered())
 				{
 					ImGui::BeginTooltip();
 					ImGui::TextUnformatted(buff.name.c_str());
+					ImGui::Text("%d s", (int)ins->timer);
 					ImGui::EndTooltip();
 				}
 				auto p0 = (vec2)ImGui::GetItemRectMin();

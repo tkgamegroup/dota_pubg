@@ -53,7 +53,7 @@ struct EquipmentInstance
 {
 	int id = -1;
 	int enchant = -1;
-	float enchant_time = 0.f;
+	float enchant_timer = 0.f;
 };
 
 struct BuffInstance
@@ -111,15 +111,6 @@ struct CommandPickUp : Command
 	Tracker<cChestPtr> target;
 
 	CommandPickUp(cCharacterPtr character, cChestPtr _target);
-
-	void update() override;
-};
-
-struct CommandCastAbility : Command
-{
-	AbilityInstance* ins;
-
-	CommandCastAbility(cCharacterPtr character, AbilityInstance* ins);
 
 	void update() override;
 };
@@ -250,7 +241,9 @@ struct cCharacter : Component
 	uint INT_PTS = 0;
 	uint LUK_PTS = 0;
 
+	DamageType atk_type = PhysicalDamage;
 	uint atk = 10;
+	Listeners<void(cCharacterPtr character, cCharacterPtr target)> atk_effs;
 	uint phy_def = 0;
 	uint mag_def = 0;
 	uint hp_reg = 0;
@@ -282,8 +275,8 @@ struct cCharacter : Component
 	~cCharacter();
 	void on_init() override;
 
-	void inflict_damage(cCharacterPtr target, uint value);
-	bool take_damage(uint value); // return true if the damage causes the character die
+	void inflict_damage(cCharacterPtr target, uint value, DamageType type);
+	bool take_damage(uint value, DamageType type); // return true if the damage causes the character die
 	void gain_exp(uint v);
 	bool gain_item(uint id, uint num);
 	bool gain_ability(uint id);

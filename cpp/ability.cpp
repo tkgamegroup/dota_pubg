@@ -44,7 +44,7 @@ void load_abilities()
 				[caster](cCharacterPtr t) {
 					auto hash = "Fire Thrower"_h + (uint)caster;
 					if (t->add_marker(hash, 0.5f))
-						caster->inflict_damage(t, 100.f + caster->INT * 5.f);
+						caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
 				}, [](cProjectilePtr pt) {
 					pt->collide_radius += 2.5f * delta_time;
 					pt->node->set_scl(vec3(pt->collide_radius));
@@ -67,7 +67,7 @@ void load_abilities()
 		ability.cd = 10.f;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
-			caster->inflict_damage(target, 50.f + caster->STR * 1.2f);
+			caster->inflict_damage(target, 50.f + caster->STR * 1.2f, PhysicalDamage);
 			target->add_buff(Buff::find("Stun"), 2.f);
 		};
 		ability.show = []() {
@@ -89,10 +89,10 @@ void load_abilities()
 			return caster->equipments[EquipWeapon0].id != -1;
 		};
 		ability.active = [](cCharacterPtr caster) {
-			caster->equipments[EquipWeapon0] = { 
-				.enchant = Buff::find("Flame Weapon"), 
-				.enchant_time = 60.f 
-			};
+			auto& ins = caster->equipments[EquipWeapon0];
+			ins.enchant = Buff::find("Flame Weapon");
+			ins.enchant_timer = 60.f;
+			caster->stats_dirty = true;
 		};
 		ability.show = []() {
 			ImGui::TextUnformatted("");

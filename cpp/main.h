@@ -20,6 +20,12 @@ enum TargetType
 	TargetLocation = 1 << 2
 };
 
+enum DamageType
+{
+	PhysicalDamage,
+	MagicDamage
+};
+
 extern EntityPtr root;
 
 struct MainCamera

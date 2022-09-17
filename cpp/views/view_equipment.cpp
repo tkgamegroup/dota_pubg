@@ -1,5 +1,6 @@
 #include "view_equipment.h"
 #include "../character.h"
+#include "../buff.h"
 
 #include <flame/graphics/image.h>
 
@@ -266,6 +267,15 @@ void ViewEquipment::on_draw()
 			{
 				ImGui::BeginTooltip();
 				ImGui::TextUnformatted(item.name.c_str());
+				if (ins.enchant != -1)
+				{
+					auto& buff = Buff::get(ins.enchant);
+					ImGui::Image(buff.icon_image, ImVec2(16, 16), buff.icon_uvs.xy(), buff.icon_uvs.zw());
+					ImGui::SameLine();
+					ImGui::TextUnformatted(buff.name.c_str());
+					ImGui::SameLine();
+					ImGui::Text("%d s", (int)ins.enchant_timer);
+				}
 				ImGui::EndTooltip();
 			}
 			dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());

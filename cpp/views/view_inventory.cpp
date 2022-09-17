@@ -61,9 +61,8 @@ void ViewInventory::on_draw()
 						if (ImGui::Selectable("Equip"))
 						{
 							int id = ins->id;
-							EquipPart part;
-							item.equipment_info(&part);
-							auto& eins = main_player.character->equipments[part];
+							auto einfo = item.equipment_info();
+							auto& eins = main_player.character->equipments[einfo.part];
 							std::swap(id, eins.id);
 							eins.enchant = -1;
 							main_player.character->inventory[i].reset(nullptr);

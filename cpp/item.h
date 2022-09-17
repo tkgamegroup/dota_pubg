@@ -29,6 +29,7 @@ enum EquipPart
 
 struct WeaponInfo
 {
+	DamageType atk_type;
 	uint atk;
 };
 

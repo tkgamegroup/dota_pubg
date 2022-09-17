@@ -24,7 +24,9 @@ void load_buffs()
 		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma pulverize.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character) {
-
+			character->atk_effs.add([](cCharacterPtr character, cCharacterPtr target) {
+				character->inflict_damage(target, 10, MagicDamage);
+			});
 		};
 	}
 }

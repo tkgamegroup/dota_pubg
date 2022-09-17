@@ -28,6 +28,31 @@ void load_items()
 	{
 		auto& item = items.emplace_back();
 		item.id = items.size() - 1;
+		item.name = "Straight Sword";
+		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_uvs = vec4(1.f / 13, 7.f / 15.f, 2.f / 13, 8.f / 15.f);
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemEquipment;
+		item.equipment_info = []()->EquipmentInfo& {
+			static EquipmentInfo info{
+				.part = EquipWeapon0,
+				.weapon_info = []()->WeaponInfo& {
+					static WeaponInfo info { 
+						.atk_type = PhysicalDamage,
+						.atk = 10
+					};
+					return info;
+				}
+			};
+			return info;
+		};
+		item.passive = [](cCharacterPtr character) {
+
+		};
+	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
 		item.name = "Magic Candy";
 		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
 		item.icon_uvs = vec4(0.f / 13, 3.f / 15.f, 1.f / 13, 4.f / 15.f);

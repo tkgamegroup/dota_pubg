@@ -291,13 +291,13 @@ void cCharacter::on_init()
 	}, "character"_h);
 }
 
-void cCharacter::inflict_damage(cCharacterPtr target, uint value)
+void cCharacter::inflict_damage(cCharacterPtr target, uint value, DamageType type)
 {
-	if (target->take_damage(value))
+	if (target->take_damage(value, type))
 		gain_exp(target->exp_max * 0.15f);
 }
 
-bool cCharacter::take_damage(uint value)
+bool cCharacter::take_damage(uint value, DamageType type)
 {
 	if (dead)
 		return false;
@@ -522,18 +522,25 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		{
 			if (distance(node->pos, target->node->pos) <= preset.atk_distance + 3.5f)
 			{
+				auto attack = [this](cCharacterPtr target) {
+					inflict_damage(target, atk, atk_type);
+					for (auto& ef : atk_effs.list)
+					{
+						if (!target->dead)
+							ef.first(this, target);
+					}
+				};
 				if (preset.atk_projectile)
 				{
 					add_projectile(preset.atk_projectile,
-						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f),
-						target, 6.f,
-						[this](const vec3&, cCharacterPtr t) {
+						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
+						[&](const vec3&, cCharacterPtr t) {
 							if (t)
-								inflict_damage(t, atk);
+								attack(t);
 						});
 				}
 				else
-					inflict_damage(target, atk);
+					attack(target);
 			}
 
 			attack_interval_timer = (preset.atk_time - preset.atk_point) / attack_speed;
@@ -646,7 +653,9 @@ void cCharacter::update()
 		INT = preset.INT + INT_PTS;
 		LUK = preset.LUK + LUK_PTS;
 
+		atk_type = PhysicalDamage;
 		atk = preset.atk;
+		atk_effs.list.clear();
 
 		hp_reg = preset.hp_reg;
 		mp_reg = preset.mp_reg;
@@ -658,7 +667,8 @@ void cCharacter::update()
 			if (ins)
 			{
 				auto& ability = Ability::get(ins->id);
-
+				if (ability.passive)
+					ability.passive(this);
 			}
 		}
 		for (auto& ins : equipments)
@@ -668,6 +678,12 @@ void cCharacter::update()
 				auto& item = Item::get(ins.id);
 				if (item.passive)
 					item.passive(this);
+				if (ins.enchant != -1)
+				{
+					auto& buff = Buff::get(ins.enchant);
+					if (buff.passive)
+						buff.passive(this);
+				}
 			}
 		}
 		for (auto& ins : buffs)
@@ -712,6 +728,21 @@ void cCharacter::update()
 	{
 		if (ins && ins->cd_timer > 0.f)
 			ins->cd_timer -= delta_time;
+	}
+	for (auto& ins : equipments)
+	{
+		if (ins.id != -1)
+		{
+			if (ins.enchant != -1)
+			{
+				ins.enchant_timer -= delta_time;
+				if (ins.enchant_timer <= 0)
+				{
+					ins.enchant = -1;
+					stats_dirty = true;
+				}
+			}
+		}
 	}
 	for (auto it = buffs.begin(); it != buffs.end();)
 	{
