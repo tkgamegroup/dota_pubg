@@ -65,7 +65,7 @@ struct cMain : Component
 	cNodePtr node;
 
 	/// Reflect
-	float camera_length = 10.f;
+	float camera_length = 15.f;
 	/// Reflect
 	float camera_angle = 45.f;
 
@@ -83,6 +83,7 @@ struct cMain : Component
 };
 
 std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint faction);
-void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(cCharacterPtr t)>& cb);
+void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {});
+void add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {});
 void add_chest(const vec3& pos, uint item_id, uint item_num = 1);
 void teleport(cCharacterPtr character, const vec3& location);

@@ -35,18 +35,25 @@ struct Tracker
 	}
 };
 
-struct ItemInstance
-{
-	uint id;
-	uint num = 1;
-};
-
 struct AbilityInstance
 {
 	uint id;
 	uint lv = 0;
 	float cd_max = 0.f;
 	float cd_timer = 0.f;
+};
+
+struct ItemInstance
+{
+	uint id;
+	uint num = 1;
+};
+
+struct EquipmentInstance
+{
+	int id = -1;
+	int enchant = -1;
+	float enchant_time = 0.f;
 };
 
 struct BuffInstance
@@ -255,8 +262,9 @@ struct cCharacter : Component
 	uint abilities_points = 0;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
-	int												equipments[EquipPart_Count];
+	EquipmentInstance								equipments[EquipPart_Count];
 	std::vector<std::unique_ptr<BuffInstance>>		buffs;
+	std::map<uint, float>							markers;
 
 	bool dead = false;
 	bool stats_dirty = true;
@@ -282,6 +290,7 @@ struct cCharacter : Component
 	void use_item(ItemInstance* ins);
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
 	void add_buff(uint id, float time);
+	bool add_marker(uint hash, float time);
 	void die();
 
 	bool process_approach(const vec3& target, float dist = 0.1f, float ang = 0.f);

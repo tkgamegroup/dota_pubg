@@ -178,12 +178,18 @@ struct AbilityShortcut : Shortcut
 			illegal_op_str_timer = 3.f;
 			return;
 		}
+		if (ability.cast_check)
+		{
+			if (!ability.cast_check(main_player.character))
+				return;
+		}
 		select_mode = ability.target_type;
 		if (ability.target_type & TargetLocation)
 		{
 			select_location_callback = [this](const vec3& location) {
 				new CommandCastAbilityToLocation(main_player.character, ins, location);
 			};
+			select_distance = ability.distance;
 		}
 		if (ability.target_type & TargetEnemy)
 		{
@@ -229,7 +235,9 @@ void cMain::start()
 		root->add_child(e);
 		main_player.init(e);
 		main_player.character->set_faction(1);
+		main_player.character->gain_ability(Ability::find("Fire Thrower"));
 		main_player.character->gain_ability(Ability::find("Shield Bash"));
+		main_player.character->gain_ability(Ability::find("Flame Weapon"));
 
 		for (auto i = 0; i < countof(shortcuts); i++)
 		{
@@ -831,7 +839,8 @@ void cMain::update()
 	{
 		static vec3 velocity(0.f);
 		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
-		main_camera.node->set_pos(smooth_damp(main_camera.node->pos, main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
+		main_camera.node->set_pos(smooth_damp(main_camera.node->pos, 
+			main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
 	}
 }
 
@@ -872,14 +881,29 @@ std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint fa
 	return ret;
 }
 
-void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(cCharacterPtr t)>& cb)
+void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update)
 {
 	auto e = prefab->copy();
-	e->get_component_t<cNode>()->set_pos(pos);
+	e->node()->set_pos(pos);
 	auto projectile = e->get_component_t<cProjectile>();
-	projectile->target = target;
+	projectile->set_target(target);
 	projectile->speed = speed;
-	projectile->callback = cb;
+	projectile->on_end = on_end;
+	root->add_child(e);
+}
+
+void add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update)
+{
+	auto e = prefab->copy();
+	e->node()->set_pos(pos);
+	auto projectile = e->get_component_t<cProjectile>();
+	projectile->use_target = false;
+	projectile->location = location;
+	projectile->speed = speed;
+	projectile->collide_radius = collide_radius;
+	projectile->collide_faction = collide_faction;
+	projectile->on_collide = on_collide;
+	projectile->on_update = on_update;
 	root->add_child(e);
 }
 

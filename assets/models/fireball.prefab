@@ -7,8 +7,8 @@
 	<children>
 		<item file_id="c6e3b88548964735fbe16db03367bb0a" name="Entity 0">
 			<components>
-				<item type_name="flame::cNode" scl="0.3,0.3,0.3" />
-				<item type_name="flame::cMesh" mesh_name="standard_sphere" material_name="fire_0.fmat" />
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="standard_sphere" material_name="fire_0.fmat" cast_shadow="false" />
 			</components>
 		</item>
 	</children>

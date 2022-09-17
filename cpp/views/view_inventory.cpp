@@ -63,7 +63,9 @@ void ViewInventory::on_draw()
 							int id = ins->id;
 							EquipPart part;
 							item.equipment_info(&part);
-							std::swap(id, main_player.character->equipments[part]);
+							auto& eins = main_player.character->equipments[part];
+							std::swap(id, eins.id);
+							eins.enchant = -1;
 							main_player.character->inventory[i].reset(nullptr);
 							if (id != -1)
 								main_player.character->gain_item(id, 1);

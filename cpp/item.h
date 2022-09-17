@@ -27,6 +27,18 @@ enum EquipPart
 	EquipPart_Count
 };
 
+struct WeaponInfo
+{
+	uint atk;
+};
+
+struct EquipmentInfo
+{
+	EquipPart part;
+
+	WeaponInfo& (*weapon_info)() = nullptr;
+};
+
 struct Item
 {
 	uint					id;
@@ -37,7 +49,7 @@ struct Item
 
 	ItemType				type = ItemItem;
 
-	void(*equipment_info)(EquipPart* part) = nullptr;
+	EquipmentInfo&(*equipment_info)() = nullptr;
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*passive)(cCharacterPtr) = nullptr;
 	void(*show)() = nullptr;

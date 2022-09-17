@@ -47,7 +47,7 @@ void ViewEquipment::on_draw()
 		if (main_player.character->attribute_points > 0)
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("+"))
+			if (ImGui::SmallButton("+"))
 			{
 				main_player.character->VIG_PTS++;
 				main_player.character->attribute_points--;
@@ -69,7 +69,7 @@ void ViewEquipment::on_draw()
 		if (main_player.character->attribute_points > 0)
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("+"))
+			if (ImGui::SmallButton("+"))
 			{
 				main_player.character->MND_PTS++;
 				main_player.character->attribute_points--;
@@ -91,7 +91,7 @@ void ViewEquipment::on_draw()
 		if (main_player.character->attribute_points > 0)
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("+"))
+			if (ImGui::SmallButton("+"))
 			{
 				main_player.character->STR_PTS++;
 				main_player.character->attribute_points--;
@@ -113,7 +113,7 @@ void ViewEquipment::on_draw()
 		if (main_player.character->attribute_points > 0)
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("+"))
+			if (ImGui::SmallButton("+"))
 			{
 				main_player.character->DEX_PTS++;
 				main_player.character->attribute_points--;
@@ -135,7 +135,7 @@ void ViewEquipment::on_draw()
 		if (main_player.character->attribute_points > 0)
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("+"))
+			if (ImGui::SmallButton("+"))
 			{
 				main_player.character->INT_PTS++;
 				main_player.character->attribute_points--;
@@ -157,7 +157,7 @@ void ViewEquipment::on_draw()
 		if (main_player.character->attribute_points > 0)
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("+"))
+			if (ImGui::SmallButton("+"))
 			{
 				main_player.character->LUK_PTS++;
 				main_player.character->attribute_points--;
@@ -259,9 +259,9 @@ void ViewEquipment::on_draw()
 		auto p1 = (vec2)ImGui::GetItemRectMax();
 		dl->AddRect(p0, p1, ImColor(1.f, 1.f, 0.7f));
 
-		if (auto id = main_player.character->equipments[part]; id != -1)
+		if (auto& ins = main_player.character->equipments[part]; ins.id != -1)
 		{
-			auto& item = Item::get(id);
+			auto& item = Item::get(ins.id);
 			if (ImGui::IsItemHovered())
 			{
 				ImGui::BeginTooltip();
@@ -274,9 +274,9 @@ void ViewEquipment::on_draw()
 			{
 				if (ImGui::Selectable("Take Off"))
 				{
-					if (main_player.character->gain_item(id, 1))
+					if (main_player.character->gain_item(ins.id, 1))
 					{
-						main_player.character->equipments[part] = -1;
+						main_player.character->equipments[part] = { -1, -1 };
 						main_player.character->stats_dirty = true;
 					}
 				}

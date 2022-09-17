@@ -1,9 +1,11 @@
 #include "projectile.h"
 #include "character.h"
 
+#include <flame/universe/octree.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/systems/scene.h>
 
 static void* ev_delete_projectiles;
 static std::vector<cProjectilePtr> dead_projectiles;
@@ -26,6 +28,7 @@ void cProjectile::set_target(cCharacterPtr character)
 
 void cProjectile::die()
 {
+	set_target(nullptr);
 	if (!ev_delete_projectiles)
 	{
 		ev_delete_projectiles = add_event([]() {
@@ -45,26 +48,38 @@ void cProjectile::start()
 
 void cProjectile::update()
 {
-	if (!target)
+	if (on_update)
+		on_update(this);
+
+	if (use_target)
 	{
-		if (callback)
-			callback(nullptr);
-		die();
-		return;
-	}
-	else
-	{
-		auto pa = node->pos;
-		auto pb = target->node->pos + vec3(0.f, target->nav_agent->height * 0.5f, 0.f);
-		if (distance(pa, pb) < speed)
+		if (!target)
 		{
-			if (callback)
-				callback(target);
+			if (on_end)
+				on_end(node->pos, nullptr);
 			die();
 			return;
 		}
-		node->add_pos(normalize(pb - pa) * speed);
-		node->look_at(pb);
+		location = target->node->pos + vec3(0.f, target->nav_agent->height * 0.5f, 0.f);
+	}
+
+	auto sp = speed * delta_time;
+	auto self_pos = node->pos;
+	if (distance(self_pos, location) < sp)
+	{
+		if (on_end)
+			on_end(node->pos, target);
+		die();
+		return;
+	}
+
+	node->add_pos(normalize(location - self_pos) * sp);
+	node->look_at(location);
+
+	if (collide_radius > 0.f && on_collide)
+	{
+		for (auto c : get_characters(node->pos, collide_radius, collide_faction))
+			on_collide(c);
 	}
 }
 

@@ -1,6 +1,7 @@
 #include "ability.h"
 #include "character.h"
 #include "buff.h"
+#include "projectile.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
@@ -15,28 +16,43 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
-		ability.name = "Fire Ball";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma seizmic.jpg";
+		ability.name = "Fire Thrower";
+		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.target_type = TargetEnemy;
-		ability.cast_time = 0.5f;
+		ability.target_type = TargetLocation;
+		ability.cast_time = 0.2f;
 		ability.mp = 500;
-		ability.cd = 3.f;
-		ability.distance = 5.f;
-		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
+		ability.cd = 7.f;
+		ability.distance = 8.f;
+		ability.active_l = [](cCharacterPtr caster, const vec3& target) {
 			static EntityPtr projectile = nullptr;
 			if (!projectile)
 			{
 				projectile = Entity::create();
 				projectile->load(L"assets\\models\\fireball.prefab");
 			}
-			add_projectile(projectile, caster->node->pos +
+			auto pos = caster->node->pos +
 				vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
-				caster->node->g_rot[2] * 0.3f,
-				target, 0.3f,
-			[](cCharacterPtr t) {
-				t->add_buff(Buff::find("Stun"), 2.f);
-			});
+				caster->node->g_rot[2] * 0.3f;
+			auto dir = normalize(target.xz() - pos.xz());
+			auto ang = degrees(atan2(dir.y, dir.x));
+			auto sp = 12.f;
+			for (auto i = -2; i < 3; i++)
+			{
+				auto a = radians(ang + i * 15.f);
+				add_projectile(projectile, pos, pos + vec3(cos(a), 0.f, sin(a)) * 8.f, sp, 0.5f, ~caster->faction,
+				[caster](cCharacterPtr t) {
+					auto hash = "Fire Thrower"_h + (uint)caster;
+					if (t->add_marker(hash, 0.5f))
+						caster->inflict_damage(t, 100.f + caster->INT * 5.f);
+				}, [](cProjectilePtr pt) {
+					pt->collide_radius += 2.5f * delta_time;
+					pt->node->set_scl(vec3(pt->collide_radius));
+				});
+			}
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("");
 		};
 	}
 	{
@@ -48,14 +64,38 @@ void load_abilities()
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
 		ability.mp = 500;
+		ability.cd = 10.f;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
-			caster->inflict_damage(target, caster->STR);
+			caster->inflict_damage(target, 50.f + caster->STR * 1.2f);
 			target->add_buff(Buff::find("Stun"), 2.f);
 		};
 		ability.show = []() {
 			ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
 				"dealing damage base on your strength and stunning it.");
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
+		ability.name = "Flame Weapon";
+		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma pulverize.jpg";
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.target_type = TargetNull;
+		ability.cast_time = 0.f;
+		ability.mp = 500;
+		ability.cd = 10.f;
+		ability.cast_check = [](cCharacterPtr caster) {
+			return caster->equipments[EquipWeapon0].id != -1;
+		};
+		ability.active = [](cCharacterPtr caster) {
+			caster->equipments[EquipWeapon0] = { 
+				.enchant = Buff::find("Flame Weapon"), 
+				.enchant_time = 60.f 
+			};
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("");
 		};
 	}
 	{
@@ -67,9 +107,12 @@ void load_abilities()
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.f;
 		ability.mp = 500;
-		ability.distance = 5.f;
+		ability.distance = 15.f;
 		ability.active_l = [](cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("");
 		};
 	}
 }

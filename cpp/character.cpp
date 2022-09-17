@@ -385,6 +385,11 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	auto& ability = Ability::get(ins->id);
 	if (mp < ability.mp)
 		return;
+	if (ability.cast_check)
+	{
+		if (!ability.cast_check(this))
+			return;
+	}
 	if (ability.active)
 		ability.active(this);
 	else if (ability.active_l)
@@ -403,6 +408,17 @@ void cCharacter::add_buff(uint id, float time)
 	ins->timer = time;
 	buffs.emplace_back(ins);
 	stats_dirty = true;
+}
+
+bool cCharacter::add_marker(uint hash, float time)
+{
+	auto it = markers.find(hash);
+	if (it == markers.end())
+	{
+		markers.emplace(hash, time);
+		return true;
+	}
+	return false;
 }
 
 void cCharacter::die()
@@ -465,8 +481,6 @@ void cCharacter::start()
 	}, (uint)this);
 
 	inventory.resize(16);
-	for (auto& id : equipments)
-		id = -1;
 }
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
@@ -512,8 +526,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 				{
 					add_projectile(preset.atk_projectile,
 						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f),
-						target, 0.1f,
-						[this](cCharacterPtr t) {
+						target, 6.f,
+						[this](const vec3&, cCharacterPtr t) {
 							if (t)
 								inflict_damage(t, atk);
 						});
@@ -647,11 +661,11 @@ void cCharacter::update()
 
 			}
 		}
-		for (auto id : equipments)
+		for (auto& ins : equipments)
 		{
-			if (id != -1)
+			if (ins.id != -1)
 			{
-				auto& item = Item::get(id);
+				auto& item = Item::get(ins.id);
 				if (item.passive)
 					item.passive(this);
 			}
@@ -699,7 +713,6 @@ void cCharacter::update()
 		if (ins && ins->cd_timer > 0.f)
 			ins->cd_timer -= delta_time;
 	}
-
 	for (auto it = buffs.begin(); it != buffs.end();)
 	{
 		if ((*it)->timer > 0)
@@ -709,6 +722,19 @@ void cCharacter::update()
 			{
 				it = buffs.erase(it);
 				stats_dirty = true;
+				continue;
+			}
+		}
+		it++;
+	}
+	for (auto it = markers.begin(); it != markers.end();)
+	{
+		if (it->second > 0)
+		{
+			it->second -= delta_time;
+			if (it->second <= 0)
+			{
+				it = markers.erase(it);
 				continue;
 			}
 		}

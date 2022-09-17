@@ -17,6 +17,16 @@ void load_buffs()
 			character->state = State(character->state | StateStun);
 		};
 	}
+	{
+		auto& buff = buffs.emplace_back();
+		buff.id = buffs.size() - 1;
+		buff.name = "Flame Weapon";
+		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma pulverize.jpg";
+		buff.icon_image = graphics::Image::get(buff.icon_name);
+		buff.passive = [](cCharacterPtr character) {
+
+		};
+	}
 }
 
 int Buff::find(const std::string& name)
