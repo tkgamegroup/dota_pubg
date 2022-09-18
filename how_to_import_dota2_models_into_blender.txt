@@ -1,0 +1,8 @@
+1. delete the original skeletons
+2. select all R X 90
+3. ctrl a - Apply Rotation
+4. import bindpose.dmx
+5. pose mode - select all - Alt G R S
+6. I - Location & Rotation & Scale (insert key frame)
+7. object mode - R X -90 R Z -90
+8. ctrl a - Apply Rotaion

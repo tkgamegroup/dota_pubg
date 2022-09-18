@@ -1,13 +1,6 @@
 <?xml version="1.0"?>
 <material color_map="0">
 	<textures>
-		<item filename="D:\dota2_resources\life_stealer\materialsrc\models\heroes\life_stealer\lifestealer_base.tga" />
-		<item />
-		<item />
-		<item />
-		<item />
-		<item />
-		<item />
-		<item />
+		<item filename="lifestealer_base.jpg" srgb="true" auto_mipmap="true" />
 	</textures>
 </material>
