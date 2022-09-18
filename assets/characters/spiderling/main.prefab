@@ -15,8 +15,6 @@
 						<item first="run.fani" second="run" />
 						<item first="attack.fani" second="attack" />
 					</animation_names>
-					<animation_transitions>
-					</animation_transitions>
 				</item>
 			</components>
 			<children>

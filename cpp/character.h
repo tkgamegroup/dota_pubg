@@ -252,7 +252,7 @@ struct cCharacter : Component
 	uint atk_sp = 0;
 
 	uint attribute_points = 0;
-	uint abilities_points = 0;
+	uint ability_points = 1;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
 	EquipmentInstance								equipments[EquipPart_Count];

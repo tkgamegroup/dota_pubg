@@ -312,12 +312,16 @@ void cMain::start()
 			{
 				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
+				static const wchar_t* prefabs[] = {
+					L"assets\\characters\\spiderling\\main.prefab",
+					L"assets\\characters\\treant\\main.prefab"
+				};
+
 				auto e = Entity::create();
-				e->load(L"assets\\characters\\spiderling\\main.prefab");
+				e->load(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]);
 				e->node()->set_pos(coord);
 				auto character = e->get_component_t<cCharacter>();
 				character->set_faction(2);
-				character->set_preset_name("Spiderling");
 				new CommandAttackLocation(character, coord);
 				root->add_child(e);
 			}
@@ -465,10 +469,10 @@ void cMain::start()
 				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
-				if (main_player.character->abilities_points > 0)
+				if (main_player.character->ability_points > 0)
 				{
 					dl->AddCircleFilled(vec2(p1.x, p0.y), 7.f, ImColor(0.8f, 0.2f, 0.2f));
-					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(main_player.character->abilities_points).c_str());
+					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(main_player.character->ability_points).c_str());
 				}
 				if (pressed)
 				{

@@ -6,3 +6,4 @@
 6. I - Location & Rotation & Scale (insert key frame)
 7. object mode - R X -90 R Z -90
 8. ctrl a - Apply Rotaion
+9. import a animation - select all - R X 90 - ctrl a - Apply Rotation

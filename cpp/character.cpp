@@ -222,6 +222,19 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.name = "Treant";
+		preset.exp_base = 200;
+		preset.hp = 5500;
+		preset.mp = 0;
+		preset.atk = 15;
+		preset.atk_time = 1.6f;
+		preset.atk_point = 0.467f;
+		preset.hp_reg = 25;
+		preset.mov_sp = 100;
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
 		preset.name = "Creep";
 		preset.exp_base = 200;
 		preset.hp = 5000;
@@ -322,7 +335,7 @@ void cCharacter::gain_exp(uint v)
 		exp -= exp_max;
 		lv++;
 		attribute_points += 5;
-		abilities_points++;
+		ability_points++;
 		exp_max *= 1.1f;
 		stats_dirty = true;
 	}

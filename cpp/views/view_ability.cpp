@@ -24,7 +24,7 @@ void ViewAbility::on_draw()
 	{
 		auto dl = ImGui::GetWindowDrawList();
 		const auto icon_size = 48.f;
-		ImGui::Text("Points: %d", main_player.character->abilities_points);
+		ImGui::Text("Points: %d", main_player.character->ability_points);
 		for (auto i = 0; i < main_player.character->abilities.size(); i++)
 		{
 			if (i % 6 != 0) ImGui::SameLine();
@@ -58,10 +58,10 @@ void ViewAbility::on_draw()
 					}
 				}
 
-				if (pressed && main_player.character->abilities_points > 0)
+				if (pressed && main_player.character->ability_points > 0)
 				{
 					ins->lv++;
-					main_player.character->abilities_points--;
+					main_player.character->ability_points--;
 				}
 			}
 		}
