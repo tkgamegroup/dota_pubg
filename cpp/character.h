@@ -243,7 +243,6 @@ struct cCharacter : Component
 
 	DamageType atk_type = PhysicalDamage;
 	uint atk = 10;
-	Listeners<void(cCharacterPtr character, cCharacterPtr target)> atk_effs;
 	uint phy_def = 0;
 	uint mag_def = 0;
 	uint hp_reg = 0;
@@ -253,6 +252,9 @@ struct cCharacter : Component
 
 	uint attribute_points = 0;
 	uint ability_points = 1;
+
+	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
+	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
 	EquipmentInstance								equipments[EquipPart_Count];

@@ -101,6 +101,23 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
+		ability.name = "Flame Shield";
+		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma seizmic.jpg";
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.target_type = TargetNull;
+		ability.cast_time = 0.f;
+		ability.mp = 1000;
+		ability.cd = 30.f;
+		ability.active = [](cCharacterPtr caster) {
+
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("");
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
 		ability.name = "Roar";
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusfungusbite2.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);

@@ -24,7 +24,7 @@ void load_buffs()
 		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma pulverize.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character) {
-			character->atk_effs.add([](cCharacterPtr character, cCharacterPtr target) {
+			character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
 				character->inflict_damage(target, 10, MagicDamage);
 			});
 		};
@@ -38,6 +38,16 @@ void load_buffs()
 		buff.passive = [](cCharacterPtr character) {
 			character->mov_sp += 20;
 			character->atk_sp += 20;
+		};
+	}
+	{
+		auto& buff = buffs.emplace_back();
+		buff.id = buffs.size() - 1;
+		buff.name = "Poisoned";
+		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusgue-ball.jpg";
+		buff.icon_image = graphics::Image::get(buff.icon_name);
+		buff.passive = [](cCharacterPtr character) {
+
 		};
 	}
 }

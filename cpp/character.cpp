@@ -550,10 +550,10 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			{
 				auto attack = [this](cCharacterPtr target) {
 					inflict_damage(target, atk, atk_type);
-					for (auto& ef : atk_effs.list)
+					for (auto& ef : attack_effects.list)
 					{
 						if (!target->dead)
-							ef.first(this, target);
+							ef.first(this, target, atk_type, atk);
 					}
 				};
 				if (preset.atk_projectile)
@@ -681,13 +681,14 @@ void cCharacter::update()
 
 		atk_type = PhysicalDamage;
 		atk = preset.atk;
-		atk_effs.list.clear();
 
 		hp_reg = preset.hp_reg;
 		mp_reg = preset.mp_reg;
 		mov_sp = preset.mov_sp;
 		atk_sp = preset.atk_sp;
 
+		attack_effects.list.clear();
+		injury_effects.list.clear();
 		for (auto& ins : abilities)
 		{
 			if (ins)
