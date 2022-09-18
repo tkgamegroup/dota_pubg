@@ -41,12 +41,35 @@ void ViewInventory::on_draw()
 				{
 					ImGui::BeginTooltip();
 					ImGui::TextUnformatted(item.name.c_str());
+					if (item.show)
+						item.show();
 					ImGui::EndTooltip();
 				}
 				dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
 
-				if (pressed && item.type == ItemConsumable)
-					main_player.character->use_item(ins);
+				auto equip = [&]() {
+					int id = ins->id;
+					auto& eins = main_player.character->equipments[item.sub_category];
+					std::swap(id, eins.id);
+					eins.enchant = -1;
+					main_player.character->inventory[i].reset(nullptr);
+					if (id != -1)
+						main_player.character->gain_item(id, 1);
+					main_player.character->stats_dirty = true;
+				};
+
+				if (pressed)
+				{
+					switch (item.type)
+					{
+					case ItemConsumable:
+						main_player.character->use_item(ins);
+						break;
+					case ItemEquipment:
+						equip();
+						break;
+					}
+				}
 
 				if (ImGui::BeginDragDropSource())
 				{
@@ -56,21 +79,6 @@ void ViewInventory::on_draw()
 
 				if (ImGui::BeginPopupContextItem())
 				{
-					if (item.type == ItemEquipment)
-					{
-						if (ImGui::Selectable("Equip"))
-						{
-							int id = ins->id;
-							auto einfo = item.equipment_info();
-							auto& eins = main_player.character->equipments[einfo.part];
-							std::swap(id, eins.id);
-							eins.enchant = -1;
-							main_player.character->inventory[i].reset(nullptr);
-							if (id != -1)
-								main_player.character->gain_item(id, 1);
-							main_player.character->stats_dirty = true;
-						}
-					}
 					if (ImGui::Selectable("Drop"))
 					{
 						add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);

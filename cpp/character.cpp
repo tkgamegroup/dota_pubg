@@ -703,7 +703,8 @@ void cCharacter::update()
 		if (mp_max != pre_mp_max)
 			mp *= (float)mp_max / pre_mp_max;
 
-		atk += STR;
+		if (equipments[EquipWeapon0].id == -1)
+			atk += STR;
 
 		stats_dirty = false;
 	}

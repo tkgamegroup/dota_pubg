@@ -27,19 +27,6 @@ enum EquipPart
 	EquipPart_Count
 };
 
-struct WeaponInfo
-{
-	DamageType atk_type;
-	uint atk;
-};
-
-struct EquipmentInfo
-{
-	EquipPart part;
-
-	WeaponInfo& (*weapon_info)() = nullptr;
-};
-
 struct Item
 {
 	uint					id;
@@ -49,8 +36,8 @@ struct Item
 	graphics::ImagePtr		icon_image = nullptr;
 
 	ItemType				type = ItemItem;
+	int						sub_category; // for equipment, it is EquipPart
 
-	EquipmentInfo&(*equipment_info)() = nullptr;
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*passive)(cCharacterPtr) = nullptr;
 	void(*show)() = nullptr;

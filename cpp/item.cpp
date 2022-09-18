@@ -2,6 +2,7 @@
 #include "character.h"
 
 #include <flame/graphics/image.h>
+#include <flame/graphics/gui.h>
 
 std::vector<Item> items;
 
@@ -15,14 +16,12 @@ void load_items()
 		item.icon_uvs = vec4(5.f / 13, 10.f / 15.f, 6.f / 13, 11.f / 15.f);
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemEquipment;
-		item.equipment_info = []()->EquipmentInfo& {
-			static EquipmentInfo info { 
-				.part = EquipFoot 
-			};
-			return info;
-		};
+		item.sub_category = EquipFoot;
 		item.passive = [](cCharacterPtr character) {
 			character->mov_sp += 20;
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("+20 MOV SP");
 		};
 	}
 	{
@@ -33,21 +32,13 @@ void load_items()
 		item.icon_uvs = vec4(1.f / 13, 7.f / 15.f, 2.f / 13, 8.f / 15.f);
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemEquipment;
-		item.equipment_info = []()->EquipmentInfo& {
-			static EquipmentInfo info{
-				.part = EquipWeapon0,
-				.weapon_info = []()->WeaponInfo& {
-					static WeaponInfo info { 
-						.atk_type = PhysicalDamage,
-						.atk = 10
-					};
-					return info;
-				}
-			};
-			return info;
-		};
+		item.sub_category = EquipWeapon0;
 		item.passive = [](cCharacterPtr character) {
-
+			character->atk_type = PhysicalDamage;
+			character->atk += 10 + character->STR;
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("Physical\n+10 ATK\nSTR Fix 1.0");
 		};
 	}
 	{
@@ -60,6 +51,9 @@ void load_items()
 		item.type = ItemConsumable;
 		item.active = [](cCharacterPtr character) {
 			character->gain_exp(character->exp_max);
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("Gain exp as much as current level");
 		};
 	}
 }
