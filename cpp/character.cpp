@@ -235,6 +235,19 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.name = "Boar";
+		preset.exp_base = 200;
+		preset.hp = 3000;
+		preset.mp = 1000;
+		preset.atk = 20;
+		preset.atk_time = 1.25f;
+		preset.atk_point = 0.5f;
+		preset.hp_reg = 15;
+		preset.mov_sp = 100;
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
 		preset.name = "Creep";
 		preset.exp_base = 200;
 		preset.hp = 5000;

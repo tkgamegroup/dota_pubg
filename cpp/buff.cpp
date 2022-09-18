@@ -29,6 +29,17 @@ void load_buffs()
 			});
 		};
 	}
+	{
+		auto& buff = buffs.emplace_back();
+		buff.id = buffs.size() - 1;
+		buff.name = "Roar";
+		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusfungusbite2.jpg";
+		buff.icon_image = graphics::Image::get(buff.icon_name);
+		buff.passive = [](cCharacterPtr character) {
+			character->mov_sp += 20;
+			character->atk_sp += 20;
+		};
+	}
 }
 
 int Buff::find(const std::string& name)

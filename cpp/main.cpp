@@ -314,7 +314,8 @@ void cMain::start()
 
 				static const wchar_t* prefabs[] = {
 					L"assets\\characters\\spiderling\\main.prefab",
-					L"assets\\characters\\treant\\main.prefab"
+					L"assets\\characters\\treant\\main.prefab",
+					L"assets\\characters\\boar\\main.prefab"
 				};
 
 				auto e = Entity::create();
