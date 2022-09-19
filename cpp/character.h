@@ -1,7 +1,9 @@
 #pragma once
 
 #include "main.h"
+#include "ability.h"
 #include "item.h"
+#include "buff.h"
 
 template<typename T>
 struct Tracker
@@ -33,33 +35,6 @@ struct Tracker
 			}, hash);
 		}
 	}
-};
-
-struct AbilityInstance
-{
-	uint id;
-	uint lv = 0;
-	float cd_max = 0.f;
-	float cd_timer = 0.f;
-};
-
-struct ItemInstance
-{
-	uint id;
-	uint num = 1;
-};
-
-struct EquipmentInstance
-{
-	int id = -1;
-	int enchant = -1;
-	float enchant_timer = 0.f;
-};
-
-struct BuffInstance
-{
-	uint id;
-	float timer;
 };
 
 struct Command
@@ -172,6 +147,8 @@ struct CharacterPreset
 	uint mov_sp = 100; // move speed
 	uint atk_sp = 100; // attack speed
 
+	std::vector<std::pair<std::string, uint>> abilities;
+
 	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);
 };
@@ -281,10 +258,10 @@ struct cCharacter : Component
 	bool take_damage(uint value, DamageType type); // return true if the damage causes the character die
 	void gain_exp(uint v);
 	bool gain_item(uint id, uint num);
-	bool gain_ability(uint id);
+	bool gain_ability(uint id, uint lv = 0);
 	void use_item(ItemInstance* ins);
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
-	void add_buff(uint id, float time);
+	void add_buff(uint id, float time, bool replace = false);
 	bool add_marker(uint hash, float time);
 	void die();
 

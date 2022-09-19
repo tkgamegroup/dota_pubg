@@ -240,9 +240,6 @@ void cMain::start()
 		root->add_child(e);
 		main_player.init(e);
 		main_player.character->set_faction(1);
-		main_player.character->gain_ability(Ability::find("Fire Thrower"));
-		main_player.character->gain_ability(Ability::find("Shield Bash"));
-		main_player.character->gain_ability(Ability::find("Flame Weapon"));
 
 		for (auto i = 0; i < countof(shortcuts); i++)
 		{
@@ -505,6 +502,27 @@ void cMain::start()
 		}
 		ImGui::End();
 
+		auto show_buffs = [](ImDrawList* dl, cCharacterPtr character) {
+
+			for (auto i = 0; i < character->buffs.size(); i++)
+			{
+				if (i > 0) ImGui::SameLine();
+				auto& ins = character->buffs[i];
+				auto& buff = Buff::get(ins->id);
+				ImGui::Dummy(ImVec2(16, 16));
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::BeginTooltip();
+					ImGui::TextUnformatted(buff.name.c_str());
+					ImGui::Text("%d s", (int)ins->timer);
+					ImGui::EndTooltip();
+				}
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
+			}
+		};
+
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(200.f, 100.f), ImGuiCond_Always);
@@ -545,6 +563,8 @@ void cMain::start()
 				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 			}
 
+			show_buffs(dl, main_player.character);
+
 			ImGui::End();
 		}
 
@@ -569,23 +589,7 @@ void cMain::start()
 				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 			}
 
-			for (auto i = 0; i < focus_character->buffs.size(); i++)
-			{
-				if (i > 0) ImGui::SameLine();
-				auto& ins = focus_character->buffs[i];
-				auto& buff = Buff::get(ins->id);
-				ImGui::Dummy(ImVec2(16, 16));
-				if (ImGui::IsItemHovered())
-				{
-					ImGui::BeginTooltip();
-					ImGui::TextUnformatted(buff.name.c_str());
-					ImGui::Text("%d s", (int)ins->timer);
-					ImGui::EndTooltip();
-				}
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
-			}
+			show_buffs(dl, focus_character);
 
 			ImGui::End();
 		}

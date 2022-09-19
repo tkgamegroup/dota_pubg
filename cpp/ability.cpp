@@ -118,6 +118,23 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
+		ability.name = "Stinger";
+		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\funguscorrosive spore.jpg";
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.target_type = TargetNull;
+		ability.passive = [](cCharacterPtr caster) {
+			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
+				if (linearRand(0U, 99U) < 10)
+					target->add_buff(Buff::find("Poisoned"), 10.f, true);
+			});
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("");
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
 		ability.name = "Roar";
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusfungusbite2.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);

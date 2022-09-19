@@ -2,6 +2,14 @@
 
 #include "main.h"
 
+struct AbilityInstance
+{
+	uint id;
+	uint lv = 0;
+	float cd_max = 0.f;
+	float cd_timer = 0.f;
+};
+
 struct Ability
 {
 	uint					id;

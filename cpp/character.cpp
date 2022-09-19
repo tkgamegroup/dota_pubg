@@ -171,6 +171,9 @@ void load_character_presets()
 		preset.atk_point = 0.5f;
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
+		preset.abilities.emplace_back("Fire Thrower", 0);
+		preset.abilities.emplace_back("Shield Bash", 0);
+		preset.abilities.emplace_back("Flame Weapon", 0);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -218,6 +221,7 @@ void load_character_presets()
 		preset.atk_point = 0.5f;
 		preset.hp_reg = 5;
 		preset.mov_sp = 400;
+		preset.abilities.emplace_back("Stinger", 1);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -293,6 +297,14 @@ void cCharacter::set_preset_name(const std::string& name)
 		return;
 	preset_name = name;
 	preset_id = CharacterPreset::find(preset_name);
+
+	auto& preset = get_preset();
+	if (!preset.abilities.empty())
+	{
+		abilities.clear();
+		for (auto& i : preset.abilities)
+			gain_ability(Ability::find(i.first), i.second);
+	}
 }
 
 cCharacter::~cCharacter()
@@ -370,10 +382,11 @@ bool cCharacter::gain_item(uint id, uint num)
 	return false;
 }
 
-bool cCharacter::gain_ability(uint id)
+bool cCharacter::gain_ability(uint id, uint lv)
 {
 	auto ins = new AbilityInstance;
 	ins->id = id;
+	ins->lv = lv;
 	abilities.emplace_back(ins);
 	stats_dirty = true;
 	return true;
@@ -427,12 +440,29 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	mp -= ability.mp;
 }
 
-void cCharacter::add_buff(uint id, float time)
+void cCharacter::add_buff(uint id, float time, bool replace)
 {
-	auto ins = new BuffInstance;
+	BuffInstance* ins = nullptr;
+	if (replace)
+	{
+		for (auto& i : buffs)
+		{
+			if (i->id == id)
+			{
+				ins = i.get();
+				break;
+			}
+		}
+	}
+	if (!ins)
+	{
+		ins = new BuffInstance;
+		buffs.emplace_back(ins);
+	}
 	ins->id = id;
 	ins->timer = time;
-	buffs.emplace_back(ins);
+	if (auto& buff = Buff::get(id); buff.start)
+		buff.start(this, ins);
 	stats_dirty = true;
 }
 
@@ -691,7 +721,7 @@ void cCharacter::update()
 		injury_effects.list.clear();
 		for (auto& ins : abilities)
 		{
-			if (ins)
+			if (ins && ins->lv > 0)
 			{
 				auto& ability = Ability::get(ins->id);
 				if (ability.passive)
@@ -709,7 +739,7 @@ void cCharacter::update()
 				{
 					auto& buff = Buff::get(ins.enchant);
 					if (buff.passive)
-						buff.passive(this);
+						buff.passive(this, nullptr);
 				}
 			}
 		}
@@ -717,7 +747,7 @@ void cCharacter::update()
 		{
 			auto& buff = Buff::get(ins->id);
 			if (buff.passive)
-				buff.passive(this);
+				buff.passive(this, ins.get());
 		}
 
 		hp_max += VIG * 200;
@@ -774,10 +804,15 @@ void cCharacter::update()
 	}
 	for (auto it = buffs.begin(); it != buffs.end();)
 	{
-		if ((*it)->timer > 0)
+		auto& ins = *it;
+		auto& buff = Buff::get(ins->id);
+		if (buff.continuous)
+			buff.continuous(this, ins.get());
+
+		if (ins->timer > 0)
 		{
-			(*it)->timer -= delta_time;
-			if ((*it)->timer <= 0)
+			ins->timer -= delta_time;
+			if (ins->timer <= 0)
 			{
 				it = buffs.erase(it);
 				stats_dirty = true;

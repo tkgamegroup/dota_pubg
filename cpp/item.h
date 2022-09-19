@@ -27,6 +27,19 @@ enum EquipPart
 	EquipPart_Count
 };
 
+struct ItemInstance
+{
+	uint id;
+	uint num = 1;
+};
+
+struct EquipmentInstance
+{
+	int id = -1;
+	int enchant = -1;
+	float enchant_timer = 0.f;
+};
+
 struct Item
 {
 	uint					id;
