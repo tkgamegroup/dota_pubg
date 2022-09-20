@@ -1,6 +1,7 @@
 #pragma once
 
 #include <flame/universe/component.h>
+#include <flame/universe/entity.h>
 
 using namespace flame;
 
@@ -9,6 +10,7 @@ FLAME_TYPE(cCharacter)
 FLAME_TYPE(cSpwaner)
 FLAME_TYPE(cProjectile)
 FLAME_TYPE(cChest)
+FLAME_TYPE(cCreepAI)
 
 const auto CharacterTag = 1 << 1;
 
@@ -63,6 +65,38 @@ struct MainPlayer
 extern MainPlayer main_player;
 
 extern cCharacterPtr selecting_target;
+
+template<typename T>
+struct Tracker
+{
+	uint hash;
+	T obj = nullptr;
+
+	Tracker()
+	{
+		hash = rand();
+	}
+
+	~Tracker()
+	{
+		if (obj)
+			obj->entity->message_listeners.remove(hash);
+	}
+
+	void set(T oth)
+	{
+		if (obj)
+			obj->entity->message_listeners.remove((uint)this);
+		obj = oth;
+		if (oth)
+		{
+			oth->entity->message_listeners.add([this](uint h, void*, void*) {
+				if (h == "destroyed"_h)
+					obj = nullptr;
+				}, hash);
+		}
+	}
+};
 
 /// Reflect ctor
 struct cMain : Component

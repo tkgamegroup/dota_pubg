@@ -17,7 +17,8 @@
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
 
-Command::Command(cCharacterPtr character) :
+Command::Command(uint type, cCharacterPtr character) :
+	type(type),
 	character(character)
 {
 	character->command.reset(this);
@@ -25,7 +26,7 @@ Command::Command(cCharacterPtr character) :
 }
 
 CommandIdle::CommandIdle(cCharacterPtr character) :
-	Command(character)
+	Command("Idle"_h, character)
 {
 }
 
@@ -35,7 +36,7 @@ void CommandIdle::update()
 }
 
 CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
-	Command(character)
+	Command("MoveTo"_h, character)
 {
 	location = _location;
 }
@@ -50,7 +51,7 @@ void CommandMoveTo::update()
 }
 
 CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
-	Command(character)
+	Command("AttackTarget"_h, character)
 {
 	target.set(_target);
 }
@@ -64,23 +65,19 @@ void CommandAttackTarget::update()
 }
 
 CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3& _location) :
-	Command(character)
+	Command("AttackLocation"_h, character)
 {
 	location = _location;
 }
 
 void CommandAttackLocation::update()
 {
-	auto atk_dist = character->get_preset().atk_distance;
-	auto dist = target.obj ? distance(character->node->pos, target.obj->node->pos) : 10000.f;
-	if (dist > atk_dist + 10.f)
-		target.set(nullptr);
-	if (character->action != ActionAttack)
+	if (!target.obj && character->action != ActionAttack)
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = get_characters(character->node->pos, 5.f, ~character->faction);
-			if (!enemies.empty() && dist > atk_dist)
+			auto enemies = get_characters(character->node->pos, max(character->get_preset().atk_distance, 5.f), ~character->faction);
+			if (!enemies.empty())
 				target.set(enemies.front());
 
 			character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
@@ -94,7 +91,7 @@ void CommandAttackLocation::update()
 }
 
 CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
-	Command(character)
+	Command("PickUp"_h, character)
 {
 	target.set(_target);
 }
@@ -123,7 +120,7 @@ void CommandPickUp::update()
 }
 
 CommandCastAbilityToLocation::CommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location) :
-	Command(character),
+	Command("CastAbilityToLocation"_h, character),
 	ins(ins)
 {
 	location = _location;
@@ -135,7 +132,7 @@ void CommandCastAbilityToLocation::update()
 }
 
 CommandCastAbilityToTarget::CommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target) :
-	Command(character),
+	Command("CastAbilityToTarget"_h, character),
 	ins(ins)
 {
 	target.set(_target);

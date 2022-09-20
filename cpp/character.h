@@ -5,43 +5,12 @@
 #include "item.h"
 #include "buff.h"
 
-template<typename T>
-struct Tracker
-{
-	uint hash;
-	T obj = nullptr;
-
-	Tracker()
-	{
-		hash = rand();
-	}
-
-	~Tracker()
-	{
-		if (obj)
-			obj->entity->message_listeners.remove(hash);
-	}
-
-	void set(T oth)
-	{
-		if (obj)
-			obj->entity->message_listeners.remove((uint)this);
-		obj = oth;
-		if (oth)
-		{
-			oth->entity->message_listeners.add([this](uint h, void*, void*) {
-				if (h == "destroyed"_h)
-					obj = nullptr;
-			}, hash);
-		}
-	}
-};
-
 struct Command
 {
+	uint type;
 	cCharacterPtr character;
 
-	Command(cCharacterPtr character);
+	Command(uint type, cCharacterPtr character);
 	virtual ~Command() {}
 	virtual void update() = 0;
 };

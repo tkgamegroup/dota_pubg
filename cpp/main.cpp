@@ -320,7 +320,7 @@ void cMain::start()
 				e->node()->set_pos(coord);
 				auto character = e->get_component_t<cCharacter>();
 				character->set_faction(2);
-				new CommandAttackLocation(character, coord);
+				e->add_component<cCreepAI>();
 				root->add_child(e);
 			}
 		}
