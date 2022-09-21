@@ -10,20 +10,76 @@ void cCreepAI::start()
 
 void cCreepAI::update()
 {
-	if (distance(character->node->pos, start_pos) > 10.f)
+	if (distance(character->node->pos, start_pos) < 10.f)
+		aggro_timer = 5.f;
+	if (aggro_timer > 0.f)
 	{
-
-	}
-	if (character->action == ActionNone)
-	{
-		if (character->search_timer <= 0.f)
+		aggro_timer -= delta_time;
+		if (aggro_timer <= 0.f)
 		{
-			auto enemies = get_characters(character->node->pos, 5.f, ~character->faction);
-			if (!enemies.empty())
-				new CommandAttackTarget(character, enemies[0]);
-			character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+			new CommandMoveTo(character, start_pos);
+			flee_timer = 3.f;
 		}
 	}
+
+	if (flee_timer <= 0.f)
+	{
+		if (character->action == ActionNone)
+		{
+			auto attack_closest = [this]() {
+				cCharacterPtr enemy = nullptr;
+				if (character->search_timer <= 0.f)
+				{
+					auto enemies = get_characters(character->node->pos, 5.f, ~character->faction);
+					if (!enemies.empty())
+						new CommandAttackTarget(character, enemies[0]);
+					character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+				}
+			};
+
+			switch (character->command->type)
+			{
+			case "Idle"_h:
+				attack_closest();
+				break;
+			case "MoveTo"_h:
+				attack_closest();
+				break;
+			case "AttackTarget"_h:
+				if (linearRand(0U, 600U) < 10)
+				{
+					for (auto& ins : character->abilities)
+					{
+						if (ins->cd_timer <= 0.f)
+						{
+							if (auto& ability = Ability::get(ins->id); character->mp >= ability.mp)
+							{
+								if (!ability.cast_check || ability.cast_check(character))
+								{
+									if (ability.target_type == TargetNull && ability.active)
+									{
+										new CommandCastAbility(character, ins.get());
+										break;
+									}
+									if (ability.target_type == TargetEnemy && ability.active_t)
+									{
+										new CommandCastAbilityToTarget(character, ins.get(),
+											((CommandAttackTarget*)character->command.get())->target.obj);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+				else
+					attack_closest();
+				break;
+			}
+		}
+	}
+	else
+		flee_timer -= delta_time;
 }
 
 struct cCreepAICreate : cCreepAI::Create

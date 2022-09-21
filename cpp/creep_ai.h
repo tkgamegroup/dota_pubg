@@ -9,6 +9,8 @@ struct cCreepAI : Component
 	cCharacterPtr character;
 
 	vec3 start_pos;
+	float aggro_timer = 0.f;
+	float flee_timer = 0.f;
 
 	void start() override;
 	void update() override;

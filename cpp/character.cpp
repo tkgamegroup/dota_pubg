@@ -119,6 +119,17 @@ void CommandPickUp::update()
 	}
 }
 
+CommandCastAbility::CommandCastAbility(cCharacterPtr character, AbilityInstance* ins) :
+	Command("CastAbility"_h, character),
+	ins(ins)
+{
+}
+
+void CommandCastAbility::update()
+{
+	character->process_cast_ability(ins, vec3(0.f), nullptr);
+}
+
 CommandCastAbilityToLocation::CommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location) :
 	Command("CastAbilityToLocation"_h, character),
 	ins(ins)
@@ -226,12 +237,16 @@ void load_character_presets()
 		preset.name = "Treant";
 		preset.exp_base = 200;
 		preset.hp = 5500;
-		preset.mp = 0;
+		preset.mp = 2000;
 		preset.atk = 15;
 		preset.atk_time = 1.6f;
 		preset.atk_point = 0.467f;
+		preset.cast_time = 2.f;
+		preset.cast_point = 1.95f;
 		preset.hp_reg = 25;
+		preset.mp_reg = 20;
 		preset.mov_sp = 100;
+		preset.abilities.emplace_back("Recover", 1);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -534,6 +549,8 @@ void cCharacter::start()
 	}, (uint)this);
 
 	inventory.resize(16);
+
+	new CommandIdle(this);
 }
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
@@ -638,7 +655,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
-	auto approached = process_approach(pos, ability.distance, 15.f);
+	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.distance, 15.f);
 	if (cast_timer > 0.f)
 	{
 		cast_timer -= delta_time;
@@ -856,7 +873,7 @@ void cCharacter::update()
 			break;
 		case ActionCast:
 			armature->loop = false;
-			armature->playing_speed = 1.f;
+			armature->playing_speed = cast_speed;
 			armature->play("cast"_h);
 			break;
 		}

@@ -59,6 +59,15 @@ struct CommandPickUp : Command
 	void update() override;
 };
 
+struct CommandCastAbility : Command
+{
+	AbilityInstance* ins;
+
+	CommandCastAbility(cCharacterPtr character, AbilityInstance* ins);
+
+	void update() override;
+};
+
 struct CommandCastAbilityToLocation : Command
 {
 	vec3 location;
@@ -108,7 +117,7 @@ struct CharacterPreset
 	std::filesystem::path atk_projectile_name;
 	EntityPtr atk_projectile = nullptr;
 	float cast_time = 1.f; // animation time
-	float cast_point = 0.5f; // hit point
+	float cast_point = 1.f; // hit point
 	uint phy_def = 0; // physical defense
 	uint mag_def = 0; // magic defense
 	uint hp_reg = 0; // hp regeneration

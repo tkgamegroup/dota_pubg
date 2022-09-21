@@ -152,6 +152,26 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
+		ability.name = "Recover";
+		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\mucus trap.jpg";
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.target_type = TargetNull;
+		ability.cast_time = 3.f;
+		ability.mp = 500;
+		ability.cd = 0.f;
+		ability.cast_check = [](cCharacterPtr caster) {
+			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
+		};
+		ability.active = [](cCharacterPtr caster) {
+			caster->hp = min(caster->hp + 1000, caster->hp_max);
+		};
+		ability.show = []() {
+			ImGui::TextUnformatted("");
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
 		ability.name = "Blink";
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\Tactical Flight.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);

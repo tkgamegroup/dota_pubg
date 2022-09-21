@@ -185,7 +185,7 @@ struct AbilityShortcut : Shortcut
 		}
 		select_mode = ability.target_type;
 		if (select_mode == TargetNull)
-			main_player.character->cast_ability(ins, vec3(0.f), nullptr);
+			new CommandCastAbility(main_player.character, ins);
 		else
 		{
 			if (ability.target_type & TargetLocation)
@@ -523,6 +523,53 @@ void cMain::start()
 			}
 		};
 
+		auto hp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			ImGui::Dummy(ImVec2(width, height));
+			auto p0 = (vec2)ImGui::GetItemRectMin();
+			auto p1 = (vec2)ImGui::GetItemRectMax();
+			dl->AddRectFilled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * width, height), ImColor(0.3f, 0.7f, 0.2f));
+			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+			auto str = std::format("{}/{}", character->hp / 10, character->hp_max / 10);
+			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+		};
+		auto mp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			ImGui::Dummy(ImVec2(width, height));
+			auto p0 = (vec2)ImGui::GetItemRectMin();
+			auto p1 = (vec2)ImGui::GetItemRectMax();
+			dl->AddRectFilled(p0, p0 + vec2((float)character->mp / (float)character->mp_max * width, height), ImColor(0.2f, 0.3f, 0.7f));
+			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+			auto str = std::format("{}/{}", character->mp / 10, character->mp_max / 10);
+			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+		};
+		auto exp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			ImGui::Dummy(ImVec2(width, height));
+			auto p0 = (vec2)ImGui::GetItemRectMin();
+			auto p1 = (vec2)ImGui::GetItemRectMax();
+			dl->AddRectFilled(p0, p0 + vec2((float)character->exp / (float)character->exp_max * width, height), ImColor(0.7f, 0.7f, 0.2f));
+			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+			auto str = std::format("LV {}  {}/{}", character->lv, character->exp, character->exp_max);
+			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+		};
+		auto action_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			float time = 0.f;
+			if (character->attack_timer > 0.f)
+				time = character->attack_timer;
+			else if (character->cast_timer > 0.f)
+				time = character->cast_timer;
+			if (time > 0.f)
+			{
+				ImGui::Dummy(ImVec2(width, height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((1.f - fract(time)) * width, height), ImColor(0.7f, 0.7f, 0.7f));
+				dl->AddRect(p0, p1, ImColor(0.3f, 0.3f, 0.3f));
+				dl->AddText(vec2((p0.x + p1.x) * 0.5f - 3.f, p0.y - 7.f), ImColor(1.f, 1.f, 1.f), str((int)time).c_str());
+			}
+		};
+
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(200.f, 100.f), ImGuiCond_Always);
@@ -532,38 +579,12 @@ void cMain::start()
 			auto dl = ImGui::GetWindowDrawList();
 			const auto bar_width = ImGui::GetContentRegionAvailWidth();
 			const auto bar_height = 16.f;
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->hp / (float)main_player.character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("{}/{}", main_player.character->hp / 10, main_player.character->hp_max / 10);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->mp / (float)main_player.character->mp_max * bar_width, bar_height), ImColor(0.2f, 0.3f, 0.7f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("{}/{}", main_player.character->mp / 10, main_player.character->mp_max / 10);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)main_player.character->exp / (float)main_player.character->exp_max * bar_width, bar_height), ImColor(0.7f, 0.7f, 0.2f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("LV {}  {}/{}", main_player.character->lv, main_player.character->exp, main_player.character->exp_max);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
+			hp_bar(dl, bar_width, bar_height, main_player.character);
+			mp_bar(dl, bar_width, bar_height, main_player.character);
+			exp_bar(dl, bar_width, bar_height, main_player.character);
 
 			show_buffs(dl, main_player.character);
+			action_bar(dl, bar_width, 4.f, main_player.character);
 
 			ImGui::End();
 		}
@@ -578,18 +599,11 @@ void cMain::start()
 			auto dl = ImGui::GetWindowDrawList();
 			const auto bar_width = ImGui::GetContentRegionAvailWidth();
 			const auto bar_height = 16.f;
-			{
-				ImGui::Dummy(ImVec2(bar_width, bar_height));
-				auto p0 = (vec2)ImGui::GetItemRectMin();
-				auto p1 = (vec2)ImGui::GetItemRectMax();
-				dl->AddRectFilled(p0, p0 + vec2((float)focus_character->hp / (float)focus_character->hp_max * bar_width, bar_height), ImColor(0.3f, 0.7f, 0.2f));
-				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-				auto str = std::format("{}/{}", focus_character->hp / 10, focus_character->hp_max / 10);
-				auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-				dl->AddText(p0 + vec2((bar_width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-			}
+			hp_bar(dl, bar_width, bar_height, focus_character);
+			mp_bar(dl, bar_width, bar_height, focus_character);
 
 			show_buffs(dl, focus_character);
+			action_bar(dl, bar_width, 4.f, focus_character);
 
 			ImGui::End();
 		}
