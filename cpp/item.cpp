@@ -56,6 +56,21 @@ void load_items()
 			ImGui::TextUnformatted("Gain exp as much as current level");
 		};
 	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
+		item.name = "Berry";
+		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_uvs = vec4(6.f / 13, 12.f / 15.f, 7.f / 13, 13.f / 15.f);
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemConsumable;
+		item.active = [](cCharacterPtr character) {
+			character->hp = min(character->hp + 200, character->hp_max);
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("Recover hp by 20");
+		};
+	}
 }
 
 int Item::find(const std::string& name)

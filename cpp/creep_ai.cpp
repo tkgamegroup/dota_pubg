@@ -27,20 +27,25 @@ void cCreepAI::update()
 		if (character->action == ActionNone)
 		{
 			auto attack_closest = [this]() {
-				cCharacterPtr enemy = nullptr;
+				bool found = false;
 				if (character->search_timer <= 0.f)
 				{
 					auto enemies = get_characters(character->node->pos, 5.f, ~character->faction);
 					if (!enemies.empty())
+					{
 						new CommandAttackTarget(character, enemies[0]);
+						found = true;
+					}
 					character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
 				}
+				return found;
 			};
 
 			switch (character->command->type)
 			{
 			case "Idle"_h:
-				attack_closest();
+				if (!attack_closest() && linearRand(0U, 600U) < 10)
+					new CommandMoveTo(character, main_terrain.get_coord(start_pos + vec3(linearRand(-3.f, +3.f), 0.f, linearRand(-3.f, +3.f))));
 				break;
 			case "MoveTo"_h:
 				attack_closest();

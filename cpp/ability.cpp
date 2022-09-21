@@ -142,6 +142,9 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 10.f;
+		ability.cast_check = [](cCharacterPtr caster) {
+			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
+		};
 		ability.active = [](cCharacterPtr caster) {
 			caster->add_buff(Buff::find("Roar"), 12.f);
 		};

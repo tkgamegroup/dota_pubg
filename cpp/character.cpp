@@ -222,7 +222,7 @@ void load_character_presets()
 		preset.id = character_presets.size() - 1;
 		preset.name = "Spiderling";
 		preset.exp_base = 200;
-		preset.hp = 4500;
+		preset.hp = 2000;
 		preset.mp = 0;
 		preset.atk = 14;
 		preset.atk_time = 1.35f;
@@ -260,6 +260,7 @@ void load_character_presets()
 		preset.atk_point = 0.5f;
 		preset.hp_reg = 15;
 		preset.mov_sp = 100;
+		preset.abilities.emplace_back("Roar", 1);
 	}
 	{
 		auto& preset = character_presets.emplace_back();

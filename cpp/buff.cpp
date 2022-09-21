@@ -37,7 +37,7 @@ void load_buffs()
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character, BuffInstance*) {
 			character->mov_sp += 20;
-			character->atk_sp += 20;
+			character->atk_sp += 100;
 		};
 	}
 	{
