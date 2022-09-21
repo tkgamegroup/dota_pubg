@@ -36,6 +36,7 @@ void load_buffs()
 		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusfungusbite2.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character, BuffInstance*) {
+			character->atk += 20;
 			character->mov_sp += 20;
 			character->atk_sp += 100;
 		};

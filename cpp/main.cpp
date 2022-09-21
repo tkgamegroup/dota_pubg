@@ -218,6 +218,30 @@ cMain::~cMain()
 	graphics::gui_cursor_callbacks.remove((uint)this);
 }
 
+void toggle_equipment_view()
+{
+	if (!view_equipment.opened)
+		view_equipment.open();
+	else
+		view_equipment.close();
+}
+
+void toggle_ability_view()
+{
+	if (!view_ability.opened)
+		view_ability.open();
+	else
+		view_ability.close();
+}
+
+void toggle_inventory_view()
+{
+	if (!view_inventory.opened)
+		view_inventory.open();
+	else
+		view_inventory.close();
+}
+
 void cMain::start()
 {
 	printf("main started\n");
@@ -450,12 +474,7 @@ void cMain::start()
 					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(main_player.character->attribute_points).c_str());
 				}
 				if (pressed)
-				{
-					if (!view_equipment.opened)
-						view_equipment.open();
-					else
-						view_equipment.close();
-				}
+					toggle_equipment_view();
 			}
 			ImGui::SameLine();
 			{
@@ -473,12 +492,7 @@ void cMain::start()
 					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(main_player.character->ability_points).c_str());
 				}
 				if (pressed)
-				{
-					if (!view_ability.opened)
-						view_ability.open();
-					else
-						view_ability.close();
-				}
+					toggle_ability_view();
 			}
 			ImGui::SameLine();
 			{
@@ -491,12 +505,7 @@ void cMain::start()
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
 				if (pressed)
-				{
-					if (!view_inventory.opened)
-						view_inventory.open();
-					else
-						view_inventory.close();
-				}
+					toggle_inventory_view();
 			}
 			ImGui::EndGroup();
 		}
@@ -865,6 +874,12 @@ void cMain::update()
 			if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
 				shortcut->click();
 		}
+		if (input->kpressed(Keyboard_F1))
+			toggle_equipment_view();
+		if (input->kpressed(Keyboard_F2))
+			toggle_ability_view();
+		if (input->kpressed(Keyboard_F3))
+			toggle_inventory_view();
 	}
 
 	if (main_camera.node && main_player.node)
