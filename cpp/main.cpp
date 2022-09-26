@@ -586,7 +586,7 @@ void cMain::start()
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 
 			auto dl = ImGui::GetWindowDrawList();
-			const auto bar_width = ImGui::GetContentRegionAvailWidth();
+			const auto bar_width = ImGui::GetContentRegionAvail().x;
 			const auto bar_height = 16.f;
 			hp_bar(dl, bar_width, bar_height, main_player.character);
 			mp_bar(dl, bar_width, bar_height, main_player.character);
@@ -606,7 +606,7 @@ void cMain::start()
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 
 			auto dl = ImGui::GetWindowDrawList();
-			const auto bar_width = ImGui::GetContentRegionAvailWidth();
+			const auto bar_width = ImGui::GetContentRegionAvail().x;
 			const auto bar_height = 16.f;
 			hp_bar(dl, bar_width, bar_height, focus_character);
 			mp_bar(dl, bar_width, bar_height, focus_character);
