@@ -12,11 +12,18 @@
 			<children>
 				<item file_id="194c072d4786d69ef6c67aa2a096e2b2" name="Circle.009">
 					<components>
-						<item type_name="flame::cNode" eul="75.8528,-90,0" qut="0.557767,-0.557767,0.434622,0.434622" scl="92.0181,92.0181,92.0181" />
+						<item type_name="flame::cNode" qut="0.557767,-0.557767,0.434622,0.434622" scl="92.0181,92.0181,92.0181" />
 						<item type_name="flame::cMesh" mesh_name="laubbaum.fmod#mesh0" material_name="laubbaum_Material.fmat" />
 					</components>
 				</item>
 			</children>
+		</item>
+		<item file_id="1d490ae14a37b2f762b1998545666354" name="blocker">
+			<components>
+				<item type_name="flame::cNode" pos="0,3.79,0" scl="0.5,4,0.5" />
+				<item type_name="flame::cMesh" enable="false" mesh_name="standard_cylinder" material_name="default" />
+				<item type_name="flame::cNavMesh" />
+			</components>
 		</item>
 	</children>
 </prefab>

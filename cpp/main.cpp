@@ -25,6 +25,7 @@
 #include "spwaner.h"
 #include "projectile.h"
 #include "chest.h"
+#include "creep_ai.h"
 #include "views/view_equipment.h"
 #include "views/view_ability.h"
 #include "views/view_inventory.h"
@@ -248,12 +249,6 @@ void cMain::start()
 
 	srand(time(0));
 
-	add_event([this]() {
-		sScene::instance()->generate_nav_mesh();
-
-		return false;
-	});
-
 	root = entity;
 
 	main_camera.init(entity->find_child("Camera"));
@@ -316,13 +311,12 @@ void cMain::start()
 			{
 				auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
 
-				static const wchar_t* prefabs[] = {
-					L"assets\\characters\\life_stealer\\main.prefab",
-					L"assets\\characters\\slark\\main.prefab"
+				static EntityPtr prefabs[] = {
+					Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
+					Entity::create(L"assets\\characters\\slark\\main.prefab")
 				};
 
-				auto e = Entity::create();
-				e->load(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]);
+				auto e = prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]->copy();
 				e->node()->set_pos(coord);
 				auto character = e->get_component_t<cCharacter>();
 				character->set_faction(2);
@@ -333,14 +327,13 @@ void cMain::start()
 			{
 				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-				static const wchar_t* prefabs[] = {
-					L"assets\\characters\\spiderling\\main.prefab",
-					L"assets\\characters\\treant\\main.prefab",
-					L"assets\\characters\\boar\\main.prefab"
+				static EntityPtr prefabs[] = {
+					Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
+					Entity::create(L"assets\\characters\\treant\\main.prefab"),
+					Entity::create(L"assets\\characters\\boar\\main.prefab")
 				};
 
-				auto e = Entity::create();
-				e->load(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]);
+				auto e = prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]->copy();
 				e->node()->set_pos(coord);
 				auto character = e->get_component_t<cCharacter>();
 				character->set_faction(2);
@@ -656,7 +649,7 @@ void cMain::start()
 				cursor_x = 3;
 				cursor_y = 0;
 			}
-			auto pos = sInput::instance()->mpos;
+			auto pos = sInput::instance()->mpos + sInput::instance()->offset;
 			auto dl = ImGui::GetForegroundDrawList();
 			dl->AddImage(icon_cursors, pos + vec2(-32.f), pos + vec2(32.f),
 				vec2((float)cursor_x / cursor_cx, (float)cursor_y / cursor_cy),
@@ -982,5 +975,8 @@ EXPORT void* cpp_info()
 	cMain::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cSpwaner::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cProjectile::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cChest::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	return nullptr;
 }
