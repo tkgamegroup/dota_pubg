@@ -667,6 +667,22 @@ void cMain::start()
 
 void cMain::update()
 {
+	if (main_camera.node && main_player.node)
+	{
+		static vec3 velocity(0.f);
+		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
+		main_camera.node->set_pos(smooth_damp(main_camera.node->pos,
+			main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
+	}
+
+	static graphics::ImagePtr img_vision = nullptr;
+	if (!img_vision)
+		img_vision = graphics::Image::get(L"assets/vision.png");
+	if (img_vision)
+	{
+		graphics::Queue::get()->wait_idle();
+	}
+
 	if (!graphics::gui_want_mouse())
 	{
 		auto input = sInput::instance();
@@ -873,14 +889,6 @@ void cMain::update()
 			toggle_ability_view();
 		if (input->kpressed(Keyboard_F3))
 			toggle_inventory_view();
-	}
-
-	if (main_camera.node && main_player.node)
-	{
-		static vec3 velocity(0.f);
-		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
-		main_camera.node->set_pos(smooth_damp(main_camera.node->pos, 
-			main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
 	}
 }
 

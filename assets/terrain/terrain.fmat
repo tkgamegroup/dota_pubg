@@ -1,12 +1,12 @@
-<material shader_file="flame/shaders/terrain/default_mat.glsl" int_values="1,0,0,0">
+<?xml version="1.0"?>
+<material int_values="1,0,0,0" code_file="flame/shaders/terrain/default_mat.glsl">
+	<shader_defines>
+		<item v="LAYERS=3" />
+		<item v="TRI_PLANAR" />
+	</shader_defines>
 	<textures>
 		<item filename="rock.jpg" srgb="true" auto_mipmap="true" />
 		<item filename="grass.jpg" srgb="true" auto_mipmap="true" />
 		<item filename="dirt.jpg" srgb="true" auto_mipmap="true" />
 	</textures>
-	<shader_defines>
-		<item v="LAYERS=3" />
-		<item v="TRI_PLANAR" />
-	</shader_defines>
 </material>
-
