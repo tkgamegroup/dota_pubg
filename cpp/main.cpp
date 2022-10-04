@@ -2,8 +2,10 @@
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
 #include <flame/foundation/window.h>
+#include <flame/graphics/buffer.h>
 #include <flame/graphics/window.h>
 #include <flame/graphics/gui.h>
+#include <flame/graphics/extension.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/draw_data.h>
 #include <flame/universe/octree.h>
@@ -676,11 +678,264 @@ void cMain::update()
 	}
 
 	static graphics::ImagePtr img_vision = nullptr;
+	static graphics::BufferPtr stag_vision = nullptr;
 	if (!img_vision)
-		img_vision = graphics::Image::get(L"assets/vision.png");
+	{
+		img_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(256), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
+		auto id = sRenderer::instance()->get_texture_res(img_vision->get_view());
+		sRenderer::instance()->set_texture_res_name(id, "VISION");
+	}
 	if (img_vision)
 	{
 		graphics::Queue::get()->wait_idle();
+		if (!stag_vision)
+		{
+			stag_vision = graphics::Buffer::create(256 * 256, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
+			stag_vision->map();
+			memset(stag_vision->mapped, 0, stag_vision->size);
+		}
+
+		auto w = img_vision->size.x;
+		auto h = img_vision->size.y;
+
+		auto character = main_player.character;
+		auto pos = character->node->pos;
+		auto coord = (ivec2)pos.xz();
+		auto last_coord = character->vision_coord;
+		if (coord != last_coord)
+		{
+			struct Beam
+			{
+				std::vector<ivec2> pts;
+			};
+			auto get_beam = [&](int x, int y)->Beam {
+				Beam b;
+				if (x == 0)
+				{
+					if (y > 0)
+					{
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(0, +i));
+					}
+					else
+					{
+						y = -y;
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(0, -i));
+					}
+				}
+				else if (y == 0)
+				{
+					if (x > 0)
+					{
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(+i, 0));
+					}
+					else
+					{
+						x = -x;
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(-i, 0));
+					}
+				}
+				else if (x > 0 && y > 0)
+				{
+					if (x == y)
+					{
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(+i, +i));
+					}
+					else if (x > y)
+					{
+						auto k = y / (float)x;
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(+i, +i * k));
+					}
+					else
+					{
+						auto k = x / (float)y;
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(+i * k, +i));
+					}
+				}
+				else if (x < 0 && y > 0)
+				{
+					if (-x == y)
+					{
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(-i, +i));
+					}
+					else if (-x > y)
+					{
+						x = -x;
+						auto k = y / (float)x;
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(-i, +i * k));
+					}
+					else
+					{
+						x = -x;
+						auto k = x / (float)y;
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(-i * k, +i));
+					}
+				}
+				else if (x > 0 && y < 0)
+				{
+					if (x == -y)
+					{
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(+i, -i));
+					}
+					else if (x > -y)
+					{
+						y = -y;
+						auto k = y / (float)x;
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(+i, -i * k));
+					}
+					else
+					{
+						y = -y;
+						auto k = x / (float)y;
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(+i * k, -i));
+					}
+				}
+				else if (x < 0 && y < 0)
+				{
+					if (x == y)
+					{
+						x = -x;
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(-i, -i));
+					}
+					else if (-x > -y)
+					{
+						x = -x;
+						y = -y;
+						auto k = y / (float)x;
+						for (auto i = 0; i < x; i++)
+							b.pts.push_back(ivec2(-i, -i * k));
+					}
+					else
+					{
+						x = -x;
+						y = -y;
+						auto k = x / (float)y;
+						for (auto i = 0; i < y; i++)
+							b.pts.push_back(ivec2(-i * k, -i));
+					}
+				}
+				return b;
+			};
+
+			auto height = pos.y;
+			auto range = character->vision_range;
+			auto elev = main_terrain.terrain->extent.y / 4.f;
+			auto level = 0;
+			for (; level < 4; level++)
+			{
+				if (height < elev)
+					break;
+				height -= elev;
+			}
+			height = (level + 1) * elev;
+
+			auto pbuf = (uchar*)stag_vision->mapped;
+			memset(pbuf, 0, stag_vision->size);
+			// add blockers (trees, rocks)
+			std::vector<cNodePtr> objs;
+			sScene::instance()->octree->get_colliding(pos, range, objs);
+			for (auto n : objs)
+			{
+				if (n->entity->name == "blocker")
+				{
+					auto pos = n->g_pos;
+					auto coord = (ivec2)pos.xz();
+					pbuf[coord.y * w + coord.x] = 1;
+					if (pos.x < 0.5f)
+					{
+						if (coord.x > 0)
+							pbuf[coord.y * w + (coord.x - 1)] = 1;
+					}
+					else
+					{
+						if (coord.x < w - 1)
+							pbuf[coord.y * w + (coord.x + 1)] = 1;
+					}
+					if (pos.y < 0.5f)
+					{
+						if (coord.y > 0)
+							pbuf[(coord.y - 1) * w + coord.x] = 1;
+					}
+					else
+					{
+						if (coord.y < h - 1)
+							pbuf[(coord.y + 1) * w + coord.x] = 1;
+					}
+				}
+			}
+			// add blockers (high elevation)
+			for (auto y = int(coord.y - range); y <= coord.y + range; y++)
+			{
+				for (auto x = int(coord.x - range); x <= coord.x + range; x++)
+				{
+					if (x >= 0 && y >= 0 && x < w && y < h)
+					{
+						if (main_terrain.get_coord(vec2((x + 0.5f) / w, (y + 0.5f) / h)).y > height)
+							pbuf[y * w + x] = 1;
+					}
+				}
+			}
+
+			auto cast_beam = [&](const Beam& b) {
+				for (auto& p : b.pts)
+				{
+					if (length((vec2)p) > range)
+						break;
+					auto c = coord + p;
+					auto& dst = pbuf[c.y * w + c.x];
+					if (dst == 1)
+						break;
+					dst = 255;
+				}
+			};
+			cast_beam(get_beam(+range, 0));
+			cast_beam(get_beam(-range, 0));
+			cast_beam(get_beam(0, +range));
+			cast_beam(get_beam(0, -range));
+
+			cast_beam(get_beam(+range, +range));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(+range, +i));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(+i, +range));
+
+			cast_beam(get_beam(-range, +range));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(-range, +i));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(-i, +range));
+
+			cast_beam(get_beam(+range, -range));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(+range, -i));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(+i, -range));
+
+			cast_beam(get_beam(-range, -range));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(-range, -i));
+			for (auto i = 1; i < range; i++)
+				cast_beam(get_beam(-i, -range));
+
+			character->vision_coord = coord;
+		}
+
+		graphics::InstanceCommandBuffer cb;
+		cb->copy_buffer_to_image(stag_vision, img_vision, graphics::BufferImageCopy(uvec2(w, h)));
+		cb.excute();
 	}
 
 	if (!graphics::gui_want_mouse())

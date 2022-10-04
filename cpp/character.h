@@ -208,6 +208,9 @@ struct cCharacter : Component
 	uint attribute_points = 0;
 	uint ability_points = 1;
 
+	ivec2 vision_coord = uvec2(0);
+	uint vision_range = 15;
+
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
