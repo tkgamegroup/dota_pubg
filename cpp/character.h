@@ -149,6 +149,8 @@ struct cCharacter : Component
 
 	cArmaturePtr armature = nullptr;
 
+	std::string guid;
+
 	/// Reflect
 	uint faction = 0;
 	/// Reflect
@@ -208,8 +210,9 @@ struct cCharacter : Component
 	uint attribute_points = 0;
 	uint ability_points = 1;
 
-	ivec2 vision_coord = uvec2(0);
+	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 15;
+	bool be_seen = false; // by your faction
 
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;

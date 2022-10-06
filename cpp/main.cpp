@@ -2,6 +2,7 @@
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
 #include <flame/foundation/window.h>
+#include <flame/foundation/system.h>
 #include <flame/graphics/buffer.h>
 #include <flame/graphics/window.h>
 #include <flame/graphics/gui.h>
@@ -19,10 +20,11 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
 
-#include "main.h"
 #include "item.h"
 #include "ability.h"
 #include "buff.h"
+#include "launcher.h"
+#include "main.h"
 #include "character.h"
 #include "spwaner.h"
 #include "projectile.h"
@@ -31,6 +33,7 @@
 #include "views/view_equipment.h"
 #include "views/view_ability.h"
 #include "views/view_inventory.h"
+#include "views/view_settings.h"
 
 EntityPtr root = nullptr;
 
@@ -75,6 +78,10 @@ void MainPlayer::init(EntityPtr e)
 		character = e->get_component_t<cCharacter>();
 	}
 }
+
+MultiPlayerType multi_player = SinglePlayer;
+network::ClientPtr nw_client = nullptr;
+network::ServerPtr nw_server = nullptr;
 
 MainCamera main_camera;
 MainTerrain main_terrain;
@@ -245,6 +252,16 @@ void toggle_inventory_view()
 		view_inventory.close();
 }
 
+void toggle_settings_view()
+{
+	if (!view_settings.opened)
+		view_settings.open();
+	else
+		view_settings.close();
+}
+
+static EntityPtr knight_prefab = nullptr;
+
 void cMain::start()
 {
 	printf("main started\n");
@@ -255,19 +272,17 @@ void cMain::start()
 
 	main_camera.init(entity->find_child("Camera"));
 	main_terrain.init(entity->find_child("terrain"));
+	if (!knight_prefab)
 	{
-		auto e = Entity::create();
-		e->load(L"assets\\characters\\dragon_knight\\main.prefab");
-		root->add_child(e);
-		main_player.init(e);
-		main_player.character->set_faction(1);
-
-		for (auto i = 0; i < countof(shortcuts); i++)
-		{
-			auto shortcut = new Shortcut;
-			shortcut->key = KeyboardKey(Keyboard_1 + i);
-			shortcuts[i].reset(shortcut);
-		}
+		knight_prefab = Entity::create();
+		knight_prefab->load(L"assets\\characters\\dragon_knight\\main.prefab");
+	}
+	main_player.init(add_character(knight_prefab, vec3(0.f), 1)->entity);
+	for (auto i = 0; i < countof(shortcuts); i++)
+	{
+		auto shortcut = new Shortcut;
+		shortcut->key = KeyboardKey(Keyboard_1 + i);
+		shortcuts[i].reset(shortcut);
 	}
 
 	if (main_terrain.terrain)
@@ -318,12 +333,8 @@ void cMain::start()
 					Entity::create(L"assets\\characters\\slark\\main.prefab")
 				};
 
-				auto e = prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]->copy();
-				e->node()->set_pos(coord);
-				auto character = e->get_component_t<cCharacter>();
-				character->set_faction(2);
+				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, 2);
 				new CommandAttackLocation(character, coord);
-				root->add_child(e);
 			}
 			for (auto i = 0; i < 100; i++)
 			{
@@ -335,12 +346,8 @@ void cMain::start()
 					Entity::create(L"assets\\characters\\boar\\main.prefab")
 				};
 
-				auto e = prefabs[linearRand(0U, (uint)countof(prefabs) - 1)]->copy();
-				e->node()->set_pos(coord);
-				auto character = e->get_component_t<cCharacter>();
-				character->set_faction(2);
-				e->add_component<cCreepAI>();
-				root->add_child(e);
+				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, 2);
+				character->entity->add_component<cCreepAI>();
 			}
 		}
 	}
@@ -501,6 +508,19 @@ void cMain::start()
 				dl->AddImage(img, p0, p1);
 				if (pressed)
 					toggle_inventory_view();
+			}
+			ImGui::SameLine();
+			{
+				static auto img = graphics::Image::get("assets\\icons\\gear.png");
+				auto pressed = ImGui::InvisibleButton("btn_settings", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					toggle_settings_view();
 			}
 			ImGui::EndGroup();
 		}
@@ -667,6 +687,11 @@ void cMain::start()
 	}, (uint)this);
 }
 
+static graphics::ImagePtr img_vision = nullptr;
+static graphics::BufferPtr buf_vision = nullptr;
+uint vision_map_w = 256;
+uint vision_map_h = 256;
+
 void cMain::update()
 {
 	if (main_camera.node && main_player.node)
@@ -676,33 +701,29 @@ void cMain::update()
 		main_camera.node->set_pos(smooth_damp(main_camera.node->pos,
 			main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
 	}
-
-	static graphics::ImagePtr img_vision = nullptr;
-	static graphics::BufferPtr stag_vision = nullptr;
 	if (!img_vision)
 	{
-		img_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(256), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
+		img_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(vision_map_w, vision_map_h), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
 		auto id = sRenderer::instance()->get_texture_res(img_vision->get_view());
 		sRenderer::instance()->set_texture_res_name(id, "VISION");
 	}
 	if (img_vision)
 	{
 		graphics::Queue::get()->wait_idle();
-		if (!stag_vision)
+		if (!buf_vision)
 		{
-			stag_vision = graphics::Buffer::create(256 * 256, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
-			stag_vision->map();
-			memset(stag_vision->mapped, 0, stag_vision->size);
+			buf_vision = graphics::Buffer::create(vision_map_w * vision_map_h, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
+			buf_vision->map();
+			memset(buf_vision->mapped, 0, buf_vision->size);
 		}
 
-		auto w = img_vision->size.x;
-		auto h = img_vision->size.y;
+		auto w = vision_map_w;
+		auto h = vision_map_h;
 
 		auto character = main_player.character;
 		auto pos = character->node->pos;
 		auto coord = (ivec2)pos.xz();
-		auto last_coord = character->vision_coord;
-		if (coord != last_coord)
+		if (coord != character->vision_coord)
 		{
 			struct Beam
 			{
@@ -842,8 +863,8 @@ void cMain::update()
 			}
 			height = (level + 1) * elev;
 
-			auto pbuf = (uchar*)stag_vision->mapped;
-			memset(pbuf, 0, stag_vision->size);
+			auto pbuf = (uchar*)buf_vision->mapped;
+			memset(pbuf, 0, buf_vision->size);
 			// add blockers (trees, rocks)
 			std::vector<cNodePtr> objs;
 			sScene::instance()->octree->get_colliding(pos, range, objs);
@@ -934,7 +955,7 @@ void cMain::update()
 		}
 
 		graphics::InstanceCommandBuffer cb;
-		cb->copy_buffer_to_image(stag_vision, img_vision, graphics::BufferImageCopy(uvec2(w, h)));
+		cb->copy_buffer_to_image(buf_vision, img_vision, graphics::BufferImageCopy(uvec2(w, h)));
 		cb.excute();
 	}
 
@@ -1158,6 +1179,18 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
+bool get_vision(const vec3& coord)
+{
+	auto c = (ivec2)coord.xz();
+	if (c.x >= 0 && c.y >= 0 && c.x < vision_map_w && c.y < vision_map_w)
+	{
+		auto pbuf = (uchar*)buf_vision->mapped;
+		auto v = pbuf[c.y * vision_map_w + c.x];
+		return v > 0;
+	}
+	return false;
+}
+
 std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint faction)
 {
 	std::vector<cCharacterPtr> ret;
@@ -1184,7 +1217,20 @@ std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint fa
 	return ret;
 }
 
-void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update)
+cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid)
+{
+	auto e = prefab->copy();
+	e->node()->set_pos(pos);
+	auto character = e->get_component_t<cCharacter>();
+	character->set_faction(faction);
+	character->guid = guid;
+	if (character->guid.empty())
+		character->guid = generate_guid();
+	root->add_child(e);
+	return character;
+}
+
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update)
 {
 	auto e = prefab->copy();
 	e->node()->set_pos(pos);
@@ -1193,9 +1239,10 @@ void add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, flo
 	projectile->speed = speed;
 	projectile->on_end = on_end;
 	root->add_child(e);
+	return projectile;
 }
 
-void add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update)
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update)
 {
 	auto e = prefab->copy();
 	e->node()->set_pos(pos);
@@ -1208,9 +1255,10 @@ void add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, flo
 	projectile->on_collide = on_collide;
 	projectile->on_update = on_update;
 	root->add_child(e);
+	return projectile;
 }
 
-void add_chest(const vec3& pos, uint item_id, uint item_num)
+cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num)
 {
 	static EntityPtr e_chest = nullptr;
 	if (!e_chest)
@@ -1224,6 +1272,7 @@ void add_chest(const vec3& pos, uint item_id, uint item_num)
 	auto chest = e->get_component_t<cChest>();
 	chest->item_id = item_id;
 	chest->item_num = item_num;
+	return chest;
 }
 
 void teleport(cCharacterPtr character, const vec3& location)
@@ -1235,6 +1284,7 @@ void teleport(cCharacterPtr character, const vec3& location)
 EXPORT void* cpp_info()
 {
 	auto uinfo = universe_info(); // references universe module explicitly
+	cLauncher::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cMain::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cSpwaner::create((EntityPtr)INVALID_POINTER); // references create function explicitly

@@ -335,6 +335,8 @@ void cCharacter::on_init()
 	nav_agent->separation_group = faction;
 
 	node->measurers.add([this](AABB* ret) {
+		if (!nav_agent)
+			return false;
 		auto radius = nav_agent->radius;
 		auto height = nav_agent->height;
 		*ret = AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform));
@@ -500,6 +502,9 @@ void cCharacter::die()
 
 void cCharacter::start()
 {
+	if (multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
+		nav_agent = nullptr;
+
 	entity->tag |= CharacterTag;
 
 	auto e = entity;
@@ -533,7 +538,7 @@ void cCharacter::start()
 
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
-		if (main_camera.camera)
+		if (be_seen && main_camera.camera)
 		{
 			auto p = main_camera.camera->world_to_screen(node->pos + vec3(0.f, nav_agent->height + 0.1f, 0.f));
 			if (p.x > 0.f && p.y > 0.f)
@@ -693,168 +698,174 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 
 void cCharacter::update()
 {
-	if (dead)
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		add_event([this]() {
-			entity->parent->remove_child(entity);
-			return false;
-		});
-		return;
-	}
+		if (dead)
+		{
+			add_event([this]() {
+				entity->parent->remove_child(entity);
+				return false;
+			});
+			return;
+		}
 
-	if (stats_dirty)
-	{
-		auto& preset = get_preset();
+		if (stats_dirty)
+		{
+			auto& preset = get_preset();
 
-		if (exp_max == 0)
-			exp_max = preset.exp_base;
+			if (exp_max == 0)
+				exp_max = preset.exp_base;
 
-		state = StateNormal;
+			state = StateNormal;
 
-		auto pre_hp_max = hp_max;
-		auto pre_mp_max = mp_max;
+			auto pre_hp_max = hp_max;
+			auto pre_mp_max = mp_max;
 
-		hp_max = preset.hp;
-		mp_max = preset.mp;
+			hp_max = preset.hp;
+			mp_max = preset.mp;
 
-		VIG = preset.VIG + VIG_PTS;
-		MND = preset.MND + MND_PTS;
-		STR = preset.STR + STR_PTS;
-		DEX = preset.DEX + DEX_PTS;
-		INT = preset.INT + INT_PTS;
-		LUK = preset.LUK + LUK_PTS;
+			VIG = preset.VIG + VIG_PTS;
+			MND = preset.MND + MND_PTS;
+			STR = preset.STR + STR_PTS;
+			DEX = preset.DEX + DEX_PTS;
+			INT = preset.INT + INT_PTS;
+			LUK = preset.LUK + LUK_PTS;
 
-		atk_type = PhysicalDamage;
-		atk = preset.atk;
+			atk_type = PhysicalDamage;
+			atk = preset.atk;
 
-		hp_reg = preset.hp_reg;
-		mp_reg = preset.mp_reg;
-		mov_sp = preset.mov_sp;
-		atk_sp = preset.atk_sp;
+			hp_reg = preset.hp_reg;
+			mp_reg = preset.mp_reg;
+			mov_sp = preset.mov_sp;
+			atk_sp = preset.atk_sp;
 
-		attack_effects.list.clear();
-		injury_effects.list.clear();
+			attack_effects.list.clear();
+			injury_effects.list.clear();
+			for (auto& ins : abilities)
+			{
+				if (ins && ins->lv > 0)
+				{
+					auto& ability = Ability::get(ins->id);
+					if (ability.passive)
+						ability.passive(this);
+				}
+			}
+			for (auto& ins : equipments)
+			{
+				if (ins.id != -1)
+				{
+					auto& item = Item::get(ins.id);
+					if (item.passive)
+						item.passive(this);
+					if (ins.enchant != -1)
+					{
+						auto& buff = Buff::get(ins.enchant);
+						if (buff.passive)
+							buff.passive(this, nullptr);
+					}
+				}
+			}
+			for (auto& ins : buffs)
+			{
+				auto& buff = Buff::get(ins->id);
+				if (buff.passive)
+					buff.passive(this, ins.get());
+			}
+
+			hp_max += VIG * 200;
+			hp_reg += VIG;
+			mp_max += MND * 200;
+			mp_reg += MND;
+
+			if (hp_max != pre_hp_max)
+				hp *= (float)hp_max / pre_hp_max;
+			if (mp_max != pre_mp_max)
+				mp *= (float)mp_max / pre_mp_max;
+
+			if (equipments[EquipWeapon0].id == -1)
+				atk += STR;
+
+			stats_dirty = false;
+		}
+
+		if (regeneration_timer > 0)
+			regeneration_timer -= delta_time;
+		else
+		{
+			hp += hp_reg;
+			if (hp > hp_max) hp = hp_max;
+			mp += mp_reg;
+			if (mp > mp_max) mp = mp_max;
+			regeneration_timer = 1.f;
+		}
+
+		if (search_timer > 0)
+			search_timer -= delta_time;
+		if (attack_interval_timer > 0)
+			attack_interval_timer -= delta_time;
+
 		for (auto& ins : abilities)
 		{
-			if (ins && ins->lv > 0)
-			{
-				auto& ability = Ability::get(ins->id);
-				if (ability.passive)
-					ability.passive(this);
-			}
+			if (ins && ins->cd_timer > 0.f)
+				ins->cd_timer -= delta_time;
 		}
 		for (auto& ins : equipments)
 		{
 			if (ins.id != -1)
 			{
-				auto& item = Item::get(ins.id);
-				if (item.passive)
-					item.passive(this);
 				if (ins.enchant != -1)
 				{
-					auto& buff = Buff::get(ins.enchant);
-					if (buff.passive)
-						buff.passive(this, nullptr);
+					ins.enchant_timer -= delta_time;
+					if (ins.enchant_timer <= 0)
+					{
+						ins.enchant = -1;
+						stats_dirty = true;
+					}
 				}
 			}
 		}
-		for (auto& ins : buffs)
+		for (auto it = buffs.begin(); it != buffs.end();)
 		{
+			auto& ins = *it;
 			auto& buff = Buff::get(ins->id);
-			if (buff.passive)
-				buff.passive(this, ins.get());
-		}
+			if (buff.continuous)
+				buff.continuous(this, ins.get());
 
-		hp_max += VIG * 200;
-		hp_reg += VIG;
-		mp_max += MND * 200;
-		mp_reg += MND;
-
-		if (hp_max != pre_hp_max)
-			hp *= (float)hp_max / pre_hp_max;
-		if (mp_max != pre_mp_max)
-			mp *= (float)mp_max / pre_mp_max;
-
-		if (equipments[EquipWeapon0].id == -1)
-			atk += STR;
-
-		stats_dirty = false;
-	}
-
-	if (regeneration_timer > 0)
-		regeneration_timer -= delta_time;
-	else
-	{
-		hp += hp_reg;
-		if (hp > hp_max) hp = hp_max;
-		mp += mp_reg;
-		if (mp > mp_max) mp = mp_max;
-		regeneration_timer = 1.f;
-	}
-
-	if (search_timer > 0)
-		search_timer -= delta_time;
-	if (attack_interval_timer > 0)
-		attack_interval_timer -= delta_time;
-
-	for (auto& ins : abilities)
-	{
-		if (ins && ins->cd_timer > 0.f)
-			ins->cd_timer -= delta_time;
-	}
-	for (auto& ins : equipments)
-	{
-		if (ins.id != -1)
-		{
-			if (ins.enchant != -1)
+			if (ins->timer > 0)
 			{
-				ins.enchant_timer -= delta_time;
-				if (ins.enchant_timer <= 0)
+				ins->timer -= delta_time;
+				if (ins->timer <= 0)
 				{
-					ins.enchant = -1;
+					it = buffs.erase(it);
 					stats_dirty = true;
+					continue;
 				}
 			}
+			it++;
 		}
-	}
-	for (auto it = buffs.begin(); it != buffs.end();)
-	{
-		auto& ins = *it;
-		auto& buff = Buff::get(ins->id);
-		if (buff.continuous)
-			buff.continuous(this, ins.get());
-
-		if (ins->timer > 0)
+		for (auto it = markers.begin(); it != markers.end();)
 		{
-			ins->timer -= delta_time;
-			if (ins->timer <= 0)
+			if (it->second > 0)
 			{
-				it = buffs.erase(it);
-				stats_dirty = true;
-				continue;
+				it->second -= delta_time;
+				if (it->second <= 0)
+				{
+					it = markers.erase(it);
+					continue;
+				}
 			}
+			it++;
 		}
-		it++;
-	}
-	for (auto it = markers.begin(); it != markers.end();)
-	{
-		if (it->second > 0)
-		{
-			it->second -= delta_time;
-			if (it->second <= 0)
-			{
-				it = markers.erase(it);
-				continue;
-			}
-		}
-		it++;
-	}
 
-	if (command)
-		command->update();
+		if (command)
+			command->update();
+	}
 
 	if (armature)
 	{
+		be_seen = get_vision(node->pos);
+		armature->entity->set_enable(be_seen);
+
 		switch (action)
 		{
 		case ActionNone:
