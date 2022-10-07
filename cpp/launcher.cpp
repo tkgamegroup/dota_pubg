@@ -7,42 +7,50 @@ cLauncher::~cLauncher()
 	graphics::gui_callbacks.remove((uint)this);
 }
 
+void enter_scene(EntityPtr root)
+{
+	add_event([root]() {
+		root->remove_component<cLauncher>();
+		root->load(L"assets\\main.prefab");
+		return false;
+	});
+}
+
 void cLauncher::start()
 {
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
 		if (ImGui::Button("Single Player"))
 		{
-			add_event([this]() {
-				auto root = entity;
-				root->remove_component<cLauncher>();
-				root->load(L"assets\\main.prefab");
-				return false;
-			});
+			enter_scene(entity);
 		}
 		if (ImGui::Button("Create Local Server"))
 		{
-			//		nw_server = network::Server::create(network::SocketTcp, 1234, nullptr, [](void* id) {
-			//			nw_server->set_client(id, [](const std::string& msg) {
-			//
-			//				},
-			//				[]() {
-			//
-			//				});
-			//			nw_server->send(id, "hello");
-			//			});
-			//		multi_player = MultiPlayerAsHost;
+			nw_server = network::Server::create(network::SocketTcp, 1234, nullptr, [](void* id) {
+				nw_server->set_client(id, [](const std::string& msg) {
+
+				},
+				[]() {
+
+				});
+
+			});
+			multi_player = MultiPlayerAsHost;
+			enter_scene(entity);
 		}
 		if (ImGui::Button("Join Local Server"))
 		{
-			//		nw_client = network::Client::create(network::SocketTcp, "127.0.0.1", 1234, [](const std::string& msg) {
-			//			printf(msg.c_str());
-			//			},
-			//			[]() {
-			//
-			//			});
-			//		if (nw_client)
-			//			;
+			nw_client = network::Client::create(network::SocketTcp, "127.0.0.1", 1234, [](const std::string& msg) {
+
+			},
+			[]() {
+
+			});
+			if (nw_client)
+			{
+				multi_player = MultiPlayerAsClient;
+				enter_scene(entity);
+			}
 		}
 	}, (uint)this);
 }

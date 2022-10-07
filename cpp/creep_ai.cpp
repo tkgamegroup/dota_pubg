@@ -30,7 +30,7 @@ void cCreepAI::update()
 				bool found = false;
 				if (character->search_timer <= 0.f)
 				{
-					auto enemies = get_characters(character->node->pos, 5.f, ~character->faction);
+					auto enemies = find_characters(character->node->pos, 5.f, ~character->faction);
 					if (!enemies.empty())
 					{
 						new CommandAttackTarget(character, enemies[0]);

@@ -76,7 +76,7 @@ void CommandAttackLocation::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = get_characters(character->node->pos, max(character->get_preset().atk_distance, 5.f), ~character->faction);
+			auto enemies = find_characters(character->node->pos, max(character->get_preset().atk_distance, 5.f), ~character->faction);
 			if (!enemies.empty())
 				target.set(enemies.front());
 
@@ -702,10 +702,7 @@ void cCharacter::update()
 	{
 		if (dead)
 		{
-			add_event([this]() {
-				entity->parent->remove_child(entity);
-				return false;
-			});
+			remove_character(this);
 			return;
 		}
 
@@ -863,7 +860,7 @@ void cCharacter::update()
 
 	if (armature)
 	{
-		be_seen = get_vision(node->pos);
+		be_seen = get_vision(faction, node->pos);
 		armature->entity->set_enable(be_seen);
 
 		switch (action)

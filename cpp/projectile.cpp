@@ -78,7 +78,7 @@ void cProjectile::update()
 
 	if (collide_radius > 0.f && on_collide)
 	{
-		for (auto c : get_characters(node->pos, collide_radius, collide_faction))
+		for (auto c : find_characters(node->pos, collide_radius, collide_faction))
 			on_collide(c);
 	}
 }

@@ -2,7 +2,6 @@
 <prefab file_id="c516481b48d0f782c740aca6af208c21">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavObstacle" radius="2.41" height="6.89" />
 	</components>
 	<children>
 		<item file_id="282c62414facb73010853289e1e0aa16" name="RootNode">

@@ -2,7 +2,6 @@
 <prefab file_id="5723a5cb466a70f078a074ab0f0b1aa4" name="rock1.obj">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavObstacle" radius="1.77" />
 	</components>
 	<children>
 		<item file_id="f9ab4fc246e831b0b7e0ab8cd5fa9a4b" name="rock_1_Plane.005">

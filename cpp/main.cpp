@@ -1,12 +1,26 @@
+#include "main.h"
+#include "item.h"
+#include "ability.h"
+#include "buff.h"
+#include "vision.h"
+#include "launcher.h"
+#include "character.h"
+#include "spwaner.h"
+#include "projectile.h"
+#include "chest.h"
+#include "creep_ai.h"
+#include "views/view_equipment.h"
+#include "views/view_ability.h"
+#include "views/view_inventory.h"
+#include "views/view_settings.h"
+
 #define FLAME_NO_XML
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
 #include <flame/foundation/window.h>
 #include <flame/foundation/system.h>
-#include <flame/graphics/buffer.h>
 #include <flame/graphics/window.h>
 #include <flame/graphics/gui.h>
-#include <flame/graphics/extension.h>
 #include <flame/universe/entity.h>
 #include <flame/universe/draw_data.h>
 #include <flame/universe/octree.h>
@@ -19,21 +33,6 @@
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
-
-#include "item.h"
-#include "ability.h"
-#include "buff.h"
-#include "launcher.h"
-#include "main.h"
-#include "character.h"
-#include "spwaner.h"
-#include "projectile.h"
-#include "chest.h"
-#include "creep_ai.h"
-#include "views/view_equipment.h"
-#include "views/view_ability.h"
-#include "views/view_inventory.h"
-#include "views/view_settings.h"
 
 EntityPtr root = nullptr;
 
@@ -265,19 +264,9 @@ static EntityPtr knight_prefab = nullptr;
 void cMain::start()
 {
 	printf("main started\n");
-
 	srand(time(0));
-
 	root = entity;
 
-	main_camera.init(entity->find_child("Camera"));
-	main_terrain.init(entity->find_child("terrain"));
-	if (!knight_prefab)
-	{
-		knight_prefab = Entity::create();
-		knight_prefab->load(L"assets\\characters\\dragon_knight\\main.prefab");
-	}
-	main_player.init(add_character(knight_prefab, vec3(0.f), 1)->entity);
 	for (auto i = 0; i < countof(shortcuts); i++)
 	{
 		auto shortcut = new Shortcut;
@@ -285,69 +274,84 @@ void cMain::start()
 		shortcuts[i].reset(shortcut);
 	}
 
-	if (main_terrain.terrain)
+	main_camera.init(entity->find_child("Camera"));
+	main_terrain.init(entity->find_child("terrain"));
+
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		std::vector<vec3> site_positions;
-		if (auto height_map_info_fn = main_terrain.terrain->height_map->filename; !height_map_info_fn.empty())
+		if (!knight_prefab)
 		{
-			height_map_info_fn += L".info";
-			std::ifstream file(height_map_info_fn);
-			if (file.good())
-			{
-				LineReader info(file);
-				info.read_block("sites:");
-				unserialize_text(info, &site_positions);
-				file.close();
-			}
+			knight_prefab = Entity::create();
+			knight_prefab->load(L"assets\\characters\\dragon_knight\\main.prefab");
 		}
+		main_player.init(add_character(knight_prefab, vec3(0.f), 1)->entity);
 
-		if (!site_positions.empty())
+		update_vision();
+
+		if (main_terrain.terrain)
 		{
-			std::vector<std::pair<float, int>> site_centrality(site_positions.size());
-			for (auto i = 0; i < site_positions.size(); i++)
+			std::vector<vec3> site_positions;
+			if (auto height_map_info_fn = main_terrain.terrain->height_map->filename; !height_map_info_fn.empty())
 			{
-				auto x = abs(site_positions[i].x * 2.f - 1.f);
-				auto z = abs(site_positions[i].z * 2.f - 1.f);
-				site_centrality[i] = std::make_pair(x * z, i);
+				height_map_info_fn += L".info";
+				std::ifstream file(height_map_info_fn);
+				if (file.good())
+				{
+					LineReader info(file);
+					info.read_block("sites:");
+					unserialize_text(info, &site_positions);
+					file.close();
+				}
 			}
-			std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
-				return a.first < b.first;
-			});
 
-			auto player1_pos = site_positions[site_centrality.back().second].xz();
-			auto player1_coord = main_terrain.get_coord(player1_pos);
-
-			main_player.node->set_pos(main_terrain.get_coord(player1_coord));
-			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
-			add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
-			add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
-			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
-			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
-
-			for (auto i = 1; i < site_centrality.size() - 1; i++)
+			if (!site_positions.empty())
 			{
-				auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
+				std::vector<std::pair<float, int>> site_centrality(site_positions.size());
+				for (auto i = 0; i < site_positions.size(); i++)
+				{
+					auto x = abs(site_positions[i].x * 2.f - 1.f);
+					auto z = abs(site_positions[i].z * 2.f - 1.f);
+					site_centrality[i] = std::make_pair(x * z, i);
+				}
+				std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
+					return a.first < b.first;
+				});
 
-				static EntityPtr prefabs[] = {
-					Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
-					Entity::create(L"assets\\characters\\slark\\main.prefab")
-				};
+				auto player1_pos = site_positions[site_centrality.back().second].xz();
+				auto player1_coord = main_terrain.get_coord(player1_pos);
 
-				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, 2);
-				new CommandAttackLocation(character, coord);
-			}
-			for (auto i = 0; i < 100; i++)
-			{
-				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
+				main_player.node->set_pos(main_terrain.get_coord(player1_coord));
+				add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
+				add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
+				add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
+				add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
+				add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
-				static EntityPtr prefabs[] = {
-					Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
-					Entity::create(L"assets\\characters\\treant\\main.prefab"),
-					Entity::create(L"assets\\characters\\boar\\main.prefab")
-				};
+				//for (auto i = 1; i < site_centrality.size() - 1; i++)
+				//{
+				//	auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
 
-				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, 2);
-				character->entity->add_component<cCreepAI>();
+				//	static EntityPtr prefabs[] = {
+				//		Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
+				//		Entity::create(L"assets\\characters\\slark\\main.prefab")
+				//	};
+
+				//	auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, 2);
+				//	new CommandAttackLocation(character, coord);
+				//}
+				//for (auto i = 0; i < 100; i++)
+				//{
+				//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
+
+				//	static EntityPtr prefabs[] = {
+				//		Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
+				//		Entity::create(L"assets\\characters\\treant\\main.prefab"),
+				//		Entity::create(L"assets\\characters\\boar\\main.prefab")
+				//	};
+
+				//	auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, 2);
+				//	character->entity->add_component<cCreepAI>();
+				//}
 			}
 		}
 	}
@@ -594,6 +598,7 @@ void cMain::start()
 			}
 		};
 
+		if (main_player.character)
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(200.f, 100.f), ImGuiCond_Always);
@@ -687,11 +692,6 @@ void cMain::start()
 	}, (uint)this);
 }
 
-static graphics::ImagePtr img_vision = nullptr;
-static graphics::BufferPtr buf_vision = nullptr;
-uint vision_map_w = 256;
-uint vision_map_h = 256;
-
 void cMain::update()
 {
 	if (main_camera.node && main_player.node)
@@ -700,263 +700,6 @@ void cMain::update()
 		main_camera.node->set_eul(vec3(0.f, -camera_angle, 0.f));
 		main_camera.node->set_pos(smooth_damp(main_camera.node->pos,
 			main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
-	}
-	if (!img_vision)
-	{
-		img_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(vision_map_w, vision_map_h), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
-		auto id = sRenderer::instance()->get_texture_res(img_vision->get_view());
-		sRenderer::instance()->set_texture_res_name(id, "VISION");
-	}
-	if (img_vision)
-	{
-		graphics::Queue::get()->wait_idle();
-		if (!buf_vision)
-		{
-			buf_vision = graphics::Buffer::create(vision_map_w * vision_map_h, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
-			buf_vision->map();
-			memset(buf_vision->mapped, 0, buf_vision->size);
-		}
-
-		auto w = vision_map_w;
-		auto h = vision_map_h;
-
-		auto character = main_player.character;
-		auto pos = character->node->pos;
-		auto coord = (ivec2)pos.xz();
-		if (coord != character->vision_coord)
-		{
-			struct Beam
-			{
-				std::vector<ivec2> pts;
-			};
-			auto get_beam = [&](int x, int y)->Beam {
-				Beam b;
-				if (x == 0)
-				{
-					if (y > 0)
-					{
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(0, +i));
-					}
-					else
-					{
-						y = -y;
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(0, -i));
-					}
-				}
-				else if (y == 0)
-				{
-					if (x > 0)
-					{
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(+i, 0));
-					}
-					else
-					{
-						x = -x;
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(-i, 0));
-					}
-				}
-				else if (x > 0 && y > 0)
-				{
-					if (x == y)
-					{
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(+i, +i));
-					}
-					else if (x > y)
-					{
-						auto k = y / (float)x;
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(+i, +i * k));
-					}
-					else
-					{
-						auto k = x / (float)y;
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(+i * k, +i));
-					}
-				}
-				else if (x < 0 && y > 0)
-				{
-					if (-x == y)
-					{
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(-i, +i));
-					}
-					else if (-x > y)
-					{
-						x = -x;
-						auto k = y / (float)x;
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(-i, +i * k));
-					}
-					else
-					{
-						x = -x;
-						auto k = x / (float)y;
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(-i * k, +i));
-					}
-				}
-				else if (x > 0 && y < 0)
-				{
-					if (x == -y)
-					{
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(+i, -i));
-					}
-					else if (x > -y)
-					{
-						y = -y;
-						auto k = y / (float)x;
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(+i, -i * k));
-					}
-					else
-					{
-						y = -y;
-						auto k = x / (float)y;
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(+i * k, -i));
-					}
-				}
-				else if (x < 0 && y < 0)
-				{
-					if (x == y)
-					{
-						x = -x;
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(-i, -i));
-					}
-					else if (-x > -y)
-					{
-						x = -x;
-						y = -y;
-						auto k = y / (float)x;
-						for (auto i = 0; i < x; i++)
-							b.pts.push_back(ivec2(-i, -i * k));
-					}
-					else
-					{
-						x = -x;
-						y = -y;
-						auto k = x / (float)y;
-						for (auto i = 0; i < y; i++)
-							b.pts.push_back(ivec2(-i * k, -i));
-					}
-				}
-				return b;
-			};
-
-			auto height = pos.y;
-			auto range = character->vision_range;
-			auto elev = main_terrain.terrain->extent.y / 4.f;
-			auto level = 0;
-			for (; level < 4; level++)
-			{
-				if (height < elev)
-					break;
-				height -= elev;
-			}
-			height = (level + 1) * elev;
-
-			auto pbuf = (uchar*)buf_vision->mapped;
-			memset(pbuf, 0, buf_vision->size);
-			// add blockers (trees, rocks)
-			std::vector<cNodePtr> objs;
-			sScene::instance()->octree->get_colliding(pos, range, objs);
-			for (auto n : objs)
-			{
-				if (n->entity->name == "blocker")
-				{
-					auto pos = n->g_pos;
-					auto coord = (ivec2)pos.xz();
-					pbuf[coord.y * w + coord.x] = 1;
-					if (pos.x < 0.5f)
-					{
-						if (coord.x > 0)
-							pbuf[coord.y * w + (coord.x - 1)] = 1;
-					}
-					else
-					{
-						if (coord.x < w - 1)
-							pbuf[coord.y * w + (coord.x + 1)] = 1;
-					}
-					if (pos.y < 0.5f)
-					{
-						if (coord.y > 0)
-							pbuf[(coord.y - 1) * w + coord.x] = 1;
-					}
-					else
-					{
-						if (coord.y < h - 1)
-							pbuf[(coord.y + 1) * w + coord.x] = 1;
-					}
-				}
-			}
-			// add blockers (high elevation)
-			for (auto y = int(coord.y - range); y <= coord.y + range; y++)
-			{
-				for (auto x = int(coord.x - range); x <= coord.x + range; x++)
-				{
-					if (x >= 0 && y >= 0 && x < w && y < h)
-					{
-						if (main_terrain.get_coord(vec2((x + 0.5f) / w, (y + 0.5f) / h)).y > height)
-							pbuf[y * w + x] = 1;
-					}
-				}
-			}
-
-			auto cast_beam = [&](const Beam& b) {
-				for (auto& p : b.pts)
-				{
-					if (length((vec2)p) > range)
-						break;
-					auto c = coord + p;
-					auto& dst = pbuf[c.y * w + c.x];
-					if (dst == 1)
-						break;
-					dst = 255;
-				}
-			};
-			cast_beam(get_beam(+range, 0));
-			cast_beam(get_beam(-range, 0));
-			cast_beam(get_beam(0, +range));
-			cast_beam(get_beam(0, -range));
-
-			cast_beam(get_beam(+range, +range));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(+range, +i));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(+i, +range));
-
-			cast_beam(get_beam(-range, +range));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(-range, +i));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(-i, +range));
-
-			cast_beam(get_beam(+range, -range));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(+range, -i));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(+i, -range));
-
-			cast_beam(get_beam(-range, -range));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(-range, -i));
-			for (auto i = 1; i < range; i++)
-				cast_beam(get_beam(-i, -range));
-
-			character->vision_coord = coord;
-		}
-
-		graphics::InstanceCommandBuffer cb;
-		cb->copy_buffer_to_image(buf_vision, img_vision, graphics::BufferImageCopy(uvec2(w, h)));
-		cb.excute();
 	}
 
 	if (!graphics::gui_want_mouse())
@@ -1118,47 +861,50 @@ void cMain::update()
 				}
 			}
 		}
-		if (input->mpressed(Mouse_Right))
+		if (main_player.character)
 		{
-			if (select_mode == TargetNull)
+			if (input->mpressed(Mouse_Right))
 			{
-				if (hovering_character)
+				if (select_mode == TargetNull)
 				{
-					if (hovering_character->faction != main_player.character->faction)
-						new CommandAttackTarget(main_player.character, hovering_character);
+					if (hovering_character)
+					{
+						if (hovering_character->faction != main_player.character->faction)
+							new CommandAttackTarget(main_player.character, hovering_character);
+					}
+					else if (hovering_chest)
+					{
+						new CommandPickUp(main_player.character, hovering_chest);
+					}
+					else if (hovering_terrain)
+					{
+						new CommandMoveTo(main_player.character, hovering_pos);
+						add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
+					}
 				}
-				else if (hovering_chest)
-				{
-					new CommandPickUp(main_player.character, hovering_chest);
-				}
-				else if (hovering_terrain)
-				{
-					new CommandMoveTo(main_player.character, hovering_pos);
-					add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
-				}
+				else
+					reset_select();
 			}
-			else
-				reset_select();
-		}
 
+			if (input->kpressed(Keyboard_A))
+			{
+				select_mode = TargetType(TargetEnemy | TargetLocation);
+				select_enemy_callback = [](cCharacterPtr character) {
+					new CommandAttackTarget(main_player.character, character);
+				};
+				select_location_callback = [](const vec3& pos) {
+					new CommandAttackLocation(main_player.character, pos);
+				};
+			}
+			for (auto i = 0; i < countof(shortcuts); i++)
+			{
+				auto shortcut = shortcuts[i].get();
+				if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
+					shortcut->click();
+			}
+		}
 		if (input->kpressed(Keyboard_Esc))
 			reset_select();
-		if (input->kpressed(Keyboard_A))
-		{
-			select_mode = TargetType(TargetEnemy | TargetLocation);
-			select_enemy_callback = [](cCharacterPtr character) {
-				new CommandAttackTarget(main_player.character, character);
-			};
-			select_location_callback = [](const vec3& pos) {
-				new CommandAttackLocation(main_player.character, pos);
-			};
-		}
-		for (auto i = 0; i < countof(shortcuts); i++)
-		{
-			auto shortcut = shortcuts[i].get();
-			if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
-				shortcut->click();
-		}
 		if (input->kpressed(Keyboard_F1))
 			toggle_equipment_view();
 		if (input->kpressed(Keyboard_F2))
@@ -1179,19 +925,7 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
-bool get_vision(const vec3& coord)
-{
-	auto c = (ivec2)coord.xz();
-	if (c.x >= 0 && c.y >= 0 && c.x < vision_map_w && c.y < vision_map_w)
-	{
-		auto pbuf = (uchar*)buf_vision->mapped;
-		auto v = pbuf[c.y * vision_map_w + c.x];
-		return v > 0;
-	}
-	return false;
-}
-
-std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint faction)
+std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction)
 {
 	std::vector<cCharacterPtr> ret;
 
@@ -1217,6 +951,8 @@ std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint fa
 	return ret;
 }
 
+static std::map<std::string, cCharacterPtr> characters;
+
 cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid)
 {
 	auto e = prefab->copy();
@@ -1227,7 +963,18 @@ cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, con
 	if (character->guid.empty())
 		character->guid = generate_guid();
 	root->add_child(e);
+	characters.emplace(character->guid, character);
 	return character;
+}
+
+void remove_character(cCharacterPtr character)
+{
+	characters.erase(characters.find(character->guid));
+	add_event([character]() {
+		auto e = character->entity;
+		e->parent->remove_child(e);
+		return false;
+	});
 }
 
 cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update)

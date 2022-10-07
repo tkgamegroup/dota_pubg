@@ -16,6 +16,15 @@ FLAME_TYPE(cCreepAI)
 
 const auto CharacterTag = 1 << 1;
 
+enum Faction
+{
+	FactionCreep,
+	FactionParty1,
+	FactionParty2,
+	FactionParty3,
+	FactionParty4
+};
+
 enum TargetType
 {
 	TargetNull = 0,
@@ -35,6 +44,30 @@ enum MultiPlayerType
 	SinglePlayer,
 	MultiPlayerAsHost,
 	MultiPlayerAsClient
+};
+
+enum nwMessage
+{
+	nwAddCharacter,
+	nwRemoveCharacter,
+	nwUpdateCharacter
+};
+
+struct nwAddCharacterStruct
+{
+	char path[256];
+	char guid[32];
+	vec3 pos;
+};
+
+struct nwRemoveCharacterStruct
+{
+
+};
+
+struct nwUpdateCharacterStruct
+{
+
 };
 
 extern MultiPlayerType multi_player;
@@ -135,9 +168,9 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
-bool get_vision(const vec3& coord);
-std::vector<cCharacterPtr> get_characters(const vec3& pos, float radius, uint faction);
+std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
 cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid = "");
+void remove_character(cCharacterPtr character);
 cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {});
 cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {});
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1);
