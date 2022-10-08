@@ -22,7 +22,7 @@ bool get_vision(uint faction, const vec3& coord)
 	auto it = visions.find(faction);
 	if (it == visions.end())
 		return false;
-	auto& buf = it->second;
+	auto buf = it->second.data();
 	auto c = (ivec2)coord.xz();
 	if (c.x >= 0 && c.y >= 0 && c.x < vision_map_w && c.y < vision_map_w)
 	{
@@ -45,16 +45,14 @@ void update_vision()
 				it = visions.emplace(f.first, std::vector<uchar>()).first;
 				it->second.resize(w * h);
 			}
-			auto& buf = it->second;
+			auto buf = it->second.data();
 
-			if (f.first != FactionCreep) // well, creeps have full vision
+			if (f.first == FactionCreep) // well, creeps have full vision
 			{
-				memset(buf.data(), 255, w * h);
+				memset(buf, 255, w * h);
 			}
 			else
 			{
-				memset(buf.data(), 0, w * h);
-
 				for (auto character : f.second)
 				{
 					auto pos = character->node->pos;
@@ -187,6 +185,8 @@ void update_vision()
 							return b;
 						};
 
+						memset(buf, 0, w * h);
+
 						auto height = pos.y;
 						auto range = character->vision_range;
 						auto elev = main_terrain.terrain->extent.y / 4.f;
@@ -199,8 +199,6 @@ void update_vision()
 						}
 						height = (level + 1) * elev;
 
-						auto pbuf = (uchar*)stagbuf->mapped;
-						memset(pbuf, 0, stagbuf->size);
 						// add blockers (trees, rocks)
 						std::vector<cNodePtr> objs;
 						sScene::instance()->octree->get_colliding(pos, range, objs);
@@ -210,26 +208,26 @@ void update_vision()
 							{
 								auto pos = n->g_pos;
 								auto coord = (ivec2)pos.xz();
-								pbuf[coord.y * w + coord.x] = 1;
+								buf[coord.y * w + coord.x] = 1;
 								if (pos.x < 0.5f)
 								{
 									if (coord.x > 0)
-										pbuf[coord.y * w + (coord.x - 1)] = 1;
+										buf[coord.y * w + (coord.x - 1)] = 1;
 								}
 								else
 								{
 									if (coord.x < w - 1)
-										pbuf[coord.y * w + (coord.x + 1)] = 1;
+										buf[coord.y * w + (coord.x + 1)] = 1;
 								}
 								if (pos.y < 0.5f)
 								{
 									if (coord.y > 0)
-										pbuf[(coord.y - 1) * w + coord.x] = 1;
+										buf[(coord.y - 1) * w + coord.x] = 1;
 								}
 								else
 								{
 									if (coord.y < h - 1)
-										pbuf[(coord.y + 1) * w + coord.x] = 1;
+										buf[(coord.y + 1) * w + coord.x] = 1;
 								}
 							}
 						}
@@ -241,7 +239,7 @@ void update_vision()
 								if (x >= 0 && y >= 0 && x < w && y < h)
 								{
 									if (main_terrain.get_coord(vec2((x + 0.5f) / w, (y + 0.5f) / h)).y > height)
-										pbuf[y * w + x] = 1;
+										buf[y * w + x] = 1;
 								}
 							}
 						}
@@ -252,7 +250,9 @@ void update_vision()
 								if (length((vec2)p) > range)
 									break;
 								auto c = coord + p;
-								auto& dst = pbuf[c.y * w + c.x];
+								if (c.x < 0 || c.y < 0 || c.x >= w || c.y >= w)
+									break;
+								auto& dst = buf[c.y * w + c.x];
 								if (dst == 1)
 									break;
 								dst = 255;
@@ -288,6 +288,28 @@ void update_vision()
 							cast_beam(get_beam(-i, -range));
 
 						character->vision_coord = coord;
+
+						if (f.first == main_player.character->faction)
+						{
+							graphics::Queue::get()->wait_idle();
+
+							if (!img_my_vision)
+							{
+								img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(w, h), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
+								auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
+								sRenderer::instance()->set_texture_res_name(id, "VISION");
+							}
+							if (!stagbuf)
+							{
+								stagbuf = graphics::Buffer::create(vision_map_w * vision_map_h, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
+								stagbuf->map();
+							}
+
+							graphics::InstanceCommandBuffer cb;
+							memcpy(stagbuf->mapped, visions[main_player.character->faction].data(), stagbuf->size);
+							cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec2(w, h)));
+							cb.excute();
+						}
 					}
 				}
 			}
@@ -297,23 +319,4 @@ void update_vision()
 	// update character's visiable
 	for (auto& pair : characters_by_guid)
 		pair.second->entity->children[0]->set_enable(get_vision(main_player.character->faction, pair.second->node->pos));
-
-	graphics::Queue::get()->wait_idle();
-
-	if (!img_my_vision)
-	{
-		img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(w, h), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
-		auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
-		sRenderer::instance()->set_texture_res_name(id, "VISION");
-	}
-	if (!stagbuf)
-	{
-		stagbuf = graphics::Buffer::create(vision_map_w * vision_map_h, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
-		stagbuf->map();
-		memset(stagbuf->mapped, 0, stagbuf->size);
-	}
-
-	graphics::InstanceCommandBuffer cb;
-	cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec2(w, h)));
-	cb.excute();
 }

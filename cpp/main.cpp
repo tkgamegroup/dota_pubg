@@ -286,8 +286,6 @@ void cMain::start()
 		}
 		main_player.init(add_character(knight_prefab, vec3(0.f), FactionParty1)->entity);
 
-		update_vision();
-
 		if (main_terrain.terrain)
 		{
 			std::vector<vec3> site_positions;
@@ -327,31 +325,31 @@ void cMain::start()
 				add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
 				add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
-				//for (auto i = 1; i < site_centrality.size() - 1; i++)
-				//{
-				//	auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
+				for (auto i = 1; i < site_centrality.size() - 1; i++)
+				{
+					auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
 
-				//	static EntityPtr prefabs[] = {
-				//		Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
-				//		Entity::create(L"assets\\characters\\slark\\main.prefab")
-				//	};
+					static EntityPtr prefabs[] = {
+						Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
+						Entity::create(L"assets\\characters\\slark\\main.prefab")
+					};
 
-				//	auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
-				//	new CommandAttackLocation(character, coord);
-				//}
-				//for (auto i = 0; i < 100; i++)
-				//{
-				//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
+					auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
+					new CommandAttackLocation(character, coord);
+				}
+				for (auto i = 0; i < 100; i++)
+				{
+					auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-				//	static EntityPtr prefabs[] = {
-				//		Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
-				//		Entity::create(L"assets\\characters\\treant\\main.prefab"),
-				//		Entity::create(L"assets\\characters\\boar\\main.prefab")
-				//	};
+					static EntityPtr prefabs[] = {
+						Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
+						Entity::create(L"assets\\characters\\treant\\main.prefab"),
+						Entity::create(L"assets\\characters\\boar\\main.prefab")
+					};
 
-				//	auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
-				//	character->entity->add_component<cCreepAI>();
-				//}
+					auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
+					character->entity->add_component<cCreepAI>();
+				}
 			}
 		}
 	}
@@ -721,6 +719,8 @@ void cMain::update()
 		main_camera.node->set_pos(smooth_damp(main_camera.node->pos,
 			main_player.node->pos + camera_length * main_camera.node->g_rot[2], velocity, 0.3f, 10000.f, delta_time));
 	}
+
+	update_vision();
 
 	if (!graphics::gui_want_mouse())
 	{
