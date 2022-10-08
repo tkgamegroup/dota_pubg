@@ -1,6 +1,7 @@
-#include <flame/graphics/gui.h>
-
 #include "launcher.h"
+#include "network.h"
+
+#include <flame/graphics/gui.h>
 
 cLauncher::~cLauncher()
 {
@@ -26,26 +27,12 @@ void cLauncher::start()
 		}
 		if (ImGui::Button("Create Local Server"))
 		{
-			nw_server = network::Server::create(network::SocketTcp, 1234, nullptr, [](void* id) {
-				nw_server->set_client(id, [](const std::string& msg) {
-
-				},
-				[]() {
-
-				});
-
-			});
-			multi_player = MultiPlayerAsHost;
+			start_server();
 			enter_scene(entity);
 		}
 		if (ImGui::Button("Join Local Server"))
 		{
-			nw_client = network::Client::create(network::SocketTcp, "127.0.0.1", 1234, [](const std::string& msg) {
-
-			},
-			[]() {
-
-			});
+			join_server();
 			if (nw_client)
 			{
 				multi_player = MultiPlayerAsClient;

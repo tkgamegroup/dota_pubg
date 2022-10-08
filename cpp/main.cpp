@@ -3,6 +3,7 @@
 #include "ability.h"
 #include "buff.h"
 #include "vision.h"
+#include "network.h"
 #include "launcher.h"
 #include "character.h"
 #include "spwaner.h"
@@ -54,6 +55,33 @@ void MainTerrain::init(EntityPtr e)
 		node = e->node();
 		terrain = e->get_component_t<cTerrain>();
 		extent = terrain->extent;
+
+		if (terrain)
+		{
+			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
+			{
+				height_map_info_fn += L".info";
+				std::ifstream file(height_map_info_fn);
+				if (file.good())
+				{
+					LineReader info(file);
+					info.read_block("sites:");
+					unserialize_text(info, &site_positions);
+					file.close();
+				}
+			}
+
+			site_centrality.resize(site_positions.size());
+			for (auto i = 0; i < site_positions.size(); i++)
+			{
+				auto x = abs(site_positions[i].x * 2.f - 1.f);
+				auto z = abs(site_positions[i].z * 2.f - 1.f);
+				site_centrality[i] = std::make_pair(x * z, i);
+			}
+			std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
+				return a.first < b.first;
+			});
+		}
 	}
 }
 
@@ -67,6 +95,13 @@ vec3 MainTerrain::get_coord(const vec3& pos)
 	return get_coord(vec2((pos.x - node->pos.x) / extent.x, (pos.z - node->pos.z) / extent.z));
 }
 
+vec3 MainTerrain::get_coord_by_centrality(int i)
+{
+	if (i < 0)
+		i = (int)site_centrality.size() + i;
+	return get_coord(site_positions[site_centrality[i].second].xz());
+}
+
 void MainPlayer::init(EntityPtr e)
 {
 	entity = e;
@@ -77,10 +112,6 @@ void MainPlayer::init(EntityPtr e)
 		character = e->get_component_t<cCharacter>();
 	}
 }
-
-MultiPlayerType multi_player = SinglePlayer;
-network::ClientPtr nw_client = nullptr;
-network::ServerPtr nw_server = nullptr;
 
 MainCamera main_camera;
 MainTerrain main_terrain;
@@ -279,77 +310,49 @@ void cMain::start()
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		if (!knight_prefab)
+		if (!main_terrain.site_positions.empty())
 		{
-			knight_prefab = Entity::create();
-			knight_prefab->load(L"assets\\characters\\dragon_knight\\main.prefab");
-		}
-		main_player.init(add_character(knight_prefab, vec3(0.f), FactionParty1)->entity);
+			vec3 player1_coord;
+			uint player1_faction;
+			add_player(player1_coord, player1_faction);
 
-		if (main_terrain.terrain)
-		{
-			std::vector<vec3> site_positions;
-			if (auto height_map_info_fn = main_terrain.terrain->height_map->filename; !height_map_info_fn.empty())
+			if (!knight_prefab)
 			{
-				height_map_info_fn += L".info";
-				std::ifstream file(height_map_info_fn);
-				if (file.good())
-				{
-					LineReader info(file);
-					info.read_block("sites:");
-					unserialize_text(info, &site_positions);
-					file.close();
-				}
+				knight_prefab = Entity::create();
+				knight_prefab->load(L"assets\\characters\\dragon_knight\\main.prefab");
 			}
+			main_player.init(add_character(knight_prefab, player1_coord, player1_faction)->entity);
 
-			if (!site_positions.empty())
+			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
+			add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
+			add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
+			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
+			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
+
+			for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
 			{
-				std::vector<std::pair<float, int>> site_centrality(site_positions.size());
-				for (auto i = 0; i < site_positions.size(); i++)
-				{
-					auto x = abs(site_positions[i].x * 2.f - 1.f);
-					auto z = abs(site_positions[i].z * 2.f - 1.f);
-					site_centrality[i] = std::make_pair(x * z, i);
-				}
-				std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
-					return a.first < b.first;
-				});
+				auto coord = main_terrain.get_coord_by_centrality(i);
 
-				auto player1_pos = site_positions[site_centrality.back().second].xz();
-				auto player1_coord = main_terrain.get_coord(player1_pos);
+				static EntityPtr prefabs[] = {
+					Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
+					Entity::create(L"assets\\characters\\slark\\main.prefab")
+				};
 
-				main_player.node->set_pos(main_terrain.get_coord(player1_coord));
-				add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
-				add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
-				add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
-				add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
-				add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
+				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
+				new CommandAttackLocation(character, coord);
+			}
+			for (auto i = 0; i < 100; i++)
+			{
+				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-				for (auto i = 1; i < site_centrality.size() - 1; i++)
-				{
-					auto coord = main_terrain.get_coord(site_positions[site_centrality[i].second].xz());
+				static EntityPtr prefabs[] = {
+					Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
+					Entity::create(L"assets\\characters\\treant\\main.prefab"),
+					Entity::create(L"assets\\characters\\boar\\main.prefab")
+				};
 
-					static EntityPtr prefabs[] = {
-						Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
-						Entity::create(L"assets\\characters\\slark\\main.prefab")
-					};
-
-					auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
-					new CommandAttackLocation(character, coord);
-				}
-				for (auto i = 0; i < 100; i++)
-				{
-					auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
-
-					static EntityPtr prefabs[] = {
-						Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
-						Entity::create(L"assets\\characters\\treant\\main.prefab"),
-						Entity::create(L"assets\\characters\\boar\\main.prefab")
-					};
-
-					auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
-					character->entity->add_component<cCreepAI>();
-				}
+				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
+				character->entity->add_component<cCreepAI>();
 			}
 		}
 	}
@@ -944,6 +947,14 @@ struct cMainCreate : cMain::Create
 	}
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
+
+void add_player(vec3& pos, uint& faction)
+{
+	static uint idx = 0;
+	pos = main_terrain.get_coord_by_centrality(-idx - 1);
+	faction = FactionParty1 + idx;
+	idx++;
+}
 
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction)
 {

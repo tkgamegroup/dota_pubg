@@ -4,6 +4,7 @@
 #include "buff.h"
 #include "projectile.h"
 #include "chest.h"
+#include "network.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>

@@ -1,5 +1,6 @@
 #include "vision.h"
 #include "character.h"
+#include "network.h"
 
 #include <flame/graphics/buffer.h>
 #include <flame/graphics/image.h>

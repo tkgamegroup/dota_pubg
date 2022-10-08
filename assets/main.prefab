@@ -13,7 +13,7 @@
 		</item>
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">
 			<components>
-				<item type_name="flame::cNode" qut="0.97947,-0.201591,0,0" />
+				<item type_name="flame::cNode" eul="0,-60,0" />
 				<item type_name="flame::cDirLight" color="1,1,1,3" cast_shadow="true" />
 			</components>
 		</item>

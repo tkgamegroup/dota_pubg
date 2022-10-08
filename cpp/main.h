@@ -1,6 +1,5 @@
 #pragma once
 
-#include <flame/foundation/network.h>
 #include <flame/universe/component.h>
 #include <flame/universe/entity.h>
 
@@ -38,41 +37,6 @@ enum DamageType
 	PhysicalDamage,
 	MagicDamage
 };
-
-enum MultiPlayerType
-{
-	SinglePlayer,
-	MultiPlayerAsHost,
-	MultiPlayerAsClient
-};
-
-enum nwMessage
-{
-	nwAddCharacter,
-	nwRemoveCharacter,
-	nwUpdateCharacter
-};
-
-struct nwAddCharacterStruct
-{
-	char path[256];
-	char guid[32];
-	vec3 pos;
-};
-
-struct nwRemoveCharacterStruct
-{
-
-};
-
-struct nwUpdateCharacterStruct
-{
-
-};
-
-extern MultiPlayerType multi_player;
-extern network::ClientPtr nw_client;
-extern network::ServerPtr nw_server;
 
 template<typename T>
 struct Tracker
@@ -125,9 +89,13 @@ struct MainTerrain
 	cTerrainPtr terrain = nullptr;
 	vec3 extent;
 
+	std::vector<vec3> site_positions;
+	std::vector<std::pair<float, int>> site_centrality;
+
 	void init(EntityPtr e);
 	vec3 get_coord(const vec2& uv);
 	vec3 get_coord(const vec3& pos);
+	vec3 get_coord_by_centrality(int i);
 };
 extern MainTerrain main_terrain;
 
@@ -173,6 +141,7 @@ extern std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
 extern std::map<std::string, cProjectilePtr> projectiles_by_guid;
 extern std::map<std::string, cChestPtr> chests_by_guid;
 
+void add_player(vec3& pos, uint& faction);
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
 cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid = "");
 void remove_character(cCharacterPtr character);
