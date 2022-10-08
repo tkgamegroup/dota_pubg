@@ -105,13 +105,7 @@ void CommandPickUp::update()
 		if (character->process_approach(target.obj->node->pos, 1.f))
 		{
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
-			{
-				auto e = target.obj->entity;
-				add_event([e]() {
-					e->remove_from_parent();
-					return false;
-				});
-			}
+				remove_chest(target.obj);
 
 			character->nav_agent->stop();
 			new CommandIdle(character);
@@ -326,8 +320,6 @@ cCharacter::~cCharacter()
 
 	if (armature)
 		armature->playing_callbacks.remove("character"_h);
-
-	graphics::gui_callbacks.remove((uint)this);
 }
 
 void cCharacter::on_init()
@@ -535,24 +527,6 @@ void cCharacter::start()
 			}
 		}, "character"_h);
 	}
-
-	graphics::gui_set_current();
-	graphics::gui_callbacks.add([this]() {
-		if (be_seen && main_camera.camera)
-		{
-			auto p = main_camera.camera->world_to_screen(node->pos + vec3(0.f, nav_agent->height + 0.1f, 0.f));
-			if (p.x > 0.f && p.y > 0.f)
-			{
-				p += sInput::instance()->offset;
-				auto dl = ImGui::GetBackgroundDrawList();
-				const auto bar_width = 80.f * (nav_agent->radius / 0.6f);
-				const auto bar_height = 5.f;
-				p.x -= bar_width * 0.5f;
-				dl->AddRectFilled(p, p + vec2((float)hp / (float)hp_max * bar_width, bar_height),
-					faction == main_player.character->faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
-			}
-		}
-	}, (uint)this);
 
 	inventory.resize(16);
 
@@ -860,9 +834,6 @@ void cCharacter::update()
 
 	if (armature)
 	{
-		be_seen = get_vision(faction, node->pos);
-		armature->entity->set_enable(be_seen);
-
 		switch (action)
 		{
 		case ActionNone:

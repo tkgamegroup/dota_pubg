@@ -18,11 +18,11 @@ const auto CharacterTag = 1 << 1;
 
 enum Faction
 {
-	FactionCreep,
-	FactionParty1,
-	FactionParty2,
-	FactionParty3,
-	FactionParty4
+	FactionCreep = 1 << 0,
+	FactionParty1 = 1 << 1,
+	FactionParty2 = 1 << 2,
+	FactionParty3 = 1 << 3,
+	FactionParty4 = 1 << 4
 };
 
 enum TargetType
@@ -168,10 +168,17 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
+extern std::map<std::string, cCharacterPtr> characters_by_guid;
+extern std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
+extern std::map<std::string, cProjectilePtr> projectiles_by_guid;
+extern std::map<std::string, cChestPtr> chests_by_guid;
+
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
 cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid = "");
 void remove_character(cCharacterPtr character);
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {});
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {});
-cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1);
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {}, const std::string& guid = "");
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {}, const std::string& guid = "");
+void remove_projectile(cProjectilePtr projectile);
+cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, const std::string& guid = "");
+void remove_chest(cChestPtr chest);
 void teleport(cCharacterPtr character, const vec3& location);

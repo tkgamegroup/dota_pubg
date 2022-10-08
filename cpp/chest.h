@@ -8,6 +8,8 @@ struct cChest : Component
 	/// Reflect requires
 	cNodePtr node;
 
+	std::string guid;
+
 	int item_id = -1;
 	uint item_num = 1;
 

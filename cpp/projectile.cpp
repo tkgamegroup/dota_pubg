@@ -7,41 +7,6 @@
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
-static void* ev_delete_projectiles;
-static std::vector<cProjectilePtr> dead_projectiles;
-
-void cProjectile::set_target(cCharacterPtr character)
-{
-	if (target == character)
-		return;
-	if (target)
-		target->entity->message_listeners.remove((uint)this);
-	target = character;
-	if (target)
-	{
-		target->entity->message_listeners.add([this](uint h, void*, void*) {
-			if (h == "destroyed"_h)
-				target = nullptr;
-		}, (uint)this);
-	}
-}
-
-void cProjectile::die()
-{
-	set_target(nullptr);
-	if (!ev_delete_projectiles)
-	{
-		ev_delete_projectiles = add_event([]() {
-			for (auto p : dead_projectiles)
-				p->entity->remove_from_parent();
-			dead_projectiles.clear();
-			ev_delete_projectiles = nullptr;
-			return false;
-		});
-	}
-	dead_projectiles.push_back(this);
-}
-
 void cProjectile::start()
 {
 }
@@ -53,14 +18,14 @@ void cProjectile::update()
 
 	if (use_target)
 	{
-		if (!target)
+		if (!target.obj)
 		{
 			if (on_end)
 				on_end(node->pos, nullptr);
-			die();
+			remove_projectile(this);
 			return;
 		}
-		location = target->node->pos + vec3(0.f, target->nav_agent->height * 0.5f, 0.f);
+		location = target.obj->node->pos + vec3(0.f, target.obj->nav_agent->height * 0.5f, 0.f);
 	}
 
 	auto sp = speed * delta_time;
@@ -68,8 +33,8 @@ void cProjectile::update()
 	if (distance(self_pos, location) < sp)
 	{
 		if (on_end)
-			on_end(node->pos, target);
-		die();
+			on_end(node->pos, target.obj);
+		remove_projectile(this);
 		return;
 	}
 
