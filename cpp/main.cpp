@@ -312,9 +312,9 @@ void cMain::start()
 		{
 			vec3 player1_coord;
 			uint player1_faction;
-			std::filesystem::path player1_file;
-			add_player(player1_coord, player1_faction, player1_file);
-			auto character = add_character(get_prefab(player1_file), player1_coord, player1_faction);
+			uint player1_preset_id;
+			add_player(player1_coord, player1_faction, player1_preset_id);
+			auto character = add_character(player1_preset_id, player1_coord, player1_faction);
 			main_player.faction = player1_faction;
 			main_player.character_id = character->id;
 			main_player.init(character->entity);
@@ -329,25 +329,25 @@ void cMain::start()
 			{
 				auto coord = main_terrain.get_coord_by_centrality(i);
 
-				static const wchar_t* paths[] = {
-					L"assets\\characters\\life_stealer\\main.prefab",
-					L"assets\\characters\\slark\\main.prefab"
+				static uint preset_ids[] = {
+					CharacterPreset::find("Life Stealer"),
+					CharacterPreset::find("Slark")
 				};
 
-				auto character = add_character(get_prefab(paths[linearRand(0U, (uint)countof(paths) - 1)]), coord, FactionCreep);
+				auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
 				new CommandAttackLocation(character, coord);
 			}
 			for (auto i = 0; i < 100; i++)
 			{
 				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-				static const wchar_t* paths[] = {
-					L"assets\\characters\\spiderling\\main.prefab",
-					L"assets\\characters\\treant\\main.prefab",
-					L"assets\\characters\\boar\\main.prefab"
+				static uint preset_ids[] = {
+					CharacterPreset::find("Spiderling"),
+					CharacterPreset::find("Treant"),
+					CharacterPreset::find("Boar")
 				};
 
-				auto character = add_character(get_prefab(paths[linearRand(0U, (uint)countof(paths) - 1)]), coord, FactionCreep);
+				auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
 				character->entity->add_component<cCreepAI>();
 			}
 		}
@@ -719,9 +719,9 @@ void cMain::update()
 		{
 			vec3 pos;
 			uint faction;
-			std::filesystem::path file;
-			add_player(pos, faction, file);
-			auto character = add_character(get_prefab(file), pos, faction);
+			uint preset_id;
+			add_player(pos, faction, preset_id);
+			auto character = add_character(preset_id, pos, faction);
 
 			std::string res;
 			{
@@ -733,7 +733,7 @@ void cMain::update()
 			for (auto& pair : characters_by_id)
 			{
 				nwAddCharacterStruct stru;
-				wcscpy(stru.path, find_prefab_file(pair.second->entity).c_str());
+				stru.preset_id = pair.second->preset_id;
 				stru.id = pair.first;
 				stru.faction = pair.second->faction;
 				stru.pos = pair.second->node->pos;
@@ -750,7 +750,7 @@ void cMain::update()
 	{
 		for (auto& s : peeding_add_characters.actions)
 		{
-			auto character = add_character(get_prefab(s.path), s.pos, s.faction, s.id);
+			auto character = add_character(s.preset_id, s.pos, s.faction, s.id);
 			if (s.id == main_player.character_id)
 				main_player.init(character->entity);
 		}
@@ -1014,12 +1014,12 @@ EntityPtr get_prefab(const std::filesystem::path& _path)
 	return it->second;
 }
 
-void add_player(vec3& pos, uint& faction, std::filesystem::path& file)
+void add_player(vec3& pos, uint& faction, uint& preset_id)
 {
 	static uint idx = 0;
 	pos = main_terrain.get_coord_by_centrality(-idx - 1);
 	faction =  1 << (log2i((uint)FactionParty1) + idx);
-	file = L"assets\\characters\\dragon_knight\\main.prefab";
+	preset_id = CharacterPreset::find("Dragon Knight");
 	idx++;
 }
 
@@ -1054,14 +1054,21 @@ std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
 std::map<uint, cProjectilePtr> projectiles_by_id;
 std::map<uint, cChestPtr> chests_by_id;
 
-cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, uint id)
+cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id)
 {
 	static uint uid = 1;
-	auto e = prefab->copy();
+	auto& preset = CharacterPreset::get(preset_id);
+	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
 	auto character = e->get_component_t<cCharacter>();
+	character->preset_id = preset_id;
 	character->set_faction(faction);
 	character->id = id ? id : uid++;
+	if (!preset.abilities.empty())
+	{
+		for (auto& i : preset.abilities)
+			character->gain_ability(Ability::find(i.first), i.second);
+	}
 	root->add_child(e);
 	characters_by_id.emplace(character->id, character);
 	characters_by_faction[faction].push_back(character);

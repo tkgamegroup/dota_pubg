@@ -100,6 +100,7 @@ struct CharacterPreset
 {
 	uint					id;
 	std::string				name;
+	std::filesystem::path	path;
 
 	uint exp_base = 0;
 	uint hp = 1000;

@@ -27,7 +27,7 @@ struct nwNewPlayerInfoStruct
 
 struct nwAddCharacterStruct
 {
-	wchar_t path[256];
+	uint preset_id;
 	uint id;
 	uint faction;
 	vec3 pos;

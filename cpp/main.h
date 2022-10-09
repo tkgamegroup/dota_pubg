@@ -145,9 +145,9 @@ extern std::map<uint, cProjectilePtr> projectiles_by_id;
 extern std::map<uint, cChestPtr> chests_by_id;
 
 EntityPtr get_prefab(const std::filesystem::path& path);
-void add_player(vec3& pos, uint& faction, std::filesystem::path& file);
+void add_player(vec3& pos, uint& faction, uint& preset_id);
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
-cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, uint id = 0);
+cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id = 0);
 void remove_character(cCharacterPtr character);
 cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {}, uint id = 0);
 cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {}, uint id = 0);

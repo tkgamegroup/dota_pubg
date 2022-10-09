@@ -3,7 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavAgent" radius="0.6" height="1.8" speed="7.87" separation_group="0" />
-		<item type_name="cCharacter" preset_name="Dragon Knight" />
+		<item type_name="cCharacter" />
 	</components>
 	<children>
 		<item file_id="48f395e84fc041d33d9790ad219afef2" name="RootNode">

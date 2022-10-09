@@ -159,6 +159,7 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.path = L"assets\\characters\\dragon_knight\\main.prefab";
 		preset.name = "Dragon Knight";
 		preset.exp_base = 200;
 		preset.hp = 2000;
@@ -181,6 +182,7 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.path = L"assets\\characters\\life_stealer\\main.prefab";
 		preset.name = "Life Stealer";
 		preset.exp_base = 200;
 		preset.hp = 2000;
@@ -198,6 +200,7 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.path = L"assets\\characters\\slark\\main.prefab";
 		preset.name = "Slark";
 		preset.exp_base = 200;
 		preset.hp = 2000;
@@ -215,6 +218,7 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.path = L"assets\\characters\\spiderling\\main.prefab";
 		preset.name = "Spiderling";
 		preset.exp_base = 200;
 		preset.hp = 2000;
@@ -229,6 +233,7 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.path = L"assets\\characters\\treant\\main.prefab";
 		preset.name = "Treant";
 		preset.exp_base = 200;
 		preset.hp = 5500;
@@ -248,6 +253,7 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.path = L"assets\\characters\\boar\\main.prefab";
 		preset.name = "Boar";
 		preset.exp_base = 200;
 		preset.hp = 3000;

@@ -3,7 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavAgent" radius="0.6" height="1" speed="8.128" />
-		<item type_name="cCharacter" preset_name="Boar" />
+		<item type_name="cCharacter" />
 	</components>
 	<children>
 		<item name="RootNode">
