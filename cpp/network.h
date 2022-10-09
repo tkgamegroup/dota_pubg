@@ -13,31 +13,61 @@ enum MultiPlayerType
 
 enum nwMessage
 {
+	nwNewPlayerInfo,
 	nwAddCharacter,
 	nwRemoveCharacter,
 	nwUpdateCharacter
 };
 
+struct nwNewPlayerInfoStruct
+{
+	uint faction;
+	uint character_id;
+};
+
 struct nwAddCharacterStruct
 {
-	char path[256];
-	char guid[32];
+	wchar_t path[256];
+	uint id;
+	uint faction;
 	vec3 pos;
 };
 
 struct nwRemoveCharacterStruct
 {
-
+	uint id;
 };
 
 struct nwUpdateCharacterStruct
 {
-
+	uint id;
+	vec3 pos;
+	vec3 euler;
+	uint action;
 };
+
+template <typename T>
+struct PeedingActions
+{
+	std::mutex mtx;
+	std::vector<T> actions;
+};
+
+extern PeedingActions<void*>				peeding_add_players;
+extern PeedingActions<nwAddCharacterStruct> peeding_add_characters;
 
 extern MultiPlayerType multi_player;
 extern network::ClientPtr nw_client;
 extern network::ServerPtr nw_server;
+
+template <typename T>
+void pack_msg(std::string& res, uint msg, T& stru)
+{
+	auto dst = res.data();
+	res.resize(res.size() + sizeof(uint) + sizeof(T));
+	memcpy(dst, &msg, sizeof(uint)); dst += sizeof(uint);
+	memcpy(dst, &stru, sizeof(T));
+}
 
 void start_server();
 void join_server();

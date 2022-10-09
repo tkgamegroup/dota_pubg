@@ -19,7 +19,7 @@
 		</item>
 		<item file_id="1d490ae14a37b2f762b1998545666354" name="blocker">
 			<components>
-				<item type_name="flame::cNode" pos="0,3.79,0" scl="0.5,4,0.5" />
+				<item type_name="flame::cNode" pos="0,3.79,0" scl="1.5,4,1.5" />
 				<item type_name="flame::cMesh" enable="false" mesh_name="standard_cylinder" material_name="default" />
 				<item type_name="flame::cNavMesh" />
 			</components>

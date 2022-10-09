@@ -4,6 +4,9 @@ MultiPlayerType multi_player = SinglePlayer;
 network::ClientPtr nw_client = nullptr;
 network::ServerPtr nw_server = nullptr;
 
+PeedingActions<void*>					peeding_add_players;
+PeedingActions<nwAddCharacterStruct>	peeding_add_characters;
+
 void start_server()
 {
 	nw_server = network::Server::create(network::SocketTcp, 1234, nullptr, [](void* id) {
@@ -13,6 +16,9 @@ void start_server()
 		[]() {
 
 		});
+		peeding_add_players.mtx.lock();
+		peeding_add_players.actions.push_back(id);
+		peeding_add_players.mtx.unlock();
 	});
 	multi_player = MultiPlayerAsHost;
 }
@@ -21,16 +27,26 @@ void join_server()
 {
 	nw_client = network::Client::create(network::SocketTcp, "127.0.0.1", 1234, [](const std::string& msg) {
 		auto p = msg.data();
-		uint l = msg.size();
-		while (l > 0)
+		auto e = p + msg.size();
+		while (p < e)
 		{
 			auto msg = *(uint*)p;
 			p += sizeof(uint);
-			l -= 4;
 			switch (msg)
 			{
+			case nwNewPlayerInfo:
+			{
+				auto& s = *(nwNewPlayerInfoStruct*)p;
+				main_player.faction = s.faction;
+				main_player.character_id = s.character_id;
+				p += sizeof(nwNewPlayerInfoStruct);
+			}
+				break;
 			case nwAddCharacter:
-
+				peeding_add_characters.mtx.lock();
+				peeding_add_characters.actions.push_back(*(nwAddCharacterStruct*)p);
+				peeding_add_characters.mtx.unlock();
+				p += sizeof(nwAddCharacterStruct);
 				break;
 			}
 		}

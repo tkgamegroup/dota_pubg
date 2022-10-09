@@ -8,7 +8,7 @@ struct cProjectile : Component
 	/// Reflect requires
 	cNodePtr node;
 
-	std::string guid;
+	uint id;
 
 	float speed = 0.1f;
 

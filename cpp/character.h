@@ -149,7 +149,7 @@ struct cCharacter : Component
 
 	cArmaturePtr armature = nullptr;
 
-	std::string guid;
+	uint id;
 
 	/// Reflect
 	uint faction = 0;

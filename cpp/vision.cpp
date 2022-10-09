@@ -11,8 +11,9 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
 
-const uint vision_map_w = 256;
-const uint vision_map_h = 256;
+const uint resolution = 2;
+const uint W = 256 * resolution;
+const uint H = 256 * resolution;
 static graphics::ImagePtr img_my_vision = nullptr;
 static graphics::BufferPtr stagbuf = nullptr;
 
@@ -24,300 +25,304 @@ bool get_vision(uint faction, const vec3& coord)
 	if (it == visions.end())
 		return false;
 	auto buf = it->second.data();
-	auto c = (ivec2)coord.xz();
-	if (c.x >= 0 && c.y >= 0 && c.x < vision_map_w && c.y < vision_map_w)
+	auto c = (ivec2)(coord.xz() * (float)resolution);
+	if (c.x >= 0 && c.y >= 0 && c.x < W && c.y < W)
 	{
-		auto v = buf[c.y * vision_map_w + c.x];
+		auto v = buf[c.y * W + c.x];
 		return v > 0;
 	}
 	return false;
 }
 
+std::vector<ivec2> get_beam(int x, int y)
+{
+	std::vector<ivec2> ret;
+	if (x == 0)
+	{
+		if (y > 0)
+		{
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(0, +i));
+		}
+		else
+		{
+			y = -y;
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(0, -i));
+		}
+	}
+	else if (y == 0)
+	{
+		if (x > 0)
+		{
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(+i, 0));
+		}
+		else
+		{
+			x = -x;
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(-i, 0));
+		}
+	}
+	else if (x > 0 && y > 0)
+	{
+		if (x == y)
+		{
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(+i, +i));
+		}
+		else if (x > y)
+		{
+			auto k = y / (float)x;
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(+i, +i * k));
+		}
+		else
+		{
+			auto k = x / (float)y;
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(+i * k, +i));
+		}
+	}
+	else if (x < 0 && y > 0)
+	{
+		if (-x == y)
+		{
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(-i, +i));
+		}
+		else if (-x > y)
+		{
+			x = -x;
+			auto k = y / (float)x;
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(-i, +i * k));
+		}
+		else
+		{
+			x = -x;
+			auto k = x / (float)y;
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(-i * k, +i));
+		}
+	}
+	else if (x > 0 && y < 0)
+	{
+		if (x == -y)
+		{
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(+i, -i));
+		}
+		else if (x > -y)
+		{
+			y = -y;
+			auto k = y / (float)x;
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(+i, -i * k));
+		}
+		else
+		{
+			y = -y;
+			auto k = x / (float)y;
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(+i * k, -i));
+		}
+	}
+	else if (x < 0 && y < 0)
+	{
+		if (x == y)
+		{
+			x = -x;
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(-i, -i));
+		}
+		else if (-x > -y)
+		{
+			x = -x;
+			y = -y;
+			auto k = y / (float)x;
+			for (auto i = 0; i < x; i++)
+				ret.push_back(ivec2(-i, -i * k));
+		}
+		else
+		{
+			x = -x;
+			y = -y;
+			auto k = x / (float)y;
+			for (auto i = 0; i < y; i++)
+				ret.push_back(ivec2(-i * k, -i));
+		}
+	}
+	return ret;
+}
+
 void update_vision()
 {
-	auto w = vision_map_w; auto h = vision_map_h;
-	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	for (auto& f : characters_by_faction)
 	{
-		for (auto& f : characters_by_faction)
-		{
-			auto it = visions.find(f.first);
-			if (it == visions.end())
-			{
-				it = visions.emplace(f.first, std::vector<uchar>()).first;
-				it->second.resize(w * h);
-			}
-			auto buf = it->second.data();
+		if (main_player.faction != f.first && multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
+			continue;
 
-			if (f.first == FactionCreep) // well, creeps have full vision
+		auto it = visions.find(f.first);
+		if (it == visions.end())
+		{
+			it = visions.emplace(f.first, std::vector<uchar>()).first;
+			it->second.resize(W * H);
+		}
+		auto buf = it->second.data();
+
+		if (f.first == FactionCreep) // well, creeps have full vision
+		{
+			if (buf[0] != 255)
+				memset(buf, 255, W * H);
+		}
+		else
+		{
+			auto changed = false;
+			for (auto character : f.second)
 			{
-				memset(buf, 255, w * h);
+				auto pos = character->node->pos;
+				auto coord = (ivec2)(pos.xz() * (float)resolution);
+				if (coord != character->vision_coord)
+				{
+					changed = true;
+					character->vision_coord = coord;
+				}
 			}
-			else
+
+			if (changed)
 			{
+				memset(buf, 0, W * H);
+
 				for (auto character : f.second)
 				{
+
 					auto pos = character->node->pos;
-					auto coord = (ivec2)pos.xz();
-					if (coord != character->vision_coord)
+					auto coord = character->vision_coord;
+					auto height = pos.y;
+					auto range = character->vision_range;
+					auto elev = main_terrain.terrain->extent.y / 4.f;
+					auto level = 0;
+					for (; level < 4; level++)
 					{
-						struct Beam
+						if (height < elev)
+							break;
+						height -= elev;
+					}
+					height = (level + 1) * elev;
+
+					// add blockers (trees, rocks)
+					std::vector<cNodePtr> objs;
+					sScene::instance()->octree->get_colliding(pos, range / (float)resolution, objs);
+					std::vector<std::pair<vec2, float>> blockers;
+					for (auto n : objs)
+					{
+						if (n->entity->name == "blocker")
+							blockers.emplace_back(n->g_pos.xz(), n->g_scl.x * 0.5f);
+					}
+
+					for (auto y = int(coord.y - range); y <= coord.y + range; y++)
+					{
+						for (auto x = int(coord.x - range); x <= coord.x + range; x++)
 						{
-							std::vector<ivec2> pts;
-						};
-						auto get_beam = [&](int x, int y)->Beam {
-							Beam b;
-							if (x == 0)
+							if (x >= 0 && y >= 0 && x < W && y < H)
 							{
-								if (y > 0)
-								{
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(0, +i));
-								}
+								auto mark = false;
+								if (main_terrain.get_coord(vec2((x + 0.5f) / W, (y + 0.5f) / H)).y > height) // high elevation
+									mark = true;
 								else
 								{
-									y = -y;
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(0, -i));
+									for (auto& b : blockers)
+									{
+										if (distance(vec2(x, y) / (float)resolution, b.first) > b.second)
+											continue;
+										if (distance(vec2(x + 1, y) / (float)resolution, b.first) > b.second)
+											continue;
+										if (distance(vec2(x + 1, y + 1) / (float)resolution, b.first) > b.second)
+											continue;
+										if (distance(vec2(x, y + 1) / (float)resolution, b.first) > b.second)
+											continue;
+										mark = true;
+										break;
+									}
 								}
+								if (mark)
+									buf[y * W + x] = 1;
 							}
-							else if (y == 0)
-							{
-								if (x > 0)
-								{
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(+i, 0));
-								}
-								else
-								{
-									x = -x;
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(-i, 0));
-								}
-							}
-							else if (x > 0 && y > 0)
-							{
-								if (x == y)
-								{
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(+i, +i));
-								}
-								else if (x > y)
-								{
-									auto k = y / (float)x;
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(+i, +i * k));
-								}
-								else
-								{
-									auto k = x / (float)y;
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(+i * k, +i));
-								}
-							}
-							else if (x < 0 && y > 0)
-							{
-								if (-x == y)
-								{
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(-i, +i));
-								}
-								else if (-x > y)
-								{
-									x = -x;
-									auto k = y / (float)x;
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(-i, +i * k));
-								}
-								else
-								{
-									x = -x;
-									auto k = x / (float)y;
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(-i * k, +i));
-								}
-							}
-							else if (x > 0 && y < 0)
-							{
-								if (x == -y)
-								{
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(+i, -i));
-								}
-								else if (x > -y)
-								{
-									y = -y;
-									auto k = y / (float)x;
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(+i, -i * k));
-								}
-								else
-								{
-									y = -y;
-									auto k = x / (float)y;
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(+i * k, -i));
-								}
-							}
-							else if (x < 0 && y < 0)
-							{
-								if (x == y)
-								{
-									x = -x;
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(-i, -i));
-								}
-								else if (-x > -y)
-								{
-									x = -x;
-									y = -y;
-									auto k = y / (float)x;
-									for (auto i = 0; i < x; i++)
-										b.pts.push_back(ivec2(-i, -i * k));
-								}
-								else
-								{
-									x = -x;
-									y = -y;
-									auto k = x / (float)y;
-									for (auto i = 0; i < y; i++)
-										b.pts.push_back(ivec2(-i * k, -i));
-								}
-							}
-							return b;
-						};
-
-						memset(buf, 0, w * h);
-
-						auto height = pos.y;
-						auto range = character->vision_range;
-						auto elev = main_terrain.terrain->extent.y / 4.f;
-						auto level = 0;
-						for (; level < 4; level++)
-						{
-							if (height < elev)
-								break;
-							height -= elev;
-						}
-						height = (level + 1) * elev;
-
-						// add blockers (trees, rocks)
-						std::vector<cNodePtr> objs;
-						sScene::instance()->octree->get_colliding(pos, range, objs);
-						for (auto n : objs)
-						{
-							if (n->entity->name == "blocker")
-							{
-								auto pos = n->g_pos;
-								auto coord = (ivec2)pos.xz();
-								buf[coord.y * w + coord.x] = 1;
-								if (pos.x < 0.5f)
-								{
-									if (coord.x > 0)
-										buf[coord.y * w + (coord.x - 1)] = 1;
-								}
-								else
-								{
-									if (coord.x < w - 1)
-										buf[coord.y * w + (coord.x + 1)] = 1;
-								}
-								if (pos.y < 0.5f)
-								{
-									if (coord.y > 0)
-										buf[(coord.y - 1) * w + coord.x] = 1;
-								}
-								else
-								{
-									if (coord.y < h - 1)
-										buf[(coord.y + 1) * w + coord.x] = 1;
-								}
-							}
-						}
-						// add blockers (high elevation)
-						for (auto y = int(coord.y - range); y <= coord.y + range; y++)
-						{
-							for (auto x = int(coord.x - range); x <= coord.x + range; x++)
-							{
-								if (x >= 0 && y >= 0 && x < w && y < h)
-								{
-									if (main_terrain.get_coord(vec2((x + 0.5f) / w, (y + 0.5f) / h)).y > height)
-										buf[y * w + x] = 1;
-								}
-							}
-						}
-
-						auto cast_beam = [&](const Beam& b) {
-							for (auto& p : b.pts)
-							{
-								if (length((vec2)p) > range)
-									break;
-								auto c = coord + p;
-								if (c.x < 0 || c.y < 0 || c.x >= w || c.y >= w)
-									break;
-								auto& dst = buf[c.y * w + c.x];
-								if (dst == 1)
-									break;
-								dst = 255;
-							}
-						};
-						cast_beam(get_beam(+range, 0));
-						cast_beam(get_beam(-range, 0));
-						cast_beam(get_beam(0, +range));
-						cast_beam(get_beam(0, -range));
-
-						cast_beam(get_beam(+range, +range));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(+range, +i));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(+i, +range));
-
-						cast_beam(get_beam(-range, +range));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(-range, +i));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(-i, +range));
-
-						cast_beam(get_beam(+range, -range));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(+range, -i));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(+i, -range));
-
-						cast_beam(get_beam(-range, -range));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(-range, -i));
-						for (auto i = 1; i < range; i++)
-							cast_beam(get_beam(-i, -range));
-
-						character->vision_coord = coord;
-
-						if (f.first == main_player.character->faction)
-						{
-							graphics::Queue::get()->wait_idle();
-
-							if (!img_my_vision)
-							{
-								img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(w, h), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
-								auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
-								sRenderer::instance()->set_texture_res_name(id, "VISION");
-							}
-							if (!stagbuf)
-							{
-								stagbuf = graphics::Buffer::create(vision_map_w * vision_map_h, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
-								stagbuf->map();
-							}
-
-							graphics::InstanceCommandBuffer cb;
-							memcpy(stagbuf->mapped, visions[main_player.character->faction].data(), stagbuf->size);
-							cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec2(w, h)));
-							cb.excute();
 						}
 					}
+
+					auto cast_beam = [&](const std::vector<ivec2>& b) {
+						for (auto& p : b)
+						{
+							if (length((vec2)p) > range)
+								break;
+							auto c = coord + p;
+							if (c.x < 0 || c.y < 0 || c.x >= W || c.y >= H)
+								break;
+							auto& dst = buf[c.y * W + c.x];
+							if (dst == 1)
+								break;
+							dst = 255;
+						}
+					};
+					cast_beam(get_beam(+range, 0));
+					cast_beam(get_beam(-range, 0));
+					cast_beam(get_beam(0, +range));
+					cast_beam(get_beam(0, -range));
+
+					cast_beam(get_beam(+range, +range));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(+range, +i));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(+i, +range));
+
+					cast_beam(get_beam(-range, +range));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(-range, +i));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(-i, +range));
+
+					cast_beam(get_beam(+range, -range));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(+range, -i));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(+i, -range));
+
+					cast_beam(get_beam(-range, -range));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(-range, -i));
+					for (auto i = 1; i < range; i++)
+						cast_beam(get_beam(-i, -range));
+				}
+
+				if (f.first == main_player.faction)
+				{
+					graphics::Queue::get()->wait_idle();
+
+					if (!img_my_vision)
+					{
+						img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(W, H), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
+						auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
+						sRenderer::instance()->set_texture_res_name(id, "VISION");
+					}
+					if (!stagbuf)
+					{
+						stagbuf = graphics::Buffer::create(W * H, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
+						stagbuf->map();
+					}
+
+					graphics::InstanceCommandBuffer cb;
+					memcpy(stagbuf->mapped, visions[main_player.faction].data(), stagbuf->size);
+					cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec2(W, H)));
+					cb.excute();
 				}
 			}
 		}
 	}
 
 	// update character's visiable
-	for (auto& pair : characters_by_guid)
-		pair.second->entity->children[0]->set_enable(get_vision(main_player.character->faction, pair.second->node->pos));
+	for (auto& pair : characters_by_id)
+		pair.second->entity->children[0]->set_enable(get_vision(main_player.faction, pair.second->node->pos));
 }

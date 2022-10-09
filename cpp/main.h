@@ -101,6 +101,9 @@ extern MainTerrain main_terrain;
 
 struct MainPlayer
 {
+	uint faction;
+	uint character_id;
+
 	EntityPtr entity = nullptr;
 	cNodePtr node = nullptr;
 	cNavAgentPtr nav_agent = nullptr;
@@ -136,18 +139,19 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
-extern std::map<std::string, cCharacterPtr> characters_by_guid;
+extern std::map<uint, cCharacterPtr> characters_by_id;
 extern std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
-extern std::map<std::string, cProjectilePtr> projectiles_by_guid;
-extern std::map<std::string, cChestPtr> chests_by_guid;
+extern std::map<uint, cProjectilePtr> projectiles_by_id;
+extern std::map<uint, cChestPtr> chests_by_id;
 
-void add_player(vec3& pos, uint& faction);
+EntityPtr get_prefab(const std::filesystem::path& path);
+void add_player(vec3& pos, uint& faction, std::filesystem::path& file);
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
-cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid = "");
+cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, uint id = 0);
 void remove_character(cCharacterPtr character);
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {}, const std::string& guid = "");
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {}, const std::string& guid = "");
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update = {}, uint id = 0);
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update = {}, uint id = 0);
 void remove_projectile(cProjectilePtr projectile);
-cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, const std::string& guid = "");
+cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
 void remove_chest(cChestPtr chest);
 void teleport(cCharacterPtr character, const vec3& location);

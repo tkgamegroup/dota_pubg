@@ -290,8 +290,6 @@ void toggle_settings_view()
 		view_settings.close();
 }
 
-static EntityPtr knight_prefab = nullptr;
-
 void cMain::start()
 {
 	printf("main started\n");
@@ -314,14 +312,12 @@ void cMain::start()
 		{
 			vec3 player1_coord;
 			uint player1_faction;
-			add_player(player1_coord, player1_faction);
-
-			if (!knight_prefab)
-			{
-				knight_prefab = Entity::create();
-				knight_prefab->load(L"assets\\characters\\dragon_knight\\main.prefab");
-			}
-			main_player.init(add_character(knight_prefab, player1_coord, player1_faction)->entity);
+			std::filesystem::path player1_file;
+			add_player(player1_coord, player1_faction, player1_file);
+			auto character = add_character(get_prefab(player1_file), player1_coord, player1_faction);
+			main_player.faction = player1_faction;
+			main_player.character_id = character->id;
+			main_player.init(character->entity);
 
 			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
 			add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
@@ -333,25 +329,25 @@ void cMain::start()
 			{
 				auto coord = main_terrain.get_coord_by_centrality(i);
 
-				static EntityPtr prefabs[] = {
-					Entity::create(L"assets\\characters\\life_stealer\\main.prefab"),
-					Entity::create(L"assets\\characters\\slark\\main.prefab")
+				static const wchar_t* paths[] = {
+					L"assets\\characters\\life_stealer\\main.prefab",
+					L"assets\\characters\\slark\\main.prefab"
 				};
 
-				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
+				auto character = add_character(get_prefab(paths[linearRand(0U, (uint)countof(paths) - 1)]), coord, FactionCreep);
 				new CommandAttackLocation(character, coord);
 			}
 			for (auto i = 0; i < 100; i++)
 			{
 				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-				static EntityPtr prefabs[] = {
-					Entity::create(L"assets\\characters\\spiderling\\main.prefab"),
-					Entity::create(L"assets\\characters\\treant\\main.prefab"),
-					Entity::create(L"assets\\characters\\boar\\main.prefab")
+				static const wchar_t* paths[] = {
+					L"assets\\characters\\spiderling\\main.prefab",
+					L"assets\\characters\\treant\\main.prefab",
+					L"assets\\characters\\boar\\main.prefab"
 				};
 
-				auto character = add_character(prefabs[linearRand(0U, (uint)countof(prefabs) - 1)], coord, FactionCreep);
+				auto character = add_character(get_prefab(paths[linearRand(0U, (uint)countof(paths) - 1)]), coord, FactionCreep);
 				character->entity->add_component<cCreepAI>();
 			}
 		}
@@ -715,6 +711,52 @@ void cMain::start()
 
 void cMain::update()
 {
+	peeding_add_players.mtx.lock();
+	if (!peeding_add_players.actions.empty())
+	{
+		for (auto so_id : peeding_add_players.actions)
+		{
+			vec3 pos;
+			uint faction;
+			std::filesystem::path file;
+			add_player(pos, faction, file);
+			auto character = add_character(get_prefab(file), pos, faction);
+
+			std::string res;
+			{
+				nwNewPlayerInfoStruct stru;
+				stru.faction = faction;
+				stru.character_id = character->id;
+				pack_msg(res, nwAddCharacter, stru);
+			}
+			{
+				nwAddCharacterStruct stru;
+				wcscpy(stru.path, file.c_str());
+				stru.id = character->id;
+				stru.faction = faction;
+				stru.pos = pos;
+				pack_msg(res, nwAddCharacter, stru);
+			}
+			nw_server->send(so_id, res);
+		}
+
+	}
+	peeding_add_players.mtx.unlock();
+
+	peeding_add_characters.mtx.lock();
+	if (!peeding_add_characters.actions.empty())
+	{
+		for (auto& s : peeding_add_characters.actions)
+		{
+			auto character = add_character(get_prefab(s.path), s.pos, s.faction, s.id);
+			if (s.id == main_player.character_id)
+			{
+				main_player.init(character->entity);
+			}
+		}
+	}
+	peeding_add_characters.mtx.unlock();
+
 	if (main_camera.node && main_player.node)
 	{
 		static vec3 velocity(0.f);
@@ -948,11 +990,26 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
-void add_player(vec3& pos, uint& faction)
+EntityPtr get_prefab(const std::filesystem::path& _path)
+{
+	static std::map<std::filesystem::path, EntityPtr> prefabs;
+	auto path = Path::get(_path);
+	auto it = prefabs.find(path);
+	if (it == prefabs.end())
+	{
+		auto e = Entity::create();
+		e->load(path);
+		it = prefabs.emplace(path, e).first;
+	}
+	return it->second;
+}
+
+void add_player(vec3& pos, uint& faction, std::filesystem::path& file)
 {
 	static uint idx = 0;
 	pos = main_terrain.get_coord_by_centrality(-idx - 1);
 	faction = FactionParty1 + idx;
+	file = L"assets\\characters\\dragon_knight\\main.prefab";
 	idx++;
 }
 
@@ -982,27 +1039,28 @@ std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint f
 	return ret;
 }
 
-std::map<std::string, cCharacterPtr> characters_by_guid;
+std::map<uint, cCharacterPtr> characters_by_id;
 std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
-std::map<std::string, cProjectilePtr> projectiles_by_guid;
-std::map<std::string, cChestPtr> chests_by_guid;
+std::map<uint, cProjectilePtr> projectiles_by_id;
+std::map<uint, cChestPtr> chests_by_id;
 
-cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, const std::string& guid)
+cCharacterPtr add_character(EntityPtr prefab, const vec3& pos, uint faction, uint id)
 {
+	static uint uid = 1;
 	auto e = prefab->copy();
 	e->node()->set_pos(pos);
 	auto character = e->get_component_t<cCharacter>();
 	character->set_faction(faction);
-	character->guid = guid.empty() ? generate_guid() : guid;
+	character->id = id ? id : uid++;
 	root->add_child(e);
-	characters_by_guid.emplace(character->guid, character);
+	characters_by_id.emplace(character->id, character);
 	characters_by_faction[faction].push_back(character);
 	return character;
 }
 
 void remove_character(cCharacterPtr character)
 {
-	characters_by_guid.erase(characters_by_guid.find(character->guid));
+	characters_by_id.erase(characters_by_id.find(character->id));
 	std::erase_if(characters_by_faction[character->faction], [&](const auto& i) {
 		return i == character;
 	});
@@ -1013,26 +1071,28 @@ void remove_character(cCharacterPtr character)
 	});
 }
 
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update, const std::string& guid)
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update, uint id)
 {
+	static uint uid = 1;
 	auto e = prefab->copy();
 	e->node()->set_pos(pos);
 	auto projectile = e->get_component_t<cProjectile>();
-	projectile->guid = guid.empty() ? generate_guid() : guid;
+	projectile->id = id ? id : uid++;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	projectile->on_end = on_end;
 	root->add_child(e);
-	projectiles_by_guid.emplace(projectile->guid, projectile);
+	projectiles_by_id.emplace(projectile->id, projectile);
 	return projectile;
 }
 
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update, const std::string& guid)
+cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update, uint id)
 {
+	static uint uid = 1;
 	auto e = prefab->copy();
 	e->node()->set_pos(pos);
 	auto projectile = e->get_component_t<cProjectile>();
-	projectile->guid = guid.empty() ? generate_guid() : guid;
+	projectile->id = id ? id : uid++;
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
@@ -1041,13 +1101,13 @@ cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& loc
 	projectile->on_collide = on_collide;
 	projectile->on_update = on_update;
 	root->add_child(e);
-	projectiles_by_guid.emplace(projectile->guid, projectile);
+	projectiles_by_id.emplace(projectile->id, projectile);
 	return projectile;
 }
 
 void remove_projectile(cProjectilePtr projectile)
 {
-	projectiles_by_guid.erase(projectiles_by_guid.find(projectile->guid));
+	projectiles_by_id.erase(projectiles_by_id.find(projectile->id));
 	add_event([projectile]() {
 		auto e = projectile->entity;
 		e->parent->remove_child(e);
@@ -1055,8 +1115,9 @@ void remove_projectile(cProjectilePtr projectile)
 	});
 }
 
-cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, const std::string& guid)
+cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
+	static uint uid = 1;
 	static EntityPtr e_chest = nullptr;
 	if (!e_chest)
 	{
@@ -1067,16 +1128,16 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, const std::str
 	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
 	auto chest = e->get_component_t<cChest>();
-	chest->guid = guid.empty() ? generate_guid() : guid;
+	chest->id = id ? id : uid++;
 	chest->item_id = item_id;
 	chest->item_num = item_num;
-	chests_by_guid.emplace(chest->guid, chest);
+	chests_by_id.emplace(chest->id, chest);
 	return chest;
 }
 
 void remove_chest(cChestPtr chest)
 {
-	chests_by_guid.erase(chests_by_guid.find(chest->guid));
+	chests_by_id.erase(chests_by_id.find(chest->id));
 	add_event([chest]() {
 		auto e = chest->entity;
 		e->parent->remove_child(e);
