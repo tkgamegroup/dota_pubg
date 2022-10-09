@@ -63,8 +63,9 @@ extern network::ServerPtr nw_server;
 template <typename T>
 void pack_msg(std::string& res, uint msg, T& stru)
 {
-	auto dst = res.data();
-	res.resize(res.size() + sizeof(uint) + sizeof(T));
+	auto old_size = (uint)res.size();
+	res.resize(old_size + sizeof(uint) + sizeof(T));
+	auto dst = res.data() + old_size;
 	memcpy(dst, &msg, sizeof(uint)); dst += sizeof(uint);
 	memcpy(dst, &stru, sizeof(T));
 }

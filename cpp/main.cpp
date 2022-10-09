@@ -598,7 +598,7 @@ void cMain::start()
 		if (main_player.character)
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
-			ImGui::SetNextWindowSize(ImVec2(200.f, 100.f), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(200.f, 120.f), ImGuiCond_Always);
 			ImGui::Begin("##main_player", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 
@@ -608,9 +608,10 @@ void cMain::start()
 			hp_bar(dl, bar_width, bar_height, main_player.character);
 			mp_bar(dl, bar_width, bar_height, main_player.character);
 			exp_bar(dl, bar_width, bar_height, main_player.character);
-
 			show_buffs(dl, main_player.character);
 			action_bar(dl, bar_width, 4.f, main_player.character);
+			auto pos = main_player.character->node->pos;
+			ImGui::Text("%d, %d", (int)pos.x, (int)pos.z);
 
 			ImGui::End();
 		}
@@ -727,19 +728,20 @@ void cMain::update()
 				nwNewPlayerInfoStruct stru;
 				stru.faction = faction;
 				stru.character_id = character->id;
-				pack_msg(res, nwAddCharacter, stru);
+				pack_msg(res, nwNewPlayerInfo, stru);
 			}
+			for (auto& pair : characters_by_id)
 			{
 				nwAddCharacterStruct stru;
-				wcscpy(stru.path, file.c_str());
-				stru.id = character->id;
-				stru.faction = faction;
-				stru.pos = pos;
+				wcscpy(stru.path, find_prefab_file(pair.second->entity).c_str());
+				stru.id = pair.first;
+				stru.faction = pair.second->faction;
+				stru.pos = pair.second->node->pos;
 				pack_msg(res, nwAddCharacter, stru);
 			}
 			nw_server->send(so_id, res);
 		}
-
+		peeding_add_players.actions.clear();
 	}
 	peeding_add_players.mtx.unlock();
 
@@ -750,10 +752,9 @@ void cMain::update()
 		{
 			auto character = add_character(get_prefab(s.path), s.pos, s.faction, s.id);
 			if (s.id == main_player.character_id)
-			{
 				main_player.init(character->entity);
-			}
 		}
+		peeding_add_characters.actions.clear();
 	}
 	peeding_add_characters.mtx.unlock();
 
@@ -766,6 +767,11 @@ void cMain::update()
 	}
 
 	update_vision();
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+
+	}
 
 	if (!graphics::gui_want_mouse())
 	{
@@ -943,7 +949,10 @@ void cMain::update()
 					}
 					else if (hovering_terrain)
 					{
-						new CommandMoveTo(main_player.character, hovering_pos);
+						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+							new CommandMoveTo(main_player.character, hovering_pos);
+						else
+							;
 						add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
 					}
 				}
@@ -990,9 +999,10 @@ struct cMainCreate : cMain::Create
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
 
+static std::map<std::filesystem::path, EntityPtr> prefabs;
+
 EntityPtr get_prefab(const std::filesystem::path& _path)
 {
-	static std::map<std::filesystem::path, EntityPtr> prefabs;
 	auto path = Path::get(_path);
 	auto it = prefabs.find(path);
 	if (it == prefabs.end())
@@ -1008,7 +1018,7 @@ void add_player(vec3& pos, uint& faction, std::filesystem::path& file)
 {
 	static uint idx = 0;
 	pos = main_terrain.get_coord_by_centrality(-idx - 1);
-	faction = FactionParty1 + idx;
+	faction =  1 << (log2i((uint)FactionParty1) + idx);
 	file = L"assets\\characters\\dragon_knight\\main.prefab";
 	idx++;
 }

@@ -126,6 +126,7 @@ struct CharacterPreset
 	uint atk_sp = 100; // attack speed
 
 	std::vector<std::pair<std::string, uint>> abilities;
+	std::vector<std::tuple<uint, uint, uint, uint>> drop_items; // id, probability, num min, num max
 
 	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);

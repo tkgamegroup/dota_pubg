@@ -11,6 +11,70 @@ void load_items()
 	{
 		auto& item = items.emplace_back();
 		item.id = items.size() - 1;
+		item.name = "Knight Helm";
+		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_uvs = vec4(4.f / 13, 9.f / 15.f, 5.f / 13, 10.f / 15.f);
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemEquipment;
+		item.sub_category = EquipHead;
+		item.passive = [](cCharacterPtr character) {
+			character->phy_def += 4;
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("+4 PHY DEF");
+		};
+	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
+		item.name = "Knight Armor";
+		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_uvs = vec4(9.f / 13, 9.f / 15.f, 10.f / 13, 10.f / 15.f);
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemEquipment;
+		item.sub_category = EquipChest;
+		item.passive = [](cCharacterPtr character) {
+			character->phy_def += 5;
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("+5 PHY DEF");
+		};
+	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
+		item.name = "Knight Trousers";
+		item.icon_name = L"assets\\icons\\items\\iron_trousers.png";
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemEquipment;
+		item.sub_category = EquipLeg;
+		item.passive = [](cCharacterPtr character) {
+			character->phy_def += 4;
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("+4 PHY DEF");
+		};
+	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
+		item.name = "Knight Boots";
+		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_uvs = vec4(8.f / 13, 10.f / 15.f, 9.f / 13, 11.f / 15.f);
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemEquipment;
+		item.sub_category = EquipFoot;
+		item.passive = [](cCharacterPtr character) {
+			character->mov_sp += 5;
+			character->phy_def += 2;
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("+5 MOV SP\n+2 PHY DEF");
+		};
+	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
 		item.name = "Boots of Speed";
 		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
 		item.icon_uvs = vec4(5.f / 13, 10.f / 15.f, 6.f / 13, 11.f / 15.f);
@@ -65,10 +129,25 @@ void load_items()
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemConsumable;
 		item.active = [](cCharacterPtr character) {
-			character->hp = min(character->hp + 200, character->hp_max);
+			character->hp = min(character->hp + 1000, character->hp_max);
 		};
 		item.show = []() {
-			ImGui::TextUnformatted("Recover hp by 20");
+			ImGui::TextUnformatted("Recover hp by 100");
+		};
+	}
+	{
+		auto& item = items.emplace_back();
+		item.id = items.size() - 1;
+		item.name = "Mint";
+		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_uvs = vec4(1.f / 13, 13.f / 15.f, 2.f / 13, 14.f / 15.f);
+		item.icon_image = graphics::Image::get(item.icon_name);
+		item.type = ItemConsumable;
+		item.active = [](cCharacterPtr character) {
+			character->mp = min(character->mp + 500, character->mp_max);
+		};
+		item.show = []() {
+			ImGui::TextUnformatted("Recover mp by 50");
 		};
 	}
 }

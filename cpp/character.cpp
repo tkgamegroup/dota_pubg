@@ -242,6 +242,8 @@ void load_character_presets()
 		preset.mp_reg = 20;
 		preset.mov_sp = 100;
 		preset.abilities.emplace_back("Recover", 1);
+		preset.drop_items.emplace_back(Item::find("Berry"), 30, 1, 3);
+		preset.drop_items.emplace_back(Item::find("Mint"), 5, 1, 1);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -491,6 +493,19 @@ void cCharacter::die()
 		return;
 	hp = 0;
 	dead = true;
+	auto& preset = get_preset();
+	if (!preset.drop_items.empty())
+	{
+		std::vector<std::pair<uint, uint>> drops;
+		for (auto& d : preset.drop_items)
+		{
+			if (linearRand(0U, 100U) < std::get<1>(d))
+				drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
+		}
+		auto p = node->pos;
+		for (auto& d : drops)
+			add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
+	}
 }
 
 void cCharacter::start()
