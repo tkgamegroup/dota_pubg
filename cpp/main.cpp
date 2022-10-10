@@ -723,6 +723,8 @@ void cMain::update()
 			add_player(pos, faction, preset_id);
 			auto character = add_character(preset_id, pos, faction);
 
+			nw_players[faction].push_back(so_id);
+
 			std::string res;
 			{
 				nwNewPlayerInfoStruct stru;
@@ -770,7 +772,14 @@ void cMain::update()
 
 	if (multi_player == MultiPlayerAsHost)
 	{
-
+		for (auto& f : nw_players)
+		{
+			for (auto& pair : characters_by_id)
+			{
+				if (get_vision(f.first, pair.second->node->pos))
+					;
+			}
+		}
 	}
 
 	if (!graphics::gui_want_mouse())

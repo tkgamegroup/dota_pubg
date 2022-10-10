@@ -3,6 +3,7 @@
 MultiPlayerType multi_player = SinglePlayer;
 network::ClientPtr nw_client = nullptr;
 network::ServerPtr nw_server = nullptr;
+std::map<uint, std::vector<void*>> nw_players;
 
 PeedingActions<void*>					peeding_add_players;
 PeedingActions<nwAddCharacterStruct>	peeding_add_characters;
@@ -16,6 +17,7 @@ void start_server()
 		[]() {
 
 		});
+
 		peeding_add_players.mtx.lock();
 		peeding_add_players.actions.push_back(id);
 		peeding_add_players.mtx.unlock();

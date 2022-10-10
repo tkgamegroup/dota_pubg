@@ -59,6 +59,7 @@ extern PeedingActions<nwAddCharacterStruct> peeding_add_characters;
 extern MultiPlayerType multi_player;
 extern network::ClientPtr nw_client;
 extern network::ServerPtr nw_server;
+extern std::map<uint, std::vector<void*>> nw_players;
 
 template <typename T>
 void pack_msg(std::string& res, uint msg, T& stru)
