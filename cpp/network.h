@@ -105,8 +105,8 @@ extern PeedingActions<nwAddChestStruct>			peeding_add_chests;
 extern PeedingActions<nwRemoveChestStruct>		peeding_remove_chests;
 
 extern MultiPlayerType multi_player;
-extern network::ClientPtr nw_client;
-extern network::ServerPtr nw_server;
+extern network::ClientPtr so_client;
+extern network::ServerPtr so_server;
 extern std::map<uint, std::vector<void*>> nw_players;
 
 template <typename T>

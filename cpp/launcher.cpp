@@ -33,7 +33,7 @@ void cLauncher::start()
 		if (ImGui::Button("Join Local Server"))
 		{
 			join_server();
-			if (nw_client)
+			if (so_client)
 			{
 				multi_player = MultiPlayerAsClient;
 				enter_scene(entity);

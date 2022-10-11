@@ -248,7 +248,7 @@ struct AbilityShortcut : Shortcut
 
 std::unique_ptr<Shortcut> shortcuts[10];
 
-cCharacterPtr focus_character = nullptr;
+Tracker<cCharacterPtr> focus_character;
 
 cMain::~cMain()
 {
@@ -256,6 +256,12 @@ cMain::~cMain()
 
 	graphics::gui_callbacks.remove((uint)this);
 	graphics::gui_cursor_callbacks.remove((uint)this);
+}
+
+static std::vector<std::pair<uint, vec3>> location_tips;
+void add_location_icon(const vec3& pos)
+{
+	location_tips.emplace_back(30, pos);
 }
 
 void toggle_equipment_view()
@@ -616,7 +622,7 @@ void cMain::start()
 			ImGui::End();
 		}
 
-		if (focus_character)
+		if (focus_character.obj)
 		{
 			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(100.f, 100.f), ImGuiCond_Always);
@@ -626,11 +632,11 @@ void cMain::start()
 			auto dl = ImGui::GetWindowDrawList();
 			const auto bar_width = ImGui::GetContentRegionAvail().x;
 			const auto bar_height = 16.f;
-			hp_bar(dl, bar_width, bar_height, focus_character);
-			mp_bar(dl, bar_width, bar_height, focus_character);
+			hp_bar(dl, bar_width, bar_height, focus_character.obj);
+			mp_bar(dl, bar_width, bar_height, focus_character.obj);
 
-			show_buffs(dl, focus_character);
-			action_bar(dl, bar_width, 4.f, focus_character);
+			show_buffs(dl, focus_character.obj);
+			action_bar(dl, bar_width, 4.f, focus_character.obj);
 
 			ImGui::End();
 		}
@@ -661,6 +667,32 @@ void cMain::start()
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(tooltip.c_str());
 			ImGui::EndTooltip();
+		}
+
+		if (!location_tips.empty())
+		{
+			static graphics::ImagePtr icon_location = nullptr;
+			if (!icon_location)
+				icon_location = graphics::Image::get(L"assets\\icons\\location.png");
+			for (auto& t : location_tips)
+			{
+				auto p = main_camera.camera->world_to_screen(t.second);
+				if (p.x > 0.f && p.y > 0.f)
+				{
+					p.xy += sInput::instance()->offset;
+					auto dl = ImGui::GetBackgroundDrawList();
+					auto sz = (vec2)icon_location->size;
+					dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
+				}
+			}
+			for (auto it = location_tips.begin(); it != location_tips.end();)
+			{
+				it->first--;
+				if (it->first == 0)
+					it = location_tips.erase(it);
+				else
+					it++;
+			}
 		}
 
 		if (illegal_op_str_timer > 0.f)
@@ -750,7 +782,7 @@ void cMain::update()
 				stru.pos = pair.second->node->pos;
 				pack_msg(res, nwAddChest, stru);
 			}
-			nw_server->send(so_id, res);
+			so_server->send(so_id, res);
 		}
 		peeding_add_players.actions.clear();
 	}
@@ -915,7 +947,7 @@ void cMain::update()
 				}
 			}
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 
@@ -1020,41 +1052,11 @@ void cMain::update()
 			}
 		}
 
-		auto add_location_icon = [](const vec3& pos, const vec3& color) {
-			static graphics::ImagePtr icon_location = nullptr;
-			if (!icon_location)
-				icon_location = graphics::Image::get(L"assets\\icons\\location.png");
-			static int icon_location_id = 0;
-			auto ticks = 30;
-			auto _id = icon_location_id;
-			graphics::gui_callbacks.add([pos, color, ticks, _id]() mutable {
-				auto p = main_camera.camera->world_to_screen(pos);
-				if (p.x > 0.f && p.y > 0.f)
-				{
-					p.xy += sInput::instance()->offset;
-					auto dl = ImGui::GetBackgroundDrawList();
-					auto sz = (vec2)icon_location->size;
-					dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(color.r, color.g, color.b, max(0.f, ticks / 30.f)));
-				}
-				if (ticks-- <= 0)
-				{
-					auto h = sh(("icon_location_" + str(_id)).c_str());
-					add_event([h]() {
-						graphics::gui_callbacks.remove(h);
-						return false;
-					});
-				}
-			}, sh(("icon_location_" + str(_id)).c_str()));
-			icon_location_id++;
-		};
 		if (input->mpressed(Mouse_Left))
 		{
 			if (select_mode == TargetNull)
 			{
-				if (hovering_character)
-					focus_character = hovering_character;
-				else
-					focus_character = nullptr;
+				focus_character.set(hovering_character ? hovering_character : nullptr);
 			}
 			else
 			{
@@ -1098,7 +1100,7 @@ void cMain::update()
 								stru.type = "AttackTarget"_h;
 								stru.target = hovering_character->id;
 								pack_msg(res, nwCommandCharacter, stru);
-								nw_client->send(res);
+								so_client->send(res);
 							}
 						}
 					}
@@ -1114,7 +1116,7 @@ void cMain::update()
 							stru.type = "PickUp"_h;
 							stru.target = hovering_chest->id;
 							pack_msg(res, nwCommandCharacter, stru);
-							nw_client->send(res);
+							so_client->send(res);
 						}
 					}
 					else if (hovering_terrain)
@@ -1129,9 +1131,9 @@ void cMain::update()
 							stru.type = "MoveTo"_h;
 							stru.location = hovering_pos;
 							pack_msg(res, nwCommandCharacter, stru);
-							nw_client->send(res);
+							so_client->send(res);
 						}
-						add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
+						add_location_icon(hovering_pos);
 					}
 				}
 				else
@@ -1152,7 +1154,7 @@ void cMain::update()
 						stru.type = "AttackTarget"_h;
 						stru.target = character->id;
 						pack_msg(res, nwCommandCharacter, stru);
-						nw_client->send(res);
+						so_client->send(res);
 					}
 				};
 				select_location_callback = [](const vec3& pos) {
@@ -1166,7 +1168,7 @@ void cMain::update()
 						stru.type = "AttackLocation"_h;
 						stru.location = pos;
 						pack_msg(res, nwCommandCharacter, stru);
-						nw_client->send(res);
+						so_client->send(res);
 					}
 				};
 			}
@@ -1300,7 +1302,7 @@ void remove_character(uint id)
 			stru.id = id;
 			pack_msg(res, nwRemoveCharacter, stru);
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 }
@@ -1332,7 +1334,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 			stru.speed = speed;
 			pack_msg(res, nwAddProjectile, stru);
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 
@@ -1369,7 +1371,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 			stru.speed = speed;
 			pack_msg(res, nwAddProjectile, stru);
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 
@@ -1398,7 +1400,7 @@ void remove_projectile(uint id)
 			stru.id = id;
 			pack_msg(res, nwRemoveProjectile, stru);
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 }
@@ -1426,7 +1428,7 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 			stru.item_num = item_num;
 			pack_msg(res, nwAddChest, stru);
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 
@@ -1455,7 +1457,7 @@ void remove_chest(uint id)
 			stru.id = id;
 			pack_msg(res, nwRemoveChest, stru);
 			for (auto so_id : f.second)
-				nw_server->send(so_id, res);
+				so_server->send(so_id, res);
 		}
 	}
 }
