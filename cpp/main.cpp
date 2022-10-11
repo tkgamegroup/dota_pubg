@@ -741,6 +741,15 @@ void cMain::update()
 				stru.pos = pair.second->node->pos;
 				pack_msg(res, nwAddCharacter, stru);
 			}
+			for (auto& pair : chests_by_id)
+			{
+				nwAddChestStruct stru;
+				stru.id = pair.second->id;
+				stru.item_id = pair.second->item_id;
+				stru.item_num = pair.second->item_num;
+				stru.pos = pair.second->node->pos;
+				pack_msg(res, nwAddChest, stru);
+			}
 			nw_server->send(so_id, res);
 		}
 		peeding_add_players.actions.clear();
@@ -750,15 +759,133 @@ void cMain::update()
 	peeding_add_characters.mtx.lock();
 	if (!peeding_add_characters.actions.empty())
 	{
-		for (auto& s : peeding_add_characters.actions)
+		for (auto& a : peeding_add_characters.actions)
 		{
-			auto character = add_character(s.preset_id, s.pos, s.faction, s.id);
-			if (s.id == main_player.character_id)
+			auto character = add_character(a.preset_id, a.pos, a.faction, a.id);
+			if (a.id == main_player.character_id)
 				main_player.init(character->entity);
 		}
 		peeding_add_characters.actions.clear();
 	}
 	peeding_add_characters.mtx.unlock();
+
+	peeding_remove_characters.mtx.lock();
+	if (!peeding_remove_characters.actions.empty())
+	{
+		for (auto& a : peeding_remove_characters.actions)
+		{
+			remove_character(a.id);
+		}
+		peeding_remove_characters.actions.clear();
+	}
+	peeding_remove_characters.mtx.unlock();
+
+	peeding_update_characters.mtx.lock();
+	if (!peeding_update_characters.actions.empty())
+	{
+		for (auto& a : peeding_update_characters.actions)
+		{
+			auto it = characters_by_id.find(a.id);
+			if (it == characters_by_id.end())
+				continue;
+			auto character = it->second;
+			auto node = character->node;
+			node->set_pos(a.pos);
+			node->set_eul(vec3(a.yaw, 0.f, 0.f));
+			character->action = (Action)a.action;
+		}
+		peeding_update_characters.actions.clear();
+	}
+	peeding_update_characters.mtx.unlock();
+
+	peeding_command_characters.mtx.lock();
+	if (!peeding_command_characters.actions.empty())
+	{
+		for (auto& a : peeding_command_characters.actions)
+		{
+			auto it = characters_by_id.find(a.id);
+			if (it == characters_by_id.end())
+				continue;
+			auto character = it->second;
+			switch (a.type)
+			{
+			case "Idle"_h:
+				new CommandIdle(character);
+				break;
+			case "MoveTo"_h:
+				new CommandMoveTo(character, a.location);
+				break;
+			case "AttackTarget"_h:
+			{
+				auto it = characters_by_id.find(a.target);
+				if (it != characters_by_id.end())
+					new CommandAttackTarget(character, it->second);
+			}
+				break;
+			case "AttackLocation"_h:
+				new CommandAttackLocation(character, a.location);
+				break;
+			case "PickUp"_h:
+				auto it = chests_by_id.find(a.target);
+				if (it != chests_by_id.end())
+					new CommandPickUp(character, it->second);
+				break;
+			}
+		}
+		peeding_command_characters.actions.clear();
+	}
+	peeding_command_characters.mtx.unlock();
+
+	peeding_add_projectiles.mtx.lock();
+	if (!peeding_add_projectiles.actions.empty())
+	{
+		for (auto& a : peeding_add_projectiles.actions)
+		{
+			if (a.target > 0)
+			{
+				auto it = characters_by_id.find(a.target);
+				if (it != characters_by_id.end())
+					add_projectile(a.preset_id, a.pos, it->second, a.speed, nullptr, nullptr, a.id);
+			}
+			else
+				add_projectile(a.preset_id, a.pos, a.location, a.speed, 0, nullptr, a.id);
+		}
+		peeding_add_projectiles.actions.clear();
+	}
+	peeding_add_projectiles.mtx.unlock();
+
+	peeding_remove_projectiles.mtx.lock();
+	if (!peeding_remove_projectiles.actions.empty())
+	{
+		for (auto& a : peeding_remove_projectiles.actions)
+		{
+			remove_projectile(a.id);
+		}
+		peeding_remove_projectiles.actions.clear();
+	}
+	peeding_remove_projectiles.mtx.unlock();
+
+	peeding_add_chests.mtx.lock();
+	if (!peeding_add_chests.actions.empty())
+	{
+		for (auto& a : peeding_add_chests.actions)
+		{
+			add_chest(a.pos, a.item_id, a.item_num, a.id);
+		}
+		peeding_add_chests.actions.clear();
+	}
+	peeding_add_chests.mtx.unlock();
+
+	peeding_remove_chests.mtx.lock();
+	if (!peeding_remove_chests.actions.empty())
+	{
+		for (auto& a : peeding_remove_chests.actions)
+		{
+			remove_chest(a.id);
+		}
+		peeding_remove_chests.actions.clear();
+	}
+	peeding_remove_chests.mtx.unlock();
 
 	if (main_camera.node && main_player.node)
 	{
@@ -774,11 +901,21 @@ void cMain::update()
 	{
 		for (auto& f : nw_players)
 		{
+			std::string res;
 			for (auto& pair : characters_by_id)
 			{
 				if (get_vision(f.first, pair.second->node->pos))
-					;
+				{
+					nwUpdateCharacterStruct stru;
+					stru.id = pair.second->id;
+					stru.pos = pair.second->node->pos;
+					stru.yaw = pair.second->node->eul.x;
+					stru.action = pair.second->action;
+					pack_msg(res, nwUpdateCharacter, stru);
+				}
 			}
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
 		}
 	}
 
@@ -950,18 +1087,50 @@ void cMain::update()
 					if (hovering_character)
 					{
 						if (hovering_character->faction != main_player.character->faction)
-							new CommandAttackTarget(main_player.character, hovering_character);
+						{
+							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+								new CommandAttackTarget(main_player.character, hovering_character);
+							else if (multi_player == MultiPlayerAsClient)
+							{
+								std::string res;
+								nwCommandCharacterStruct stru;
+								stru.id = main_player.character->id;
+								stru.type = "AttackTarget"_h;
+								stru.target = hovering_character->id;
+								pack_msg(res, nwCommandCharacter, stru);
+								nw_client->send(res);
+							}
+						}
 					}
 					else if (hovering_chest)
 					{
-						new CommandPickUp(main_player.character, hovering_chest);
+						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+							new CommandPickUp(main_player.character, hovering_chest);
+						else if (multi_player == MultiPlayerAsClient)
+						{
+							std::string res;
+							nwCommandCharacterStruct stru;
+							stru.id = main_player.character->id;
+							stru.type = "PickUp"_h;
+							stru.target = hovering_chest->id;
+							pack_msg(res, nwCommandCharacter, stru);
+							nw_client->send(res);
+						}
 					}
 					else if (hovering_terrain)
 					{
 						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 							new CommandMoveTo(main_player.character, hovering_pos);
-						else
-							;
+						else if (multi_player == MultiPlayerAsClient)
+						{
+							std::string res;
+							nwCommandCharacterStruct stru;
+							stru.id = main_player.character->id;
+							stru.type = "MoveTo"_h;
+							stru.location = hovering_pos;
+							pack_msg(res, nwCommandCharacter, stru);
+							nw_client->send(res);
+						}
 						add_location_icon(hovering_pos, vec3(0.f, 1.f, 0.f));
 					}
 				}
@@ -973,10 +1142,32 @@ void cMain::update()
 			{
 				select_mode = TargetType(TargetEnemy | TargetLocation);
 				select_enemy_callback = [](cCharacterPtr character) {
-					new CommandAttackTarget(main_player.character, character);
+					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+						new CommandAttackTarget(main_player.character, character);
+					else if (multi_player == MultiPlayerAsClient)
+					{
+						std::string res;
+						nwCommandCharacterStruct stru;
+						stru.id = main_player.character->id;
+						stru.type = "AttackTarget"_h;
+						stru.target = character->id;
+						pack_msg(res, nwCommandCharacter, stru);
+						nw_client->send(res);
+					}
 				};
 				select_location_callback = [](const vec3& pos) {
-					new CommandAttackLocation(main_player.character, pos);
+					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+						new CommandAttackLocation(main_player.character, pos);
+					else if (multi_player == MultiPlayerAsClient)
+					{
+						std::string res;
+						nwCommandCharacterStruct stru;
+						stru.id = main_player.character->id;
+						stru.type = "AttackLocation"_h;
+						stru.location = pos;
+						pack_msg(res, nwCommandCharacter, stru);
+						nw_client->send(res);
+					}
 				};
 			}
 			for (auto i = 0; i < countof(shortcuts); i++)
@@ -1084,9 +1275,13 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	return character;
 }
 
-void remove_character(cCharacterPtr character)
+void remove_character(uint id)
 {
-	characters_by_id.erase(characters_by_id.find(character->id));
+	auto it = characters_by_id.find(id);
+	if (it == characters_by_id.end())
+		return;
+	auto character = it->second;
+	characters_by_id.erase(it);
 	std::erase_if(characters_by_faction[character->faction], [&](const auto& i) {
 		return i == character;
 	});
@@ -1095,62 +1290,123 @@ void remove_character(cCharacterPtr character)
 		e->parent->remove_child(e);
 		return false;
 	});
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwRemoveCharacterStruct stru;
+			stru.id = id;
+			pack_msg(res, nwRemoveCharacter, stru);
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
+		}
+	}
 }
 
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update, uint id)
+cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update, uint id)
 {
 	static uint uid = 1;
-	auto e = prefab->copy();
+	auto& preset = ProjectilePreset::get(preset_id);
+	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
 	auto projectile = e->get_component_t<cProjectile>();
+	projectile->preset_id = preset_id;
 	projectile->id = id ? id : uid++;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	projectile->on_end = on_end;
 	root->add_child(e);
 	projectiles_by_id.emplace(projectile->id, projectile);
+	
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddProjectileStruct stru;
+			stru.preset_id = preset_id;
+			stru.id = id;
+			stru.target = target->id;
+			stru.speed = speed;
+			pack_msg(res, nwAddProjectile, stru);
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
+		}
+	}
+
 	return projectile;
 }
 
-cProjectilePtr add_projectile(EntityPtr prefab, const vec3& pos, const vec3& location, float speed, float collide_radius, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide, const std::function<void(cProjectilePtr)>& on_update, uint id)
+cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide,   uint id)
 {
 	static uint uid = 1;
-	auto e = prefab->copy();
+	auto& preset = ProjectilePreset::get(preset_id);
+	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
 	auto projectile = e->get_component_t<cProjectile>();
+	projectile->preset_id = preset_id;
 	projectile->id = id ? id : uid++;
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
-	projectile->collide_radius = collide_radius;
+	projectile->collide_radius = preset.collide_radius;
 	projectile->collide_faction = collide_faction;
 	projectile->on_collide = on_collide;
-	projectile->on_update = on_update;
 	root->add_child(e);
 	projectiles_by_id.emplace(projectile->id, projectile);
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddProjectileStruct stru;
+			stru.preset_id = preset_id;
+			stru.id = id;
+			stru.location = location;
+			stru.speed = speed;
+			pack_msg(res, nwAddProjectile, stru);
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
+		}
+	}
+
 	return projectile;
 }
 
-void remove_projectile(cProjectilePtr projectile)
+void remove_projectile(uint id)
 {
-	projectiles_by_id.erase(projectiles_by_id.find(projectile->id));
+	auto it = projectiles_by_id.find(id);
+	if (it == projectiles_by_id.end())
+		return;
+	auto projectile = it->second;
+	projectiles_by_id.erase(it);
 	add_event([projectile]() {
 		auto e = projectile->entity;
 		e->parent->remove_child(e);
 		return false;
 	});
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwRemoveProjectileStruct stru;
+			stru.id = id;
+			pack_msg(res, nwRemoveProjectile, stru);
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
+		}
+	}
 }
 
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
 	static uint uid = 1;
-	static EntityPtr e_chest = nullptr;
-	if (!e_chest)
-	{
-		e_chest = Entity::create();
-		e_chest->load(L"assets\\models\\chest.prefab");
-	}
-	auto e = e_chest->copy();
+	auto e = get_prefab(L"assets\\models\\chest.prefab")->copy();
 	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
 	auto chest = e->get_component_t<cChest>();
@@ -1158,17 +1414,50 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 	chest->item_id = item_id;
 	chest->item_num = item_num;
 	chests_by_id.emplace(chest->id, chest);
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddChestStruct stru;
+			stru.id = id;
+			stru.item_id = item_id;
+			stru.item_num = item_num;
+			pack_msg(res, nwAddChest, stru);
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
+		}
+	}
+
 	return chest;
 }
 
-void remove_chest(cChestPtr chest)
+void remove_chest(uint id)
 {
-	chests_by_id.erase(chests_by_id.find(chest->id));
+	auto it = chests_by_id.find(id);
+	if (it == chests_by_id.end())
+		return;
+	auto chest = it->second;
+	chests_by_id.erase(it);
 	add_event([chest]() {
 		auto e = chest->entity;
 		e->parent->remove_child(e);
 		return false;
 	});
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwRemoveChestStruct stru;
+			stru.id = id;
+			pack_msg(res, nwRemoveChest, stru);
+			for (auto so_id : f.second)
+				nw_server->send(so_id, res);
+		}
+	}
 }
 
 void teleport(cCharacterPtr character, const vec3& location)

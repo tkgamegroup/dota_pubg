@@ -16,7 +16,12 @@ enum nwMessage
 	nwNewPlayerInfo,
 	nwAddCharacter,
 	nwRemoveCharacter,
-	nwUpdateCharacter
+	nwUpdateCharacter,
+	nwCommandCharacter,
+	nwAddProjectile,
+	nwRemoveProjectile,
+	nwAddChest,
+	nwRemoveChest
 };
 
 struct nwNewPlayerInfoStruct
@@ -42,8 +47,44 @@ struct nwUpdateCharacterStruct
 {
 	uint id;
 	vec3 pos;
-	vec3 euler;
+	float yaw;
 	uint action;
+};
+
+struct nwCommandCharacterStruct
+{
+	uint id;
+	uint type;
+	vec3 location;
+	uint target;
+};
+
+struct nwAddProjectileStruct
+{
+	uint preset_id;
+	uint id;
+	vec3 location;
+	uint target;
+	vec3 pos;
+	float speed;
+};
+
+struct nwRemoveProjectileStruct
+{
+	uint id;
+};
+
+struct nwAddChestStruct
+{
+	uint id;
+	vec3 pos;
+	uint item_id;
+	uint item_num;
+};
+
+struct nwRemoveChestStruct
+{
+	uint id;
 };
 
 template <typename T>
@@ -53,8 +94,15 @@ struct PeedingActions
 	std::vector<T> actions;
 };
 
-extern PeedingActions<void*>				peeding_add_players;
-extern PeedingActions<nwAddCharacterStruct> peeding_add_characters;
+extern PeedingActions<void*>					peeding_add_players;
+extern PeedingActions<nwAddCharacterStruct>		peeding_add_characters;
+extern PeedingActions<nwRemoveCharacterStruct>	peeding_remove_characters;
+extern PeedingActions<nwUpdateCharacterStruct>	peeding_update_characters;
+extern PeedingActions<nwCommandCharacterStruct>	peeding_command_characters;
+extern PeedingActions<nwAddProjectileStruct>	peeding_add_projectiles;
+extern PeedingActions<nwRemoveProjectileStruct>	peeding_remove_projectiles;
+extern PeedingActions<nwAddChestStruct>			peeding_add_chests;
+extern PeedingActions<nwRemoveChestStruct>		peeding_remove_chests;
 
 extern MultiPlayerType multi_player;
 extern network::ClientPtr nw_client;

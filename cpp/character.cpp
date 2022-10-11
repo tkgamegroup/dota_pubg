@@ -106,7 +106,7 @@ void CommandPickUp::update()
 		if (character->process_approach(target.obj->node->pos, 1.f))
 		{
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
-				remove_chest(target.obj);
+				remove_chest(target.obj->id);
 
 			character->nav_agent->stop();
 			new CommandIdle(character);
@@ -307,22 +307,6 @@ void cCharacter::set_faction(uint _faction)
 		nav_agent->separation_group = faction;
 }
 
-void cCharacter::set_preset_name(const std::string& name)
-{
-	if (preset_name == name)
-		return;
-	preset_name = name;
-	preset_id = CharacterPreset::find(preset_name);
-
-	auto& preset = get_preset();
-	if (!preset.abilities.empty())
-	{
-		abilities.clear();
-		for (auto& i : preset.abilities)
-			gain_ability(Ability::find(i.first), i.second);
-	}
-}
-
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
@@ -499,19 +483,6 @@ void cCharacter::die()
 		return;
 	hp = 0;
 	dead = true;
-	auto& preset = get_preset();
-	if (!preset.drop_items.empty())
-	{
-		std::vector<std::pair<uint, uint>> drops;
-		for (auto& d : preset.drop_items)
-		{
-			if (linearRand(0U, 100U) < std::get<1>(d))
-				drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
-		}
-		auto p = node->pos;
-		for (auto& d : drops)
-			add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
-	}
 }
 
 void cCharacter::start()
@@ -602,9 +573,9 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 							ef.first(this, target, atk_type, atk);
 					}
 				};
-				if (preset.atk_projectile)
+				if (preset.atk_projectile_preset != -1)
 				{
-					add_projectile(preset.atk_projectile,
+					add_projectile(preset.atk_projectile_preset,
 						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
 						[&](const vec3&, cCharacterPtr t) {
 							if (t)
@@ -698,7 +669,22 @@ void cCharacter::update()
 	{
 		if (dead)
 		{
-			remove_character(this);
+			auto& preset = get_preset();
+			if (!preset.drop_items.empty())
+			{
+				std::vector<std::pair<uint, uint>> drops;
+				for (auto& d : preset.drop_items)
+				{
+					if (linearRand(0U, 100U) < std::get<1>(d))
+						drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
+				}
+				auto p = node->pos;
+				for (auto& d : drops)
+					add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
+			}
+
+			remove_character(id);
+
 			return;
 		}
 

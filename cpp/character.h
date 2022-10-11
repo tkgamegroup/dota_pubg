@@ -115,8 +115,7 @@ struct CharacterPreset
 	float atk_distance = 1.5f;
 	float atk_time = 2.f; // attack interval
 	float atk_point = 1.f; // hit point
-	std::filesystem::path atk_projectile_name;
-	EntityPtr atk_projectile = nullptr;
+	int atk_projectile_preset = -1;
 	float cast_time = 1.f; // animation time
 	float cast_point = 1.f; // hit point
 	uint phy_def = 0; // physical defense
@@ -152,6 +151,11 @@ struct cCharacter : Component
 	cArmaturePtr armature = nullptr;
 
 	uint id;
+	uint preset_id;
+	inline const CharacterPreset& get_preset()
+	{
+		return CharacterPreset::get(preset_id);
+	}
 
 	/// Reflect
 	uint faction = 0;
@@ -159,16 +163,6 @@ struct cCharacter : Component
 	void set_faction(uint _faction);
 	/// Reflect
 	uint ai_id = 0;
-	/// Reflect
-	uint preset_id = 0;
-	/// Reflect
-	std::string preset_name;
-	/// Reflect
-	void set_preset_name(const std::string& name);
-	inline const CharacterPreset& get_preset()
-	{
-		return CharacterPreset::get(preset_id);
-	}
 
 	/// Reflect
 	uint lv = 1;

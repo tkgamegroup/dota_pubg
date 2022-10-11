@@ -25,12 +25,6 @@ void load_abilities()
 		ability.cd = 7.f;
 		ability.distance = 8.f;
 		ability.active_l = [](cCharacterPtr caster, const vec3& target) {
-			static EntityPtr projectile = nullptr;
-			if (!projectile)
-			{
-				projectile = Entity::create();
-				projectile->load(L"assets\\models\\fireball.prefab");
-			}
 			auto pos = caster->node->pos +
 				vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
 				caster->node->g_rot[2] * 0.3f;
@@ -40,14 +34,11 @@ void load_abilities()
 			for (auto i = -2; i < 3; i++)
 			{
 				auto a = radians(ang + i * 15.f);
-				add_projectile(projectile, pos, pos + vec3(cos(a), 0.f, sin(a)) * 8.f, sp, 0.5f, ~caster->faction,
+				add_projectile(ProjectilePreset::find("Fire Ball"), pos, pos + vec3(cos(a), 0.f, sin(a)) * 8.f, sp, ~caster->faction,
 				[caster](cCharacterPtr t) {
 					auto hash = "Fire Thrower"_h + (uint)caster;
 					if (t->add_marker(hash, 0.5f))
 						caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
-				}, [](cProjectilePtr pt) {
-					pt->collide_radius += 2.5f * delta_time;
-					pt->node->set_scl(vec3(pt->collide_radius));
 				});
 			}
 		};
