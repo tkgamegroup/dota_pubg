@@ -264,6 +264,17 @@ void add_location_icon(const vec3& pos)
 	location_tips.emplace_back(30, pos);
 }
 
+struct FloatingTip
+{
+	uint ticks;
+	vec3 pos;
+	std::string text;
+	vec2 size = vec2(0.f);
+	cvec4 color;
+};
+
+static std::vector<FloatingTip> floating_tips;
+
 void toggle_equipment_view()
 {
 	if (!view_equipment.opened)
@@ -669,29 +680,57 @@ void cMain::start()
 			ImGui::EndTooltip();
 		}
 
-		if (!location_tips.empty())
+		if (main_camera.camera)
 		{
-			static graphics::ImagePtr icon_location = nullptr;
-			if (!icon_location)
-				icon_location = graphics::Image::get(L"assets\\icons\\location.png");
-			for (auto& t : location_tips)
+			if (!floating_tips.empty())
 			{
-				auto p = main_camera.camera->world_to_screen(t.second);
-				if (p.x > 0.f && p.y > 0.f)
+				for (auto& t : floating_tips)
 				{
-					p.xy += sInput::instance()->offset;
-					auto dl = ImGui::GetBackgroundDrawList();
-					auto sz = (vec2)icon_location->size;
-					dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
+					auto p = main_camera.camera->world_to_screen(t.pos);
+					if (p.x > 0.f && p.y > 0.f)
+					{
+						p.xy += sInput::instance()->offset;
+						auto dl = ImGui::GetBackgroundDrawList();
+						if (t.size.x == 0.f || t.size.y == 0.f)
+							t.size = ImGui::CalcTextSize(t.text.c_str());
+						dl->AddText(p - vec2(t.size.x * 0.5f, 0.f), ImColor(t.color.r, t.color.g, t.color.b, 255), t.text.c_str());
+					}
+					t.pos.y += 1.8f * delta_time;
+				}
+				for (auto it = floating_tips.begin(); it != floating_tips.end();)
+				{
+					it->ticks--;
+					if (it->ticks == 0)
+						it = floating_tips.erase(it);
+					else
+						it++;
 				}
 			}
-			for (auto it = location_tips.begin(); it != location_tips.end();)
+
+			if (!location_tips.empty())
 			{
-				it->first--;
-				if (it->first == 0)
-					it = location_tips.erase(it);
-				else
-					it++;
+				static graphics::ImagePtr icon_location = nullptr;
+				if (!icon_location)
+					icon_location = graphics::Image::get(L"assets\\icons\\location.png");
+				for (auto& t : location_tips)
+				{
+					auto p = main_camera.camera->world_to_screen(t.second);
+					if (p.x > 0.f && p.y > 0.f)
+					{
+						p.xy += sInput::instance()->offset;
+						auto dl = ImGui::GetBackgroundDrawList();
+						auto sz = (vec2)icon_location->size;
+						dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
+					}
+				}
+				for (auto it = location_tips.begin(); it != location_tips.end();)
+				{
+					it->first--;
+					if (it->first == 0)
+						it = location_tips.erase(it);
+					else
+						it++;
+				}
 			}
 		}
 
@@ -1466,6 +1505,15 @@ void teleport(cCharacterPtr character, const vec3& location)
 {
 	character->node->set_pos(location);
 	character->nav_agent->update_pos();
+}
+
+void add_floating_tip(const vec3& pos, const std::string& text, const cvec4& color)
+{
+	auto& t = floating_tips.emplace_back();
+	t.ticks = 30;
+	t.pos = pos;
+	t.text = text;
+	t.color = color;
 }
 
 EXPORT void* cpp_info()

@@ -155,3 +155,5 @@ void remove_projectile(uint id);
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
 void remove_chest(uint id);
 void teleport(cCharacterPtr character, const vec3& location);
+
+void add_floating_tip(const vec3& pos, const std::string& text, const cvec4& color);

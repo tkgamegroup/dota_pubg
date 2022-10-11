@@ -1,5 +1,6 @@
 #include "creep_ai.h"
 #include "character.h"
+#include "network.h"
 
 #include <flame/universe/components/node.h>
 
@@ -10,6 +11,9 @@ void cCreepAI::start()
 
 void cCreepAI::update()
 {
+	if (multi_player != SinglePlayer || multi_player != MultiPlayerAsHost)
+		return;
+
 	if (distance(character->node->pos, start_pos) < 10.f)
 		aggro_timer = 5.f;
 	if (aggro_timer > 0.f)
