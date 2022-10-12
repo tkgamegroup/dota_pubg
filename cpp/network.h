@@ -56,8 +56,12 @@ struct nwCommandCharacterStruct
 {
 	uint id;
 	uint type;
-	vec3 location;
-	uint target;
+	uint id2;
+	union 
+	{
+		vec3 location;
+		uint target;
+	}t;
 };
 
 struct nwAddProjectileStruct

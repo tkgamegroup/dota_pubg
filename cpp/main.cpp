@@ -226,20 +226,57 @@ struct AbilityShortcut : Shortcut
 		}
 		select_mode = ability.target_type;
 		if (select_mode == TargetNull)
-			new CommandCastAbility(main_player.character, ins);
+		{
+			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+				new CommandCastAbility(main_player.character, ins);
+			else if (multi_player == MultiPlayerAsClient)
+			{
+				std::string res;
+				nwCommandCharacterStruct stru;
+				stru.id = main_player.character->id;
+				stru.type = "CastAbility"_h;
+				stru.id2 = ins->id;
+				pack_msg(res, nwCommandCharacter, stru);
+				so_client->send(res);
+			}
+		}
 		else
 		{
 			if (ability.target_type & TargetLocation)
 			{
 				select_location_callback = [this](const vec3& location) {
-					new CommandCastAbilityToLocation(main_player.character, ins, location);
+					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+						new CommandCastAbilityToLocation(main_player.character, ins, location);
+					else if (multi_player == MultiPlayerAsClient)
+					{
+						std::string res;
+						nwCommandCharacterStruct stru;
+						stru.id = main_player.character->id;
+						stru.type = "CastAbilityToLocation"_h;
+						stru.id2 = ins->id;
+						stru.t.location = location;
+						pack_msg(res, nwCommandCharacter, stru);
+						so_client->send(res);
+					}
 				};
 				select_distance = ability.distance;
 			}
 			if (ability.target_type & TargetEnemy)
 			{
 				select_enemy_callback = [this](cCharacterPtr character) {
-					new CommandCastAbilityToTarget(main_player.character, ins, character);
+					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+						new CommandCastAbilityToTarget(main_player.character, ins, character);
+					else if (multi_player == MultiPlayerAsClient)
+					{
+						std::string res;
+						nwCommandCharacterStruct stru;
+						stru.id = main_player.character->id;
+						stru.type = "CastAbilityToTarget"_h;
+						stru.id2 = ins->id;
+						stru.t.target = character->id;
+						pack_msg(res, nwCommandCharacter, stru);
+						so_client->send(res);
+					}
 				};
 				select_distance = ability.distance;
 			}
@@ -917,22 +954,26 @@ void cMain::update()
 				new CommandIdle(character);
 				break;
 			case "MoveTo"_h:
-				new CommandMoveTo(character, a.location);
+				new CommandMoveTo(character, a.t.location);
 				break;
 			case "AttackTarget"_h:
 			{
-				auto it = characters_by_id.find(a.target);
+				auto it = characters_by_id.find(a.t.target);
 				if (it != characters_by_id.end())
 					new CommandAttackTarget(character, it->second);
 			}
 				break;
 			case "AttackLocation"_h:
-				new CommandAttackLocation(character, a.location);
+				new CommandAttackLocation(character, a.t.location);
 				break;
 			case "PickUp"_h:
-				auto it = chests_by_id.find(a.target);
+			{
+				auto it = chests_by_id.find(a.t.target);
 				if (it != chests_by_id.end())
 					new CommandPickUp(character, it->second);
+			}
+				break;
+			case "CastAbility"_h:
 				break;
 			}
 		}
@@ -1196,7 +1237,7 @@ void cMain::update()
 								nwCommandCharacterStruct stru;
 								stru.id = main_player.character->id;
 								stru.type = "AttackTarget"_h;
-								stru.target = hovering_character->id;
+								stru.t.target = hovering_character->id;
 								pack_msg(res, nwCommandCharacter, stru);
 								so_client->send(res);
 							}
@@ -1212,7 +1253,7 @@ void cMain::update()
 							nwCommandCharacterStruct stru;
 							stru.id = main_player.character->id;
 							stru.type = "PickUp"_h;
-							stru.target = hovering_chest->id;
+							stru.t.target = hovering_chest->id;
 							pack_msg(res, nwCommandCharacter, stru);
 							so_client->send(res);
 						}
@@ -1227,7 +1268,7 @@ void cMain::update()
 							nwCommandCharacterStruct stru;
 							stru.id = main_player.character->id;
 							stru.type = "MoveTo"_h;
-							stru.location = hovering_pos;
+							stru.t.location = hovering_pos;
 							pack_msg(res, nwCommandCharacter, stru);
 							so_client->send(res);
 						}
@@ -1250,7 +1291,7 @@ void cMain::update()
 						nwCommandCharacterStruct stru;
 						stru.id = main_player.character->id;
 						stru.type = "AttackTarget"_h;
-						stru.target = character->id;
+						stru.t.target = character->id;
 						pack_msg(res, nwCommandCharacter, stru);
 						so_client->send(res);
 					}
@@ -1264,7 +1305,7 @@ void cMain::update()
 						nwCommandCharacterStruct stru;
 						stru.id = main_player.character->id;
 						stru.type = "AttackLocation"_h;
-						stru.location = pos;
+						stru.t.location = pos;
 						pack_msg(res, nwCommandCharacter, stru);
 						so_client->send(res);
 					}

@@ -1,6 +1,7 @@
 #include "view_inventory.h"
 #include "../character.h"
 #include "../item.h"
+#include "../network.h"
 
 #include <flame/universe/components/node.h>
 
@@ -60,14 +61,17 @@ void ViewInventory::on_draw()
 
 				if (pressed)
 				{
-					switch (item.type)
+					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 					{
-					case ItemConsumable:
-						main_player.character->use_item(ins);
-						break;
-					case ItemEquipment:
-						equip();
-						break;
+						switch (item.type)
+						{
+						case ItemConsumable:
+							main_player.character->use_item(ins);
+							break;
+						case ItemEquipment:
+							equip();
+							break;
+						}
 					}
 				}
 
@@ -81,8 +85,11 @@ void ViewInventory::on_draw()
 				{
 					if (ImGui::Selectable("Drop"))
 					{
-						add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
-						main_player.character->inventory[i].reset(nullptr);
+						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+						{
+							add_chest(main_player.character->node->pos + vec3(linearRand(-0.2f, 0.2f), 0.f, linearRand(-0.2f, 0.2f)), ins->id, ins->num);
+							main_player.character->inventory[i].reset(nullptr);
+						}
 					}
 					ImGui::EndPopup();
 				}
@@ -93,7 +100,10 @@ void ViewInventory::on_draw()
 				{
 					auto j = *(int*)payload->Data;
 					if (i != j)
-						std::swap(main_player.character->inventory[i], main_player.character->inventory[j]);
+					{
+						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+							std::swap(main_player.character->inventory[i], main_player.character->inventory[j]);
+					}
 				}
 				ImGui::EndDragDropTarget();
 			}
