@@ -221,8 +221,8 @@ struct cCharacter : Component
 	void set_LUK(ushort v);
 
 	/// Reflect
-	DamageType atk_type = PhysicalDamage;
-	void set_atk_type(DamageType v);
+	uchar atk_type = PhysicalDamage;
+	void set_atk_type(uchar v);
 	/// Reflect
 	uint atk = 10;
 	void set_atk(uint v);

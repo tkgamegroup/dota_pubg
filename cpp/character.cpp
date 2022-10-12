@@ -411,6 +411,70 @@ void cCharacter::set_LUK(ushort v)
 	data_changed("LUK"_h);
 }
 
+void cCharacter::set_atk_type(uchar v)
+{
+	if (atk_type == v)
+		return;
+	atk_type = v;
+	data_changed("atk_type"_h);
+}
+
+void cCharacter::set_atk(uint v)
+{
+	if (atk == v)
+		return;
+	atk = v;
+	data_changed("atk"_h);
+}
+
+void cCharacter::set_phy_def(uint v)
+{
+	if (phy_def == v)
+		return;
+	phy_def = v;
+	data_changed("phy_def"_h);
+}
+
+void cCharacter::set_mag_def(uint v)
+{
+	if (mag_def == v)
+		return;
+	mag_def = v;
+	data_changed("mag_def"_h);
+}
+
+void cCharacter::set_hp_reg(uint v)
+{
+	if (hp_reg == v)
+		return;
+	hp_reg = v;
+	data_changed("hp_reg"_h);
+}
+
+void cCharacter::set_mp_reg(uint v)
+{
+	if (mp_reg == v)
+		return;
+	mp_reg = v;
+	data_changed("mp_reg"_h);
+}
+
+void cCharacter::set_mov_sp(uint v)
+{
+	if (mov_sp == v)
+		return;
+	mov_sp = v;
+	data_changed("mov_sp"_h);
+}
+
+void cCharacter::set_atk_sp(uint v)
+{
+	if (atk_sp == v)
+		return;
+	atk_sp = v;
+	data_changed("atk_sp"_h);
+}
+
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
@@ -679,11 +743,11 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			if (distance(node->pos, target->node->pos) <= preset.atk_distance + 3.5f)
 			{
 				auto attack = [this](cCharacterPtr target) {
-					inflict_damage(target, atk, atk_type);
+					inflict_damage(target, atk, (DamageType)atk_type);
 					for (auto& ef : attack_effects.list)
 					{
 						if (!target->dead)
-							ef.first(this, target, atk_type, atk);
+							ef.first(this, target, (DamageType)atk_type, atk);
 					}
 				};
 				if (preset.atk_projectile_preset != -1)
