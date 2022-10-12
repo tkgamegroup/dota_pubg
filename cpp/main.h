@@ -12,6 +12,7 @@ FLAME_TYPE(cSpwaner)
 FLAME_TYPE(cProjectile)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cCreepAI)
+FLAME_TYPE(cNWDataHarvester)
 
 const auto CharacterTag = 1 << 1;
 

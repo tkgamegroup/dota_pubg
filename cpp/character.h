@@ -140,6 +140,18 @@ enum State
 	StateSilence = 1 << 2
 };
 
+struct CharacterPoints
+{
+	uint ability_points = 1;
+	uint attribute_points = 0;
+	ushort VIG_PTS = 0;
+	ushort MND_PTS = 0;
+	ushort STR_PTS = 0;
+	ushort DEX_PTS = 0;
+	ushort INT_PTS = 0;
+	ushort LUK_PTS = 0;
+};
+
 /// Reflect ctor
 struct cCharacter : Component
 {
@@ -166,48 +178,77 @@ struct cCharacter : Component
 
 	/// Reflect
 	uint lv = 1;
+	void set_lv(uint v);
 	/// Reflect
 	uint exp = 0;
+	void set_exp(uint v);
 	uint exp_max = 0;
+	void set_exp_max(uint v);
 
 	State state = StateNormal;
 
 	/// Reflect
 	uint hp = 1000;
+	void set_hp(uint v);
+	/// Reflect
 	uint hp_max = 1000;
+	void set_hp_max(uint v);
 
 	/// Reflect
-	uint mp = 10;
+	uint mp = 0;
+	void set_mp(uint v);
+	/// Reflect
 	uint mp_max = 10;
+	void set_mp_max(uint v);
 
-	uint VIG = 0;
-	uint MND = 0;
-	uint STR = 0;
-	uint DEX = 0;
-	uint INT = 0;
-	uint LUK = 0;
+	/// Reflect
+	ushort VIG = 0;
+	void set_VIG(ushort v);
+	/// Reflect
+	ushort MND = 0;
+	void set_MND(ushort v);
+	/// Reflect
+	ushort STR = 0;
+	void set_STR(ushort v);
+	/// Reflect
+	ushort DEX = 0;
+	void set_DEX(ushort v);
+	/// Reflect
+	ushort INT = 0;
+	void set_INT(ushort v);
+	/// Reflect
+	ushort LUK = 0;
+	void set_LUK(ushort v);
 
-	uint VIG_PTS = 0;
-	uint MND_PTS = 0;
-	uint STR_PTS = 0;
-	uint DEX_PTS = 0;
-	uint INT_PTS = 0;
-	uint LUK_PTS = 0;
-
+	/// Reflect
 	DamageType atk_type = PhysicalDamage;
+	void set_atk_type(DamageType v);
+	/// Reflect
 	uint atk = 10;
+	void set_atk(uint v);
+	/// Reflect
 	uint phy_def = 0;
+	void set_phy_def(uint v);
+	/// Reflect
 	uint mag_def = 0;
+	void set_mag_def(uint v);
+	/// Reflect
 	uint hp_reg = 0;
+	void set_hp_reg(uint v);
+	/// Reflect
 	uint mp_reg = 0;
+	void set_mp_reg(uint v);
+	/// Reflect
 	uint mov_sp = 0;
+	void set_mov_sp(uint v);
+	/// Reflect
 	uint atk_sp = 0;
-
-	uint attribute_points = 0;
-	uint ability_points = 1;
+	void set_atk_sp(uint v);
 
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 15;
+
+	std::unique_ptr<CharacterPoints> points;
 
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;

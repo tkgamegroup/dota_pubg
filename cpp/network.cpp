@@ -5,15 +5,15 @@ network::ClientPtr so_client = nullptr;
 network::ServerPtr so_server = nullptr;
 std::map<uint, std::vector<void*>> nw_players;
 
-PeedingActions<void*>						peeding_add_players;
-PeedingActions<nwAddCharacterStruct>		peeding_add_characters;
-PeedingActions<nwRemoveCharacterStruct>		peeding_remove_characters;
-PeedingActions<nwUpdateCharacterStruct>		peeding_update_characters;
-PeedingActions<nwCommandCharacterStruct>	peeding_command_characters;
-PeedingActions<nwAddProjectileStruct>		peeding_add_projectiles;
-PeedingActions<nwRemoveProjectileStruct>	peeding_remove_projectiles;
-PeedingActions<nwAddChestStruct>			peeding_add_chests;
-PeedingActions<nwRemoveChestStruct>			peeding_remove_chests;
+PeedingActions<void*>											peeding_add_players;
+PeedingActions<nwAddCharacterStruct>							peeding_add_characters;
+PeedingActions<nwRemoveCharacterStruct>							peeding_remove_characters;
+PeedingActions<std::pair<nwUpdateCharacterStruct, std::string>>	peeding_update_characters;
+PeedingActions<nwCommandCharacterStruct>						peeding_command_characters;
+PeedingActions<nwAddProjectileStruct>							peeding_add_projectiles;
+PeedingActions<nwRemoveProjectileStruct>						peeding_remove_projectiles;
+PeedingActions<nwAddChestStruct>								peeding_add_chests;
+PeedingActions<nwRemoveChestStruct>								peeding_remove_chests;
 
 void start_server()
 {
@@ -23,8 +23,8 @@ void start_server()
 			auto e = p + msg.size();
 			while (p < e)
 			{
-				auto msg = *(uint*)p;
-				p += sizeof(uint);
+				auto msg = *(uchar*)p;
+				p += sizeof(uchar);
 				switch (msg)
 				{
 				case nwCommandCharacter:
@@ -54,8 +54,8 @@ void join_server()
 		auto e = p + msg.size();
 		while (p < e)
 		{
-			auto msg = *(uint*)p;
-			p += sizeof(uint);
+			auto msg = *(uchar*)p;
+			p += sizeof(uchar);
 			switch (msg)
 			{
 			case nwNewPlayerInfo:
@@ -79,10 +79,19 @@ void join_server()
 				p += sizeof(nwRemoveCharacterStruct);
 				break;
 			case nwUpdateCharacter:
-				peeding_update_characters.mtx.lock();
-				peeding_update_characters.actions.push_back(*(nwUpdateCharacterStruct*)p);
-				peeding_update_characters.mtx.unlock();
+			{
+				auto& stru = *(nwUpdateCharacterStruct*)p;
 				p += sizeof(nwUpdateCharacterStruct);
+				std::string extra;
+				if (stru.extra_length > 0)
+				{
+					extra = std::string(p, p + stru.extra_length);
+					p += stru.extra_length;
+				}
+				peeding_update_characters.mtx.lock();
+				peeding_update_characters.actions.emplace_back(stru, extra);
+				peeding_update_characters.mtx.unlock();
+			}
 				break;
 			case nwAddProjectile:
 				peeding_add_projectiles.mtx.lock();

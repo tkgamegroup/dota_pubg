@@ -10,6 +10,7 @@
 #include "projectile.h"
 #include "chest.h"
 #include "creep_ai.h"
+#include "nw_data_harvester.h"
 #include "views/view_equipment.h"
 #include "views/view_ability.h"
 #include "views/view_inventory.h"
@@ -324,6 +325,26 @@ void cMain::start()
 			main_player.faction = player1_faction;
 			main_player.character_id = character->id;
 			main_player.init(character->entity);
+			if (auto harvester = main_player.entity->add_component<cNWDataHarvester>(); harvester)
+			{
+				harvester->add_target("cCharacter"_h, "lv"_h);
+				harvester->add_target("cCharacter"_h, "exp"_h);
+				harvester->add_target("cCharacter"_h, "exp_max"_h);
+				harvester->add_target("cCharacter"_h, "VIG"_h);
+				harvester->add_target("cCharacter"_h, "MND"_h);
+				harvester->add_target("cCharacter"_h, "STR"_h);
+				harvester->add_target("cCharacter"_h, "DEX"_h);
+				harvester->add_target("cCharacter"_h, "INT"_h);
+				harvester->add_target("cCharacter"_h, "LUK"_h);
+				harvester->add_target("cCharacter"_h, "atk_type"_h);
+				harvester->add_target("cCharacter"_h, "atk"_h);
+				harvester->add_target("cCharacter"_h, "phy_def"_h);
+				harvester->add_target("cCharacter"_h, "mag_def"_h);
+				harvester->add_target("cCharacter"_h, "hp_reg"_h);
+				harvester->add_target("cCharacter"_h, "mp_reg"_h);
+				harvester->add_target("cCharacter"_h, "mov_sp"_h);
+				harvester->add_target("cCharacter"_h, "atk_sp"_h);
+			}
 
 			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
 			add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
@@ -477,10 +498,10 @@ void cMain::start()
 				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
-				if (main_player.character->attribute_points > 0)
+				if (auto pts = main_player.character->points->attribute_points; pts > 0)
 				{
 					dl->AddCircleFilled(vec2(p1.x, p0.y), 7.f, ImColor(0.8f, 0.2f, 0.2f));
-					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(main_player.character->attribute_points).c_str());
+					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(pts).c_str());
 				}
 				if (pressed)
 					toggle_equipment_view();
@@ -495,10 +516,10 @@ void cMain::start()
 				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
-				if (main_player.character->ability_points > 0)
+				if (auto pts = main_player.character->points->ability_points; pts > 0)
 				{
 					dl->AddCircleFilled(vec2(p1.x, p0.y), 7.f, ImColor(0.8f, 0.2f, 0.2f));
-					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(main_player.character->ability_points).c_str());
+					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(pts).c_str());
 				}
 				if (pressed)
 					toggle_ability_view();
@@ -817,14 +838,26 @@ void cMain::update()
 	{
 		for (auto& a : peeding_update_characters.actions)
 		{
-			auto it = characters_by_id.find(a.id);
+			auto it = characters_by_id.find(a.first.id);
 			if (it == characters_by_id.end())
 				continue;
 			auto character = it->second;
 			auto node = character->node;
-			node->set_pos(a.pos);
-			node->set_eul(vec3(a.yaw, 0.f, 0.f));
-			character->action = (Action)a.action;
+			node->set_pos(a.first.pos);
+			node->set_eul(vec3(a.first.yaw, 0.f, 0.f));
+			character->action = (Action)a.first.action;
+			if (a.first.extra_length > 0)
+			{
+				static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
+				auto p = a.second.data();
+				auto end = a.second.data() + a.second.size();
+				while (p < end)
+				{
+					auto hash = *(uint*)p; p += sizeof(uint);
+					auto vi = ui->find_variable(hash); auto len = vi->type->size;
+					memcpy((char*)character + vi->offset, p, len); p += len;
+				}
+			}
 		}
 		peeding_update_characters.actions.clear();
 	}
@@ -943,7 +976,33 @@ void cMain::update()
 					stru.pos = pair.second->node->pos;
 					stru.yaw = pair.second->node->eul.x;
 					stru.action = pair.second->action;
+
+					std::string extra_data;
+					if (auto harvester = pair.second->entity->get_component_t<cNWDataHarvester>(); harvester)
+					{
+						static char buf[1024];
+						static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
+
+						auto& map = harvester->targets["cCharacter"_h];
+						auto p = buf;
+						for (auto& pair : map)
+						{
+							if (pair.second & f.first)
+							{
+								*(uint*)p = pair.first; p += sizeof(uint);
+								auto vi = ui->find_variable(pair.first); auto len = vi->type->size;
+								memcpy(p, (char*)pair.second + vi->offset, len); p += len;
+								
+								pair.second &= ~f.first;
+							}
+						}
+						extra_data = std::string(buf, p);
+					}
+
+					stru.extra_length = extra_data.size();
 					pack_msg(res, nwUpdateCharacter, stru);
+					if (!extra_data.empty())
+						pack_msg(res, extra_data.size(), extra_data.data());
 				}
 			}
 			for (auto so_id : f.second)
@@ -1271,6 +1330,14 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 		for (auto& i : preset.abilities)
 			character->gain_ability(Ability::find(i.first), i.second);
 	}
+	if (multi_player == MultiPlayerAsHost)
+	{
+		auto harvester = e->add_component<cNWDataHarvester>();
+		harvester->add_target("cCharacter"_h, "hp"_h);
+		harvester->add_target("cCharacter"_h, "hp_max"_h);
+		harvester->add_target("cCharacter"_h, "mp"_h);
+		harvester->add_target("cCharacter"_h, "mp_max"_h);
+	}
 	root->add_child(e);
 	characters_by_id.emplace(character->id, character);
 	characters_by_faction[faction].push_back(character);
@@ -1478,5 +1545,6 @@ EXPORT void* cpp_info()
 	cProjectile::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cChest::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cNWDataHarvester::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	return nullptr;
 }

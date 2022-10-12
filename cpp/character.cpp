@@ -307,6 +307,110 @@ void cCharacter::set_faction(uint _faction)
 		nav_agent->separation_group = faction;
 }
 
+void cCharacter::set_lv(uint v)
+{
+	if (lv == v)
+		return;
+	lv = v;
+	data_changed("lv"_h);
+}
+
+void cCharacter::set_exp(uint v)
+{
+	if (exp == v)
+		return;
+	exp = v;
+	data_changed("exp"_h);
+}
+
+void cCharacter::set_exp_max(uint v)
+{
+	if (exp_max == v)
+		return;
+	exp_max = v;
+	data_changed("exp_max"_h);
+}
+
+void cCharacter::set_hp(uint v)
+{
+	if (hp == v)
+		return;
+	hp = v;
+	data_changed("hp"_h);
+}
+
+void cCharacter::set_hp_max(uint v)
+{
+	if (hp_max == v)
+		return;
+	hp_max = v;
+	data_changed("hp_max"_h);
+}
+
+void cCharacter::set_mp(uint v)
+{
+	if (mp == v)
+		return;
+	mp = v;
+	data_changed("mp"_h);
+}
+
+void cCharacter::set_mp_max(uint v)
+{
+	if (mp_max == v)
+		return;
+	mp_max = v;
+	data_changed("mp_max"_h);
+}
+
+void cCharacter::set_VIG(ushort v)
+{
+	if (VIG == v)
+		return;
+	VIG = v;
+	data_changed("VIG"_h);
+}
+
+void cCharacter::set_MND(ushort v)
+{
+	if (MND == v)
+		return;
+	MND = v;
+	data_changed("MND"_h);
+}
+
+void cCharacter::set_STR(ushort v)
+{
+	if (STR == v)
+		return;
+	STR = v;
+	data_changed("STR"_h);
+}
+
+void cCharacter::set_DEX(ushort v)
+{
+	if (DEX == v)
+		return;
+	DEX = v;
+	data_changed("DEX"_h);
+}
+
+void cCharacter::set_INT(ushort v)
+{
+	if (INT == v)
+		return;
+	INT = v;
+	data_changed("INT"_h);
+}
+
+void cCharacter::set_LUK(ushort v)
+{
+	if (LUK == v)
+		return;
+	LUK = v;
+	data_changed("LUK"_h);
+}
+
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
@@ -342,7 +446,7 @@ bool cCharacter::take_damage(uint value, DamageType type)
 	value *= 10;
 	if (hp > value)
 	{
-		hp -= value;
+		set_hp(hp - value);
 		return false;
 	}
 
@@ -359,8 +463,11 @@ void cCharacter::gain_exp(uint v)
 	{
 		exp -= exp_max;
 		lv++;
-		attribute_points += 5;
-		ability_points++;
+		if (points)
+		{
+			points->attribute_points += 5;
+			points->ability_points++;
+		}
 		exp_max *= 1.1f;
 		stats_dirty = true;
 	}
@@ -437,7 +544,7 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 		ability.active_t(this, target);
 	ins->cd_max = ability.cd;
 	ins->cd_timer = ins->cd_max;
-	mp -= ability.mp;
+	set_mp(mp - ability.mp);
 }
 
 void cCharacter::add_buff(uint id, float time, bool replace)
@@ -481,7 +588,7 @@ void cCharacter::die()
 {
 	if (dead)
 		return;
-	hp = 0;
+	set_hp(0);
 	dead = true;
 }
 
@@ -697,18 +804,18 @@ void cCharacter::update()
 
 			state = StateNormal;
 
-			auto pre_hp_max = hp_max;
-			auto pre_mp_max = mp_max;
+			auto new_hp_max = preset.hp;
+			auto new_mp_max = preset.mp;
 
-			hp_max = preset.hp;
-			mp_max = preset.mp;
-
-			VIG = preset.VIG + VIG_PTS;
-			MND = preset.MND + MND_PTS;
-			STR = preset.STR + STR_PTS;
-			DEX = preset.DEX + DEX_PTS;
-			INT = preset.INT + INT_PTS;
-			LUK = preset.LUK + LUK_PTS;
+			if (points)
+			{
+				VIG = preset.VIG + points->VIG_PTS;
+				MND = preset.MND + points->MND_PTS;
+				STR = preset.STR + points->STR_PTS;
+				DEX = preset.DEX + points->DEX_PTS;
+				INT = preset.INT + points->INT_PTS;
+				LUK = preset.LUK + points->LUK_PTS;
+			}
 
 			atk_type = PhysicalDamage;
 			atk = preset.atk;
@@ -751,15 +858,21 @@ void cCharacter::update()
 					buff.passive(this, ins.get());
 			}
 
-			hp_max += VIG * 200;
+			new_hp_max += VIG * 200;
 			hp_reg += VIG;
-			mp_max += MND * 200;
+			new_mp_max += MND * 200;
 			mp_reg += MND;
 
-			if (hp_max != pre_hp_max)
-				hp *= (float)hp_max / pre_hp_max;
-			if (mp_max != pre_mp_max)
-				mp *= (float)mp_max / pre_mp_max;
+			if (hp_max != new_hp_max)
+			{
+				set_hp(hp * (float)new_hp_max / hp_max);
+				set_hp_max(new_hp_max);
+			}
+			if (mp_max != new_hp_max)
+			{
+				set_mp(mp * (float)new_mp_max / mp_max);
+				set_mp_max(new_mp_max);
+			}
 
 			if (equipments[EquipWeapon0].id == -1)
 				atk += STR;
@@ -771,10 +884,8 @@ void cCharacter::update()
 			regeneration_timer -= delta_time;
 		else
 		{
-			hp += hp_reg;
-			if (hp > hp_max) hp = hp_max;
-			mp += mp_reg;
-			if (mp > mp_max) mp = mp_max;
+			set_hp(min(hp + hp_reg, hp_max));
+			set_mp(min(mp + mp_reg, mp_max));
 			regeneration_timer = 1.f;
 		}
 

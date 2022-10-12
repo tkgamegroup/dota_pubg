@@ -129,7 +129,7 @@ void load_items()
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemConsumable;
 		item.active = [](cCharacterPtr character) {
-			character->hp = min(character->hp + 1000, character->hp_max);
+			character->set_hp(min(character->hp + 1000, character->hp_max));
 		};
 		item.show = []() {
 			ImGui::TextUnformatted("Recover hp by 100");
@@ -144,7 +144,7 @@ void load_items()
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemConsumable;
 		item.active = [](cCharacterPtr character) {
-			character->mp = min(character->mp + 500, character->mp_max);
+			character->set_mp(min(character->mp + 500, character->mp_max));
 		};
 		item.show = []() {
 			ImGui::TextUnformatted("Recover mp by 50");

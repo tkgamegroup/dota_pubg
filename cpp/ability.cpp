@@ -157,7 +157,7 @@ void load_abilities()
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
 		};
 		ability.active = [](cCharacterPtr caster) {
-			caster->hp = min(caster->hp + 1000, caster->hp_max);
+			caster->set_hp(min(caster->hp + 1000, caster->hp_max));
 		};
 		ability.show = []() {
 			ImGui::TextUnformatted("");
