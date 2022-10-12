@@ -437,6 +437,12 @@ void cCharacter::inflict_damage(cCharacterPtr target, uint value, DamageType typ
 {
 	if (target->take_damage(value, type))
 		gain_exp(target->exp_max * 0.15f);
+
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	{
+		if (target == main_player.character || this == main_player.character)
+			add_floating_tip(target->node->pos + vec3(0.f, 0.8f, 0.f), str(value), cvec4(255));
+	}
 }
 
 bool cCharacter::take_damage(uint value, DamageType type)

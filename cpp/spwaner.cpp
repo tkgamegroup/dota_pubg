@@ -1,4 +1,5 @@
 #include "spwaner.h"
+#include "network.h"
 
 #include <flame/universe/entity.h>
 #include <flame/universe/world.h>
@@ -33,6 +34,9 @@ void cSpwaner::start()
 
 void cSpwaner::update()
 {
+	if (multi_player != SinglePlayer || multi_player != MultiPlayerAsHost)
+		return;
+
 	auto dt = delta_time;
 	if (spwan_timer > 0)
 		spwan_timer -= dt;
