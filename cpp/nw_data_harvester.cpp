@@ -2,35 +2,20 @@
 
 #include <flame/foundation/typeinfo.h>
 
-void cNWDataHarvester::add_target(uint comp, uint var)
+void cNWDataHarvester::add_target(uint var)
 {
-	targets[comp][var] = 0xffffffff;
+	targets[var] = 0xffffffff;
 }
 
-void cNWDataHarvester::start()
+void cNWDataHarvester::on_init()
 {
-	for (auto& pair : targets)
-	{
-		auto comp = entity->get_component(pair.first);
-		if (comp)
-		{
-			auto& map = pair.second;
-			comp->data_listeners.add([&map](uint hash) {
-				auto it = map.find(hash);
-				if (it != map.end())
-					it->second = 0xffffffff;
-			});
-		}
-		else
-			pair.second.clear();
-	}
-	for (auto it = targets.begin(); it != targets.end();)
-	{
-		if (it->second.empty())
-			it = targets.erase(it);
-		else
-			it++;
-	}
+	auto comp = entity->get_component("cCharacter"_h);
+	  
+	comp->data_listeners.add([this](uint hash) {
+		auto it = targets.find(hash);
+		if (it != targets.end())
+			it->second = 0xffffffff;
+	});
 }
 
 struct cNWDataHarvesterCreate : cNWDataHarvester::Create

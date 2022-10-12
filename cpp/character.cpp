@@ -664,9 +664,6 @@ void cCharacter::die()
 
 void cCharacter::start()
 {
-	if (multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
-		nav_agent = nullptr;
-
 	entity->tag |= CharacterTag;
 
 	auto e = entity;

@@ -117,7 +117,7 @@ extern std::map<uint, std::vector<void*>> nw_players;
 inline void pack_msg(std::string& res, uint len, char* data)
 {
 	auto old_size = (uint)res.size();
-	res.resize(old_size + sizeof(uint) + len);
+	res.resize(old_size + len);
 	auto dst = res.data() + old_size;
 	memcpy(dst, data, len);
 }
@@ -126,7 +126,7 @@ template <typename T>
 inline void pack_msg(std::string& res, uint msg, T& stru)
 {
 	auto old_size = (uint)res.size();
-	res.resize(old_size + sizeof(uint) + sizeof(T));
+	res.resize(old_size + sizeof(uchar) + sizeof(T));
 	auto dst = res.data() + old_size;
 	memcpy(dst, &msg, sizeof(uchar)); dst += sizeof(uchar);
 	if (std::is_pod_v<T>)

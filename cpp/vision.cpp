@@ -323,6 +323,12 @@ void update_vision()
 	}
 
 	// update character's visiable
+	characters_in_vision.clear();
 	for (auto& pair : characters_by_id)
-		pair.second->entity->children[0]->set_enable(get_vision(main_player.faction, pair.second->node->pos));
+	{
+		auto v = get_vision(main_player.faction, pair.second->node->pos);
+		pair.second->entity->children[0]->set_enable(v);
+		if (v)
+			characters_in_vision.push_back(pair.second);
+	}
 }

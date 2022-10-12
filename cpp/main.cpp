@@ -370,28 +370,29 @@ void cMain::start()
 			uint player1_preset_id;
 			add_player(player1_coord, player1_faction, player1_preset_id);
 			auto character = add_character(player1_preset_id, player1_coord, player1_faction);
+			character->points.reset(new CharacterPoints);
 			main_player.faction = player1_faction;
 			main_player.character_id = character->id;
 			main_player.init(character->entity);
-			if (auto harvester = main_player.entity->add_component<cNWDataHarvester>(); harvester)
+			if (auto harvester = main_player.entity->get_component_t<cNWDataHarvester>(); harvester)
 			{
-				harvester->add_target("cCharacter"_h, "lv"_h);
-				harvester->add_target("cCharacter"_h, "exp"_h);
-				harvester->add_target("cCharacter"_h, "exp_max"_h);
-				harvester->add_target("cCharacter"_h, "VIG"_h);
-				harvester->add_target("cCharacter"_h, "MND"_h);
-				harvester->add_target("cCharacter"_h, "STR"_h);
-				harvester->add_target("cCharacter"_h, "DEX"_h);
-				harvester->add_target("cCharacter"_h, "INT"_h);
-				harvester->add_target("cCharacter"_h, "LUK"_h);
-				harvester->add_target("cCharacter"_h, "atk_type"_h);
-				harvester->add_target("cCharacter"_h, "atk"_h);
-				harvester->add_target("cCharacter"_h, "phy_def"_h);
-				harvester->add_target("cCharacter"_h, "mag_def"_h);
-				harvester->add_target("cCharacter"_h, "hp_reg"_h);
-				harvester->add_target("cCharacter"_h, "mp_reg"_h);
-				harvester->add_target("cCharacter"_h, "mov_sp"_h);
-				harvester->add_target("cCharacter"_h, "atk_sp"_h);
+				//harvester->add_target("lv"_h);
+				//harvester->add_target("exp"_h);
+				//harvester->add_target("exp_max"_h);
+				//harvester->add_target("VIG"_h);
+				//harvester->add_target("MND"_h);
+				//harvester->add_target("STR"_h);
+				//harvester->add_target("DEX"_h);
+				//harvester->add_target("INT"_h);
+				//harvester->add_target("LUK"_h);
+				//harvester->add_target("atk_type"_h);
+				//harvester->add_target("atk"_h);
+				//harvester->add_target("phy_def"_h);
+				//harvester->add_target("mag_def"_h);
+				//harvester->add_target("hp_reg"_h);
+				//harvester->add_target("mp_reg"_h);
+				//harvester->add_target("mov_sp"_h);
+				//harvester->add_target("atk_sp"_h);
 			}
 
 			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
@@ -400,31 +401,31 @@ void cMain::start()
 			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
 			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
-			for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
-			{
-				auto coord = main_terrain.get_coord_by_centrality(i);
+			//for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
+			//{
+			//	auto coord = main_terrain.get_coord_by_centrality(i);
 
-				static uint preset_ids[] = {
-					CharacterPreset::find("Life Stealer"),
-					CharacterPreset::find("Slark")
-				};
+			//	static uint preset_ids[] = {
+			//		CharacterPreset::find("Life Stealer"),
+			//		CharacterPreset::find("Slark")
+			//	};
 
-				auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-				new CommandAttackLocation(character, coord);
-			}
-			for (auto i = 0; i < 100; i++)
-			{
-				auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
+			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
+			//	new CommandAttackLocation(character, coord);
+			//}
+			//for (auto i = 0; i < 100; i++)
+			//{
+			//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-				static uint preset_ids[] = {
-					CharacterPreset::find("Spiderling"),
-					CharacterPreset::find("Treant"),
-					CharacterPreset::find("Boar")
-				};
+			//	static uint preset_ids[] = {
+			//		CharacterPreset::find("Spiderling"),
+			//		CharacterPreset::find("Treant"),
+			//		CharacterPreset::find("Boar")
+			//	};
 
-				auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-				character->entity->add_component<cCreepAI>();
-			}
+			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
+			//	character->entity->add_component<cCreepAI>();
+			//}
 		}
 	}
 
@@ -712,10 +713,8 @@ void cMain::start()
 
 		if (main_player.character && main_camera.camera)
 		{
-			for (auto character : find_characters(main_player.character->node->pos, 25.f, 0xffffffff))
+			for (auto character : characters_in_vision)
 			{
-				if (!character->entity->children[0]->enable)
-					continue;
 				auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
 				if (p.x > 0.f && p.y > 0.f)
 				{
@@ -851,6 +850,7 @@ void cMain::update()
 			uint preset_id;
 			add_player(pos, faction, preset_id);
 			auto character = add_character(preset_id, pos, faction);
+			character->points.reset(new CharacterPoints);
 
 			nw_players[faction].push_back(so_id);
 
@@ -892,7 +892,10 @@ void cMain::update()
 		{
 			auto character = add_character(a.preset_id, a.pos, a.faction, a.id);
 			if (a.id == main_player.character_id)
+			{
+				character->points.reset(new CharacterPoints);
 				main_player.init(character->entity);
+			}
 		}
 		peeding_add_characters.actions.clear();
 	}
@@ -1049,29 +1052,29 @@ void cMain::update()
 			std::string res;
 			for (auto& pair : characters_by_id)
 			{
-				if (get_vision(f.first, pair.second->node->pos))
+				auto character = pair.second;
+				if (get_vision(f.first, character->node->pos))
 				{
 					nwUpdateCharacterStruct stru;
-					stru.id = pair.second->id;
-					stru.pos = pair.second->node->pos;
-					stru.yaw = pair.second->node->eul.x;
-					stru.action = pair.second->action;
+					stru.id = character->id;
+					stru.pos = character->node->pos;
+					stru.yaw = character->node->eul.x;
+					stru.action = character->action;
 
 					std::string extra_data;
-					if (auto harvester = pair.second->entity->get_component_t<cNWDataHarvester>(); harvester)
+					if (auto harvester = character->entity->get_component_t<cNWDataHarvester>(); harvester)
 					{
 						static char buf[1024];
 						static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
 
-						auto& map = harvester->targets["cCharacter"_h];
 						auto p = buf;
-						for (auto& pair : map)
+						for (auto& pair : harvester->targets)
 						{
 							if (pair.second & f.first)
 							{
 								*(uint*)p = pair.first; p += sizeof(uint);
 								auto vi = ui->find_variable(pair.first); auto len = vi->type->size;
-								memcpy(p, (char*)pair.second + vi->offset, len); p += len;
+								memcpy(p, (char*)character + vi->offset, len); p += len;
 								
 								pair.second &= ~f.first;
 							}
@@ -1392,6 +1395,7 @@ std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint f
 
 std::map<uint, cCharacterPtr> characters_by_id;
 std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
+std::vector<cCharacterPtr> characters_in_vision;
 std::map<uint, cProjectilePtr> projectiles_by_id;
 std::map<uint, cChestPtr> chests_by_id;
 
@@ -1413,10 +1417,10 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	if (multi_player == MultiPlayerAsHost)
 	{
 		auto harvester = e->add_component<cNWDataHarvester>();
-		harvester->add_target("cCharacter"_h, "hp"_h);
-		harvester->add_target("cCharacter"_h, "hp_max"_h);
-		harvester->add_target("cCharacter"_h, "mp"_h);
-		harvester->add_target("cCharacter"_h, "mp_max"_h);
+		harvester->add_target("hp"_h);
+		harvester->add_target("hp_max"_h);
+		harvester->add_target("mp"_h);
+		harvester->add_target("mp_max"_h);
 	}
 	root->add_child(e);
 	characters_by_id.emplace(character->id, character);

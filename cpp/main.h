@@ -142,6 +142,7 @@ struct cMain : Component
 
 extern std::map<uint, cCharacterPtr> characters_by_id;
 extern std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
+extern std::vector<cCharacterPtr> characters_in_vision;
 extern std::map<uint, cProjectilePtr> projectiles_by_id;
 extern std::map<uint, cChestPtr> chests_by_id;
 
