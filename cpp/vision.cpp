@@ -19,6 +19,17 @@ static graphics::BufferPtr stagbuf = nullptr;
 
 static std::map<uint, std::vector<uchar>> visions;
 
+void init_vision()
+{
+	img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(W, H), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
+	auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
+	sRenderer::instance()->set_texture_res_name(id, "VISION");
+
+	stagbuf = graphics::Buffer::create(W * H, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
+	stagbuf->map();
+
+}
+
 bool get_vision(uint faction, const vec3& coord)
 {
 	auto it = visions.find(faction);
@@ -300,18 +311,6 @@ void update_vision()
 				if (f.first == main_player.faction)
 				{
 					graphics::Queue::get()->wait_idle();
-
-					if (!img_my_vision)
-					{
-						img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(W, H), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
-						auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
-						sRenderer::instance()->set_texture_res_name(id, "VISION");
-					}
-					if (!stagbuf)
-					{
-						stagbuf = graphics::Buffer::create(W * H, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
-						stagbuf->map();
-					}
 
 					graphics::InstanceCommandBuffer cb;
 					memcpy(stagbuf->mapped, visions[main_player.faction].data(), stagbuf->size);

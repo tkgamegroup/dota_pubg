@@ -358,6 +358,8 @@ void cMain::start()
 		shortcuts[i].reset(shortcut);
 	}
 
+	init_vision();
+
 	main_camera.init(entity->find_child("Camera"));
 	main_terrain.init(entity->find_child("terrain"));
 
@@ -376,7 +378,6 @@ void cMain::start()
 			main_player.init(character->entity);
 			if (auto harvester = main_player.entity->get_component_t<cNWDataHarvester>(); harvester)
 			{
-				//harvester->add_target("lv"_h);
 				//harvester->add_target("exp"_h);
 				//harvester->add_target("exp_max"_h);
 				//harvester->add_target("VIG"_h);
@@ -1421,6 +1422,7 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 		harvester->add_target("hp_max"_h);
 		harvester->add_target("mp"_h);
 		harvester->add_target("mp_max"_h);
+		harvester->add_target("lv"_h);
 	}
 	root->add_child(e);
 	characters_by_id.emplace(character->id, character);
