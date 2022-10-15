@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<material code_file="flame\shaders\sprite_sheet_mat.glsl" color_map="0" int_values="6,5,0,0" float_values="60,0,0,0">
+	<textures>
+		<item filename="smoke.png" srgb="true" auto_mipmap="true" />
+	</textures>
+</material>
