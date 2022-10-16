@@ -28,10 +28,10 @@ void load_abilities()
 			auto e = get_prefab(L"assets\\effects\\fire.prefab")->copy();
 			e->node()->set_pos(vec3(0.f, 1.8f, 0.f));
 			caster->entity->add_child(e);
-			add_event([e]() {
-				e->remove_from_parent();
-				return false; 
-			}, 0.5f);
+			//add_event([e]() {
+			//	e->remove_from_parent();
+			//	return false; 
+			//}, 0.5f);
 			//auto pos = caster->node->pos +
 			//	vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
 			//	caster->node->g_rot[2] * 0.3f;

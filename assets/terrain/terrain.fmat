@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <material int_values="1,0,0,0" code_file="flame/shaders/terrain/default_mat.glsl">
 	<shader_defines>
-		<item v="LAYERS=3" />
-		<item v="TRI_PLANAR" />
+		<item v="frag:LAYERS=3" />
+		<item v="frag:TRI_PLANAR" />
 	</shader_defines>
 	<textures>
 		<item filename="rock.jpg" srgb="true" auto_mipmap="true" />

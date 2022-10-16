@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
-<material code_file="flame\shaders\sprite_sheet_mat.glsl" color_map="0" int_values="6,5,0,0" float_values="60,0,0,0">
+<material color_map="0" float_values="10,0,0,0" int_values="3,3,0,0" code_file="flame\shaders\sprite_sheet_mat.glsl" ref="2">
+	<shader_defines>
+		<item v="COLOR_MAP=0" />
+		<item v="bsc=One" />
+		<item v="bdc=One" />
+	</shader_defines>
 	<textures>
-		<item filename="smoke.png" srgb="true" auto_mipmap="true" />
+		<item filename="smoke2.png" srgb="true" auto_mipmap="true" />
 	</textures>
 </material>
