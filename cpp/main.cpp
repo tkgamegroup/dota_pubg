@@ -431,8 +431,9 @@ void cMain::start()
 	}
 
 	node->drawers.add([](DrawData& draw_data) {
-		if (draw_data.pass == "outline"_h)
+		switch (draw_data.pass)
 		{
+		case PassOutline:
 			if (hovering_character)
 			{
 				if (auto armature = hovering_character->armature; armature && armature->model)
@@ -440,7 +441,7 @@ void cMain::start()
 					for (auto& c : armature->entity->children)
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
-							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, 
+							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1,
 								hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
 					}
 				}
@@ -453,9 +454,8 @@ void cMain::start()
 						draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(64, 128, 64, 255));
 				}
 			}
-		}
-		else if (draw_data.pass == "primitive"_h)
-		{
+			break;
+		case PassPrimitive:
 			if (select_distance > 0.f)
 			{
 				auto r = select_distance;
@@ -471,6 +471,7 @@ void cMain::start()
 				}
 				draw_data.primitives.emplace_back("LineList"_h, pts.data(), (uint)pts.size(), cvec4(0, 255, 0, 255));
 			}
+			break;
 		}
 	}, "main"_h);
 
@@ -1099,9 +1100,8 @@ void cMain::update()
 		auto input = sInput::instance();
 		vec3 hovering_pos;
 		auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
-			switch (draw_data.category)
+			if (draw_data.categories & CateMesh)
 			{
-			case "mesh"_h:
 				if (auto character = n->entity->get_component_t<cCharacter>(); character)
 				{
 					if (character != main_player.character && character->armature)
@@ -1127,14 +1127,14 @@ void cMain::update()
 						}
 					}
 				}
-				break;
-			case "terrain"_h:
+			}
+			if (draw_data.categories & CateTerrain)
+			{
 				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
 				{
 					if (terrain->instance_id != -1 && terrain->material_res_id != -1)
 						draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
 				}
-				break;
 			}
 			if (sInput::instance()->kpressed(Keyboard_F12))
 				draw_data.graphics_debug = true;

@@ -195,7 +195,7 @@ struct cCharacter : Component
 	void set_hp_max(uint v);
 
 	/// Reflect
-	uint mp = 0;
+	uint mp = 10;
 	void set_mp(uint v);
 	/// Reflect
 	uint mp_max = 10;

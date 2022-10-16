@@ -27,7 +27,6 @@ void init_vision()
 
 	stagbuf = graphics::Buffer::create(W * H, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
 	stagbuf->map();
-
 }
 
 bool get_vision(uint faction, const vec3& coord)
@@ -314,7 +313,9 @@ void update_vision()
 
 					graphics::InstanceCommandBuffer cb;
 					memcpy(stagbuf->mapped, visions[main_player.faction].data(), stagbuf->size);
+					cb->image_barrier(img_my_vision, {}, graphics::ImageLayoutTransferDst);
 					cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec2(W, H)));
+					cb->image_barrier(img_my_vision, {}, graphics::ImageLayoutShaderReadOnly);
 					cb.excute();
 				}
 			}
