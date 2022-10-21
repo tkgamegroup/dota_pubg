@@ -3,6 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavAgent" radius="0.6" height="1.8" speed="8.12" />
+		<item type_name="flame::cAudioSource" />
 		<item type_name="cCharacter" />
 	</components>
 	<children>

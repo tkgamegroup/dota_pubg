@@ -402,18 +402,18 @@ void cMain::start()
 			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
 			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
-			//for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
-			//{
-			//	auto coord = main_terrain.get_coord_by_centrality(i);
+			for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
+			{
+				auto coord = main_terrain.get_coord_by_centrality(i);
 
-			//	static uint preset_ids[] = {
-			//		CharacterPreset::find("Life Stealer"),
-			//		CharacterPreset::find("Slark")
-			//	};
+				static uint preset_ids[] = {
+					CharacterPreset::find("Life Stealer"),
+					CharacterPreset::find("Slark")
+				};
 
-			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-			//	new CommandAttackLocation(character, coord);
-			//}
+				auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
+				new CommandAttackLocation(character, coord);
+			}
 			//for (auto i = 0; i < 100; i++)
 			//{
 			//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));

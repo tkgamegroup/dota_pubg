@@ -9,6 +9,7 @@
 			<components>
 				<item type_name="flame::cNode" pos="0,10,10" qut="0.92388,-0.382683,0,0" />
 				<item type_name="flame::cCamera" />
+				<item type_name="flame::cAudioListener" />
 			</components>
 		</item>
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">

@@ -5,6 +5,7 @@
 #include "projectile.h"
 #include "chest.h"
 #include "network.h"
+#include "audio.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
@@ -14,6 +15,7 @@
 #include <flame/universe/components/camera.h>
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/components/audio_source.h>
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
@@ -173,6 +175,8 @@ void load_character_presets()
 		preset.atk = 32;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
+		preset.atk_precast_audio_preset = AudioPreset::find("Dragon Knight Attack Precast");
+		preset.atk_hit_audio_preset = AudioPreset::find("Dragon Knight Attack Hit");
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
 		preset.abilities.emplace_back("Fire Thrower", 0);
@@ -664,6 +668,8 @@ void cCharacter::die()
 
 void cCharacter::start()
 {
+	auto& preset = get_preset();
+
 	entity->tag |= CharacterTag;
 
 	auto e = entity;
@@ -694,6 +700,13 @@ void cCharacter::start()
 			}
 		}, "character"_h);
 	}
+
+	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
+	if (preset.atk_precast_audio_preset != -1)
+		audio_buffer_names.emplace_back(AudioPreset::get(preset.atk_precast_audio_preset).path, "attack_precast");
+	if (preset.atk_hit_audio_preset != -1)
+		audio_buffer_names.emplace_back(AudioPreset::get(preset.atk_hit_audio_preset).path, "attack_hit");
+	audio_source->set_buffer_names(audio_buffer_names);
 
 	inventory.resize(16);
 
@@ -746,6 +759,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 						if (!target->dead)
 							ef.first(this, target, (DamageType)atk_type, atk);
 					}
+
+					audio_source->play("attack_hit"_h);
 				};
 				if (preset.atk_projectile_preset != -1)
 				{
@@ -773,6 +788,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f); 
 				attack_timer = preset.atk_point / attack_speed;
+
+				audio_source->play("attack_precast"_h);
 			}
 		}
 		else
