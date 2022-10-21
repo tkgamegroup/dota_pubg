@@ -99,7 +99,7 @@ void load_items()
 		item.sub_category = EquipWeapon0;
 		item.passive = [](cCharacterPtr character) {
 			character->atk_type = PhysicalDamage;
-			character->atk += 10 + character->STR;
+			character->atk += 10;
 		};
 		item.show = []() {
 			ImGui::TextUnformatted("Physical\n+10 ATK\nSTR Fix 1.0");
