@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<material color_map="0" float_values="20,0,0,0" int_values="3,3,0,0" code_file="flame\shaders\sprite_sheet_mat.glsl" ref="2">
+<material color_map="0" float_values="30,0,0,0" int_values="3,3,0,0" code_file="flame\shaders\sprite_sheet_mat.glsl" ref="2">
 	<shader_defines>
 		<item v="COLOR_MAP=0" />
 		<item v="bsc=One" />

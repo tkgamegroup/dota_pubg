@@ -1373,7 +1373,7 @@ std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint f
 	std::vector<cCharacterPtr> ret;
 
 	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(pos, radius, objs, CharacterTag);
+	sScene::instance()->octree->get_colliding(pos.xz(), radius, objs, CharacterTag);
 	for (auto obj : objs)
 	{
 		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))

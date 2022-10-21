@@ -28,26 +28,16 @@ void load_abilities()
 			auto e = get_prefab(L"assets\\effects\\fire.prefab")->copy();
 			e->node()->set_pos(vec3(0.f, 1.8f, 0.f));
 			caster->entity->add_child(e);
-			//add_event([e]() {
-			//	e->remove_from_parent();
-			//	return false; 
-			//}, 0.5f);
-			//auto pos = caster->node->pos +
-			//	vec3(0.f, caster->nav_agent->height * 0.7f, 0.f) +
-			//	caster->node->g_rot[2] * 0.3f;
-			//auto dir = normalize(target.xz() - pos.xz());
-			//auto ang = degrees(atan2(dir.y, dir.x));
-			//auto sp = 12.f;
-			//for (auto i = -2; i < 3; i++)
-			//{
-			//	auto a = radians(ang + i * 15.f);
-			//	add_projectile(ProjectilePreset::find("Fire Ball"), pos, pos + vec3(cos(a), 0.f, sin(a)) * 8.f, sp, ~caster->faction,
-			//	[caster](cCharacterPtr t) {
-			//		auto hash = "Fire Thrower"_h + (uint)caster;
-			//		if (t->add_marker(hash, 0.5f))
-			//			caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
-			//	});
-			//}
+			add_event([e]() {
+				e->remove_from_parent();
+				return false; 
+			}, 0.3f);
+			for (auto c : find_characters(caster->node->pos, 8.f, ~caster->faction))
+			{
+				//		auto hash = "Fire Thrower"_h + (uint)caster;
+				//		if (t->add_marker(hash, 0.5f))
+				//			caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
+			}
 		};
 		ability.show = []() {
 			ImGui::TextUnformatted("");
