@@ -379,12 +379,6 @@ void cMain::start()
 			{
 				//harvester->add_target("exp"_h);
 				//harvester->add_target("exp_max"_h);
-				//harvester->add_target("VIG"_h);
-				//harvester->add_target("MND"_h);
-				//harvester->add_target("STR"_h);
-				//harvester->add_target("DEX"_h);
-				//harvester->add_target("INT"_h);
-				//harvester->add_target("LUK"_h);
 				//harvester->add_target("atk_type"_h);
 				//harvester->add_target("atk"_h);
 				//harvester->add_target("phy_def"_h);
@@ -1423,6 +1417,9 @@ void remove_character(uint id)
 	auto character = it->second;
 	characters_by_id.erase(it);
 	std::erase_if(characters_by_faction[character->faction], [&](const auto& i) {
+		return i == character;
+	});
+	std::erase_if(characters_in_vision, [&](const auto& i) {
 		return i == character;
 	});
 	add_event([character]() {
