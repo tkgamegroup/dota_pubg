@@ -166,12 +166,6 @@ void load_character_presets()
 		preset.exp_base = 200;
 		preset.hp = 2000;
 		preset.mp = 500;
-		preset.VIG = 20;
-		preset.MND = 10;
-		preset.STR = 21;
-		preset.DEX = 16;
-		preset.INT = 10;
-		preset.LUK = 10;
 		preset.atk = 32;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
@@ -191,12 +185,6 @@ void load_character_presets()
 		preset.exp_base = 200;
 		preset.hp = 2000;
 		preset.mp = 500;
-		preset.VIG = 20;
-		preset.MND = 10;
-		preset.STR = 24;
-		preset.DEX = 22;
-		preset.INT = 10;
-		preset.LUK = 10;
 		preset.atk = 35;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
@@ -209,12 +197,6 @@ void load_character_presets()
 		preset.exp_base = 200;
 		preset.hp = 2000;
 		preset.mp = 500;
-		preset.VIG = 20;
-		preset.MND = 10;
-		preset.STR = 20;
-		preset.DEX = 21;
-		preset.INT = 10;
-		preset.LUK = 10;
 		preset.atk = 37;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
@@ -367,54 +349,6 @@ void cCharacter::set_mp_max(uint v)
 	data_changed("mp_max"_h);
 }
 
-void cCharacter::set_VIG(ushort v)
-{
-	if (VIG == v)
-		return;
-	VIG = v;
-	data_changed("VIG"_h);
-}
-
-void cCharacter::set_MND(ushort v)
-{
-	if (MND == v)
-		return;
-	MND = v;
-	data_changed("MND"_h);
-}
-
-void cCharacter::set_STR(ushort v)
-{
-	if (STR == v)
-		return;
-	STR = v;
-	data_changed("STR"_h);
-}
-
-void cCharacter::set_DEX(ushort v)
-{
-	if (DEX == v)
-		return;
-	DEX = v;
-	data_changed("DEX"_h);
-}
-
-void cCharacter::set_INT(ushort v)
-{
-	if (INT == v)
-		return;
-	INT = v;
-	data_changed("INT"_h);
-}
-
-void cCharacter::set_LUK(ushort v)
-{
-	if (LUK == v)
-		return;
-	LUK = v;
-	data_changed("LUK"_h);
-}
-
 void cCharacter::set_atk_type(uchar v)
 {
 	if (atk_type == v)
@@ -537,11 +471,6 @@ void cCharacter::gain_exp(uint v)
 	{
 		exp -= exp_max;
 		lv++;
-		if (points)
-		{
-			points->attribute_points += 5;
-			points->ability_points++;
-		}
 		exp_max *= 1.1f;
 		stats_dirty = true;
 	}
@@ -891,16 +820,6 @@ void cCharacter::update()
 			auto new_hp_max = preset.hp;
 			auto new_mp_max = preset.mp;
 
-			if (points)
-			{
-				VIG = preset.VIG + points->VIG_PTS;
-				MND = preset.MND + points->MND_PTS;
-				STR = preset.STR + points->STR_PTS;
-				DEX = preset.DEX + points->DEX_PTS;
-				INT = preset.INT + points->INT_PTS;
-				LUK = preset.LUK + points->LUK_PTS;
-			}
-
 			atk_type = PhysicalDamage;
 			atk = preset.atk;
 
@@ -942,11 +861,6 @@ void cCharacter::update()
 					buff.passive(this, ins.get());
 			}
 
-			new_hp_max += VIG * 200;
-			hp_reg += VIG;
-			new_mp_max += MND * 200;
-			mp_reg += MND;
-
 			if (hp_max != new_hp_max)
 			{
 				set_hp(hp * (float)new_hp_max / hp_max);
@@ -957,9 +871,6 @@ void cCharacter::update()
 				set_mp(mp * (float)new_mp_max / mp_max);
 				set_mp_max(new_mp_max);
 			}
-
-			if (equipments[EquipWeapon0].id == -1)
-				atk += STR;
 
 			stats_dirty = false;
 		}

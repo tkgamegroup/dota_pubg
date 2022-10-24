@@ -55,7 +55,7 @@ void load_abilities()
 		ability.cd = 10.f;
 		ability.distance = 5.f;
 		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
-			caster->inflict_damage(target, 50.f + caster->STR * 1.2f, PhysicalDamage);
+			caster->inflict_damage(target, 50.f, PhysicalDamage);
 			target->add_buff(Buff::find("Stun"), 2.f);
 		};
 		ability.show = []() {

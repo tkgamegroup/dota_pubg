@@ -372,7 +372,6 @@ void cMain::start()
 			uint player1_preset_id;
 			add_player(player1_coord, player1_faction, player1_preset_id);
 			auto character = add_character(player1_preset_id, player1_coord, player1_faction);
-			character->points.reset(new CharacterPoints);
 			main_player.faction = player1_faction;
 			main_player.character_id = character->id;
 			main_player.init(character->entity);
@@ -549,11 +548,6 @@ void cMain::start()
 				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
-				if (auto pts = main_player.character->points->attribute_points; pts > 0)
-				{
-					dl->AddCircleFilled(vec2(p1.x, p0.y), 7.f, ImColor(0.8f, 0.2f, 0.2f));
-					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(pts).c_str());
-				}
 				if (pressed)
 					toggle_equipment_view();
 			}
@@ -567,11 +561,6 @@ void cMain::start()
 				auto p1 = (vec2)ImGui::GetItemRectMax();
 				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
 				dl->AddImage(img, p0, p1);
-				if (auto pts = main_player.character->points->ability_points; pts > 0)
-				{
-					dl->AddCircleFilled(vec2(p1.x, p0.y), 7.f, ImColor(0.8f, 0.2f, 0.2f));
-					dl->AddText(vec2(p1.x - 4.f, p0.y - 10.f), ImColor(1.f, 1.f, 1.f), str(pts).c_str());
-				}
 				if (pressed)
 					toggle_ability_view();
 			}
@@ -852,7 +841,6 @@ void cMain::update()
 			uint preset_id;
 			add_player(pos, faction, preset_id);
 			auto character = add_character(preset_id, pos, faction);
-			character->points.reset(new CharacterPoints);
 
 			nw_players[faction].push_back(so_id);
 
@@ -894,10 +882,7 @@ void cMain::update()
 		{
 			auto character = add_character(a.preset_id, a.pos, a.faction, a.id);
 			if (a.id == main_player.character_id)
-			{
-				character->points.reset(new CharacterPoints);
 				main_player.init(character->entity);
-			}
 		}
 		peeding_add_characters.actions.clear();
 	}

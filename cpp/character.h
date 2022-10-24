@@ -105,12 +105,6 @@ struct CharacterPreset
 	uint exp_base = 0;
 	uint hp = 1000;
 	uint mp = 1000;
-	uint VIG = 0; // vigor
-	uint MND = 0; // mind
-	uint STR = 0; // strength
-	uint DEX = 0; // dexterity
-	uint INT = 0; // intelligence
-	uint LUK = 0; // luck
 	uint atk = 0;
 	float atk_distance = 1.5f;
 	float atk_time = 2.f; // attack interval
@@ -140,18 +134,6 @@ enum State
 	StateStun = 1 << 0,
 	StateRoot = 1 << 1,
 	StateSilence = 1 << 2
-};
-
-struct CharacterPoints
-{
-	uint ability_points = 1;
-	uint attribute_points = 0;
-	ushort VIG_PTS = 0;
-	ushort MND_PTS = 0;
-	ushort STR_PTS = 0;
-	ushort DEX_PTS = 0;
-	ushort INT_PTS = 0;
-	ushort LUK_PTS = 0;
 };
 
 /// Reflect ctor
@@ -206,25 +188,6 @@ struct cCharacter : Component
 	void set_mp_max(uint v);
 
 	/// Reflect
-	ushort VIG = 0;
-	void set_VIG(ushort v);
-	/// Reflect
-	ushort MND = 0;
-	void set_MND(ushort v);
-	/// Reflect
-	ushort STR = 0;
-	void set_STR(ushort v);
-	/// Reflect
-	ushort DEX = 0;
-	void set_DEX(ushort v);
-	/// Reflect
-	ushort INT = 0;
-	void set_INT(ushort v);
-	/// Reflect
-	ushort LUK = 0;
-	void set_LUK(ushort v);
-
-	/// Reflect
 	uchar atk_type = PhysicalDamage;
 	void set_atk_type(uchar v);
 	/// Reflect
@@ -251,8 +214,6 @@ struct cCharacter : Component
 
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 15;
-
-	std::unique_ptr<CharacterPoints> points;
 
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
