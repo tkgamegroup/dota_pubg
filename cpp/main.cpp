@@ -1373,6 +1373,7 @@ std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint f
 	return ret;
 }
 
+static uint uid = 1;
 std::map<uint, cCharacterPtr> characters_by_id;
 std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
 std::vector<cCharacterPtr> characters_in_vision;
@@ -1381,7 +1382,6 @@ std::map<uint, cChestPtr> chests_by_id;
 
 cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id)
 {
-	static uint uid = 1;
 	auto& preset = CharacterPreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
@@ -1444,7 +1444,6 @@ void remove_character(uint id)
 
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update, uint id)
 {
-	static uint uid = 1;
 	auto& preset = ProjectilePreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
@@ -1478,7 +1477,6 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide,   uint id)
 {
-	static uint uid = 1;
 	auto& preset = ProjectilePreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
@@ -1542,7 +1540,6 @@ void remove_projectile(uint id)
 
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
-	static uint uid = 1;
 	auto e = get_prefab(L"assets\\models\\chest.prefab")->copy();
 	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);

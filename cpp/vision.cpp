@@ -179,15 +179,12 @@ void update_vision()
 		{
 			it = visions.emplace(f.first, std::vector<uchar>()).first;
 			it->second.resize(W * H);
+			if (f.first == FactionCreep)
+				memset(it->second.data(), 255, W * H);
 		}
-		auto buf = it->second.data();
 
-		if (f.first == FactionCreep) // well, creeps have full vision
-		{
-			if (buf[0] != 255)
-				memset(buf, 255, W * H);
-		}
-		else
+		auto buf = it->second.data();
+		if (f.first != FactionCreep) // well, creeps have full vision
 		{
 			auto changed = false;
 			for (auto character : f.second)
