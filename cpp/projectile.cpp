@@ -17,10 +17,9 @@ void load_projectile_presets()
 		preset.id = projectile_presets.size() - 1;
 		preset.path = L"assets\\models\\fireball.prefab";
 		preset.name = "Fire Ball";
-		preset.collide_radius = 0.5f;
 		preset.update = [](cProjectilePtr pt) {
-			pt->collide_radius += 2.5f * delta_time;
-			pt->node->set_scl(vec3(pt->collide_radius));
+			pt->node->scl += 2.5f * delta_time;
+			pt->node->set_scl(pt->node->scl);
 		};
 	}
 }
@@ -84,15 +83,6 @@ void cProjectile::update()
 
 	node->add_pos(normalize(location - self_pos) * sp);
 	node->look_at(location);
-
-	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-	{
-		if (collide_radius > 0.f && on_collide)
-		{
-			for (auto c : find_characters(node->pos, collide_radius, collide_faction))
-				on_collide(c);
-		}
-	}
 }
 
 struct cProjectileCreate : cProjectile::Create

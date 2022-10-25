@@ -7,6 +7,8 @@ struct cChest : Component
 {
 	/// Reflect requires
 	cNodePtr node;
+	/// Reflect auto_requires
+	cObjectPtr object;
 
 	uint id;
 

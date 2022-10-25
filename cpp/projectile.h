@@ -8,8 +8,6 @@ struct ProjectilePreset
 	std::string				name;
 	std::filesystem::path	path;
 
-	float collide_radius = 0.f;
-
 	void(*update)(cProjectilePtr) = nullptr;
 
 	static int find(const std::string& name);
@@ -21,6 +19,8 @@ struct cProjectile : Component
 {
 	/// Reflect requires
 	cNodePtr node;
+	/// Reflect auto_requires
+	cObjectPtr object;
 
 	uint id;
 	uint preset_id;
@@ -35,10 +35,6 @@ struct cProjectile : Component
 	vec3					location;
 	Tracker<cCharacterPtr>	target;
 
-	float collide_radius = 0.f;
-	uint collide_faction = 0;
-
-	std::function<void(cCharacterPtr c)>				on_collide;
 	std::function<void(const vec3& l, cCharacterPtr t)> on_end;
 
 	void start() override;

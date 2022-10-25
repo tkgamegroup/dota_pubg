@@ -5,9 +5,12 @@
 /// Reflect ctor
 struct cNWDataHarvester : Component
 {
-	std::unordered_map<uint, uint/*factions flags: is this var needs to sync to those factions*/> targets;
+	/*first: var hash, second: the current and reset faction flags (is this var needs to sync to those factions)*/
+	std::unordered_map<uint, std::pair<uint, uint>> targets;
 
-	void add_target(uint var);
+	void add_target(uint var, uint flags = 0xffffffff);
+
+	void process_data_changed(uint hash);
 
 	void on_init() override;
 

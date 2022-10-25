@@ -145,6 +145,8 @@ struct cCharacter : Component
 	cNavAgentPtr nav_agent;
 	/// Reflect requires
 	cAudioSourcePtr audio_source;
+	/// Reflect auto_requires
+	cObjectPtr object;
 
 	cArmaturePtr armature = nullptr;
 
@@ -214,13 +216,11 @@ struct cCharacter : Component
 
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 15;
-	uint vision_flags = 0xffffffff;
 
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
-	EquipmentInstance								equipments[EquipPart_Count];
 	std::vector<std::unique_ptr<BuffInstance>>		buffs;
 	std::map<uint, float>							markers;
 

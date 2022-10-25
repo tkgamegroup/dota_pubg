@@ -1,4 +1,5 @@
 #include "vision.h"
+#include "object.h"
 #include "character.h"
 #include "network.h"
 
@@ -169,6 +170,9 @@ std::vector<ivec2> get_beam(int x, int y)
 
 void update_vision()
 {
+	std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
+	for (auto& pair : characters_by_id)
+		characters_by_faction[pair.second->faction].push_back(pair.second);
 	for (auto& f : characters_by_faction)
 	{
 		if (main_player.faction != f.first && multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
@@ -319,13 +323,19 @@ void update_vision()
 		}
 	}
 
-	// update character's visiable
-	characters_in_vision.clear();
-	for (auto& pair : characters_by_id)
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		auto v = get_vision(main_player.faction, pair.second->node->pos);
-		pair.second->entity->children[0]->set_enable(v);
-		if (v)
-			characters_in_vision.push_back(pair.second);
+		// update objects' visible
+		for (auto& pair : objects)
+		{
+			auto visible_flags = 0;
+			for (auto& f : characters_by_faction)
+			{
+				auto v = get_vision(f.first, pair.second->entity->node()->pos);
+				if (v)
+					visible_flags |= f.first;
+			}
+			pair.second->set_visible_flags(visible_flags);
+		}
 	}
 }

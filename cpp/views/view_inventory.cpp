@@ -48,17 +48,6 @@ void ViewInventory::on_draw()
 				}
 				dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
 
-				auto equip = [&]() {
-					int id = ins->id;
-					auto& eins = main_player.character->equipments[item.sub_category];
-					std::swap(id, eins.id);
-					eins.enchant = -1;
-					main_player.character->inventory[i].reset(nullptr);
-					if (id != -1)
-						main_player.character->gain_item(id, 1);
-					main_player.character->stats_dirty = true;
-				};
-
 				if (pressed)
 				{
 					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
@@ -67,9 +56,6 @@ void ViewInventory::on_draw()
 						{
 						case ItemConsumable:
 							main_player.character->use_item(ins);
-							break;
-						case ItemEquipment:
-							equip();
 							break;
 						}
 					}

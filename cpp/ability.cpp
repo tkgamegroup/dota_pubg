@@ -73,14 +73,8 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.cd = 10.f;
-		ability.cast_check = [](cCharacterPtr caster) {
-			return caster->equipments[EquipWeapon0].id != -1;
-		};
 		ability.active = [](cCharacterPtr caster) {
-			auto& ins = caster->equipments[EquipWeapon0];
-			ins.enchant = Buff::find("Flame Weapon");
-			ins.enchant_timer = 60.f;
-			caster->stats_dirty = true;
+			caster->add_buff(Buff::find("Flame Weapon"), 60.f);
 		};
 		ability.show = []() {
 			ImGui::TextUnformatted("");

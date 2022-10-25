@@ -5,6 +5,7 @@
 #include "vision.h"
 #include "network.h"
 #include "launcher.h"
+#include "object.h"
 #include "character.h"
 #include "spwaner.h"
 #include "projectile.h"
@@ -698,18 +699,24 @@ void cMain::start()
 
 		if (main_player.character && main_camera.camera)
 		{
-			for (auto character : characters_in_vision)
+			for (auto& pair : objects)
 			{
-				auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
-				if (p.x > 0.f && p.y > 0.f)
+				if (pair.second->visible_flags & main_player.faction)
 				{
-					p += sInput::instance()->offset;
-					auto dl = ImGui::GetBackgroundDrawList();
-					const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
-					const auto bar_height = 5.f;
-					p.x -= bar_width * 0.5f;
-					dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
-						character->faction == main_player.character->faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
+					if (auto character = pair.second->entity->get_component_t<cCharacter>(); character)
+					{
+						auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
+						if (p.x > 0.f && p.y > 0.f)
+						{
+							p += sInput::instance()->offset;
+							auto dl = ImGui::GetBackgroundDrawList();
+							const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
+							const auto bar_height = 5.f;
+							p.x -= bar_width * 0.5f;
+							dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
+								character->faction == main_player.faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
+						}
+					}
 				}
 			}
 		}
@@ -851,7 +858,6 @@ void cMain::update()
 				stru.preset_id = pair.second->preset_id;
 				stru.id = pair.first;
 				stru.faction = pair.second->faction;
-				stru.pos = pair.second->node->pos;
 				pack_msg(res, nwAddCharacter, stru);
 			}
 			for (auto& pair : chests_by_id)
@@ -874,7 +880,7 @@ void cMain::update()
 	{
 		for (auto& a : peeding_add_characters.actions)
 		{
-			auto character = add_character(a.preset_id, a.pos, a.faction, a.id);
+			auto character = add_character(a.preset_id, vec3(0.f, -1000.f, 0.f), a.faction, a.id);
 			if (a.id == main_player.character_id)
 				main_player.init(character->entity);
 		}
@@ -974,10 +980,10 @@ void cMain::update()
 			{
 				auto it = characters_by_id.find(a.target);
 				if (it != characters_by_id.end())
-					add_projectile(a.preset_id, a.pos, it->second, a.speed, nullptr, nullptr, a.id);
+					add_projectile(a.preset_id, a.pos, it->second, a.speed, nullptr, a.id);
 			}
 			else
-				add_projectile(a.preset_id, a.pos, a.location, a.speed, 0, nullptr, a.id);
+				add_projectile(a.preset_id, a.pos, a.location, a.speed, nullptr, a.id);
 		}
 		peeding_add_projectiles.actions.clear();
 	}
@@ -1051,13 +1057,13 @@ void cMain::update()
 						auto p = buf;
 						for (auto& pair : harvester->targets)
 						{
-							if (pair.second & f.first)
+							if (pair.second.first & f.first)
 							{
 								*(uint*)p = pair.first; p += sizeof(uint);
 								auto vi = ui->find_variable(pair.first); auto len = vi->type->size;
 								memcpy(p, (char*)character + vi->offset, len); p += len;
 								
-								pair.second &= ~f.first;
+								pair.second.first &= ~f.first;
 							}
 						}
 						extra_data = std::string(buf, p);
@@ -1374,9 +1380,8 @@ std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint f
 }
 
 static uint uid = 1;
+std::map<uint, cObjectPtr> objects;
 std::map<uint, cCharacterPtr> characters_by_id;
-std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
-std::vector<cCharacterPtr> characters_in_vision;
 std::map<uint, cProjectilePtr> projectiles_by_id;
 std::map<uint, cChestPtr> chests_by_id;
 
@@ -1389,7 +1394,7 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	character->preset_id = preset_id;
 	character->set_faction(faction);
 	character->id = id ? id : uid++;
-	if (!preset.abilities.empty())
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
 		for (auto& i : preset.abilities)
 			character->gain_ability(Ability::find(i.first), i.second);
@@ -1405,7 +1410,6 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	}
 	root->add_child(e);
 	characters_by_id.emplace(character->id, character);
-	characters_by_faction[faction].push_back(character);
 	return character;
 }
 
@@ -1416,12 +1420,6 @@ void remove_character(uint id)
 		return;
 	auto character = it->second;
 	characters_by_id.erase(it);
-	std::erase_if(characters_by_faction[character->faction], [&](const auto& i) {
-		return i == character;
-	});
-	std::erase_if(characters_in_vision, [&](const auto& i) {
-		return i == character;
-	});
 	add_event([character]() {
 		auto e = character->entity;
 		e->parent->remove_child(e);
@@ -1442,7 +1440,7 @@ void remove_character(uint id)
 	}
 }
 
-cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, const std::function<void(cProjectilePtr)>& on_update, uint id)
+cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
 {
 	auto& preset = ProjectilePreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
@@ -1475,7 +1473,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 	return projectile;
 }
 
-cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, uint collide_faction, const std::function<void(cCharacterPtr)>& on_collide,   uint id)
+cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
 {
 	auto& preset = ProjectilePreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
@@ -1486,9 +1484,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
-	projectile->collide_radius = preset.collide_radius;
-	projectile->collide_faction = collide_faction;
-	projectile->on_collide = on_collide;
+	projectile->on_end = on_end;
 	root->add_child(e);
 	projectiles_by_id.emplace(projectile->id, projectile);
 
@@ -1614,6 +1610,7 @@ EXPORT void* cpp_info()
 	auto uinfo = universe_info(); // references universe module explicitly
 	cLauncher::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cMain::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cObject::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cSpwaner::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cProjectile::create((EntityPtr)INVALID_POINTER); // references create function explicitly

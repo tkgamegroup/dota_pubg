@@ -839,21 +839,6 @@ void cCharacter::update()
 						ability.passive(this);
 				}
 			}
-			for (auto& ins : equipments)
-			{
-				if (ins.id != -1)
-				{
-					auto& item = Item::get(ins.id);
-					if (item.passive)
-						item.passive(this);
-					if (ins.enchant != -1)
-					{
-						auto& buff = Buff::get(ins.enchant);
-						if (buff.passive)
-							buff.passive(this, nullptr);
-					}
-				}
-			}
 			for (auto& ins : buffs)
 			{
 				auto& buff = Buff::get(ins->id);
@@ -893,21 +878,6 @@ void cCharacter::update()
 		{
 			if (ins && ins->cd_timer > 0.f)
 				ins->cd_timer -= delta_time;
-		}
-		for (auto& ins : equipments)
-		{
-			if (ins.id != -1)
-			{
-				if (ins.enchant != -1)
-				{
-					ins.enchant_timer -= delta_time;
-					if (ins.enchant_timer <= 0)
-					{
-						ins.enchant = -1;
-						stats_dirty = true;
-					}
-				}
-			}
 		}
 		for (auto it = buffs.begin(); it != buffs.end();)
 		{

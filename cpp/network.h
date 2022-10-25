@@ -21,7 +21,10 @@ enum nwMessage
 	nwAddProjectile,
 	nwRemoveProjectile,
 	nwAddChest,
-	nwRemoveChest
+	nwRemoveChest,
+	nwAddObject,
+	nwRemoveObject,
+	nwUpdateObject
 };
 
 struct nwNewPlayerInfoStruct
@@ -35,7 +38,6 @@ struct nwAddCharacterStruct
 	uint preset_id;
 	uint id;
 	uint faction;
-	vec3 pos;
 };
 
 struct nwRemoveCharacterStruct
