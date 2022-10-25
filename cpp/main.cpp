@@ -390,8 +390,6 @@ void cMain::start()
 				//harvester->add_target("atk_sp"_h);
 			}
 
-			add_chest(player1_coord + vec3(-3.f, 0.f, 2.f), Item::find("Straight Sword"));
-			add_chest(player1_coord + vec3(-2.f, 0.f, 2.f), Item::find("Boots of Speed"));
 			add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
 			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
 			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));

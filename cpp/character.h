@@ -215,7 +215,7 @@ struct cCharacter : Component
 	void set_atk_sp(uint v);
 
 	ivec2 vision_coord = ivec2(-1);
-	uint vision_range = 15;
+	uint vision_range = 20;
 
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
