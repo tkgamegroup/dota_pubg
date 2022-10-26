@@ -2,6 +2,8 @@
 
 #include "main.h"
 
+extern std::map<uint, cObjectPtr> objects;
+
 /// Reflect ctor
 struct cObject : Component
 {
@@ -10,6 +12,10 @@ struct cObject : Component
 	/// Reflect
 	void set_visible_flags(uint v);
 
+	uint uid = 0;
+
+	~cObject();
+
 	struct Create
 	{
 		virtual cObjectPtr operator()(EntityPtr) = 0;
@@ -17,3 +23,5 @@ struct cObject : Component
 	/// Reflect static
 	EXPORT static Create& create;
 };
+
+void add_object(uint id = 0);

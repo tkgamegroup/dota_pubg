@@ -10,8 +10,6 @@ struct cNWDataHarvester : Component
 
 	void add_target(uint var, uint flags = 0xffffffff);
 
-	void process_data_changed(uint hash);
-
 	void on_init() override;
 
 	struct Create

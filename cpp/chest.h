@@ -10,8 +10,6 @@ struct cChest : Component
 	/// Reflect auto_requires
 	cObjectPtr object;
 
-	uint id;
-
 	int item_id = -1;
 	uint item_num = 1;
 

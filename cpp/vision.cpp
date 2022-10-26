@@ -170,10 +170,7 @@ std::vector<ivec2> get_beam(int x, int y)
 
 void update_vision()
 {
-	std::map<uint, std::vector<cCharacterPtr>> characters_by_faction;
-	for (auto& pair : characters_by_id)
-		characters_by_faction[pair.second->faction].push_back(pair.second);
-	for (auto& f : characters_by_faction)
+	for (auto& f : factions)
 	{
 		if (main_player.faction != f.first && multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
 			continue;
@@ -329,7 +326,7 @@ void update_vision()
 		for (auto& pair : objects)
 		{
 			auto visible_flags = 0;
-			for (auto& f : characters_by_faction)
+			for (auto& f : factions)
 			{
 				auto v = get_vision(f.first, pair.second->entity->node()->pos);
 				if (v)

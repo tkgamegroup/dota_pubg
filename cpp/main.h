@@ -141,21 +141,13 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
-extern std::map<uint, cObjectPtr> objects;
-extern std::map<uint, cCharacterPtr> characters_by_id;
-extern std::map<uint, cProjectilePtr> projectiles_by_id;
-extern std::map<uint, cChestPtr> chests_by_id;
-
 EntityPtr get_prefab(const std::filesystem::path& path);
 void add_player(vec3& pos, uint& faction, uint& preset_id);
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
 cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id = 0);
-void remove_character(uint id);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
-void remove_projectile(uint id);
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
-void remove_chest(uint id);
 void teleport(cCharacterPtr character, const vec3& location);
 
 void add_floating_tip(const vec3& pos, const std::string& text, const cvec4& color);

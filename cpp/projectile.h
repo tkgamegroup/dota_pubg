@@ -22,7 +22,6 @@ struct cProjectile : Component
 	/// Reflect auto_requires
 	cObjectPtr object;
 
-	uint id;
 	uint preset_id;
 	inline const ProjectilePreset& get_preset()
 	{

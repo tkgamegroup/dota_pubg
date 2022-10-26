@@ -108,7 +108,13 @@ void CommandPickUp::update()
 		if (character->process_approach(target.obj->node->pos, 1.f))
 		{
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
-				remove_chest(target.obj->id);
+			{
+				auto entity = target.obj->entity;
+				add_event([entity]() {
+					entity->remove_from_parent();
+					return false;
+				});
+			}
 
 			character->nav_agent->stop();
 			new CommandIdle(character);
@@ -284,11 +290,19 @@ const CharacterPreset& CharacterPreset::get(uint id)
 	return character_presets[id];
 }
 
+std::vector<cCharacterPtr> characters;
+std::map<uint, std::vector<cCharacterPtr>> factions;
+
 void cCharacter::set_faction(uint _faction)
 {
 	if (faction == _faction)
 		return;
+	std::erase_if(factions[faction], [this](const auto& i) {
+		return i == this;
+	});
 	faction = _faction;
+	factions[faction].push_back(this);
+
 	if (nav_agent)
 		nav_agent->separation_group = faction;
 }
@@ -413,12 +427,24 @@ void cCharacter::set_atk_sp(uint v)
 	data_changed("atk_sp"_h);
 }
 
+cCharacter::cCharacter()
+{
+	characters.push_back(this);
+}
+
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
 
 	if (armature)
 		armature->playing_callbacks.remove("character"_h);
+
+	std::erase_if(characters, [this](const auto& i) {
+		return i == this;
+	});
+	std::erase_if(factions[faction], [this](const auto& i) {
+		return i == this;
+	});
 }
 
 void cCharacter::on_init()
@@ -803,7 +829,10 @@ void cCharacter::update()
 					add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
 			}
 
-			remove_character(id);
+			add_event([this]() {
+				entity->remove_from_parent();
+				return false;
+			});
 
 			return;
 		}

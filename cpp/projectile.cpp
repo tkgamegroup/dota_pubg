@@ -61,7 +61,11 @@ void cProjectile::update()
 			{
 				if (on_end)
 					on_end(node->pos, nullptr);
-				remove_projectile(id);
+
+				add_event([this]() {
+					entity->remove_from_parent();
+					return false;
+				});
 			}
 			return;
 		}
@@ -76,7 +80,11 @@ void cProjectile::update()
 		{
 			if (on_end)
 				on_end(node->pos, target.obj);
-			remove_projectile(id);
+
+			add_event([this]() {
+				entity->remove_from_parent();
+				return false;
+			});
 		}
 		return;
 	}

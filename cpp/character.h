@@ -136,6 +136,9 @@ enum State
 	StateSilence = 1 << 2
 };
 
+extern std::vector<cCharacterPtr> characters;
+extern std::map<uint, std::vector<cCharacterPtr>> factions;
+
 /// Reflect ctor
 struct cCharacter : Component
 {
@@ -150,7 +153,7 @@ struct cCharacter : Component
 
 	cArmaturePtr armature = nullptr;
 
-	uint id;
+	//uint id;
 	uint preset_id;
 	inline const CharacterPreset& get_preset()
 	{
@@ -237,6 +240,7 @@ struct cCharacter : Component
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
 
+	cCharacter();
 	~cCharacter();
 	void on_init() override;
 

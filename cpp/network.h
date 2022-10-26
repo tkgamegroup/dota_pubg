@@ -33,27 +33,6 @@ struct nwNewPlayerInfoStruct
 	uint character_id;
 };
 
-struct nwAddCharacterStruct
-{
-	uint preset_id;
-	uint id;
-	uint faction;
-};
-
-struct nwRemoveCharacterStruct
-{
-	uint id;
-};
-
-struct nwUpdateCharacterStruct
-{
-	uint id;
-	vec3 pos;
-	float yaw;
-	uchar action;
-	ushort extra_length;
-};
-
 struct nwCommandCharacterStruct
 {
 	uint id;
@@ -66,41 +45,13 @@ struct nwCommandCharacterStruct
 	}t;
 };
 
-struct nwAddProjectileStruct
-{
-	uint preset_id;
-	uint id;
-	vec3 location;
-	uint target;
-	vec3 pos;
-	float speed;
-};
+extern std::mutex nw_mtx;
+extern MultiPlayerType multi_player;
+extern network::ClientPtr so_client;
+extern network::ServerPtr so_server;
+extern std::map<uint, std::vector<void*>> nw_players;
 
-struct nwRemoveProjectileStruct
-{
-	uint id;
-};
-
-struct nwAddChestStruct
-{
-	uint id;
-	vec3 pos;
-	uint item_id;
-	uint item_num;
-};
-
-struct nwRemoveChestStruct
-{
-	uint id;
-};
-
-template <typename T>
-struct PeedingActions
-{
-	std::mutex mtx;
-	std::vector<T> actions;
-};
-
+/*
 extern PeedingActions<void*>											peeding_add_players;
 extern PeedingActions<nwAddCharacterStruct>								peeding_add_characters;
 extern PeedingActions<nwRemoveCharacterStruct>							peeding_remove_characters;
@@ -110,11 +61,7 @@ extern PeedingActions<nwAddProjectileStruct>							peeding_add_projectiles;
 extern PeedingActions<nwRemoveProjectileStruct>							peeding_remove_projectiles;
 extern PeedingActions<nwAddChestStruct>									peeding_add_chests;
 extern PeedingActions<nwRemoveChestStruct>								peeding_remove_chests;
-
-extern MultiPlayerType multi_player;
-extern network::ClientPtr so_client;
-extern network::ServerPtr so_server;
-extern std::map<uint, std::vector<void*>> nw_players;
+*/
 
 inline void pack_msg(std::string& res, uint len, char* data)
 {
