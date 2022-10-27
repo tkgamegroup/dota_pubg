@@ -12,7 +12,10 @@ struct cObject : Component
 	/// Reflect
 	void set_visible_flags(uint v);
 
+	uint preset_id = 0;
+
 	uint uid = 0;
+	void set_uid(uint id = 0);
 
 	~cObject();
 
@@ -23,5 +26,3 @@ struct cObject : Component
 	/// Reflect static
 	EXPORT static Create& create;
 };
-
-void add_object(uint id = 0);

@@ -14,23 +14,22 @@ enum MultiPlayerType
 enum nwMessage
 {
 	nwNewPlayerInfo,
-	nwAddCharacter,
-	nwRemoveCharacter,
-	nwUpdateCharacter,
-	nwCommandCharacter,
-	nwAddProjectile,
-	nwRemoveProjectile,
-	nwAddChest,
-	nwRemoveChest,
 	nwAddObject,
 	nwRemoveObject,
-	nwUpdateObject
+	nwUpdateObject,
+	nwCommandCharacter
 };
 
 struct nwNewPlayerInfoStruct
 {
 	uint faction;
 	uint character_id;
+};
+
+struct nwAddObjectStruct
+{
+	uint preset_id;
+	uint id;
 };
 
 struct nwCommandCharacterStruct
@@ -50,18 +49,8 @@ extern MultiPlayerType multi_player;
 extern network::ClientPtr so_client;
 extern network::ServerPtr so_server;
 extern std::map<uint, std::vector<void*>> nw_players;
-
-/*
-extern PeedingActions<void*>											peeding_add_players;
-extern PeedingActions<nwAddCharacterStruct>								peeding_add_characters;
-extern PeedingActions<nwRemoveCharacterStruct>							peeding_remove_characters;
-extern PeedingActions<std::pair<nwUpdateCharacterStruct, std::string>>	peeding_update_characters;
-extern PeedingActions<nwCommandCharacterStruct>							peeding_command_characters;
-extern PeedingActions<nwAddProjectileStruct>							peeding_add_projectiles;
-extern PeedingActions<nwRemoveProjectileStruct>							peeding_remove_projectiles;
-extern PeedingActions<nwAddChestStruct>									peeding_add_chests;
-extern PeedingActions<nwRemoveChestStruct>								peeding_remove_chests;
-*/
+extern std::vector<void*> nw_new_players;
+extern std::string nw_msgs;
 
 inline void pack_msg(std::string& res, uint len, char* data)
 {

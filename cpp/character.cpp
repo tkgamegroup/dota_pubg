@@ -79,7 +79,7 @@ void CommandAttackLocation::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = find_characters(character->node->pos, max(character->get_preset().atk_distance, 5.f), ~character->faction);
+			auto enemies = find_characters(character->node->pos, max(character->preset->atk_distance, 5.f), ~character->faction);
 			if (!enemies.empty())
 				target.set(enemies.front());
 
@@ -623,8 +623,6 @@ void cCharacter::die()
 
 void cCharacter::start()
 {
-	auto& preset = get_preset();
-
 	entity->tag |= CharacterTag;
 
 	auto e = entity;
@@ -657,11 +655,17 @@ void cCharacter::start()
 	}
 
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
-	if (preset.atk_precast_audio_preset != -1)
-		audio_buffer_names.emplace_back(AudioPreset::get(preset.atk_precast_audio_preset).path, "attack_precast");
-	if (preset.atk_hit_audio_preset != -1)
-		audio_buffer_names.emplace_back(AudioPreset::get(preset.atk_hit_audio_preset).path, "attack_hit");
+	if (preset->atk_precast_audio_preset != -1)
+		audio_buffer_names.emplace_back(AudioPreset::get(preset->atk_precast_audio_preset).path, "attack_precast");
+	if (preset->atk_hit_audio_preset != -1)
+		audio_buffer_names.emplace_back(AudioPreset::get(preset->atk_hit_audio_preset).path, "attack_hit");
 	audio_source->set_buffer_names(audio_buffer_names);
+
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	{
+		for (auto& i : preset->abilities)
+			gain_ability(Ability::find(i.first), i.second);
+	}
 
 	inventory.resize(16);
 
@@ -697,15 +701,13 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		return;
 	}
 
-	auto& preset = get_preset();
-
-	auto approached = process_approach(target->node->pos, preset.atk_distance, 60.f);
+	auto approached = process_approach(target->node->pos, preset->atk_distance, 60.f);
 	if (attack_timer > 0.f)
 	{
 		attack_timer -= delta_time;
 		if (attack_timer <= 0.f)
 		{
-			if (distance(node->pos, target->node->pos) <= preset.atk_distance + 3.5f)
+			if (distance(node->pos, target->node->pos) <= preset->atk_distance + 3.5f)
 			{
 				auto attack = [this](cCharacterPtr target) {
 					inflict_damage(target, atk, (DamageType)atk_type);
@@ -717,9 +719,9 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 
 					audio_source->play("attack_hit"_h);
 				};
-				if (preset.atk_projectile_preset != -1)
+				if (preset->atk_projectile_preset != -1)
 				{
-					add_projectile(preset.atk_projectile_preset,
+					add_projectile(preset->atk_projectile_preset,
 						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
 						[&](const vec3&, cCharacterPtr t) {
 							if (t)
@@ -730,7 +732,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 					attack(target);
 			}
 
-			attack_interval_timer = (preset.atk_time - preset.atk_point) / attack_speed;
+			attack_interval_timer = (preset->atk_time - preset->atk_point) / attack_speed;
 		}
 		action = ActionAttack;
 		nav_agent->set_speed_scale(0.f);
@@ -742,7 +744,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			if (approached)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f); 
-				attack_timer = preset.atk_point / attack_speed;
+				attack_timer = preset->atk_point / attack_speed;
 
 				audio_source->play("attack_precast"_h);
 			}
@@ -770,7 +772,6 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 		return;
 	}
 
-	auto& preset = get_preset();
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
@@ -802,8 +803,8 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 			}
 			else
 			{
-				cast_speed = preset.cast_time / ability.cast_time;
-				cast_timer = preset.cast_point / cast_speed;
+				cast_speed = preset->cast_time / ability.cast_time;
+				cast_timer = preset->cast_point / cast_speed;
 			}
 		}
 	}
@@ -815,11 +816,10 @@ void cCharacter::update()
 	{
 		if (dead)
 		{
-			auto& preset = get_preset();
-			if (!preset.drop_items.empty())
+			if (!preset->drop_items.empty())
 			{
 				std::vector<std::pair<uint, uint>> drops;
-				for (auto& d : preset.drop_items)
+				for (auto& d : preset->drop_items)
 				{
 					if (linearRand(0U, 100U) < std::get<1>(d))
 						drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
@@ -839,23 +839,21 @@ void cCharacter::update()
 
 		if (stats_dirty)
 		{
-			auto& preset = get_preset();
-
 			if (exp_max == 0)
-				exp_max = preset.exp_base;
+				exp_max = preset->exp_base;
 
 			state = StateNormal;
 
-			auto new_hp_max = preset.hp;
-			auto new_mp_max = preset.mp;
+			auto new_hp_max = preset->hp;
+			auto new_mp_max = preset->mp;
 
 			atk_type = PhysicalDamage;
-			atk = preset.atk;
+			atk = preset->atk;
 
-			hp_reg = preset.hp_reg;
-			mp_reg = preset.mp_reg;
-			mov_sp = preset.mov_sp;
-			atk_sp = preset.atk_sp;
+			hp_reg = preset->hp_reg;
+			mp_reg = preset->mp_reg;
+			mov_sp = preset->mov_sp;
+			atk_sp = preset->atk_sp;
 
 			attack_effects.list.clear();
 			injury_effects.list.clear();

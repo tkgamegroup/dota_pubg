@@ -697,23 +697,20 @@ void cMain::start()
 
 		if (main_player.character && main_camera.camera)
 		{
-			for (auto& pair : objects)
+			for (auto character : characters)
 			{
-				if (pair.second->visible_flags & main_player.faction)
+				if (character->object->visible_flags & main_player.faction)
 				{
-					if (auto character = pair.second->entity->get_component_t<cCharacter>(); character)
+					auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
+					if (p.x > 0.f && p.y > 0.f)
 					{
-						auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
-						if (p.x > 0.f && p.y > 0.f)
-						{
-							p += sInput::instance()->offset;
-							auto dl = ImGui::GetBackgroundDrawList();
-							const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
-							const auto bar_height = 5.f;
-							p.x -= bar_width * 0.5f;
-							dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
-								character->faction == main_player.faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
-						}
+						p += sInput::instance()->offset;
+						auto dl = ImGui::GetBackgroundDrawList();
+						const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
+						const auto bar_height = 5.f;
+						p.x -= bar_width * 0.5f;
+						dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
+							character->faction == main_player.faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
 					}
 				}
 			}
@@ -830,180 +827,163 @@ void cMain::start()
 
 void cMain::update()
 {
-	//switch (multi_player)
-	//{
-	//case MultiPlayerAsHost:
-	//	nw_mtx.lock();
-	//	if (!peeding_add_players.empty())
-	//	{
-	//		for (auto so_id : peeding_add_players)
-	//		{
-	//			vec3 pos;
-	//			uint faction;
-	//			uint preset_id;
-	//			add_player(pos, faction, preset_id);
-	//			auto character = add_character(preset_id, pos, faction);
+	switch (multi_player)
+	{
+	case MultiPlayerAsHost:
+		nw_mtx.lock();
+		if (!nw_new_players.empty())
+		{
+			for (auto so_id : nw_new_players)
+			{
+				vec3 pos;
+				uint faction;
+				uint preset_id;
+				add_player(pos, faction, preset_id);
+				auto character = add_character(preset_id, pos, faction);
 
-	//			nw_players[faction].push_back(so_id);
+				nw_players[faction].push_back(so_id);
 
-	//			std::string res;
-	//			{
-	//				nwNewPlayerInfoStruct stru;
-	//				stru.faction = faction;
-	//				stru.character_id = character->id;
-	//				pack_msg(res, nwNewPlayerInfo, stru);
-	//			}
-	//			for (auto& pair : characters_by_id)
-	//			{
-	//				nwAddCharacterStruct stru;
-	//				stru.preset_id = pair.second->preset_id;
-	//				stru.id = pair.first;
-	//				stru.faction = pair.second->faction;
-	//				pack_msg(res, nwAddCharacter, stru);
-	//			}
-	//			for (auto& pair : chests_by_id)
-	//			{
-	//				nwAddChestStruct stru;
-	//				stru.id = pair.second->id;
-	//				stru.item_id = pair.second->item_id;
-	//				stru.item_num = pair.second->item_num;
-	//				stru.pos = pair.second->node->pos;
-	//				pack_msg(res, nwAddChest, stru);
-	//			}
-	//			so_server->send(so_id, res);
-	//		}
-	//		peeding_add_players.clear();
-	//	}
-	//	if (!peeding_command_characters.empty())
-	//	{
-	//		for (auto& a : peeding_command_characters)
-	//		{
-	//			auto it = characters_by_id.find(a.id);
-	//			if (it == characters_by_id.end())
-	//				continue;
-	//			auto character = it->second;
-	//			switch (a.type)
-	//			{
-	//			case "Idle"_h:
-	//				new CommandIdle(character);
-	//				break;
-	//			case "MoveTo"_h:
-	//				new CommandMoveTo(character, a.t.location);
-	//				break;
-	//			case "AttackTarget"_h:
-	//			{
-	//				auto it = characters_by_id.find(a.t.target);
-	//				if (it != characters_by_id.end())
-	//					new CommandAttackTarget(character, it->second);
-	//			}
-	//			break;
-	//			case "AttackLocation"_h:
-	//				new CommandAttackLocation(character, a.t.location);
-	//				break;
-	//			case "PickUp"_h:
-	//			{
-	//				auto it = chests_by_id.find(a.t.target);
-	//				if (it != chests_by_id.end())
-	//					new CommandPickUp(character, it->second);
-	//			}
-	//			break;
-	//			case "CastAbility"_h:
-	//				break;
-	//			}
-	//		}
-	//		peeding_command_characters.clear();
-	//	}
-	//	nw_mtx.unlock();
-	//	break;
-	//case MultiPlayerAsClient:
-	//	nw_mtx.lock();
-	//	if (!peeding_add_characters.empty())
-	//	{
-	//		for (auto& a : peeding_add_characters)
-	//		{
-	//			auto character = add_character(a.preset_id, vec3(0.f, -1000.f, 0.f), a.faction, a.id);
-	//			if (a.id == main_player.character_id)
-	//				main_player.init(character->entity);
-	//		}
-	//		peeding_add_characters.clear();
-	//	}
-	//	if (!peeding_remove_characters.empty())
-	//	{
-	//		for (auto& a : peeding_remove_characters)
-	//		{
-	//			remove_character(a.id);
-	//		}
-	//		peeding_remove_characters.clear();
-	//	}
-	//	if (!peeding_update_characters.empty())
-	//	{
-	//		for (auto& a : peeding_update_characters)
-	//		{
-	//			auto it = characters_by_id.find(a.first.id);
-	//			if (it == characters_by_id.end())
-	//				continue;
-	//			auto character = it->second;
-	//			auto node = character->node;
-	//			node->set_pos(a.first.pos);
-	//			node->set_eul(vec3(a.first.yaw, 0.f, 0.f));
-	//			character->action = (Action)a.first.action;
-	//			if (a.first.extra_length > 0)
-	//			{
-	//				static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
-	//				auto p = a.second.data();
-	//				auto end = a.second.data() + a.second.size();
-	//				while (p < end)
-	//				{
-	//					auto hash = *(uint*)p; p += sizeof(uint);
-	//					auto vi = ui->find_variable(hash); auto len = vi->type->size;
-	//					memcpy((char*)character + vi->offset, p, len); p += len;
-	//				}
-	//			}
-	//		}
-	//		peeding_update_characters.clear();
-	//	}
-	//	if (!peeding_add_projectiles.empty())
-	//	{
-	//		for (auto& a : peeding_add_projectiles)
-	//		{
-	//			if (a.target > 0)
-	//			{
-	//				auto it = characters_by_id.find(a.target);
-	//				if (it != characters_by_id.end())
-	//					add_projectile(a.preset_id, a.pos, it->second, a.speed, nullptr, a.id);
-	//			}
-	//			else
-	//				add_projectile(a.preset_id, a.pos, a.location, a.speed, nullptr, a.id);
-	//		}
-	//		peeding_add_projectiles.clear();
-	//	}
-	//	if (!peeding_remove_projectiles.empty())
-	//	{
-	//		for (auto& a : peeding_remove_projectiles)
-	//		{
-	//			remove_projectile(a.id);
-	//		}
-	//		peeding_remove_projectiles.clear();
-	//	}
-	//	if (!peeding_add_chests.empty())
-	//	{
-	//		for (auto& a : peeding_add_chests)
-	//		{
-	//			add_chest(a.pos, a.item_id, a.item_num, a.id);
-	//		}
-	//		peeding_add_chests.clear();
-	//	}
-	//	if (!peeding_remove_chests.empty())
-	//	{
-	//		for (auto& a : peeding_remove_chests)
-	//		{
-	//			remove_chest(a.id);
-	//		}
-	//		peeding_remove_chests.clear();
-	//	}
-	//	nw_mtx.unlock();
-	//	break;
-	//}
+				std::string res;
+				{
+					nwNewPlayerInfoStruct stru;
+					stru.faction = faction;
+					stru.character_id = character->object->uid;
+					pack_msg(res, nwNewPlayerInfo, stru);
+				}
+				for (auto& pair : objects)
+				{
+					nwAddObjectStruct stru;
+					stru.preset_id = pair.second->preset_id;
+					stru.id = pair.second->uid;
+					pack_msg(res, nwAddObject, stru);
+				}
+				so_server->send(so_id, res);
+			}
+			nw_new_players.clear();
+		}
+		if (!nw_msgs.empty())
+		{
+			auto p = nw_msgs.data();
+			auto e = p + nw_msgs.size();
+			while (p < e)
+			{
+				auto msg = *(uchar*)p;
+				p += sizeof(uchar);
+				switch (msg)
+				{
+				case nwCommandCharacter:
+				{
+					auto& stru = *(nwCommandCharacterStruct*)p;
+					auto it = objects.find(stru.id);
+					if (it == objects.end())
+						continue;
+					auto character = it->second->entity->get_component_t<cCharacter>();
+					switch (stru.type)
+					{
+					case "Idle"_h:
+						new CommandIdle(character);
+						break;
+					case "MoveTo"_h:
+						new CommandMoveTo(character, stru.t.location);
+						break;
+					case "AttackTarget"_h:
+					{
+						auto it = objects.find(stru.t.target);
+						if (it != objects.end())
+							new CommandAttackTarget(character, it->second->entity->get_component_t<cCharacter>());
+					}
+						break;
+					case "AttackLocation"_h:
+						new CommandAttackLocation(character, stru.t.location);
+						break;
+					case "PickUp"_h:
+					{
+						auto it = objects.find(stru.t.target);
+						if (it != objects.end())
+							new CommandPickUp(character, it->second->entity->get_component_t<cChest>());
+					}
+						break;
+					case "CastAbility"_h:
+						break;
+					}
+					p += sizeof(nwCommandCharacterStruct);
+				}
+					break;
+				}
+			}
+			nw_msgs.clear();
+		}
+		nw_mtx.unlock();
+		break;
+	case MultiPlayerAsClient:
+		nw_mtx.lock();
+		if (!nw_msgs.empty())
+		{
+			auto p = nw_msgs.data();
+			auto e = p + nw_msgs.size();
+			while (p < e)
+			{
+				auto msg = *(uchar*)p;
+				p += sizeof(uchar);
+				switch (msg)
+				{
+				case nwAddObject:
+					//		for (auto& a : peeding_add_characters)
+					//		{
+					//			auto character = add_character(a.preset_id, vec3(0.f, -1000.f, 0.f), a.faction, a.id);
+					//			if (a.id == main_player.character_id)
+					//				main_player.init(character->entity);
+					//		}
+					break;
+				case nwRemoveObject:
+				{
+					auto it = objects.find(*(uint*)p);
+					p += sizeof(uint);
+					if (it == objects.end())
+						continue;
+					auto entity = it->second->entity;
+					add_event([entity]() {
+						entity->remove_from_parent();
+						return false;
+					});
+					objects.erase(it);
+				}
+					break;
+				case nwUpdateObject:
+				{
+					auto it = objects.find(*(uint*)p);
+					p += sizeof(uint);
+					if (it == objects.end())
+						continue;
+					//		for (auto& a : peeding_update_characters)
+					//		{
+					//			auto character = it->second;
+					//			auto node = character->node;
+					//			node->set_pos(a.first.pos);
+					//			node->set_eul(vec3(a.first.yaw, 0.f, 0.f));
+					//			character->action = (Action)a.first.action;
+					//			if (a.first.extra_length > 0)
+					//			{
+					//				static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
+					//				auto p = a.second.data();
+					//				auto end = a.second.data() + a.second.size();
+					//				while (p < end)
+					//				{
+					//					auto hash = *(uint*)p; p += sizeof(uint);
+					//					auto vi = ui->find_variable(hash); auto len = vi->type->size;
+					//					memcpy((char*)character + vi->offset, p, len); p += len;
+					//				}
+					//			}
+					//		}
+				}
+					break;
+				}
+			}
+			nw_msgs.clear();
+		}
+		nw_mtx.unlock();
+		break;
+	}
 
 	if (main_camera.node && main_player.node)
 	{
@@ -1015,14 +995,13 @@ void cMain::update()
 
 	update_vision();
 
-	//if (multi_player == MultiPlayerAsHost)
-	//{
-	//	for (auto& f : nw_players)
-	//	{
-	//		std::string res;
-	//		for (auto& pair : characters_by_id)
-	//		{
-	//			auto character = pair.second;
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			for (auto& pair : objects)
+			{
 	//			if (get_vision(f.first, character->node->pos))
 	//			{
 	//				nwUpdateCharacterStruct stru;
@@ -1057,11 +1036,14 @@ void cMain::update()
 	//				if (!extra_data.empty())
 	//					pack_msg(res, extra_data.size(), extra_data.data());
 	//			}
-	//		}
-	//		for (auto so_id : f.second)
-	//			so_server->send(so_id, res);
-	//	}
-	//}
+			}
+			if (res.empty())
+			{
+				for (auto so_id : f.second)
+					so_server->send(so_id, res);
+			}
+		}
+	}
 
 	if (!graphics::gui_want_mouse())
 	{
@@ -1367,14 +1349,11 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	auto& preset = CharacterPreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
+	auto object = e->get_component_t<cObject>();
+	object->set_uid(id);
 	auto character = e->get_component_t<cCharacter>();
-	character->preset_id = preset_id;
+	character->preset = &preset;
 	character->set_faction(faction);
-	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-	{
-		for (auto& i : preset.abilities)
-			character->gain_ability(Ability::find(i.first), i.second);
-	}
 	if (multi_player == MultiPlayerAsHost)
 	{
 		auto harvester = e->add_component<cNWDataHarvester>();
@@ -1386,21 +1365,19 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	}
 	root->add_child(e);
 
-	//if (multi_player == MultiPlayerAsHost)
-	//{
-	//	for (auto& f : nw_players)
-	//	{
-	//		std::string res;
-	//		nwAddCharacterStruct stru;
-	//		stru.preset_id = preset_id;
-	//		stru.id = id;
-	//		stru.target = target->id;
-	//		stru.speed = speed;
-	//		pack_msg(res, nwAddProjectile, stru);
-	//		for (auto so_id : f.second)
-	//			so_server->send(so_id, res);
-	//	}
-	//}
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddObjectStruct stru;
+			stru.preset_id = 1000 + preset_id;
+			stru.id = id;
+			pack_msg(res, nwAddObject, stru);
+			for (auto so_id : f.second)
+				so_server->send(so_id, res);
+		}
+	}
 
 	return character;
 }
@@ -1410,28 +1387,28 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 	auto& preset = ProjectilePreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
+	auto object = e->get_component_t<cObject>();
+	object->set_uid(id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectile->preset_id = preset_id;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	projectile->on_end = on_end;
 	root->add_child(e);
-	
-	//if (multi_player == MultiPlayerAsHost)
-	//{
-	//	for (auto& f : nw_players)
-	//	{
-	//		std::string res;
-	//		nwAddProjectileStruct stru;
-	//		stru.preset_id = preset_id;
-	//		stru.id = id;
-	//		stru.target = target->id;
-	//		stru.speed = speed;
-	//		pack_msg(res, nwAddProjectile, stru);
-	//		for (auto so_id : f.second)
-	//			so_server->send(so_id, res);
-	//	}
-	//}
+
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddObjectStruct stru;
+			stru.preset_id = 2000 + preset_id;
+			stru.id = id;
+			pack_msg(res, nwAddObject, stru);
+			for (auto so_id : f.second)
+				so_server->send(so_id, res);
+		}
+	}
 
 	return projectile;
 }
@@ -1441,6 +1418,8 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	auto& preset = ProjectilePreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
+	auto object = e->get_component_t<cObject>();
+	object->set_uid(id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectile->preset_id = preset_id;
 	projectile->use_target = false;
@@ -1449,21 +1428,19 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	projectile->on_end = on_end;
 	root->add_child(e);
 
-	//if (multi_player == MultiPlayerAsHost)
-	//{
-	//	for (auto& f : nw_players)
-	//	{
-	//		std::string res;
-	//		nwAddProjectileStruct stru;
-	//		stru.preset_id = preset_id;
-	//		stru.id = id;
-	//		stru.location = location;
-	//		stru.speed = speed;
-	//		pack_msg(res, nwAddProjectile, stru);
-	//		for (auto so_id : f.second)
-	//			so_server->send(so_id, res);
-	//	}
-	//}
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddObjectStruct stru;
+			stru.preset_id = 2000 + preset_id;
+			stru.id = id;
+			pack_msg(res, nwAddObject, stru);
+			for (auto so_id : f.second)
+				so_server->send(so_id, res);
+		}
+	}
 
 	return projectile;
 }
@@ -1473,24 +1450,25 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 	auto e = get_prefab(L"assets\\models\\chest.prefab")->copy();
 	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
+	auto object = e->get_component_t<cObject>();
+	object->set_uid(id);
 	auto chest = e->get_component_t<cChest>();
 	chest->item_id = item_id;
 	chest->item_num = item_num;
 
-	//if (multi_player == MultiPlayerAsHost)
-	//{
-	//	for (auto& f : nw_players)
-	//	{
-	//		std::string res;
-	//		nwAddChestStruct stru;
-	//		stru.id = id;
-	//		stru.item_id = item_id;
-	//		stru.item_num = item_num;
-	//		pack_msg(res, nwAddChest, stru);
-	//		for (auto so_id : f.second)
-	//			so_server->send(so_id, res);
-	//	}
-	//}
+	if (multi_player == MultiPlayerAsHost)
+	{
+		for (auto& f : nw_players)
+		{
+			std::string res;
+			nwAddObjectStruct stru;
+			stru.preset_id = 3000;
+			stru.id = id;
+			pack_msg(res, nwAddObject, stru);
+			for (auto so_id : f.second)
+				so_server->send(so_id, res);
+		}
+	}
 
 	return chest;
 }

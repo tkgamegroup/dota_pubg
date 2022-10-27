@@ -153,12 +153,7 @@ struct cCharacter : Component
 
 	cArmaturePtr armature = nullptr;
 
-	//uint id;
-	uint preset_id;
-	inline const CharacterPreset& get_preset()
-	{
-		return CharacterPreset::get(preset_id);
-	}
+	const CharacterPreset* preset = nullptr;
 
 	/// Reflect
 	uint faction = 0;

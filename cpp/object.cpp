@@ -1,7 +1,7 @@
 #include "object.h"
 #include "network.h"
 
-static uint uid = 1;
+static uint g_uid = 1;
 std::map<uint, cObjectPtr> objects;
 
 cObject::~cObject()
@@ -28,6 +28,12 @@ void cObject::set_visible_flags(uint v)
 	data_changed("visible_flags"_h);
 }
 
+void cObject::set_uid(uint id)
+{
+	uid = id ? id : g_uid++;
+	objects[id] = this;
+}
+
 struct cObjectCreate : cObject::Create
 {
 	cObjectPtr operator()(EntityPtr e) override
@@ -38,10 +44,3 @@ struct cObjectCreate : cObject::Create
 	}
 }cObject_create;
 cObject::Create& cObject::create = cObject_create;
-
-void add_object(uint id)
-{
-	id = id ? id : uid++;
-
-	//objects[id] = object;
-}
