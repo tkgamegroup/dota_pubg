@@ -6,7 +6,8 @@ std::map<uint, cObjectPtr> objects;
 
 cObject::~cObject()
 {
-	objects.erase(objects.find(uid));
+	if (auto it = objects.find(uid); it != objects.end())
+		objects.erase(it);
 
 	if (multi_player == MultiPlayerAsHost)
 	{
