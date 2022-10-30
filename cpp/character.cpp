@@ -297,6 +297,8 @@ void cCharacter::set_faction(uint _faction)
 {
 	if (faction == _faction)
 		return;
+	if (faction == 0) // first time
+		characters.push_back(this);
 	std::erase_if(factions[faction], [this](const auto& i) {
 		return i == this;
 	});
@@ -425,11 +427,6 @@ void cCharacter::set_atk_sp(uint v)
 		return;
 	atk_sp = v;
 	data_changed("atk_sp"_h);
-}
-
-cCharacter::cCharacter()
-{
-	characters.push_back(this);
 }
 
 cCharacter::~cCharacter()

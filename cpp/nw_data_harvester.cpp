@@ -2,21 +2,31 @@
 
 #include <flame/foundation/typeinfo.h>
 
-void cNWDataHarvester::add_target(uint var, uint flags)
+void cNWDataHarvester::add_target(uint comp, uint var, uint flags)
 {
-	targets[var] = std::make_pair(flags, flags);
+	auto idx = 0;
+	for (; idx < entity->components.size() - 1; idx++)
+	{
+		if (entity->components[idx]->type_hash == comp)
+			break;
+	}
+	if (idx == entity->components.size() - 1)
+		return;
+	targets[idx][var] = std::make_pair(flags, flags);
 }
 
 void cNWDataHarvester::on_init()
 {
-	for (auto& comp : entity->components)
+	targets.resize(entity->components.size());
+	for (auto idx = 0; idx < entity->components.size(); idx++)
 	{
-		comp->data_listeners.add([this](uint hash) {
-			auto it = targets.find(hash);
-			if (it != targets.end())
+		entity->components[idx]->data_listeners.add([this, idx](uint hash) {
+			auto it = targets[idx].find(hash);
+			if (it != targets[idx].end())
 				it->second.first = it->second.second;
 		});
 	}
+	add_target("cObject"_h, "visible_flags"_h);
 }
 
 struct cNWDataHarvesterCreate : cNWDataHarvester::Create

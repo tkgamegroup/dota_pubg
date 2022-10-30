@@ -235,7 +235,6 @@ struct cCharacter : Component
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
 
-	cCharacter();
 	~cCharacter();
 	void on_init() override;
 

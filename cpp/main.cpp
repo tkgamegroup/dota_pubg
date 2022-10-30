@@ -232,13 +232,13 @@ struct AbilityShortcut : Shortcut
 				new CommandCastAbility(main_player.character, ins);
 			else if (multi_player == MultiPlayerAsClient)
 			{
-				std::string res;
+				std::ostringstream res;
 				nwCommandCharacterStruct stru;
 				stru.id = main_player.character->object->uid;
 				stru.type = "CastAbility"_h;
 				stru.id2 = ins->id;
 				pack_msg(res, nwCommandCharacter, stru);
-				so_client->send(res);
+				so_client->send(res.str());
 			}
 		}
 		else
@@ -250,14 +250,14 @@ struct AbilityShortcut : Shortcut
 						new CommandCastAbilityToLocation(main_player.character, ins, location);
 					else if (multi_player == MultiPlayerAsClient)
 					{
-						std::string res;
+						std::ostringstream res;
 						nwCommandCharacterStruct stru;
 						stru.id = main_player.character->object->uid;
 						stru.type = "CastAbilityToLocation"_h;
 						stru.id2 = ins->id;
 						stru.t.location = location;
 						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res);
+						so_client->send(res.str());
 					}
 				};
 				select_distance = ability.distance;
@@ -269,14 +269,14 @@ struct AbilityShortcut : Shortcut
 						new CommandCastAbilityToTarget(main_player.character, ins, character);
 					else if (multi_player == MultiPlayerAsClient)
 					{
-						std::string res;
+						std::ostringstream res;
 						nwCommandCharacterStruct stru;
 						stru.id = main_player.character->object->uid;
 						stru.type = "CastAbilityToTarget"_h;
 						stru.id2 = ins->id;
 						stru.t.target = character->object->uid;
 						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res);
+						so_client->send(res.str());
 					}
 				};
 				select_distance = ability.distance;
@@ -394,18 +394,18 @@ void cMain::start()
 			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
 			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
-			for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
-			{
-				auto coord = main_terrain.get_coord_by_centrality(i);
+			//for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
+			//{
+			//	auto coord = main_terrain.get_coord_by_centrality(i);
 
-				static uint preset_ids[] = {
-					CharacterPreset::find("Life Stealer"),
-					CharacterPreset::find("Slark")
-				};
+			//	static uint preset_ids[] = {
+			//		CharacterPreset::find("Life Stealer"),
+			//		CharacterPreset::find("Slark")
+			//	};
 
-				auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-				new CommandAttackLocation(character, coord);
-			}
+			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
+			//	new CommandAttackLocation(character, coord);
+			//}
 			//for (auto i = 0; i < 100; i++)
 			//{
 			//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
@@ -831,36 +831,6 @@ void cMain::update()
 	{
 	case MultiPlayerAsHost:
 		nw_mtx.lock();
-		if (!nw_new_players.empty())
-		{
-			for (auto so_id : nw_new_players)
-			{
-				vec3 pos;
-				uint faction;
-				uint preset_id;
-				add_player(pos, faction, preset_id);
-				auto character = add_character(preset_id, pos, faction);
-
-				nw_players[faction].push_back(so_id);
-
-				std::string res;
-				{
-					nwNewPlayerInfoStruct stru;
-					stru.faction = faction;
-					stru.character_id = character->object->uid;
-					pack_msg(res, nwNewPlayerInfo, stru);
-				}
-				for (auto& pair : objects)
-				{
-					nwAddObjectStruct stru;
-					stru.preset_id = pair.second->preset_id;
-					stru.id = pair.second->uid;
-					pack_msg(res, nwAddObject, stru);
-				}
-				so_server->send(so_id, res);
-			}
-			nw_new_players.clear();
-		}
 		if (!nw_msgs.empty())
 		{
 			auto p = nw_msgs.data();
@@ -927,54 +897,94 @@ void cMain::update()
 				p += sizeof(uchar);
 				switch (msg)
 				{
-				case nwAddObject:
-					//		for (auto& a : peeding_add_characters)
-					//		{
-					//			auto character = add_character(a.preset_id, vec3(0.f, -1000.f, 0.f), a.faction, a.id);
-					//			if (a.id == main_player.character_id)
-					//				main_player.init(character->entity);
-					//		}
-					break;
-				case nwRemoveObject:
+				case nwNewPlayerInfo:
 				{
-					auto it = objects.find(*(uint*)p);
-					p += sizeof(uint);
-					if (it == objects.end())
-						continue;
-					auto entity = it->second->entity;
-					add_event([entity]() {
-						entity->remove_from_parent();
-						return false;
-					});
-					objects.erase(it);
+					auto& stru = *(nwNewPlayerInfoStruct*)p;
+					main_player.faction = stru.faction;
+					main_player.character_id = stru.character_id;
+					p += sizeof(nwNewPlayerInfoStruct);
 				}
 					break;
-				case nwUpdateObject:
+				case nwAddObjects:
 				{
-					auto it = objects.find(*(uint*)p);
-					p += sizeof(uint);
-					if (it == objects.end())
-						continue;
-					//		for (auto& a : peeding_update_characters)
-					//		{
-					//			auto character = it->second;
-					//			auto node = character->node;
-					//			node->set_pos(a.first.pos);
-					//			node->set_eul(vec3(a.first.yaw, 0.f, 0.f));
-					//			character->action = (Action)a.first.action;
-					//			if (a.first.extra_length > 0)
-					//			{
-					//				static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
-					//				auto p = a.second.data();
-					//				auto end = a.second.data() + a.second.size();
-					//				while (p < end)
-					//				{
-					//					auto hash = *(uint*)p; p += sizeof(uint);
-					//					auto vi = ui->find_variable(hash); auto len = vi->type->size;
-					//					memcpy((char*)character + vi->offset, p, len); p += len;
-					//				}
-					//			}
-					//		}
+					nwAddObjectsStruct stru;
+					unserialize_binary([&](void* data, uint size) {
+						memcpy(data, p, size);
+						p += size;
+					}, &stru);
+					for (auto& item : stru.items)
+					{
+						if (item.preset_id < 2000)
+						{
+							auto character = add_character(item.preset_id - 1000, vec3(0.f, -1000.f, 0.f), 0, item.id);
+							character->entity->children[0]->set_enable(false); 
+							if (item.id == main_player.character_id)
+								main_player.init(character->entity);
+						}
+						else if (item.preset_id < 3000)
+						{
+							auto projectle = add_projectile(item.preset_id - 2000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
+							projectle->entity->children[0]->set_enable(false);
+						}
+						else
+						{
+							auto chest = add_chest(vec3(0.f, -1000.f, 0.f), -1, 0, item.id);
+							chest->entity->children[0]->set_enable(false);
+						}
+					}
+				}
+					break;
+				case nwRemoveObjects:
+				{
+					nwRemoveObjectsStruct stru;
+					unserialize_binary([&](void* data, uint size) {
+						memcpy(data, p, size);
+						p += size;
+					}, & stru);
+					for (auto id : stru.ids)
+					{
+						auto it = objects.find(id);
+						if (it == objects.end())
+							continue;
+						auto entity = it->second->entity;
+						add_event([entity]() {
+							entity->remove_from_parent();
+							return false;
+						});
+					}
+				}
+					break;
+				case nwUpdateObjects:
+				{
+					nwUpdateObjectsStruct stru;
+					unserialize_binary([&](void* data, uint size) {
+						memcpy(data, p, size);
+						p += size;
+					}, &stru);
+					for (auto& item : stru.items)
+					{
+						auto it = objects.find(item.obj_id);
+						if (it == objects.end())
+							continue;
+						auto entity = it->second->entity;
+						for (auto& citem : item.comps)
+						{
+							auto comp = entity->components[citem.idx].get();
+							auto ui = find_udt(comp->type_hash);
+							auto p = citem.datas.data();
+							for (auto i = 0; i < citem.names.size(); i++)
+							{
+								auto name = citem.names[i];
+								auto vi = ui->find_variable(name); auto len = vi->type->size;
+								auto dst = (char*)comp + vi->offset;
+								memcpy(dst, p, len);
+								p += len;
+
+								if (name == "visible_flags"_h)
+									entity->children[0]->set_enable(*(uint*)dst & main_player.faction);
+							}
+						}
+					}
 				}
 					break;
 				}
@@ -997,52 +1007,119 @@ void cMain::update()
 
 	if (multi_player == MultiPlayerAsHost)
 	{
-		for (auto& f : nw_players)
+		if (!nw_new_players.empty())
 		{
-			std::string res;
-			for (auto& pair : objects)
+			for (auto so_id : nw_new_players)
 			{
-	//			if (get_vision(f.first, character->node->pos))
-	//			{
-	//				nwUpdateCharacterStruct stru;
-	//				stru.id = character->id;
-	//				stru.pos = character->node->pos;
-	//				stru.yaw = character->node->eul.x;
-	//				stru.action = character->action;
+				vec3 pos;
+				uint faction;
+				uint preset_id;
+				add_player(pos, faction, preset_id);
+				auto character = add_character(preset_id, pos, faction);
 
-	//				std::string extra_data;
-	//				if (auto harvester = character->entity->get_component_t<cNWDataHarvester>(); harvester)
-	//				{
-	//					static char buf[1024];
-	//					static auto ui = TypeInfo::get<cCharacter>()->retrive_ui();
+				nw_players[faction].push_back(so_id);
 
-	//					auto p = buf;
-	//					for (auto& pair : harvester->targets)
-	//					{
-	//						if (pair.second.first & f.first)
-	//						{
-	//							*(uint*)p = pair.first; p += sizeof(uint);
-	//							auto vi = ui->find_variable(pair.first); auto len = vi->type->size;
-	//							memcpy(p, (char*)character + vi->offset, len); p += len;
-	//							
-	//							pair.second.first &= ~f.first;
-	//						}
-	//					}
-	//					extra_data = std::string(buf, p);
-	//				}
-
-	//				stru.extra_length = extra_data.size();
-	//				pack_msg(res, nwUpdateCharacter, stru);
-	//				if (!extra_data.empty())
-	//					pack_msg(res, extra_data.size(), extra_data.data());
-	//			}
-			}
-			if (res.empty())
-			{
-				for (auto so_id : f.second)
-					so_server->send(so_id, res);
+				std::ostringstream res;
+				{
+					nwNewPlayerInfoStruct stru;
+					stru.faction = faction;
+					stru.character_id = character->object->uid;
+					pack_msg(res, nwNewPlayerInfo, stru);
+				}
+				nwAddObjectsStruct stru;
+				for (auto& pair : objects)
+				{
+					auto& item = stru.items.emplace_back();
+					item.preset_id = pair.second->preset_id;
+					item.id = pair.second->uid;
+				}
+				pack_msg(res, nwAddObjects, stru);
+				so_server->send(so_id, res.str());
 			}
 		}
+		{	// info new and removed objects
+			std::ostringstream res;
+			if (!new_objects.empty())
+			{
+				nwAddObjectsStruct stru;
+				for (auto& o : new_objects)
+				{
+					auto& item = stru.items.emplace_back();
+					item.preset_id = o.first;
+					item.id = o.second;
+				}
+				pack_msg(res, nwAddObjects, stru);
+				new_objects.clear();
+			}
+			if (!removed_objects.empty())
+			{
+				nwRemoveObjectsStruct stru;
+				for (auto id : removed_objects)
+					stru.ids.push_back(id);
+				pack_msg(res, nwRemoveObjects, stru);
+				removed_objects.clear();
+			}
+			if (auto str = res.str(); !str.empty())
+			{
+				for (auto& f : nw_players)
+				{
+					for (auto so_id : f.second)
+					{
+						// new players has been infoed above
+						if (std::find(nw_new_players.begin(), nw_new_players.end(), so_id) == nw_new_players.end())
+							so_server->send(so_id, str);
+					}
+				}
+			}
+		}
+		for (auto& f : nw_players)
+		{
+			std::ostringstream res;
+			nwUpdateObjectsStruct stru_update;
+			for (auto& pair : objects)
+			{
+				auto entity = pair.second->entity;
+				auto harvester = entity->get_component_t<cNWDataHarvester>();
+				if (!harvester) continue;
+				auto has_vision = get_vision(f.first, entity->node()->pos);
+				nwUpdateObjectsStruct::Item item;
+				item.obj_id = pair.first;
+				for (auto i = 0; i < harvester->targets.size(); i++)
+				{
+					nwUpdateObjectsStruct::Comp citem;
+					citem.idx = i;
+
+					auto comp = entity->components[i].get();
+					auto ui = find_udt(comp->type_hash);
+					for (auto& pair : harvester->targets[i])
+					{
+						if (!has_vision && pair.first != "visible_flags"_h)
+							continue;
+						if (pair.second.first & f.first)
+						{
+							auto vi = ui->find_variable(pair.first); auto len = vi->type->size;
+							citem.names.push_back(pair.first);
+							auto sz = (uint)citem.datas.size();
+							citem.datas.resize(sz + len);
+							memcpy(citem.datas.data() + sz, (char*)comp + vi->offset, len);
+							pair.second.first &= ~f.first;
+						}
+					}
+					if (!citem.names.empty())
+						item.comps.push_back(std::move(citem));
+				}
+				if (!item.comps.empty())
+					stru_update.items.push_back(std::move(item));
+			}
+			if (!stru_update.items.empty())
+				pack_msg(res, nwUpdateObjects, stru_update);
+			if (auto str = res.str(); !str.empty())
+			{
+				for (auto so_id : f.second)
+					so_server->send(so_id, str);
+			}
+		}
+		nw_new_players.clear();
 	}
 
 	if (!graphics::gui_want_mouse())
@@ -1187,13 +1264,13 @@ void cMain::update()
 								new CommandAttackTarget(main_player.character, hovering_character);
 							else if (multi_player == MultiPlayerAsClient)
 							{
-								std::string res;
+								std::ostringstream res;
 								nwCommandCharacterStruct stru;
 								stru.id = main_player.character->object->uid;
 								stru.type = "AttackTarget"_h;
 								stru.t.target = hovering_character->object->uid;
 								pack_msg(res, nwCommandCharacter, stru);
-								so_client->send(res);
+								so_client->send(res.str());
 							}
 						}
 					}
@@ -1203,13 +1280,13 @@ void cMain::update()
 							new CommandPickUp(main_player.character, hovering_chest);
 						else if (multi_player == MultiPlayerAsClient)
 						{
-							std::string res;
+							std::ostringstream res;
 							nwCommandCharacterStruct stru;
 							stru.id = main_player.character->object->uid;
 							stru.type = "PickUp"_h;
 							stru.t.target = hovering_chest->object->uid;
 							pack_msg(res, nwCommandCharacter, stru);
-							so_client->send(res);
+							so_client->send(res.str());
 						}
 					}
 					else if (hovering_terrain)
@@ -1218,13 +1295,13 @@ void cMain::update()
 							new CommandMoveTo(main_player.character, hovering_pos);
 						else if (multi_player == MultiPlayerAsClient)
 						{
-							std::string res;
+							std::ostringstream res;
 							nwCommandCharacterStruct stru;
 							stru.id = main_player.character->object->uid;
 							stru.type = "MoveTo"_h;
 							stru.t.location = hovering_pos;
 							pack_msg(res, nwCommandCharacter, stru);
-							so_client->send(res);
+							so_client->send(res.str());
 						}
 						add_location_icon(hovering_pos);
 					}
@@ -1241,13 +1318,13 @@ void cMain::update()
 						new CommandAttackTarget(main_player.character, character);
 					else if (multi_player == MultiPlayerAsClient)
 					{
-						std::string res;
+						std::ostringstream res;
 						nwCommandCharacterStruct stru;
 						stru.id = main_player.character->object->uid;
 						stru.type = "AttackTarget"_h;
 						stru.t.target = character->object->uid;
 						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res);
+						so_client->send(res.str());
 					}
 				};
 				select_location_callback = [](const vec3& pos) {
@@ -1255,13 +1332,13 @@ void cMain::update()
 						new CommandAttackLocation(main_player.character, pos);
 					else if (multi_player == MultiPlayerAsClient)
 					{
-						std::string res;
+						std::ostringstream res;
 						nwCommandCharacterStruct stru;
 						stru.id = main_player.character->object->uid;
 						stru.type = "AttackLocation"_h;
 						stru.t.location = pos;
 						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res);
+						so_client->send(res.str());
 					}
 				};
 			}
@@ -1350,34 +1427,20 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
-	object->set_uid(id);
+	object->init(1000 + preset_id, id);
 	auto character = e->get_component_t<cCharacter>();
 	character->preset = &preset;
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
 	{
 		auto harvester = e->add_component<cNWDataHarvester>();
-		harvester->add_target("hp"_h);
-		harvester->add_target("hp_max"_h);
-		harvester->add_target("mp"_h);
-		harvester->add_target("mp_max"_h);
-		harvester->add_target("lv"_h);
+		harvester->add_target(th<cCharacter>(), "hp"_h);
+		harvester->add_target(th<cCharacter>(), "hp_max"_h);
+		harvester->add_target(th<cCharacter>(), "mp"_h);
+		harvester->add_target(th<cCharacter>(), "mp_max"_h);
+		harvester->add_target(th<cCharacter>(), "lv"_h);
 	}
 	root->add_child(e);
-
-	if (multi_player == MultiPlayerAsHost)
-	{
-		for (auto& f : nw_players)
-		{
-			std::string res;
-			nwAddObjectStruct stru;
-			stru.preset_id = 1000 + preset_id;
-			stru.id = id;
-			pack_msg(res, nwAddObject, stru);
-			for (auto so_id : f.second)
-				so_server->send(so_id, res);
-		}
-	}
 
 	return character;
 }
@@ -1388,27 +1451,13 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
-	object->set_uid(id);
+	object->init(2000 + preset_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectile->preset_id = preset_id;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	projectile->on_end = on_end;
 	root->add_child(e);
-
-	if (multi_player == MultiPlayerAsHost)
-	{
-		for (auto& f : nw_players)
-		{
-			std::string res;
-			nwAddObjectStruct stru;
-			stru.preset_id = 2000 + preset_id;
-			stru.id = id;
-			pack_msg(res, nwAddObject, stru);
-			for (auto so_id : f.second)
-				so_server->send(so_id, res);
-		}
-	}
 
 	return projectile;
 }
@@ -1419,7 +1468,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	auto e = get_prefab(preset.path)->copy();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
-	object->set_uid(id);
+	object->init(2000 + preset_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectile->preset_id = preset_id;
 	projectile->use_target = false;
@@ -1427,20 +1476,6 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	projectile->speed = speed;
 	projectile->on_end = on_end;
 	root->add_child(e);
-
-	if (multi_player == MultiPlayerAsHost)
-	{
-		for (auto& f : nw_players)
-		{
-			std::string res;
-			nwAddObjectStruct stru;
-			stru.preset_id = 2000 + preset_id;
-			stru.id = id;
-			pack_msg(res, nwAddObject, stru);
-			for (auto so_id : f.second)
-				so_server->send(so_id, res);
-		}
-	}
 
 	return projectile;
 }
@@ -1451,24 +1486,10 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
 	auto object = e->get_component_t<cObject>();
-	object->set_uid(id);
+	object->init(3000, id);
 	auto chest = e->get_component_t<cChest>();
 	chest->item_id = item_id;
 	chest->item_num = item_num;
-
-	if (multi_player == MultiPlayerAsHost)
-	{
-		for (auto& f : nw_players)
-		{
-			std::string res;
-			nwAddObjectStruct stru;
-			stru.preset_id = 3000;
-			stru.id = id;
-			pack_msg(res, nwAddObject, stru);
-			for (auto so_id : f.second)
-				so_server->send(so_id, res);
-		}
-	}
 
 	return chest;
 }

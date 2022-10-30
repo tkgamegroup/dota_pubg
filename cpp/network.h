@@ -3,6 +3,9 @@
 #include "main.h"
 
 #include <flame/foundation/network.h>
+#define FLAME_NO_XML
+#define FLAME_NO_JSON
+#include <flame/foundation/typeinfo_serialize.h>
 
 enum MultiPlayerType
 {
@@ -14,9 +17,9 @@ enum MultiPlayerType
 enum nwMessage
 {
 	nwNewPlayerInfo,
-	nwAddObject,
-	nwRemoveObject,
-	nwUpdateObject,
+	nwAddObjects,
+	nwRemoveObjects,
+	nwUpdateObjects,
 	nwCommandCharacter
 };
 
@@ -26,10 +29,38 @@ struct nwNewPlayerInfoStruct
 	uint character_id;
 };
 
-struct nwAddObjectStruct
+struct nwAddObjectsStruct
 {
-	uint preset_id;
-	uint id;
+	struct Item
+	{
+		uint preset_id;
+		uint id;
+	};
+
+	std::vector<Item> items;
+};
+
+struct nwRemoveObjectsStruct
+{
+	std::vector<uint> ids;
+};
+
+struct nwUpdateObjectsStruct
+{
+	struct Comp
+	{
+		uchar idx;
+		std::vector<uint> names;
+		std::string datas;
+	};
+
+	struct Item
+	{
+		uint obj_id;
+		std::vector<Comp> comps;
+	};
+
+	std::vector<Item> items;
 };
 
 struct nwCommandCharacterStruct
@@ -52,25 +83,16 @@ extern std::map<uint, std::vector<void*>> nw_players;
 extern std::vector<void*> nw_new_players;
 extern std::string nw_msgs;
 
-inline void pack_msg(std::string& res, uint len, char* data)
+inline void pack_msg(std::ostringstream& res, uint len, char* data)
 {
-	auto old_size = (uint)res.size();
-	res.resize(old_size + len);
-	auto dst = res.data() + old_size;
-	memcpy(dst, data, len);
+	res << std::string_view(data, len);
 }
 
 template <typename T>
-inline void pack_msg(std::string& res, uint msg, T& stru)
+inline void pack_msg(std::ostringstream& res, uint msg, T& stru)
 {
-	auto old_size = (uint)res.size();
-	res.resize(old_size + sizeof(uchar) + sizeof(T));
-	auto dst = res.data() + old_size;
-	memcpy(dst, &msg, sizeof(uchar)); dst += sizeof(uchar);
-	if (std::is_pod_v<T>)
-		memcpy(dst, &stru, sizeof(T));
-	else
-		assert(0);
+	res << (char)msg;
+	serialize_binary(&stru, res);
 }
 
 void start_server();

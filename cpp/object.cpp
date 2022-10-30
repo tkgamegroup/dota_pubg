@@ -3,6 +3,8 @@
 
 static uint g_uid = 1;
 std::map<uint, cObjectPtr> objects;
+std::vector<std::pair<uint, uint>>	new_objects;
+std::vector<uint>					removed_objects;
 
 cObject::~cObject()
 {
@@ -10,15 +12,7 @@ cObject::~cObject()
 		objects.erase(it);
 
 	if (multi_player == MultiPlayerAsHost)
-	{
-		for (auto& f : nw_players)
-		{
-			std::string res;
-			pack_msg(res, nwRemoveObject, uid);
-			for (auto so_id : f.second)
-				so_server->send(so_id, res);
-		}
-	}
+		removed_objects.push_back(uid);
 }
 
 void cObject::set_visible_flags(uint v)
@@ -29,10 +23,14 @@ void cObject::set_visible_flags(uint v)
 	data_changed("visible_flags"_h);
 }
 
-void cObject::set_uid(uint id)
+void cObject::init(uint _preset_id, uint _uid)
 {
-	uid = id ? id : g_uid++;
-	objects[id] = this;
+	preset_id = _preset_id;
+	uid = _uid ? _uid : g_uid++;
+	objects[uid] = this;
+
+	if (multi_player == MultiPlayerAsHost)
+		new_objects.emplace_back(preset_id, uid);
 }
 
 struct cObjectCreate : cObject::Create
