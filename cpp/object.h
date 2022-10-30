@@ -6,12 +6,12 @@ extern std::map<uint, cObjectPtr> objects;
 extern std::vector<std::pair<uint, uint>>	new_objects; // only in host
 extern std::vector<uint>					removed_objects; // only in host
 
-/// Reflect ctor
+// Reflect ctor
 struct cObject : Component
 {
-	/// Reflect
+	// Reflect
 	uint visible_flags = 0;
-	/// Reflect
+	// Reflect
 	void set_visible_flags(uint v);
 
 	uint preset_id = 0;
@@ -24,6 +24,6 @@ struct cObject : Component
 	{
 		virtual cObjectPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };

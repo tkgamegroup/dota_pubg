@@ -37,11 +37,13 @@ struct nwAddObjectsStruct
 		uint id;
 	};
 
+	// Reflect length_bytes=2
 	std::vector<Item> items;
 };
 
 struct nwRemoveObjectsStruct
 {
+	// Reflect length_bytes=2
 	std::vector<uint> ids;
 };
 
@@ -50,6 +52,7 @@ struct nwUpdateObjectsStruct
 	struct Comp
 	{
 		uchar idx;
+		// Reflect length_bytes=1
 		std::vector<uint> names;
 		std::string datas;
 	};
@@ -57,9 +60,11 @@ struct nwUpdateObjectsStruct
 	struct Item
 	{
 		uint obj_id;
+		// Reflect length_bytes=1
 		std::vector<Comp> comps;
 	};
 
+	// Reflect length_bytes=2
 	std::vector<Item> items;
 };
 

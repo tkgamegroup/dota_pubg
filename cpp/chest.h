@@ -2,12 +2,12 @@
 
 #include "main.h"
 
-/// Reflect ctor
+// Reflect ctor
 struct cChest : Component
 {
-	/// Reflect requires
+	// Reflect requires
 	cNodePtr node;
-	/// Reflect auto_requires
+	// Reflect auto_requires
 	cObjectPtr object;
 
 	int item_id = -1;
@@ -19,6 +19,6 @@ struct cChest : Component
 	{
 		virtual cChestPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };

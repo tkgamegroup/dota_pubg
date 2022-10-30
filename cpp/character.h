@@ -139,33 +139,33 @@ enum State
 extern std::vector<cCharacterPtr> characters;
 extern std::map<uint, std::vector<cCharacterPtr>> factions;
 
-/// Reflect ctor
+// Reflect ctor
 struct cCharacter : Component
 {
-	/// Reflect requires
+	// Reflect requires
 	cNodePtr node;
-	/// Reflect requires
+	// Reflect requires
 	cNavAgentPtr nav_agent;
-	/// Reflect requires
+	// Reflect requires
 	cAudioSourcePtr audio_source;
-	/// Reflect auto_requires
+	// Reflect auto_requires
 	cObjectPtr object;
 
 	cArmaturePtr armature = nullptr;
 
 	const CharacterPreset* preset = nullptr;
 
-	/// Reflect
+	// Reflect
 	uint faction = 0;
-	/// Reflect
+	// Reflect
 	void set_faction(uint _faction);
-	/// Reflect
+	// Reflect
 	uint ai_id = 0;
 
-	/// Reflect
+	// Reflect
 	uint lv = 1;
 	void set_lv(uint v);
-	/// Reflect
+	// Reflect
 	uint exp = 0;
 	void set_exp(uint v);
 	uint exp_max = 0;
@@ -173,42 +173,42 @@ struct cCharacter : Component
 
 	State state = StateNormal;
 
-	/// Reflect
+	// Reflect
 	uint hp = 1000;
 	void set_hp(uint v);
-	/// Reflect
+	// Reflect
 	uint hp_max = 1000;
 	void set_hp_max(uint v);
 
-	/// Reflect
+	// Reflect
 	uint mp = 10;
 	void set_mp(uint v);
-	/// Reflect
+	// Reflect
 	uint mp_max = 10;
 	void set_mp_max(uint v);
 
-	/// Reflect
+	// Reflect
 	uchar atk_type = PhysicalDamage;
 	void set_atk_type(uchar v);
-	/// Reflect
+	// Reflect
 	uint atk = 10;
 	void set_atk(uint v);
-	/// Reflect
+	// Reflect
 	uint phy_def = 0;
 	void set_phy_def(uint v);
-	/// Reflect
+	// Reflect
 	uint mag_def = 0;
 	void set_mag_def(uint v);
-	/// Reflect
+	// Reflect
 	uint hp_reg = 0;
 	void set_hp_reg(uint v);
-	/// Reflect
+	// Reflect
 	uint mp_reg = 0;
 	void set_mp_reg(uint v);
-	/// Reflect
+	// Reflect
 	uint mov_sp = 0;
 	void set_mov_sp(uint v);
-	/// Reflect
+	// Reflect
 	uint atk_sp = 0;
 	void set_atk_sp(uint v);
 
@@ -260,6 +260,6 @@ struct cCharacter : Component
 	{
 		virtual cCharacterPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };

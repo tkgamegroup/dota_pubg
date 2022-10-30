@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-/// Reflect ctor
+// Reflect ctor
 struct cLauncher : Component
 {
 
@@ -13,6 +13,6 @@ struct cLauncher : Component
 	{
 		virtual cLauncherPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };

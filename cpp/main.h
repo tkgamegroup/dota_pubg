@@ -117,15 +117,15 @@ extern MainPlayer main_player;
 
 extern cCharacterPtr selecting_target;
 
-/// Reflect ctor
+// Reflect ctor
 struct cMain : Component
 {
-	/// Reflect requires
+	// Reflect requires
 	cNodePtr node;
 
-	/// Reflect
+	// Reflect
 	float camera_length = 15.f;
-	/// Reflect
+	// Reflect
 	float camera_angle = 45.f;
 
 	~cMain();
@@ -137,7 +137,7 @@ struct cMain : Component
 	{
 		virtual cMainPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };
 

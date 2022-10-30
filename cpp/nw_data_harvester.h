@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-/// Reflect ctor
+// Reflect ctor
 struct cNWDataHarvester : Component
 {
 	std::vector<std::unordered_map<uint/*var hash*/, std::pair<uint, uint>/*the current and reset faction flags (is this var needs to sync to those factions)*/>> targets;
@@ -15,6 +15,6 @@ struct cNWDataHarvester : Component
 	{
 		virtual cNWDataHarvesterPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };

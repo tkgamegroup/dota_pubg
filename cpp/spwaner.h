@@ -2,21 +2,21 @@
 
 #include "main.h"
 
-/// Reflect ctor
+// Reflect ctor
 struct cSpwaner : Component
 {
-	/// Reflect requires
+	// Reflect requires
 	cNodePtr node;
-	/// Reflect requires
+	// Reflect requires
 	cNavObstaclePtr nav_obstacle;
 
-	/// Reflect
+	// Reflect
 	float spwan_interval = 10.f;
-	/// Reflect
+	// Reflect
 	int spwan_count = 1;
-	/// Reflect
+	// Reflect
 	std::filesystem::path prefab_path;
-	/// Reflect
+	// Reflect
 	void set_prefab_path(const std::filesystem::path& path);
 
 	Listeners<void(EntityPtr e)> callbacks;
@@ -33,6 +33,6 @@ struct cSpwaner : Component
 	{
 		virtual cSpwanerPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };

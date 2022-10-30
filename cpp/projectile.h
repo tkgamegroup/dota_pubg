@@ -14,12 +14,12 @@ struct ProjectilePreset
 	static const ProjectilePreset& get(uint id);
 };
 
-/// Reflect ctor
+// Reflect ctor
 struct cProjectile : Component
 {
-	/// Reflect requires
+	// Reflect requires
 	cNodePtr node;
-	/// Reflect auto_requires
+	// Reflect auto_requires
 	cObjectPtr object;
 
 	uint preset_id;
@@ -43,7 +43,7 @@ struct cProjectile : Component
 	{
 		virtual cProjectilePtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };
  

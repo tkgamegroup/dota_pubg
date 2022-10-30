@@ -2,10 +2,10 @@
 
 #include "main.h"
 
-/// Reflect ctor
+// Reflect ctor
 struct cCreepAI : Component
 {
-	/// Reflect requires
+	// Reflect requires
 	cCharacterPtr character;
 
 	vec3 start_pos;
@@ -19,6 +19,6 @@ struct cCreepAI : Component
 	{
 		virtual cCreepAIPtr operator()(EntityPtr) = 0;
 	};
-	/// Reflect static
+	// Reflect static
 	EXPORT static Create& create;
 };
