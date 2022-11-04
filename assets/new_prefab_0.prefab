@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<prefab file_id="4c9fc776465044e2fc940bbcbe4c9f21">
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item file_id="46cfda1647874dc98ef63cb969f7021b">
+			<components>
+				<item type_name="flame::cNode" pos="0,-0.5,0" scl="10,0.1,10" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
+			</components>
+		</item>
+		<item file_id="52e38f404e9f753442d5b3a59b4fa060">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
+				<item type_name="flame::cVolume" />
+			</components>
+		</item>
+		<item file_id="12464818490baf67619eb3aa36e00ef8">
+			<components>
+				<item type_name="flame::cNode" qut="0.92388,-0.382683,0,0" />
+				<item type_name="flame::cDirLight" cast_shadow="true" />
+			</components>
+		</item>
+	</children>
+</prefab>

@@ -8,7 +8,7 @@ struct ViewSettings : graphics::GuiView
 {
 	ViewSettings();
 
-	bool on_open() override;
+	bool on_begin() override;
 	void on_draw() override;
 };
 
