@@ -6,15 +6,15 @@
 	<children>
 		<item file_id="46cfda1647874dc98ef63cb969f7021b">
 			<components>
-				<item type_name="flame::cNode" pos="0,-0.5,0" scl="10,0.1,10" />
+				<item type_name="flame::cNode" pos="0,-1.83811,0" scl="10,0.0001,10" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 			</components>
 		</item>
 		<item file_id="52e38f404e9f753442d5b3a59b4fa060">
 			<components>
 				<item type_name="flame::cNode" />
-				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
-				<item type_name="flame::cVolume" />
+				<item type_name="flame::cMesh" enable="false" mesh_name="standard_cube" material_name="default" />
+				<item type_name="flame::cVolume" data_map_name="new_image.dds" />
 			</components>
 		</item>
 		<item file_id="12464818490baf67619eb3aa36e00ef8">
