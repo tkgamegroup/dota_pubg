@@ -7,7 +7,7 @@ ViewSettings::ViewSettings() :
 {
 }
 
-bool ViewSettings::on_open()
+bool ViewSettings::on_begin()
 {
 	bool open = true;
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(40, 40, 40));

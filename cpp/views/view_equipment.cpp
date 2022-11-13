@@ -11,7 +11,7 @@ ViewEquipment::ViewEquipment() :
 {
 }
 
-bool ViewEquipment::on_open()
+bool ViewEquipment::on_begin()
 {
 	bool open = true;
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(40, 40, 40));

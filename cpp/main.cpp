@@ -469,10 +469,10 @@ void cMain::start()
 
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
-		auto tar_sz = sRenderer::instance()->target_size();
-		if (tar_sz.x <= 0.f || tar_sz.y <= 0.f)
+		auto tar_ext = sRenderer::instance()->target_extent();
+		if (tar_ext.x <= 0.f || tar_ext.y <= 0.f)
 			return;
-		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x * 0.5f, tar_sz.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x * 0.5f, tar_ext.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 		ImGui::SetNextWindowSize(ImVec2(600.f, 42.f), ImGuiCond_Always);
 		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
@@ -678,7 +678,7 @@ void cMain::start()
 
 		if (focus_character.obj)
 		{
-			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_sz.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
 			ImGui::SetNextWindowSize(ImVec2(100.f, 100.f), ImGuiCond_Always);
 			ImGui::Begin("##focus_character", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
@@ -763,8 +763,8 @@ void cMain::start()
 					{
 						p.xy += sInput::instance()->offset;
 						auto dl = ImGui::GetBackgroundDrawList();
-						auto sz = (vec2)icon_location->size;
-						dl->AddImage(icon_location, p - vec2(sz.x * 0.5f, sz.y), p + vec2(sz.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
+						auto ext = (vec2)icon_location->extent;
+						dl->AddImage(icon_location, p - vec2(ext.x * 0.5f, ext.y), p + vec2(ext.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
 					}
 				}
 				for (auto it = location_tips.begin(); it != location_tips.end();)
@@ -782,7 +782,7 @@ void cMain::start()
 		{
 			auto dl = ImGui::GetForegroundDrawList();
 			auto text_size = (vec2)ImGui::CalcTextSize(illegal_op_str.c_str());
-			auto p = vec2((tar_sz.x - text_size.x) * 0.5f, tar_sz.y - 160.f - text_size.y);
+			auto p = vec2((tar_ext.x - text_size.x) * 0.5f, tar_ext.y - 160.f - text_size.y);
 			p.xy += sInput::instance()->offset;
 			auto alpha = 1.f;
 			if (illegal_op_str_timer < 1.f)
@@ -818,8 +818,8 @@ void cMain::start()
 	}, (uint)this);
 	graphics::gui_cursor_callbacks.add([this](CursorType cursor) {
 		auto mpos = sInput::instance()->mpos;
-		auto screen_sz = sRenderer::instance()->target_size();
-		if (mpos.x < 0.f || mpos.x > screen_sz.x || mpos.y < 0.f || mpos.y > screen_sz.y)
+		auto screen_ext = sRenderer::instance()->target_extent();
+		if (mpos.x < 0.f || mpos.x > screen_ext.x || mpos.y < 0.f || mpos.y > screen_ext.y)
 			return cursor;
 		return CursorNone;
 	}, (uint)this);

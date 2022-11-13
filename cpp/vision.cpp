@@ -22,7 +22,7 @@ static std::map<uint, std::vector<uchar>> visions;
 
 void init_vision()
 {
-	img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec2(W, H), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
+	img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec3(W, H, 1), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
 	img_my_vision->change_layout(graphics::ImageLayoutShaderReadOnly);
 	auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
 	sRenderer::instance()->set_texture_res_name(id, "VISION");
@@ -313,7 +313,7 @@ void update_vision()
 					graphics::InstanceCommandBuffer cb;
 					memcpy(stagbuf->mapped, visions[main_player.faction].data(), stagbuf->size);
 					cb->image_barrier(img_my_vision, {}, graphics::ImageLayoutTransferDst);
-					cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec2(W, H)));
+					cb->copy_buffer_to_image(stagbuf, img_my_vision, graphics::BufferImageCopy(uvec3(W, H, 1)));
 					cb->image_barrier(img_my_vision, {}, graphics::ImageLayoutShaderReadOnly);
 					cb.excute();
 				}

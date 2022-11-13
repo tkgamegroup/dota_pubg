@@ -14,7 +14,7 @@
 		</item>
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">
 			<components>
-				<item type_name="flame::cNode" eul="0,-60,0" />
+				<item type_name="flame::cNode" qut="0.866025,-0.5,0,0" />
 				<item type_name="flame::cDirLight" color="1,1,1,3" cast_shadow="true" />
 			</components>
 		</item>
@@ -5121,6 +5121,12 @@
 			<components>
 				<item type_name="flame::cNode" />
 				<item type_name="flame::cNavScene" />
+			</components>
+		</item>
+		<item file_id="65912fda41af2f94203bc6a9ab5ad03c" name="Entity 0">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cVolume" data_map_name="new_image.dds" />
 			</components>
 		</item>
 	</children>
