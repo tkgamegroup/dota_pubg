@@ -14,7 +14,28 @@
 			<components>
 				<item type_name="flame::cNode" />
 				<item type_name="flame::cMesh" enable="false" mesh_name="standard_cube" material_name="default" />
-				<item type_name="flame::cVolume" data_map_name="new_image.dds" />
+				<item type_name="flame::cVolume" extent="1024,128,1024" data_map_name="0x000001a2f49113e0" material_name="volume.fmat" />
+				<item type_name="flame::cProcedureVolume">
+					<structure_octaves>
+						<item v="1.01" />
+						<item v="0.47" />
+						<item v="0.247" />
+						<item v="0.123" />
+						<item v="0.063" />
+						<item v="0.031" />
+						<item v="0.017" />
+						<item v="0.009" />
+					</structure_octaves>
+					<detail_octaves>
+						<item v="1.98" />
+						<item v="4.03" />
+						<item v="7.97" />
+						<item v="8.07" />
+						<item v="16.07" />
+						<item v="31.99" />
+						<item v="64.11" />
+					</detail_octaves>
+				</item>
 			</components>
 		</item>
 		<item file_id="12464818490baf67619eb3aa36e00ef8">
