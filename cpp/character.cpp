@@ -167,6 +167,11 @@ void load_character_presets()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
+		preset.name = "Dummy";
+	}
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
 		preset.path = L"assets\\characters\\dragon_knight\\main.prefab";
 		preset.name = "Dragon Knight";
 		preset.exp_base = 200;
@@ -651,6 +656,8 @@ void cCharacter::start()
 		}, "character"_h);
 	}
 
+	if (!preset)
+		preset = &character_presets[CharacterPreset::find("Dummy")];
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
 	if (preset->atk_precast_audio_preset != -1)
 		audio_buffer_names.emplace_back(AudioPreset::get(preset->atk_precast_audio_preset).path, "attack_precast");

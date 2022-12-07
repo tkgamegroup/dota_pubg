@@ -14,7 +14,7 @@
 			<components>
 				<item type_name="flame::cNode" />
 				<item type_name="flame::cMesh" enable="false" mesh_name="standard_cube" material_name="default" />
-				<item type_name="flame::cVolume" extent="128,128,128" blocks="1,1,1" data_map_name="0x000002db044d4a20" material_name="volume.fmat" />
+				<item type_name="flame::cVolume" extent="128,128,128" blocks="1,1,1" data_map_name="0x0000015335d3c270" splash_map_name="0x0000015335d3a980" material_name="volume.fmat" />
 				<item type_name="flame::cProcedureVolume">
 					<structure_octaves>
 						<item v="1.01" />
@@ -48,6 +48,12 @@
 		<item file_id="becf97844105afaf6b6472b86519b183" name="renderer_settings">
 			<components>
 				<item type_name="flame::cRendererSettings" sky_map_name="assets\skies\daytime_bc7.dds" />
+			</components>
+		</item>
+		<item file_id="3b40fc17444733217cfb4496187a14cc" name="main">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="cMain" />
 			</components>
 		</item>
 	</children>

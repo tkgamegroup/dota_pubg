@@ -16,6 +16,7 @@ const uint resolution = 2;
 const uint W = 256 * resolution;
 const uint H = 256 * resolution;
 static graphics::ImagePtr img_my_vision = nullptr;
+static int my_vision_map_res_id = -1;
 static graphics::BufferPtr stagbuf = nullptr;
 
 static std::map<uint, std::vector<uchar>> visions;
@@ -24,11 +25,19 @@ void init_vision()
 {
 	img_my_vision = graphics::Image::create(graphics::Format_R8_UNORM, uvec3(W, H, 1), graphics::ImageUsageSampled | graphics::ImageUsageTransferDst);
 	img_my_vision->change_layout(graphics::ImageLayoutShaderReadOnly);
-	auto id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
-	sRenderer::instance()->set_texture_res_name(id, "VISION");
+	my_vision_map_res_id = sRenderer::instance()->get_texture_res(img_my_vision->get_view());
+	sRenderer::instance()->set_texture_res_name(my_vision_map_res_id, "VISION");
 
 	stagbuf = graphics::Buffer::create(W * H, graphics::BufferUsageTransferSrc, graphics::MemoryPropertyHost | graphics::MemoryPropertyCoherent);
 	stagbuf->map();
+}
+
+void deinit_vision()
+{
+	if (my_vision_map_res_id != -1)
+		sRenderer::instance()->release_texture_res(my_vision_map_res_id);
+	if (img_my_vision)
+		delete img_my_vision;
 }
 
 bool get_vision(uint faction, const vec3& coord)

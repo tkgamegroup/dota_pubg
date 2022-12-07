@@ -32,6 +32,7 @@
 #include <flame/universe/components/camera.h>
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/terrain.h>
+#include <flame/universe/components/volume.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/scene.h>
@@ -122,6 +123,7 @@ MainPlayer main_player;
 cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
 cTerrainPtr		hovering_terrain = nullptr;
+cVolumePtr		hovering_volume = nullptr;
 
 TargetType								select_mode = TargetNull;
 std::function<void(cCharacterPtr)>		select_enemy_callback;
@@ -291,6 +293,8 @@ Tracker<cCharacterPtr> focus_character;
 
 cMain::~cMain()
 {
+	deinit_vision();
+
 	node->drawers.remove("main"_h);
 
 	graphics::gui_callbacks.remove((uint)this);
@@ -1159,8 +1163,16 @@ void cMain::update()
 			{
 				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
 				{
-					if (terrain->instance_id != -1 && terrain->material_res_id != -1)
-						draw_data.terrains.emplace_back(terrain->instance_id, product(terrain->blocks), terrain->material_res_id);
+					if (terrain->instance_id != -1)
+						draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
+				}
+			}
+			if (draw_data.categories & CateVolume)
+			{
+				if (auto volume = n->entity->get_component_t<cVolume>(); volume)
+				{
+					if (volume->instance_id != -1)
+						draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
 				}
 			}
 			if (sInput::instance()->kpressed(Keyboard_F12))
@@ -1169,6 +1181,7 @@ void cMain::update()
 		hovering_character = nullptr;
 		hovering_chest = nullptr;
 		hovering_terrain = nullptr;
+		hovering_volume = nullptr;
 		tooltip.clear();
 		if (hovering_node)
 		{
@@ -1193,7 +1206,7 @@ void cMain::update()
 			{
 				hovering_terrain = terrain;
 
-				if (!(select_mode & TargetLocation))
+				if ((select_mode & TargetLocation) == 0)
 				{
 					if ((select_mode & TargetEnemy) || (select_mode & TargetFriendly))
 					{
@@ -1219,6 +1232,10 @@ void cMain::update()
 						}
 					}
 				}
+			}
+			if (auto volume = hovering_node->entity->get_component_t<cVolume>(); volume)
+			{
+				hovering_volume = volume;
 			}
 		}
 
@@ -1289,7 +1306,7 @@ void cMain::update()
 							so_client->send(res.str());
 						}
 					}
-					else if (hovering_terrain)
+					else if (hovering_terrain || hovering_volume)
 					{
 						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 							new CommandMoveTo(main_player.character, hovering_pos);
@@ -1433,7 +1450,7 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
 	{
-		auto harvester = e->add_component<cNWDataHarvester>();
+		auto harvester = e->add_component_t<cNWDataHarvester>();
 		harvester->add_target(th<cCharacter>(), "hp"_h);
 		harvester->add_target(th<cCharacter>(), "hp_max"_h);
 		harvester->add_target(th<cCharacter>(), "mp"_h);
