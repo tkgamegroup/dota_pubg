@@ -46,7 +46,7 @@ CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
 
 void CommandMoveTo::update()
 {
-	if (character->process_approach(location, 0.6f))
+	if (character->process_approach(location, 1.f))
 	{
 		character->nav_agent->stop();
 		new CommandIdle(character);

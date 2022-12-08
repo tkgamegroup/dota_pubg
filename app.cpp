@@ -4,7 +4,7 @@ using namespace flame;
 
 UniverseApplication app;
 
-IMPORT void* cpp_info();
+extern "C" IMPORT void* cpp_info();
 
 int main()
 {

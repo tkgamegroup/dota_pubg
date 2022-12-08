@@ -38,6 +38,10 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
 
+bool in_editor = false;
+Entity** editor_p_selecting_entity = nullptr;
+bool* editor_p_control = nullptr;
+
 EntityPtr root = nullptr;
 
 void MainCamera::init(EntityPtr e)
@@ -438,7 +442,7 @@ void cMain::start()
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
 							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1,
-								hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
+								main_player.character && hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
 					}
 				}
 			}
@@ -476,6 +480,278 @@ void cMain::start()
 		auto tar_ext = sRenderer::instance()->target_extent();
 		if (tar_ext.x <= 0.f || tar_ext.y <= 0.f)
 			return;
+
+		ImGui::SetNextWindowPos(sInput::instance()->offset, ImGuiCond_Always);
+		ImGui::SetNextWindowSize(tar_ext, ImGuiCond_Always);
+		ImGui::SetNextWindowBgAlpha(0.1f);
+		ImGui::Begin("##background", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+		if (ImGui::IsWindowHovered())
+		{
+			auto input = sInput::instance();
+			vec3 hovering_pos;
+			auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
+				if (draw_data.categories & CateMesh)
+				{
+					if (auto character = n->entity->get_component_t<cCharacter>(); character)
+					{
+						if (character != main_player.character && character->armature)
+						{
+							for (auto& c : character->armature->entity->children)
+							{
+								if (auto mesh = c->get_component_t<cMesh>(); mesh)
+								{
+									if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+										draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+								}
+							}
+						}
+					}
+					if (auto chest = n->entity->get_component_t<cChest>(); chest)
+					{
+						for (auto& c : chest->entity->get_all_children())
+						{
+							if (auto mesh = c->get_component_t<cMesh>(); mesh)
+							{
+								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+							}
+						}
+					}
+				}
+				if (draw_data.categories & CateTerrain)
+				{
+					if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
+					{
+						if (terrain->instance_id != -1)
+							draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
+					}
+				}
+				if (draw_data.categories & CateMarchingCubes)
+				{
+					if (auto volume = n->entity->get_component_t<cVolume>(); volume)
+					{
+						if (volume->marching_cubes)
+						{
+							if (volume->instance_id != -1)
+								draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
+						}
+					}
+				}
+				if (sInput::instance()->kpressed(Keyboard_F12))
+					draw_data.graphics_debug = true;
+			});
+			hovering_character = nullptr;
+			hovering_chest = nullptr;
+			hovering_terrain = nullptr;
+			hovering_volume = nullptr;
+			tooltip.clear();
+			if (hovering_node)
+			{
+				auto can_select = [](cCharacterPtr character) {
+					if (!(select_mode & TargetEnemy) && main_player.character->faction != character->faction)
+						return false;
+					if (!(select_mode & TargetFriendly) && main_player.character->faction == character->faction)
+						return false;
+					return true;
+				};
+				if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
+				{
+					if (select_mode == TargetNull || can_select(character))
+						hovering_character = character;
+				}
+				if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
+				{
+					hovering_chest = chest;
+					tooltip = Item::get(hovering_chest->item_id).name;
+				}
+				if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+				{
+					hovering_terrain = terrain;
+
+					if ((select_mode & TargetLocation) == 0)
+					{
+						if ((select_mode & TargetEnemy) || (select_mode & TargetFriendly))
+						{
+							std::vector<cNodePtr> objs;
+							sScene::instance()->octree->get_colliding(hovering_pos, 5.f, objs, CharacterTag);
+							if (!objs.empty())
+							{
+								auto min_dist = 10000.f;
+								for (auto n : objs)
+								{
+									if (auto character = n->entity->get_component_t<cCharacter>(); character)
+									{
+										if (!can_select(character))
+											continue;
+										auto dist = distance(n->pos, hovering_pos);
+										if (dist < min_dist)
+										{
+											hovering_character = character;
+											min_dist = dist;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				if (auto volume = hovering_node->entity->get_component_t<cVolume>(); volume)
+				{
+					hovering_volume = volume;
+				}
+			}
+
+			if (input->mpressed(Mouse_Left))
+			{
+				if (select_mode == TargetNull)
+				{
+					focus_character.set(hovering_character ? hovering_character : nullptr);
+				}
+				else
+				{
+					if (select_mode & TargetEnemy)
+					{
+						if (hovering_character && main_player.character->faction != hovering_character->faction)
+						{
+							if (select_enemy_callback)
+								select_enemy_callback(hovering_character);
+							reset_select();
+						}
+					}
+					if (select_mode & TargetLocation)
+					{
+						if (hovering_terrain)
+						{
+							if (select_location_callback)
+								select_location_callback(hovering_pos);
+							reset_select();
+						}
+					}
+				}
+			}
+			if (main_player.character)
+			{
+				if (input->mpressed(Mouse_Right))
+				{
+					if (select_mode == TargetNull)
+					{
+						if (hovering_character)
+						{
+							if (hovering_character->faction != main_player.character->faction)
+							{
+								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+									new CommandAttackTarget(main_player.character, hovering_character);
+								else if (multi_player == MultiPlayerAsClient)
+								{
+									std::ostringstream res;
+									nwCommandCharacterStruct stru;
+									stru.id = main_player.character->object->uid;
+									stru.type = "AttackTarget"_h;
+									stru.t.target = hovering_character->object->uid;
+									pack_msg(res, nwCommandCharacter, stru);
+									so_client->send(res.str());
+								}
+							}
+						}
+						else if (hovering_chest)
+						{
+							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+								new CommandPickUp(main_player.character, hovering_chest);
+							else if (multi_player == MultiPlayerAsClient)
+							{
+								std::ostringstream res;
+								nwCommandCharacterStruct stru;
+								stru.id = main_player.character->object->uid;
+								stru.type = "PickUp"_h;
+								stru.t.target = hovering_chest->object->uid;
+								pack_msg(res, nwCommandCharacter, stru);
+								so_client->send(res.str());
+							}
+						}
+						else if (hovering_terrain || hovering_volume)
+						{
+							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+								new CommandMoveTo(main_player.character, hovering_pos);
+							else if (multi_player == MultiPlayerAsClient)
+							{
+								std::ostringstream res;
+								nwCommandCharacterStruct stru;
+								stru.id = main_player.character->object->uid;
+								stru.type = "MoveTo"_h;
+								stru.t.location = hovering_pos;
+								pack_msg(res, nwCommandCharacter, stru);
+								so_client->send(res.str());
+							}
+							add_location_icon(hovering_pos);
+						}
+					}
+					else
+						reset_select();
+				}
+
+				if (input->kpressed(Keyboard_A))
+				{
+					select_mode = TargetType(TargetEnemy | TargetLocation);
+					select_enemy_callback = [](cCharacterPtr character) {
+						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+							new CommandAttackTarget(main_player.character, character);
+						else if (multi_player == MultiPlayerAsClient)
+						{
+							std::ostringstream res;
+							nwCommandCharacterStruct stru;
+							stru.id = main_player.character->object->uid;
+							stru.type = "AttackTarget"_h;
+							stru.t.target = character->object->uid;
+							pack_msg(res, nwCommandCharacter, stru);
+							so_client->send(res.str());
+						}
+					};
+					select_location_callback = [](const vec3& pos) {
+						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+							new CommandAttackLocation(main_player.character, pos);
+						else if (multi_player == MultiPlayerAsClient)
+						{
+							std::ostringstream res;
+							nwCommandCharacterStruct stru;
+							stru.id = main_player.character->object->uid;
+							stru.type = "AttackLocation"_h;
+							stru.t.location = pos;
+							pack_msg(res, nwCommandCharacter, stru);
+							so_client->send(res.str());
+						}
+					};
+				}
+				for (auto i = 0; i < countof(shortcuts); i++)
+				{
+					auto shortcut = shortcuts[i].get();
+					if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
+						shortcut->click();
+				}
+			}
+			if (input->kpressed(Keyboard_Esc))
+				reset_select();
+			if (input->kpressed(Keyboard_F1))
+				toggle_equipment_view();
+			if (input->kpressed(Keyboard_F2))
+				toggle_ability_view();
+			if (input->kpressed(Keyboard_F3))
+				toggle_inventory_view();
+		}
+		ImGui::End();
+
+		if (in_editor)
+		{
+			ImGui::Begin("Status");
+			ImGui::Text("Main player: %s", main_player.character ? main_player.entity->name.c_str() : "[None]");
+			if (ImGui::Button("Set Main Player (selecting entity)"))
+			{
+				if (editor_p_selecting_entity && *editor_p_selecting_entity)
+					main_player.init(*editor_p_selecting_entity);
+			}
+			ImGui::End();
+		}
+
 		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x * 0.5f, tar_ext.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
 		ImGui::SetNextWindowSize(ImVec2(600.f, 42.f), ImGuiCond_Always);
 		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
@@ -1125,256 +1401,6 @@ void cMain::update()
 		}
 		nw_new_players.clear();
 	}
-
-	if (!graphics::gui_want_mouse())
-	{
-		auto input = sInput::instance();
-		vec3 hovering_pos;
-		auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
-			if (draw_data.categories & CateMesh)
-			{
-				if (auto character = n->entity->get_component_t<cCharacter>(); character)
-				{
-					if (character != main_player.character && character->armature)
-					{
-						for (auto& c : character->armature->entity->children)
-						{
-							if (auto mesh = c->get_component_t<cMesh>(); mesh)
-							{
-								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
-							}
-						}
-					}
-				}
-				if (auto chest = n->entity->get_component_t<cChest>(); chest)
-				{
-					for (auto& c : chest->entity->get_all_children())
-					{
-						if (auto mesh = c->get_component_t<cMesh>(); mesh)
-						{
-							if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-								draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
-						}
-					}
-				}
-			}
-			if (draw_data.categories & CateTerrain)
-			{
-				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
-				{
-					if (terrain->instance_id != -1)
-						draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
-				}
-			}
-			if (draw_data.categories & CateVolume)
-			{
-				if (auto volume = n->entity->get_component_t<cVolume>(); volume)
-				{
-					if (volume->instance_id != -1)
-						draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
-				}
-			}
-			if (sInput::instance()->kpressed(Keyboard_F12))
-				draw_data.graphics_debug = true;
-		});
-		hovering_character = nullptr;
-		hovering_chest = nullptr;
-		hovering_terrain = nullptr;
-		hovering_volume = nullptr;
-		tooltip.clear();
-		if (hovering_node)
-		{
-			auto can_select = [](cCharacterPtr character) {
-				if (!(select_mode & TargetEnemy) && main_player.character->faction != character->faction)
-					return false;
-				if (!(select_mode & TargetFriendly) && main_player.character->faction == character->faction)
-					return false;
-				return true;
-			};
-			if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
-			{
-				if (select_mode == TargetNull || can_select(character))
-					hovering_character = character;
-			}
-			if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
-			{
-				hovering_chest = chest;
-				tooltip = Item::get(hovering_chest->item_id).name;
-			}
-			if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
-			{
-				hovering_terrain = terrain;
-
-				if ((select_mode & TargetLocation) == 0)
-				{
-					if ((select_mode & TargetEnemy) || (select_mode & TargetFriendly))
-					{
-						std::vector<cNodePtr> objs;
-						sScene::instance()->octree->get_colliding(hovering_pos, 5.f, objs, CharacterTag);
-						if (!objs.empty())
-						{
-							auto min_dist = 10000.f;
-							for (auto n : objs)
-							{
-								if (auto character = n->entity->get_component_t<cCharacter>(); character)
-								{
-									if (!can_select(character))
-										continue;
-									auto dist = distance(n->pos, hovering_pos);
-									if (dist < min_dist)
-									{
-										hovering_character = character;
-										min_dist = dist;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			if (auto volume = hovering_node->entity->get_component_t<cVolume>(); volume)
-			{
-				hovering_volume = volume;
-			}
-		}
-
-		if (input->mpressed(Mouse_Left))
-		{
-			if (select_mode == TargetNull)
-			{
-				focus_character.set(hovering_character ? hovering_character : nullptr);
-			}
-			else
-			{
-				if (select_mode & TargetEnemy)
-				{
-					if (hovering_character && main_player.character->faction != hovering_character->faction)
-					{
-						if (select_enemy_callback)
-							select_enemy_callback(hovering_character);
-						reset_select();
-					}
-				}
-				if (select_mode & TargetLocation)
-				{
-					if (hovering_terrain)
-					{
-						if (select_location_callback)
-							select_location_callback(hovering_pos);
-						reset_select();
-					}
-				}
-			}
-		}
-		if (main_player.character)
-		{
-			if (input->mpressed(Mouse_Right))
-			{
-				if (select_mode == TargetNull)
-				{
-					if (hovering_character)
-					{
-						if (hovering_character->faction != main_player.character->faction)
-						{
-							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-								new CommandAttackTarget(main_player.character, hovering_character);
-							else if (multi_player == MultiPlayerAsClient)
-							{
-								std::ostringstream res;
-								nwCommandCharacterStruct stru;
-								stru.id = main_player.character->object->uid;
-								stru.type = "AttackTarget"_h;
-								stru.t.target = hovering_character->object->uid;
-								pack_msg(res, nwCommandCharacter, stru);
-								so_client->send(res.str());
-							}
-						}
-					}
-					else if (hovering_chest)
-					{
-						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-							new CommandPickUp(main_player.character, hovering_chest);
-						else if (multi_player == MultiPlayerAsClient)
-						{
-							std::ostringstream res;
-							nwCommandCharacterStruct stru;
-							stru.id = main_player.character->object->uid;
-							stru.type = "PickUp"_h;
-							stru.t.target = hovering_chest->object->uid;
-							pack_msg(res, nwCommandCharacter, stru);
-							so_client->send(res.str());
-						}
-					}
-					else if (hovering_terrain || hovering_volume)
-					{
-						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-							new CommandMoveTo(main_player.character, hovering_pos);
-						else if (multi_player == MultiPlayerAsClient)
-						{
-							std::ostringstream res;
-							nwCommandCharacterStruct stru;
-							stru.id = main_player.character->object->uid;
-							stru.type = "MoveTo"_h;
-							stru.t.location = hovering_pos;
-							pack_msg(res, nwCommandCharacter, stru);
-							so_client->send(res.str());
-						}
-						add_location_icon(hovering_pos);
-					}
-				}
-				else
-					reset_select();
-			}
-
-			if (input->kpressed(Keyboard_A))
-			{
-				select_mode = TargetType(TargetEnemy | TargetLocation);
-				select_enemy_callback = [](cCharacterPtr character) {
-					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-						new CommandAttackTarget(main_player.character, character);
-					else if (multi_player == MultiPlayerAsClient)
-					{
-						std::ostringstream res;
-						nwCommandCharacterStruct stru;
-						stru.id = main_player.character->object->uid;
-						stru.type = "AttackTarget"_h;
-						stru.t.target = character->object->uid;
-						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res.str());
-					}
-				};
-				select_location_callback = [](const vec3& pos) {
-					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-						new CommandAttackLocation(main_player.character, pos);
-					else if (multi_player == MultiPlayerAsClient)
-					{
-						std::ostringstream res;
-						nwCommandCharacterStruct stru;
-						stru.id = main_player.character->object->uid;
-						stru.type = "AttackLocation"_h;
-						stru.t.location = pos;
-						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res.str());
-					}
-				};
-			}
-			for (auto i = 0; i < countof(shortcuts); i++)
-			{
-				auto shortcut = shortcuts[i].get();
-				if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
-					shortcut->click();
-			}
-		}
-		if (input->kpressed(Keyboard_Esc))
-			reset_select();
-		if (input->kpressed(Keyboard_F1))
-			toggle_equipment_view();
-		if (input->kpressed(Keyboard_F2))
-			toggle_ability_view();
-		if (input->kpressed(Keyboard_F3))
-			toggle_inventory_view();
-	}
 }
 
 struct cMainCreate : cMain::Create
@@ -1526,7 +1552,7 @@ void add_floating_tip(const vec3& pos, const std::string& text, const cvec4& col
 	t.color = color;
 }
 
-EXPORT void* cpp_info()
+extern "C" EXPORT void* cpp_info()
 {
 	auto uinfo = universe_info(); // references universe module explicitly
 	cLauncher::create((EntityPtr)INVALID_POINTER); // references create function explicitly
@@ -1539,4 +1565,11 @@ EXPORT void* cpp_info()
 	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cNWDataHarvester::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	return nullptr;
+}
+
+extern "C" EXPORT void set_editor_info(Entity** p_selecting_entity, bool* p_control)
+{
+	in_editor = true;
+	editor_p_selecting_entity = p_selecting_entity;
+	editor_p_control = p_control;
 }

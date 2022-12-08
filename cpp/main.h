@@ -101,6 +101,17 @@ struct MainTerrain
 };
 extern MainTerrain main_terrain;
 
+struct MainVolume
+{
+	EntityPtr entity = nullptr;
+	cNodePtr node = nullptr;
+	cVolumePtr volume = nullptr;
+	vec3 extent;
+
+	void init(EntityPtr e);
+};
+extern MainVolume main_volume;
+
 struct MainPlayer
 {
 	uint faction;
