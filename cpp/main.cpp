@@ -374,7 +374,7 @@ void cMain::start()
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		if (!main_terrain.site_positions.empty())
+		if (main_terrain.terrain && !main_terrain.site_positions.empty())
 		{
 			vec3 player1_coord;
 			uint player1_faction;
@@ -427,6 +427,10 @@ void cMain::start()
 			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
 			//	character->entity->add_component<cCreepAI>();
 			//}
+		}
+		else if (main_volume.volume)
+		{
+
 		}
 	}
 
@@ -1432,7 +1436,12 @@ EntityPtr get_prefab(const std::filesystem::path& _path)
 void add_player(vec3& pos, uint& faction, uint& preset_id)
 {
 	static uint idx = 0;
-	pos = main_terrain.get_coord_by_centrality(-idx - 1);
+	if (main_terrain.terrain)
+		pos = main_terrain.get_coord_by_centrality(-idx - 1);
+	else if (main_volume.volume)
+		pos = main_volume.node->pos;
+	else
+		pos = vec3(0.f);
 	faction =  1 << (log2i((uint)FactionParty1) + idx);
 	preset_id = CharacterPreset::find("Dragon Knight");
 	idx++;
