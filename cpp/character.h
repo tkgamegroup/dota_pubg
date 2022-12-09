@@ -249,7 +249,7 @@ struct cCharacter : Component
 	bool add_marker(uint hash, float time);
 	void die();
 
-	bool process_approach(const vec3& target, float dist = 0.1f, float ang = 0.f);
+	bool process_approach(const vec3& target, float dist = 0.f, float ang = 0.f);
 	void process_attack_target(cCharacterPtr target);
 	void process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
 

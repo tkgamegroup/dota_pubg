@@ -88,7 +88,8 @@ struct MainTerrain
 {
 	EntityPtr entity = nullptr;
 	cNodePtr node = nullptr;
-	cTerrainPtr terrain = nullptr;
+	cTerrainPtr hf_terrain = nullptr; // height field terrain
+	cVolumePtr mc_terrain = nullptr; // marching cubes terrain
 	vec3 extent;
 
 	std::vector<vec3> site_positions;
@@ -100,17 +101,6 @@ struct MainTerrain
 	vec3 get_coord_by_centrality(int i);
 };
 extern MainTerrain main_terrain;
-
-struct MainVolume
-{
-	EntityPtr entity = nullptr;
-	cNodePtr node = nullptr;
-	cVolumePtr volume = nullptr;
-	vec3 extent;
-
-	void init(EntityPtr e);
-};
-extern MainVolume main_volume;
 
 struct MainPlayer
 {

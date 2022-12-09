@@ -60,12 +60,14 @@ void MainTerrain::init(EntityPtr e)
 	if (e)
 	{
 		node = e->node();
-		terrain = e->get_component_t<cTerrain>();
-		extent = terrain->extent;
+		hf_terrain = e->get_component_t<cTerrain>();
+		mc_terrain = e->get_component_t<cVolume>();
 
-		if (terrain)
+		if (hf_terrain)
 		{
-			if (auto height_map_info_fn = terrain->height_map->filename; !height_map_info_fn.empty())
+			extent = hf_terrain->extent;
+
+			if (auto height_map_info_fn = hf_terrain->height_map->filename; !height_map_info_fn.empty())
 			{
 				height_map_info_fn += L".info";
 				std::ifstream file(height_map_info_fn);
@@ -89,12 +91,20 @@ void MainTerrain::init(EntityPtr e)
 				return a.first < b.first;
 			});
 		}
+		else if (mc_terrain)
+		{
+			extent = mc_terrain->extent;
+		}
 	}
 }
 
 vec3 MainTerrain::get_coord(const vec2& uv)
 {
-	return node->pos + vec3(uv.x, terrain->height_map->linear_sample(uv).x, uv.y) * extent;
+	auto c = node->pos + extent * vec3(0.5f, 1.f, 0.5f);
+	vec3 res;
+	if (!sScene::instance()->raycast_navmesh(c, c - vec3(0.f, extent.y, 0.f), res))
+		res = vec3(node->pos);
+	return res;
 }
 
 vec3 MainTerrain::get_coord(const vec3& pos)
@@ -374,8 +384,7 @@ void cMain::start()
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		if (main_terrain.terrain && !main_terrain.site_positions.empty())
-		{
+		add_event([]() {
 			vec3 player1_coord;
 			uint player1_faction;
 			uint player1_preset_id;
@@ -398,40 +407,41 @@ void cMain::start()
 				//harvester->add_target("atk_sp"_h);
 			}
 
-			add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
-			add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
-			add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
+			if (main_terrain.hf_terrain && !main_terrain.site_positions.empty())
+			{
+				add_chest(player1_coord + vec3(-3.f, 0.f, 3.f), Item::find("Magic Candy"));
+				add_chest(player1_coord + vec3(-2.f, 0.f, 3.f), Item::find("Magic Candy"));
+				add_chest(player1_coord + vec3(-1.f, 0.f, 3.f), Item::find("Magic Candy"));
 
-			//for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
-			//{
-			//	auto coord = main_terrain.get_coord_by_centrality(i);
+				//for (auto i = 1; i < main_terrain.site_centrality.size() - 1; i++)
+				//{
+				//	auto coord = main_terrain.get_coord_by_centrality(i);
 
-			//	static uint preset_ids[] = {
-			//		CharacterPreset::find("Life Stealer"),
-			//		CharacterPreset::find("Slark")
-			//	};
+				//	static uint preset_ids[] = {
+				//		CharacterPreset::find("Life Stealer"),
+				//		CharacterPreset::find("Slark")
+				//	};
 
-			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-			//	new CommandAttackLocation(character, coord);
-			//}
-			//for (auto i = 0; i < 100; i++)
-			//{
-			//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
+				//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
+				//	new CommandAttackLocation(character, coord);
+				//}
+				//for (auto i = 0; i < 100; i++)
+				//{
+				//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-			//	static uint preset_ids[] = {
-			//		CharacterPreset::find("Spiderling"),
-			//		CharacterPreset::find("Treant"),
-			//		CharacterPreset::find("Boar")
-			//	};
+				//	static uint preset_ids[] = {
+				//		CharacterPreset::find("Spiderling"),
+				//		CharacterPreset::find("Treant"),
+				//		CharacterPreset::find("Boar")
+				//	};
 
-			//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-			//	character->entity->add_component<cCreepAI>();
-			//}
-		}
-		else if (main_volume.volume)
-		{
+				//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
+				//	character->entity->add_component<cCreepAI>();
+				//}
+			}
 
-		}
+			return false;
+		});
 	}
 
 	node->drawers.add([](DrawData& draw_data) {
@@ -1436,12 +1446,10 @@ EntityPtr get_prefab(const std::filesystem::path& _path)
 void add_player(vec3& pos, uint& faction, uint& preset_id)
 {
 	static uint idx = 0;
-	if (main_terrain.terrain)
+	if (!main_terrain.site_centrality.empty())
 		pos = main_terrain.get_coord_by_centrality(-idx - 1);
-	else if (main_volume.volume)
-		pos = main_volume.node->pos;
 	else
-		pos = vec3(0.f);
+		pos = main_terrain.get_coord(vec2(0.5f));
 	faction =  1 << (log2i((uint)FactionParty1) + idx);
 	preset_id = CharacterPreset::find("Dragon Knight");
 	idx++;

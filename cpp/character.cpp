@@ -46,7 +46,7 @@ CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
 
 void CommandMoveTo::update()
 {
-	if (character->process_approach(location, 1.f))
+	if (character->process_approach(location))
 	{
 		character->nav_agent->stop();
 		new CommandIdle(character);
@@ -105,7 +105,7 @@ void CommandPickUp::update()
 		new CommandIdle(character);
 	else
 	{
-		if (character->process_approach(target.obj->node->pos, 1.f))
+		if (character->process_approach(target.obj->node->pos, 1.5f))
 		{
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
 			{
@@ -689,7 +689,19 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	nav_agent->set_target(target);
 	nav_agent->set_speed_scale(move_speed);
 
-	if (nav_agent->dist <= dist && (ang == 0.f || abs(nav_agent->ang_diff) <= ang))
+	auto approached = true;
+	if (dist <= 0.f)
+	{
+		if (distance(node->pos, nav_agent->get_path_last_pos()) > 0.1f)
+			approached = false;
+	}
+	else if (nav_agent->dist > dist)
+	{
+		approached = false;
+	}
+	if (ang > 0.f && abs(nav_agent->ang_diff) > ang)
+		approached = false;
+	if (approached)
 		return true;
 	action = ActionMove;
 	return false;
