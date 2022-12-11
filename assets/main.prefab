@@ -2,7 +2,7 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavScene" />
+		<item type_name="flame::cNavScene" generate_frame="1" />
 		<item type_name="cMain" camera_length="20" camera_angle="60" />
 	</components>
 	<children>

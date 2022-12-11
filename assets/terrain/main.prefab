@@ -2,8 +2,7 @@
 <prefab file_id="318a777f4d3654d1e5786f8e1326b6b9" name="terrain">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cTerrain1" extent="256,16,256" height_map_name="height.png" splash_map_name="splash.png" material_name="terrain.fmat" use_grass_field="true" grass_field_tess_level="6" grass_channel="1" grass_texture_name="assets/grass.png" />
-		<item type_name="flame::cVolume" extent="128,128,128" blocks="1,1,1" data_map_name="0x0000015335d3c270" splash_map_name="0x0000015335d3a980" material_name="terrain.fmat" />
+		<item type_name="flame::cVolume" extent="128,128,128" blocks="1,1,1" material_name="terrain.fmat" />
 		<item type_name="flame::cProcedureVolume">
 			<structure_octaves>
 				<item v="1.01" />
@@ -24,6 +23,9 @@
 				<item v="31.99" />
 				<item v="64.11" />
 			</detail_octaves>
+			<planes>
+				<item v="1,0.3,3,40" />
+			</planes>
 		</item>
 		<item type_name="flame::cNavMesh" />
 	</components>
