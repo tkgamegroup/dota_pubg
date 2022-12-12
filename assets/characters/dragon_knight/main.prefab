@@ -17,6 +17,9 @@
 						<item first="attack.fani" second="attack" />
 						<item first="shieldbash.fani" second="cast" />
 					</animation_names>
+					<animation_transitions>
+						<item item_0="run" item_1="idle" item_2="0.5" />
+					</animation_transitions>
 				</item>
 			</components>
 			<children>

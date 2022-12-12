@@ -692,7 +692,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	auto approached = true;
 	if (dist <= 0.f)
 	{
-		if (distance(node->pos, nav_agent->get_path_last_pos()) > 0.1f)
+		if (distance(node->pos, nav_agent->get_path_last_pos()) > nav_agent->radius)
 			approached = false;
 	}
 	else if (nav_agent->dist > dist)
