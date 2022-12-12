@@ -499,12 +499,7 @@ void cMain::start()
 
 		if (!editor_p_control || !*editor_p_control)
 		{
-			ImGui::SetNextWindowPos(sInput::instance()->offset, ImGuiCond_Always);
-			ImGui::SetNextWindowSize(tar_ext, ImGuiCond_Always);
-			ImGui::Begin("##background", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus |
-				ImGuiWindowFlags_NoNavFocus);
-			if (ImGui::IsWindowHovered())
+			if (!graphics::gui_want_mouse())
 			{
 				auto input = sInput::instance();
 				vec3 hovering_pos;
@@ -756,7 +751,6 @@ void cMain::start()
 				if (input->kpressed(Keyboard_F3))
 					toggle_inventory_view();
 			}
-			ImGui::End();
 		}
 
 		if (in_editor)
