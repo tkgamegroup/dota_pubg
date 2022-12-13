@@ -689,19 +689,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	nav_agent->set_target(target);
 	nav_agent->set_speed_scale(move_speed);
 
-	auto approached = true;
-	if (dist <= 0.f)
-	{
-		if (distance(node->pos, nav_agent->get_path_last_pos()) > nav_agent->radius)
-			approached = false;
-	}
-	else if (nav_agent->dist > dist)
-	{
-		approached = false;
-	}
-	if (ang > 0.f && abs(nav_agent->ang_diff) > ang)
-		approached = false;
-	if (approached)
+	if (nav_agent->reached_pos == target && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
 		return true;
 	action = ActionMove;
 	return false;
