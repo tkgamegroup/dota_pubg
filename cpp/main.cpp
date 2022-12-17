@@ -7,7 +7,6 @@
 #include "launcher.h"
 #include "object.h"
 #include "character.h"
-#include "spwaner.h"
 #include "projectile.h"
 #include "chest.h"
 #include "creep_ai.h"
@@ -102,9 +101,9 @@ void MainTerrain::init(EntityPtr e)
 vec3 MainTerrain::get_coord(const vec2& uv)
 {
 	if (hf_terrain)
-		return extent * vec3(uv.x, 1.f - hf_terrain->height_map->linear_sample(uv).r, uv.y);
+		return node->pos + extent * vec3(uv.x, 1.f - hf_terrain->height_map->linear_sample(uv).r, uv.y);
 	else if (mc_terrain)
-		return extent * vec3(uv.x, 1.f - mc_terrain->height_map->linear_sample(uv).r, uv.y);
+		return node->pos + extent * vec3(uv.x, 1.f - mc_terrain->height_map->linear_sample(uv).r, uv.y);
 	return vec3(0.f);
 }
 
@@ -385,7 +384,7 @@ void cMain::start()
 
 	if (auto nav_scene = entity->get_component_t<cNavScene>(); nav_scene)
 	{
-		nav_scene->finished_callback.add([]() {
+		nav_scene->finished_callback.add([this]() {
 			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 			{
 				vec3 player1_coord;
@@ -420,10 +419,10 @@ void cMain::start()
 					//{
 					//	auto coord = main_terrain.get_coord_by_centrality(i);
 
-					//	static uint preset_ids[] = {
-					//		CharacterPreset::find("Life Stealer"),
-					//		CharacterPreset::find("Slark")
-					//	};
+						//static uint preset_ids[] = {
+						//	CharacterPreset::find("Life Stealer"),
+						//	CharacterPreset::find("Slark")
+						//};
 
 					//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
 					//	new CommandAttackLocation(character, coord);
@@ -432,16 +431,18 @@ void cMain::start()
 					//{
 					//	auto coord = main_terrain.get_coord(vec2(linearRand(0.f, 1.f), linearRand(0.f, 1.f)));
 
-					//	static uint preset_ids[] = {
-					//		CharacterPreset::find("Spiderling"),
-					//		CharacterPreset::find("Treant"),
-					//		CharacterPreset::find("Boar")
-					//	};
+						//static uint preset_ids[] = {
+						//	CharacterPreset::find("Spiderling"),
+						//	CharacterPreset::find("Treant"),
+						//	CharacterPreset::find("Boar")
+						//};
 
 					//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
 					//	character->entity->add_component<cCreepAI>();
 					//}
 				}
+
+				spawn_timer = 1.f / spawn_number_per_sec;
 			}
 		});
 	}
@@ -553,7 +554,7 @@ void cMain::start()
 				}
 				if (sInput::instance()->kpressed(Keyboard_F12))
 					draw_data.graphics_debug = true;
-					});
+				});
 				hovering_character = nullptr;
 				hovering_chest = nullptr;
 				hovering_terrain = nullptr;
@@ -568,6 +569,7 @@ void cMain::start()
 							return false;
 						return true;
 					};
+					sScene::instance()->navmesh_nearest_point(hovering_pos, vec3(2.f, 4.f, 2.f), hovering_pos);
 					if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
 					{
 						if (select_mode == TargetNull || can_select(character))
@@ -753,11 +755,18 @@ void cMain::start()
 			}
 		}
 
-		if (in_editor)
+		if (true || in_editor)
 		{
 			ImGui::Begin("Status");
 			ImGui::Text("Main player: %s", main_player.character ? main_player.entity->name.c_str() : "[None]");
-			if (ImGui::Button("Set Main Player (selecting entity)"))
+			if (main_player.character)
+			{
+				auto& p = main_player.node->pos;
+				ImGui::Text("  pos: %.2f, %.2f, %.2f", p.x, p.y, p.z);
+				auto& tp = main_player.nav_agent->target_pos;
+				ImGui::Text("  tpos: %.2f, %.2f, %.2f", tp.x, tp.y, tp.z);
+			}
+			if (ImGui::Button("Set 'selecting entity' As Main Player"))
 			{
 				if (editor_p_selecting_entity && *editor_p_selecting_entity)
 					main_player.init(*editor_p_selecting_entity);
@@ -992,7 +1001,7 @@ void cMain::start()
 		{
 			for (auto character : characters)
 			{
-				if (character->object->visible_flags & main_player.faction)
+				//if (character->object->visible_flags & main_player.faction)
 				{
 					auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
 					if (p.x > 0.f && p.y > 0.f)
@@ -1298,6 +1307,39 @@ void cMain::update()
 
 	update_vision();
 
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	{
+		if (main_player.character)
+		{
+			if (spawn_timer > 0.f)
+			{
+				spawn_timer -= delta_time;
+				if (spawn_timer <= 0.f)
+				{
+					static uint preset_ids[] = {
+						CharacterPreset::find("Spiderling"),
+						CharacterPreset::find("Treant"),
+						CharacterPreset::find("Boar")
+					};
+
+					auto uv = (main_player.node->pos.xz() + circularRand(20.f)) / main_terrain.extent.xz();
+					if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
+					{
+						auto pos = main_terrain.get_coord(uv);
+						if (pos.y > main_terrain.node->pos.y + 3.f)
+						{
+							auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], pos, FactionCreep);
+							//character->entity->add_component_t<cCreepAI>();
+							new CommandAttackTarget(character, main_player.character);
+						}
+					}
+
+					spawn_timer = 1.f / spawn_number_per_sec;
+				}
+			}
+		}
+	}
+
 	if (multi_player == MultiPlayerAsHost)
 	{
 		if (!nw_new_players.empty())
@@ -1575,7 +1617,6 @@ extern "C" EXPORT void* cpp_info()
 	cMain::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cObject::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cSpwaner::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cProjectile::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cChest::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly

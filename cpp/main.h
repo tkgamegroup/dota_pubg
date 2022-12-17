@@ -9,7 +9,6 @@ FLAME_TYPE(cLauncher)
 FLAME_TYPE(cMain)
 FLAME_TYPE(cObject)
 FLAME_TYPE(cCharacter)
-FLAME_TYPE(cSpwaner)
 FLAME_TYPE(cProjectile)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cCreepAI)
@@ -128,6 +127,10 @@ struct cMain : Component
 	float camera_length = 15.f;
 	// Reflect
 	float camera_angle = 45.f;
+
+	// Reflect
+	float spawn_number_per_sec = 0.3f;
+	float spawn_timer = 0.f;
 
 	~cMain();
 

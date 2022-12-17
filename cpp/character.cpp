@@ -441,6 +441,14 @@ cCharacter::~cCharacter()
 	if (armature)
 		armature->playing_callbacks.remove("character"_h);
 
+	if (main_player.character == this)
+	{
+		main_player.entity = nullptr;
+		main_player.node = nullptr;
+		main_player.nav_agent = nullptr;
+		main_player.character = nullptr;
+	}
+
 	std::erase_if(characters, [this](const auto& i) {
 		return i == this;
 	});
@@ -673,7 +681,8 @@ void cCharacter::start()
 
 	inventory.resize(16);
 
-	new CommandIdle(this);
+	if (!command)
+		new CommandIdle(this);
 }
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
@@ -689,7 +698,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	nav_agent->set_target(target);
 	nav_agent->set_speed_scale(move_speed);
 
-	if (nav_agent->reached_pos == target && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
+	if ((nav_agent->reached_pos == target || nav_agent->dist < dist) && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
 		return true;
 	action = ActionMove;
 	return false;
