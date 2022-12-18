@@ -11,7 +11,7 @@ void load_buffs()
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
 		buff.name = "Stun";
-		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\blood tornado b.jpg";
+		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood tornado b.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character, BuffInstance*) {
 			character->state = State(character->state | StateStun);
@@ -21,7 +21,7 @@ void load_buffs()
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
 		buff.name = "Flame Weapon";
-		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma pulverize.jpg";
+		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character, BuffInstance*) {
 			character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
@@ -33,7 +33,7 @@ void load_buffs()
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
 		buff.name = "Roar";
-		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusfungusbite2.jpg";
+		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](cCharacterPtr character, BuffInstance*) {
 			character->atk += 20;
@@ -45,7 +45,7 @@ void load_buffs()
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
 		buff.name = "Poisoned";
-		buff.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusgue-ball.jpg";
+		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusgue-ball.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.start = [](cCharacterPtr character, BuffInstance* ins) {
 			ins->f0 = ins->timer;

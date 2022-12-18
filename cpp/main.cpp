@@ -211,7 +211,7 @@ struct AbilityShortcut : Shortcut
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(ability.name.c_str());
 			if (ability.show)
-				ability.show();
+				ability.show(ins->lv);
 			ImGui::EndTooltip();
 		}
 		dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
@@ -237,7 +237,7 @@ struct AbilityShortcut : Shortcut
 		}
 		if (ability.cast_check)
 		{
-			if (!ability.cast_check(main_player.character))
+			if (!ability.cast_check(ins->lv, main_player.character))
 				return;
 		}
 		select_mode = ability.target_type;
@@ -759,6 +759,24 @@ void cMain::start()
 				ImGui::Text("  pos: %.2f, %.2f, %.2f", p.x, p.y, p.z);
 				auto& tp = main_player.nav_agent->target_pos;
 				ImGui::Text("  tpos: %.2f, %.2f, %.2f", tp.x, tp.y, tp.z);
+
+				const char* action_name;
+				switch (main_player.character->action)
+				{
+				case ActionNone:
+					action_name = "None";
+					break;
+				case ActionMove:
+					action_name = "Move";
+					break;
+				case ActionAttack:
+					action_name = "Attack";
+					break;
+				case ActionCast:
+					action_name = "Cast";
+					break;
+				}
+				ImGui::Text("  action: %s", action_name);
 			}
 			if (ImGui::Button("Set 'selecting entity' As Main Player"))
 			{

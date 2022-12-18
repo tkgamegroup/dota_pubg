@@ -63,7 +63,7 @@ void cCreepAI::update()
 						{
 							if (auto& ability = Ability::get(ins->id); character->mp >= ability.mp)
 							{
-								if (!ability.cast_check || ability.cast_check(character))
+								if (!ability.cast_check || ability.cast_check(ins->lv, character))
 								{
 									if (ability.target_type == TargetNull && ability.active)
 									{

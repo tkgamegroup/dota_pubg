@@ -12,7 +12,7 @@ void load_items()
 		auto& item = items.emplace_back();
 		item.id = items.size() - 1;
 		item.name = "Magic Candy";
-		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_name = L"assets\\icons\\roguelikeitems.png";
 		item.icon_uvs = vec4(0.f / 13, 3.f / 15.f, 1.f / 13, 4.f / 15.f);
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemConsumable;
@@ -27,7 +27,7 @@ void load_items()
 		auto& item = items.emplace_back();
 		item.id = items.size() - 1;
 		item.name = "Berry";
-		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_name = L"assets\\icons\\roguelikeitems.png";
 		item.icon_uvs = vec4(6.f / 13, 12.f / 15.f, 7.f / 13, 13.f / 15.f);
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemConsumable;
@@ -42,7 +42,7 @@ void load_items()
 		auto& item = items.emplace_back();
 		item.id = items.size() - 1;
 		item.name = "Mint";
-		item.icon_name = L"assets\\icons\\items\\roguelikeitems.png";
+		item.icon_name = L"assets\\icons\\roguelikeitems.png";
 		item.icon_uvs = vec4(1.f / 13, 13.f / 15.f, 2.f / 13, 14.f / 15.f);
 		item.icon_image = graphics::Image::get(item.icon_name);
 		item.type = ItemConsumable;

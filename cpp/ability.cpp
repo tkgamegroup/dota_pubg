@@ -16,8 +16,22 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
+		ability.name = "Strong Body";
+		ability.icon_name = L"assets\\icons\\strength.png";
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.passive = [](uint lv, cCharacterPtr caster) {
+			caster->hp_max += lv * 100;
+			caster->hp_reg += lv;
+		};
+		ability.show = [](uint lv) {
+			ImGui::Text("Increase HP Max by %d and HP Reg by %d", lv * 100, lv);
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
 		ability.name = "Fire Thrower";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.2f;
@@ -47,7 +61,7 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Shield Bash";
-		ability.icon_name = L"assets\\icons\\abilities\\shield_alpha.png";
+		ability.icon_name = L"assets\\icons\\shield_alpha.png";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
@@ -67,9 +81,8 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Flame Weapon";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma pulverize.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.target_type = TargetNull;
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.cd = 10.f;
@@ -84,9 +97,8 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Flame Shield";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\magma seizmic.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma seizmic.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.target_type = TargetNull;
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 30.f;
@@ -101,9 +113,8 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Stinger";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\funguscorrosive spore.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\funguscorrosive spore.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.target_type = TargetNull;
 		ability.passive = [](uint lv, cCharacterPtr caster) {
 			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
 				if (linearRand(0U, 99U) < 10)
@@ -118,9 +129,8 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Roar";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\fungusfungusbite2.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.target_type = TargetNull;
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 10.f;
@@ -138,9 +148,8 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Recover";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\mucus trap.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\mucus trap.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.target_type = TargetNull;
 		ability.cast_time = 3.f;
 		ability.mp = 500;
 		ability.cd = 0.f;
@@ -158,7 +167,7 @@ void load_abilities()
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Blink";
-		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\Tactical Flight.jpg";
+		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\Tactical Flight.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.f;

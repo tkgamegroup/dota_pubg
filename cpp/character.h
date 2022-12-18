@@ -221,6 +221,7 @@ struct cCharacter : Component
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
 	std::vector<std::unique_ptr<BuffInstance>>		buffs;
 	std::map<uint, float>							markers;
+	uint ability_points = 0;
 
 	bool dead = false;
 	bool stats_dirty = true;

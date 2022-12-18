@@ -184,6 +184,7 @@ void load_character_presets()
 		preset.atk_hit_audio_preset = AudioPreset::find("Dragon Knight Attack Hit");
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
+		preset.abilities.emplace_back("Strong Body", 0);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -494,6 +495,7 @@ void cCharacter::gain_exp(uint v)
 	{
 		exp -= exp_max;
 		lv++;
+		ability_points++;
 		exp_max *= 1.1f;
 		stats_dirty = true;
 	}
@@ -559,15 +561,15 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 		return;
 	if (ability.cast_check)
 	{
-		if (!ability.cast_check(this))
+		if (!ability.cast_check(ins->lv, this))
 			return;
 	}
 	if (ability.active)
-		ability.active(this);
+		ability.active(ins->lv, this);
 	else if (ability.active_l)
-		ability.active_l(this, location);
+		ability.active_l(ins->lv, this, location);
 	else if (ability.active_t)
-		ability.active_t(this, target);
+		ability.active_t(ins->lv, this, target);
 	ins->cd_max = ability.cd;
 	ins->cd_timer = ins->cd_max;
 	set_mp(mp - ability.mp);
@@ -630,25 +632,6 @@ void cCharacter::start()
 		if (e->children.empty())
 			break;
 		e = e->children[0].get();
-	}
-	if (armature)
-	{
-		armature->playing_callbacks.add([this](uint ev, uint anim) {
-			if (ev == "end"_h)
-			{
-				switch (anim)
-				{
-				case "attack"_h:
-					attack_timer = -2.f;
-					action = ActionNone;
-					break;
-				case "cast"_h:
-					cast_timer = -2.f;
-					action = ActionNone;
-					break;
-				}
-			}
-		}, "character"_h);
 	}
 
 	if (!preset)
@@ -751,13 +734,11 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		}
 		else
 		{
-			if (attack_timer > -1.f)
+			if (approached)
 			{
-				action = ActionAttack;
+				action = ActionNone;
 				nav_agent->set_speed_scale(0.f);
 			}
-			if (approached)
-				nav_agent->set_speed_scale(0.f);
 		}
 	}
 }
@@ -844,8 +825,10 @@ void cCharacter::update()
 
 			state = StateNormal;
 
-			auto new_hp_max = preset->hp;
-			auto new_mp_max = preset->mp;
+			auto old_hp_max = hp_max;
+			auto old_mp_max = mp_max;
+			hp_max = preset->hp;
+			mp_max = preset->hp;
 
 			atk_type = PhysicalDamage;
 			atk = preset->atk;
@@ -863,7 +846,7 @@ void cCharacter::update()
 				{
 					auto& ability = Ability::get(ins->id);
 					if (ability.passive)
-						ability.passive(this);
+						ability.passive(ins->lv, this);
 				}
 			}
 			for (auto& ins : buffs)
@@ -873,15 +856,15 @@ void cCharacter::update()
 					buff.passive(this, ins.get());
 			}
 
-			if (hp_max != new_hp_max)
+			if (hp_max != old_hp_max)
 			{
-				set_hp(hp * (float)new_hp_max / hp_max);
-				set_hp_max(new_hp_max);
+				set_hp(hp * (float)hp_max / old_hp_max);
+				data_changed("hp_max"_h);
 			}
-			if (mp_max != new_hp_max)
+			if (mp_max != old_hp_max)
 			{
-				set_mp(mp * (float)new_mp_max / mp_max);
-				set_mp_max(new_mp_max);
+				set_mp(mp * (float)mp_max / old_mp_max);
+				data_changed("mp_max"_h);
 			}
 
 			stats_dirty = false;
