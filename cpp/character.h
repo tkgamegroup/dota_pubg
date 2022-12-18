@@ -34,6 +34,7 @@ struct CommandMoveTo : Command
 struct CommandAttackTarget : Command
 {
 	Tracker<cCharacterPtr> target;
+	cCharacterPtr precasted_target = nullptr;
 
 	CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target);
 
@@ -43,6 +44,7 @@ struct CommandAttackTarget : Command
 struct CommandAttackLocation : Command
 {
 	Tracker<cCharacterPtr> target;
+	cCharacterPtr precasted_target = nullptr;
 	vec3 location;
 
 	CommandAttackLocation(cCharacterPtr character, const vec3& _location);
@@ -220,7 +222,7 @@ struct cCharacter : Component
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
 	std::vector<std::unique_ptr<BuffInstance>>		buffs;
-	std::map<uint, float>							markers;
+	std::map<uint, std::pair<float, uint>>			markers;
 	uint ability_points = 0;
 
 	bool dead = false;

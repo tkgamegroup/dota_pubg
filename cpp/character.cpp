@@ -1,4 +1,5 @@
 #include "character.h"
+#include "object.h"
 #include "item.h"
 #include "ability.h"
 #include "buff.h"
@@ -90,7 +91,10 @@ void CommandAttackLocation::update()
 	if (target.obj)
 		character->process_attack_target(target.obj);
 	else
-		character->process_approach(location);
+	{
+		if (character->process_approach(location))
+			character->action = ActionNone;
+	}
 }
 
 CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
@@ -606,7 +610,7 @@ bool cCharacter::add_marker(uint hash, float time)
 	auto it = markers.find(hash);
 	if (it == markers.end())
 	{
-		markers.emplace(hash, time);
+		markers.emplace(hash, std::make_pair(time, 0));
 		return true;
 	}
 	return false;
@@ -684,6 +688,9 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		return;
 	}
 
+	if (action != ActionAttack)
+		attack_timer = 0.f;
+
 	auto approached = process_approach(target->node->pos, preset->atk_distance, 60.f);
 	if (attack_timer > 0.f)
 	{
@@ -728,6 +735,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f); 
 				attack_timer = preset->atk_point / attack_speed;
+				action = ActionAttack;
 
 				audio_source->play("attack_precast"_h);
 			}
@@ -910,10 +918,10 @@ void cCharacter::update()
 		}
 		for (auto it = markers.begin(); it != markers.end();)
 		{
-			if (it->second > 0)
+			if (it->second.first > 0.f)
 			{
-				it->second -= delta_time;
-				if (it->second <= 0)
+				it->second.first -= delta_time;
+				if (it->second.first <= 0.f)
 				{
 					it = markers.erase(it);
 					continue;

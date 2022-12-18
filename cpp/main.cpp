@@ -1334,7 +1334,7 @@ void cMain::update()
 						//CharacterPreset::find("Boar")
 					};
 
-					auto uv = (main_player.node->pos.xz() + circularRand(20.f)) / main_terrain.extent.xz();
+					auto uv = (main_player.node->pos.xz() + circularRand(4.f)) / main_terrain.extent.xz();
 					if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
 					{
 						auto pos = main_terrain.get_coord(uv);
@@ -1342,7 +1342,7 @@ void cMain::update()
 						{
 							auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], pos, FactionCreep);
 							//character->entity->add_component_t<cCreepAI>();
-							new CommandAttackTarget(character, main_player.character);
+							//new CommandAttackTarget(character, main_player.character);
 						}
 					}
 
