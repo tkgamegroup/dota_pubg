@@ -95,30 +95,6 @@ void ViewEquipment::on_draw()
 		ImGui::TableNextColumn();
 		ImGui::Text("%5d", main_player.character->atk_sp);
 
-		ImGui::TableNextRow();
-		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("HP REG");
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::TextUnformatted("HP regeneration pre second.");
-			ImGui::EndTooltip();
-		}
-		ImGui::TableNextColumn();
-		ImGui::Text("%5.1f", main_player.character->hp_reg / 10.f);
-
-		ImGui::TableNextRow();
-		ImGui::TableNextColumn();
-		ImGui::TextUnformatted("MP REG");
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::TextUnformatted("MP regeneration pre second.");
-			ImGui::EndTooltip();
-		}
-		ImGui::TableNextColumn();
-		ImGui::Text("%5.1f", main_player.character->mp_reg / 10.f);
-
 		ImGui::EndTable();
 	}
 }

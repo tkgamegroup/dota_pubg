@@ -103,8 +103,8 @@ struct CharacterPreset
 	std::filesystem::path	path;
 
 	uint exp_base = 0;
-	uint hp = 1000;
-	uint mp = 1000;
+	uint hp = 100;
+	uint mp = 100;
 	uint atk = 0;
 	float atk_distance = 1.5f;
 	float atk_time = 2.f; // attack interval

@@ -174,19 +174,16 @@ void load_character_presets()
 		preset.id = character_presets.size() - 1;
 		preset.path = L"assets\\characters\\dragon_knight\\main.prefab";
 		preset.name = "Dragon Knight";
-		preset.exp_base = 200;
-		preset.hp = 2000;
-		preset.mp = 500;
-		preset.atk = 32;
+		preset.exp_base = 120;
+		preset.hp = 500;
+		preset.mp = 100;
+		preset.atk = 56;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
 		preset.atk_precast_audio_preset = AudioPreset::find("Dragon Knight Attack Precast");
 		preset.atk_hit_audio_preset = AudioPreset::find("Dragon Knight Attack Hit");
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
-		preset.abilities.emplace_back("Fire Thrower", 0);
-		preset.abilities.emplace_back("Shield Bash", 0);
-		preset.abilities.emplace_back("Flame Weapon", 0);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -194,8 +191,8 @@ void load_character_presets()
 		preset.path = L"assets\\characters\\life_stealer\\main.prefab";
 		preset.name = "Life Stealer";
 		preset.exp_base = 200;
-		preset.hp = 2000;
-		preset.mp = 500;
+		preset.hp = 200;
+		preset.mp = 50;
 		preset.atk = 35;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
@@ -206,8 +203,8 @@ void load_character_presets()
 		preset.path = L"assets\\characters\\slark\\main.prefab";
 		preset.name = "Slark";
 		preset.exp_base = 200;
-		preset.hp = 2000;
-		preset.mp = 500;
+		preset.hp = 200;
+		preset.mp = 50;
 		preset.atk = 37;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.5f;
@@ -218,12 +215,11 @@ void load_character_presets()
 		preset.path = L"assets\\characters\\spiderling\\main.prefab";
 		preset.name = "Spiderling";
 		preset.exp_base = 200;
-		preset.hp = 2000;
+		preset.hp = 50;
 		preset.mp = 0;
-		preset.atk = 14;
+		preset.atk = 6;
 		preset.atk_time = 1.35f;
 		preset.atk_point = 0.5f;
-		preset.hp_reg = 5;
 		preset.mov_sp = 400;
 		preset.abilities.emplace_back("Stinger", 1);
 	}
@@ -233,15 +229,13 @@ void load_character_presets()
 		preset.path = L"assets\\characters\\treant\\main.prefab";
 		preset.name = "Treant";
 		preset.exp_base = 200;
-		preset.hp = 5500;
-		preset.mp = 2000;
+		preset.hp = 550;
+		preset.mp = 200;
 		preset.atk = 15;
 		preset.atk_time = 1.6f;
 		preset.atk_point = 0.467f;
 		preset.cast_time = 2.f;
 		preset.cast_point = 1.95f;
-		preset.hp_reg = 25;
-		preset.mp_reg = 20;
 		preset.mov_sp = 100;
 		preset.abilities.emplace_back("Recover", 1);
 		preset.drop_items.emplace_back(Item::find("Berry"), 30, 1, 3);
@@ -253,12 +247,11 @@ void load_character_presets()
 		preset.path = L"assets\\characters\\boar\\main.prefab";
 		preset.name = "Boar";
 		preset.exp_base = 200;
-		preset.hp = 3000;
-		preset.mp = 1000;
+		preset.hp = 300;
+		preset.mp = 100;
 		preset.atk = 20;
 		preset.atk_time = 1.25f;
 		preset.atk_point = 0.5f;
-		preset.hp_reg = 15;
 		preset.mov_sp = 100;
 		preset.abilities.emplace_back("Roar", 1);
 	}
@@ -267,12 +260,11 @@ void load_character_presets()
 		preset.id = character_presets.size() - 1;
 		preset.name = "Creep";
 		preset.exp_base = 200;
-		preset.hp = 5000;
+		preset.hp = 500;
 		preset.mp = 0;
 		preset.atk = 21;
 		preset.atk_time = 1.7f;
 		preset.atk_point = 0.39f;
-		preset.hp_reg = 5;
 	}
 }
 
@@ -402,22 +394,6 @@ void cCharacter::set_mag_def(uint v)
 	data_changed("mag_def"_h);
 }
 
-void cCharacter::set_hp_reg(uint v)
-{
-	if (hp_reg == v)
-		return;
-	hp_reg = v;
-	data_changed("hp_reg"_h);
-}
-
-void cCharacter::set_mp_reg(uint v)
-{
-	if (mp_reg == v)
-		return;
-	mp_reg = v;
-	data_changed("mp_reg"_h);
-}
-
 void cCharacter::set_mov_sp(uint v)
 {
 	if (mov_sp == v)
@@ -473,6 +449,18 @@ void cCharacter::on_init()
 
 void cCharacter::inflict_damage(cCharacterPtr target, uint value, DamageType type)
 {
+	value *= linearRand(0.8f, 1.2f);
+	uint def;
+	switch (type)
+	{
+	case PhysicalDamage:
+		def = target->phy_def;
+		break;
+	case MagicDamage:
+		def = target->mag_def;
+		break;
+	}
+	;
 	if (target->take_damage(value, type))
 		gain_exp(target->exp_max * 0.15f);
 
@@ -487,7 +475,6 @@ bool cCharacter::take_damage(uint value, DamageType type)
 {
 	if (dead)
 		return false;
-	value *= 10;
 	if (hp > value)
 	{
 		set_hp(hp - value);

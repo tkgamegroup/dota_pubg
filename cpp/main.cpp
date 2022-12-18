@@ -136,8 +136,7 @@ MainPlayer main_player;
 
 cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
-cTerrainPtr		hovering_terrain = nullptr;
-cVolumePtr		hovering_volume = nullptr;
+bool			hovering_terrain = false;
 
 TargetType								select_mode = TargetNull;
 std::function<void(cCharacterPtr)>		select_enemy_callback;
@@ -557,8 +556,7 @@ void cMain::start()
 				});
 				hovering_character = nullptr;
 				hovering_chest = nullptr;
-				hovering_terrain = nullptr;
-				hovering_volume = nullptr;
+				hovering_terrain = false;
 				tooltip.clear();
 				if (hovering_node)
 				{
@@ -580,9 +578,9 @@ void cMain::start()
 						hovering_chest = chest;
 						tooltip = Item::get(hovering_chest->item_id).name;
 					}
-					if (auto terrain = hovering_node->entity->get_component_t<cTerrain>(); terrain)
+					if (hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
 					{
-						hovering_terrain = terrain;
+						hovering_terrain = true;
 
 						if ((select_mode & TargetLocation) == 0)
 						{
@@ -610,10 +608,6 @@ void cMain::start()
 								}
 							}
 						}
-					}
-					if (auto volume = hovering_node->entity->get_component_t<cVolume>(); volume)
-					{
-						hovering_volume = volume;
 					}
 				}
 
@@ -684,7 +678,7 @@ void cMain::start()
 									so_client->send(res.str());
 								}
 							}
-							else if (hovering_terrain || hovering_volume)
+							else if (hovering_terrain)
 							{
 								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 									new CommandMoveTo(main_player.character, hovering_pos);
@@ -916,7 +910,7 @@ void cMain::start()
 			auto p1 = (vec2)ImGui::GetItemRectMax();
 			dl->AddRectFilled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * width, height), ImColor(0.3f, 0.7f, 0.2f));
 			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-			auto str = std::format("{}/{}", character->hp / 10, character->hp_max / 10);
+			auto str = std::format("{}/{}", character->hp, character->hp_max);
 			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 		};
@@ -926,7 +920,7 @@ void cMain::start()
 			auto p1 = (vec2)ImGui::GetItemRectMax();
 			dl->AddRectFilled(p0, p0 + vec2((float)character->mp / (float)character->mp_max * width, height), ImColor(0.2f, 0.3f, 0.7f));
 			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-			auto str = std::format("{}/{}", character->mp / 10, character->mp_max / 10);
+			auto str = std::format("{}/{}", character->mp, character->mp_max);
 			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
 			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
 		};
@@ -1318,8 +1312,8 @@ void cMain::update()
 				{
 					static uint preset_ids[] = {
 						CharacterPreset::find("Spiderling"),
-						CharacterPreset::find("Treant"),
-						CharacterPreset::find("Boar")
+						//CharacterPreset::find("Treant"),
+						//CharacterPreset::find("Boar")
 					};
 
 					auto uv = (main_player.node->pos.xz() + circularRand(20.f)) / main_terrain.extent.xz();

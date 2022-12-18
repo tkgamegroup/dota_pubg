@@ -24,7 +24,7 @@ void load_abilities()
 		ability.mp = 500;
 		ability.cd = 7.f;
 		ability.distance = 8.f;
-		ability.active_l = [](cCharacterPtr caster, const vec3& target) {
+		ability.active_l = [](uint lv, cCharacterPtr caster, const vec3& target) {
 			auto e = get_prefab(L"assets\\effects\\fire.prefab")->copy();
 			e->node()->set_pos(vec3(0.f, 1.8f, 0.f));
 			caster->entity->add_child(e);
@@ -39,7 +39,7 @@ void load_abilities()
 				//			caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
 			}
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -54,11 +54,11 @@ void load_abilities()
 		ability.mp = 500;
 		ability.cd = 10.f;
 		ability.distance = 5.f;
-		ability.active_t = [](cCharacterPtr caster, cCharacterPtr target) {
+		ability.active_t = [](uint lv, cCharacterPtr caster, cCharacterPtr target) {
 			caster->inflict_damage(target, 50.f, PhysicalDamage);
 			target->add_buff(Buff::find("Stun"), 2.f);
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
 				"dealing damage base on your strength and stunning it.");
 		};
@@ -73,10 +73,10 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.cd = 10.f;
-		ability.active = [](cCharacterPtr caster) {
+		ability.active = [](uint lv, cCharacterPtr caster) {
 			caster->add_buff(Buff::find("Flame Weapon"), 60.f);
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -90,10 +90,10 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 30.f;
-		ability.active = [](cCharacterPtr caster) {
+		ability.active = [](uint lv, cCharacterPtr caster) {
 
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -104,13 +104,13 @@ void load_abilities()
 		ability.icon_name = L"assets\\icons\\abilities\\old Ancient Beast icons\\funguscorrosive spore.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetNull;
-		ability.passive = [](cCharacterPtr caster) {
+		ability.passive = [](uint lv, cCharacterPtr caster) {
 			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
 				if (linearRand(0U, 99U) < 10)
 					target->add_buff(Buff::find("Poisoned"), 10.f, true);
 			});
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -124,13 +124,13 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 10.f;
-		ability.cast_check = [](cCharacterPtr caster) {
+		ability.cast_check = [](uint lv, cCharacterPtr caster) {
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
 		};
-		ability.active = [](cCharacterPtr caster) {
+		ability.active = [](uint lv, cCharacterPtr caster) {
 			caster->add_buff(Buff::find("Roar"), 12.f);
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -144,13 +144,13 @@ void load_abilities()
 		ability.cast_time = 3.f;
 		ability.mp = 500;
 		ability.cd = 0.f;
-		ability.cast_check = [](cCharacterPtr caster) {
+		ability.cast_check = [](uint lv, cCharacterPtr caster) {
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
 		};
-		ability.active = [](cCharacterPtr caster) {
+		ability.active = [](uint lv, cCharacterPtr caster) {
 			caster->set_hp(min(caster->hp + 1000, caster->hp_max));
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -164,10 +164,10 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.distance = 15.f;
-		ability.active_l = [](cCharacterPtr caster, const vec3& location) {
+		ability.active_l = [](uint lv, cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);
 		};
-		ability.show = []() {
+		ability.show = [](uint lv) {
 			ImGui::TextUnformatted("");
 		};
 	}

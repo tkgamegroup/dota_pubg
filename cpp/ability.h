@@ -27,14 +27,14 @@ struct Ability
 	float range = 0.f;
 	float angle = 0.f;
 
-	bool(*cast_check)(cCharacterPtr) = nullptr;
-	void(*active)(cCharacterPtr) = nullptr;
-	void(*active_l)(cCharacterPtr, const vec3&) = nullptr;
-	void(*active_t)(cCharacterPtr, cCharacterPtr) = nullptr;
-	void(*channel_l)(cCharacterPtr, const vec3&) = nullptr;
-	void(*channel_t)(cCharacterPtr, cCharacterPtr) = nullptr;
-	void(*passive)(cCharacterPtr) = nullptr;
-	void(*show)() = nullptr;
+	bool(*cast_check)(uint lv, cCharacterPtr caster) = nullptr;
+	void(*active)(uint lv, cCharacterPtr caster) = nullptr;
+	void(*active_l)(uint lv, cCharacterPtr caster, const vec3&) = nullptr;
+	void(*active_t)(uint lv, cCharacterPtr caster, cCharacterPtr) = nullptr;
+	void(*channel_l)(uint lv, cCharacterPtr caster, const vec3&) = nullptr;
+	void(*channel_t)(uint lv, cCharacterPtr caster, cCharacterPtr) = nullptr;
+	void(*passive)(uint lv, cCharacterPtr caster) = nullptr;
+	void(*show)(uint lv) = nullptr;
 
 	static int find(const std::string& name);
 	static const Ability& get(uint id);
