@@ -1340,9 +1340,12 @@ void cMain::update()
 						auto pos = main_terrain.get_coord(uv);
 						if (pos.y > main_terrain.node->pos.y + 3.f)
 						{
-							auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], pos, FactionCreep);
-							//character->entity->add_component_t<cCreepAI>();
-							//new CommandAttackTarget(character, main_player.character);
+							auto path = sScene::instance()->query_navmesh_path(pos, main_player.node->pos, 0);
+							if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
+							{
+								auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], pos, FactionCreep);
+								new CommandAttackTarget(character, main_player.character);
+							}
 						}
 					}
 

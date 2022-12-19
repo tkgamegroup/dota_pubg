@@ -30,6 +30,20 @@ void load_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
+		ability.name = "Sharp Weapon";
+		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
+		ability.icon_uvs = vec4(7.f / 13, 1.f / 15.f, 8.f / 13, 2.f / 15.f);
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.passive = [](uint lv, cCharacterPtr caster) {
+			caster->atk += lv * 10;
+		};
+		ability.show = [](uint lv) {
+			ImGui::Text("Increase ATK by %d", lv * 10);
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
 		ability.name = "Fire Thrower";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
