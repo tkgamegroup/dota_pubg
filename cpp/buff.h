@@ -17,9 +17,9 @@ struct Buff
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	graphics::ImagePtr		icon_image = nullptr;
 
-	void(*start)(cCharacterPtr, BuffInstance*) = nullptr;
-	void(*passive)(cCharacterPtr, BuffInstance*) = nullptr;
-	void(*continuous)(cCharacterPtr, BuffInstance*) = nullptr;
+	void(*start)(BuffInstance* ins, cCharacterPtr character) = nullptr;
+	void(*passive)(BuffInstance* ins, cCharacterPtr character) = nullptr;
+	void(*continuous)(BuffInstance* ins, cCharacterPtr character) = nullptr;
 
 	static int find(const std::string& name);
 	static const Buff& get(uint id);

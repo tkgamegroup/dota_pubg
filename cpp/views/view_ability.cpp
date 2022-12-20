@@ -41,7 +41,7 @@ void ViewAbility::on_draw()
 					ImGui::BeginTooltip();
 					ImGui::TextUnformatted(ability.name.c_str());
 					if (ability.show)
-						ability.show(ins->lv);
+						ability.show(ins);
 					ImGui::EndTooltip();
 				}
 				dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());

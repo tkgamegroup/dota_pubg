@@ -128,10 +128,6 @@ struct cMain : Component
 	// Reflect
 	float camera_angle = 45.f;
 
-	// Reflect
-	float spawn_number_per_sec = 0.3f;
-	float spawn_timer = 0.f;
-
 	~cMain();
 
 	void start() override;

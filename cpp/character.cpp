@@ -565,15 +565,15 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 		return;
 	if (ability.cast_check)
 	{
-		if (!ability.cast_check(ins->lv, this))
+		if (!ability.cast_check(ins, this))
 			return;
 	}
 	if (ability.active)
-		ability.active(ins->lv, this);
+		ability.active(ins, this);
 	else if (ability.active_l)
-		ability.active_l(ins->lv, this, location);
+		ability.active_l(ins, this, location);
 	else if (ability.active_t)
-		ability.active_t(ins->lv, this, target);
+		ability.active_t(ins, this, target);
 	ins->cd_max = ability.cd;
 	ins->cd_timer = ins->cd_max;
 	set_mp(mp - ability.mp);
@@ -601,7 +601,7 @@ void cCharacter::add_buff(uint id, float time, bool replace)
 	ins->id = id;
 	ins->timer = time;
 	if (auto& buff = Buff::get(id); buff.start)
-		buff.start(this, ins);
+		buff.start(ins, this);
 	stats_dirty = true;
 }
 
@@ -854,14 +854,14 @@ void cCharacter::update()
 				{
 					auto& ability = Ability::get(ins->id);
 					if (ability.passive)
-						ability.passive(ins->lv, this);
+						ability.passive(ins.get(), this);
 				}
 			}
 			for (auto& ins : buffs)
 			{
 				auto& buff = Buff::get(ins->id);
 				if (buff.passive)
-					buff.passive(this, ins.get());
+					buff.passive(ins.get(), this);
 			}
 
 			if (hp_max != old_hp_max)
@@ -902,7 +902,7 @@ void cCharacter::update()
 			auto& ins = *it;
 			auto& buff = Buff::get(ins->id);
 			if (buff.continuous)
-				buff.continuous(this, ins.get());
+				buff.continuous(ins.get(), this);
 
 			if (ins->timer > 0)
 			{

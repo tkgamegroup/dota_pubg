@@ -211,7 +211,7 @@ struct AbilityShortcut : Shortcut
 			ImGui::BeginTooltip();
 			ImGui::TextUnformatted(ability.name.c_str());
 			if (ability.show)
-				ability.show(ins->lv);
+				ability.show(ins);
 			ImGui::EndTooltip();
 		}
 		dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
@@ -237,7 +237,7 @@ struct AbilityShortcut : Shortcut
 		}
 		if (ability.cast_check)
 		{
-			if (!ability.cast_check(ins->lv, main_player.character))
+			if (!ability.cast_check(ins, main_player.character))
 				return;
 		}
 		select_mode = ability.target_type;
@@ -440,8 +440,6 @@ void cMain::start()
 					//	character->entity->add_component<cCreepAI>();
 					//}
 				}
-
-				spawn_timer = 1.f / spawn_number_per_sec;
 			}
 		});
 	}
@@ -1139,6 +1137,18 @@ void cMain::start()
 	}, (uint)this);
 }
 
+struct MonsterSpawnningRule
+{
+	uint preset_id;
+	float delay;
+	float number_function_factor_a;
+	float number_function_factor_b;
+	float number_function_factor_c;
+
+	uint spawnned_numbers = 0;
+};
+std::vector<MonsterSpawnningRule> monster_spawnning_rules;
+
 void cMain::update()
 {
 	switch (multi_player)
@@ -1323,17 +1333,51 @@ void cMain::update()
 	{
 		if (main_player.character)
 		{
-			if (spawn_timer > 0.f)
+			if (monster_spawnning_rules.empty())
 			{
-				spawn_timer -= delta_time;
-				if (spawn_timer <= 0.f)
+				for (auto& section : parse_ini_file(Path::get(L"assets\\monster_spawnnings.ini")).sections)
 				{
-					static uint preset_ids[] = {
-						CharacterPreset::find("Spiderling"),
-						//CharacterPreset::find("Treant"),
-						//CharacterPreset::find("Boar")
-					};
+					auto preset_id = CharacterPreset::find(section.name);
+					if (preset_id != -1)
+					{
+						for (auto& rule : monster_spawnning_rules)
+						{
+							if (rule.preset_id == preset_id)
+							{
+								assert(0);
+								preset_id = -1;
+								break;
+							}
+						}
+						if (preset_id != -1)
+						{
+							auto& rule = monster_spawnning_rules.emplace_back();
+							rule.preset_id = preset_id;
+							for (auto& e : section.entries)
+							{
+								if (e.key == "number_function_factor_a")
+									rule.number_function_factor_a = s2t<float>(e.value);
+								else if (e.key == "number_function_factor_b")
+									rule.number_function_factor_b = s2t<float>(e.value);
+								else if (e.key == "number_function_factor_c")
+									rule.number_function_factor_c = s2t<float>(e.value);
+							}
+						}
+					}
+				}
+			}
 
+			for (auto& rule : monster_spawnning_rules)
+			{
+				auto t = total_time / 60.f;
+				if (t < rule.delay)
+					continue;
+				
+				auto n = rule.number_function_factor_a * t + rule.number_function_factor_b * t * t + rule.number_function_factor_c;
+				n -= rule.spawnned_numbers;
+
+				for (auto i = 0; i < n; i++)
+				{
 					auto uv = (main_player.node->pos.xz() + circularRand(4.f)) / main_terrain.extent.xz();
 					if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
 					{
@@ -1343,13 +1387,14 @@ void cMain::update()
 							auto path = sScene::instance()->query_navmesh_path(pos, main_player.node->pos, 0);
 							if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
 							{
-								auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], pos, FactionCreep);
+								auto character = add_character(rule.preset_id, pos, FactionCreep);
+								character->add_buff(Buff::find("Cursed"), -1.f, true);
 								new CommandAttackTarget(character, main_player.character);
+
+								rule.spawnned_numbers++;
 							}
 						}
 					}
-
-					spawn_timer = 1.f / spawn_number_per_sec;
 				}
 			}
 		}

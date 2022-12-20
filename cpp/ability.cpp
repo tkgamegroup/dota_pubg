@@ -19,12 +19,12 @@ void load_abilities()
 		ability.name = "Strong Body";
 		ability.icon_name = L"assets\\icons\\strength.png";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.passive = [](uint lv, cCharacterPtr caster) {
-			caster->hp_max += lv * 100;
-			caster->hp_reg += lv;
+		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+			caster->hp_max += ins->lv * 100;
+			caster->hp_reg += ins->lv;
 		};
-		ability.show = [](uint lv) {
-			ImGui::Text("Increase HP Max by %d and HP Reg by %d", lv * 100, lv);
+		ability.show = [](AbilityInstance* ins) {
+			ImGui::Text("Increase HP Max by %d and HP Reg by %d", ins->lv * 100, ins->lv);
 		};
 	}
 	{
@@ -34,11 +34,11 @@ void load_abilities()
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
 		ability.icon_uvs = vec4(7.f / 13, 1.f / 15.f, 8.f / 13, 2.f / 15.f);
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.passive = [](uint lv, cCharacterPtr caster) {
-			caster->atk += lv * 10;
+		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+			caster->atk += ins->lv * 10;
 		};
-		ability.show = [](uint lv) {
-			ImGui::Text("Increase ATK by %d", lv * 10);
+		ability.show = [](AbilityInstance* ins) {
+			ImGui::Text("Increase ATK by %d", ins->lv * 10);
 		};
 	}
 	{
@@ -52,7 +52,7 @@ void load_abilities()
 		ability.mp = 500;
 		ability.cd = 7.f;
 		ability.distance = 8.f;
-		ability.active_l = [](uint lv, cCharacterPtr caster, const vec3& target) {
+		ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& target) {
 			auto e = get_prefab(L"assets\\effects\\fire.prefab")->copy();
 			e->node()->set_pos(vec3(0.f, 1.8f, 0.f));
 			caster->entity->add_child(e);
@@ -67,7 +67,7 @@ void load_abilities()
 				//			caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
 			}
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -82,11 +82,11 @@ void load_abilities()
 		ability.mp = 500;
 		ability.cd = 10.f;
 		ability.distance = 5.f;
-		ability.active_t = [](uint lv, cCharacterPtr caster, cCharacterPtr target) {
+		ability.active_t = [](AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr target) {
 			caster->inflict_damage(target, 50.f, PhysicalDamage);
 			target->add_buff(Buff::find("Stun"), 2.f);
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
 				"dealing damage base on your strength and stunning it.");
 		};
@@ -100,10 +100,10 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.cd = 10.f;
-		ability.active = [](uint lv, cCharacterPtr caster) {
+		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->add_buff(Buff::find("Flame Weapon"), 60.f);
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -116,10 +116,10 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 30.f;
-		ability.active = [](uint lv, cCharacterPtr caster) {
+		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -129,13 +129,13 @@ void load_abilities()
 		ability.name = "Stinger";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\funguscorrosive spore.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
-		ability.passive = [](uint lv, cCharacterPtr caster) {
+		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
 				if (linearRand(0U, 99U) < 10)
 					target->add_buff(Buff::find("Poisoned"), 10.f, true);
 			});
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -148,13 +148,13 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 10.f;
-		ability.cast_check = [](uint lv, cCharacterPtr caster) {
+		ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
 		};
-		ability.active = [](uint lv, cCharacterPtr caster) {
+		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->add_buff(Buff::find("Roar"), 12.f);
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -167,13 +167,13 @@ void load_abilities()
 		ability.cast_time = 3.f;
 		ability.mp = 500;
 		ability.cd = 0.f;
-		ability.cast_check = [](uint lv, cCharacterPtr caster) {
+		ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
 		};
-		ability.active = [](uint lv, cCharacterPtr caster) {
+		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->set_hp(min(caster->hp + 1000, caster->hp_max));
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
@@ -187,10 +187,10 @@ void load_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.distance = 15.f;
-		ability.active_l = [](uint lv, cCharacterPtr caster, const vec3& location) {
+		ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);
 		};
-		ability.show = [](uint lv) {
+		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
 	}
