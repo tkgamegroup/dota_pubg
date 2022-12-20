@@ -65,7 +65,7 @@ void load_buffs()
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood scavanger.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.start = [](BuffInstance* ins, cCharacterPtr character) {
-			ins->f0 = main_player.character ? (main_player.character->lv - 1) * 5.f : 0.f;
+			ins->f0 = main_player.character ? (main_player.character->lv - 1) * 0.05f : 0.f;
 		};
 		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
 			if (ins->f0 > 0.f)
