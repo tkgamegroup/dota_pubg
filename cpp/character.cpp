@@ -688,11 +688,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 		return;
 	}
 
-	if (action != ActionAttack)
-		attack_timer = 0.f;
-
-	auto approached = process_approach(target->node->pos, preset->atk_distance, 60.f);
-	if (attack_timer > 0.f)
+	if (action == ActionAttack)
 	{
 		attack_timer -= delta_time;
 		if (attack_timer <= 0.f)
@@ -729,6 +725,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 	}
 	else
 	{
+		auto approached = process_approach(target->node->pos, preset->atk_distance, 60.f);
 		if (attack_interval_timer <= 0.f)
 		{
 			if (approached)
