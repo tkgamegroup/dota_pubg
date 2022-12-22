@@ -1355,7 +1355,9 @@ void cMain::update()
 							rule.preset_id = preset_id;
 							for (auto& e : section.entries)
 							{
-								if (e.key == "number_function_factor_a")
+								if (e.key == "delay")
+									rule.delay = s2t<float>(e.value);
+								else if (e.key == "number_function_factor_a")
 									rule.number_function_factor_a = s2t<float>(e.value);
 								else if (e.key == "number_function_factor_b")
 									rule.number_function_factor_b = s2t<float>(e.value);
@@ -1378,7 +1380,7 @@ void cMain::update()
 
 				for (auto i = 0; i < n; i++)
 				{
-					auto uv = (main_player.node->pos.xz() + circularRand(4.f)) / main_terrain.extent.xz();
+					auto uv = (main_player.node->pos.xz() + circularRand(20.f)) / main_terrain.extent.xz();
 					if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
 					{
 						auto pos = main_terrain.get_coord(uv);

@@ -7,6 +7,7 @@
 #include "chest.h"
 #include "network.h"
 #include "audio.h"
+#include "views/view_ability.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
@@ -495,6 +496,8 @@ void cCharacter::gain_exp(uint v)
 	if (exp_max == 0)
 		return;
 	exp += v;
+
+	auto old_lv = lv;
 	while (exp_max > 0 && exp >= exp_max)
 	{
 		exp -= exp_max;
@@ -502,6 +505,13 @@ void cCharacter::gain_exp(uint v)
 		ability_points++;
 		exp_max *= 1.1f;
 		stats_dirty = true;
+
+	}
+
+	if (old_lv != lv)
+	{
+		view_ability.open();
+		audio_source->play("level_up"_h);
 	}
 }
 
@@ -641,6 +651,7 @@ void cCharacter::start()
 	if (!preset)
 		preset = &character_presets[CharacterPreset::find("Dummy")];
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
+	audio_buffer_names.emplace_back(AudioPreset::get(AudioPreset::find("Level Up")).path, "level_up");
 	if (preset->atk_precast_audio_preset != -1)
 		audio_buffer_names.emplace_back(AudioPreset::get(preset->atk_precast_audio_preset).path, "attack_precast");
 	if (preset->atk_hit_audio_preset != -1)

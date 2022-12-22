@@ -7,6 +7,12 @@ void load_audio_presets()
 	{
 		auto& preset = audio_presets.emplace_back();
 		preset.id = audio_presets.size() - 1;
+		preset.path = L"assets\\level_up.wav";
+		preset.name = "Level Up";
+	}
+	{
+		auto& preset = audio_presets.emplace_back();
+		preset.id = audio_presets.size() - 1;
 		preset.path = L"assets\\characters\\dragon_knight\\attack_precast.wav";
 		preset.name = "Dragon Knight Attack Precast";
 	}
