@@ -750,16 +750,17 @@ void cMain::start()
 		if (true || in_editor)
 		{
 			ImGui::Begin("Status");
-			ImGui::Text("Main player: %s", main_player.character ? main_player.entity->name.c_str() : "[None]");
-			if (main_player.character)
-			{
-				auto& p = main_player.node->pos;
+
+			auto character_status = [](cCharacterPtr character) {
+				ImGui::Text("Name: %s", character->entity->name.c_str());
+
+				auto& p = character->node->pos;
 				ImGui::Text("  pos: %.2f, %.2f, %.2f", p.x, p.y, p.z);
-				auto& tp = main_player.nav_agent->target_pos;
+				auto& tp = character->nav_agent->target_pos;
 				ImGui::Text("  tpos: %.2f, %.2f, %.2f", tp.x, tp.y, tp.z);
 
 				const char* action_name;
-				switch (main_player.character->action)
+				switch (character->action)
 				{
 				case ActionNone:
 					action_name = "None";
@@ -775,12 +776,21 @@ void cMain::start()
 					break;
 				}
 				ImGui::Text("  action: %s", action_name);
-			}
+			};
+
+			ImGui::TextUnformatted("Main player:");
+			if (main_player.character)
+				character_status(main_player.character);
+			ImGui::TextUnformatted("Focus:");
+			if (focus_character.obj)
+				character_status(focus_character.obj);
+
 			if (ImGui::Button("Set 'selecting entity' As Main Player"))
 			{
 				if (editor_p_selecting_entity && *editor_p_selecting_entity)
 					main_player.init(*editor_p_selecting_entity);
 			}
+
 			ImGui::End();
 		}
 

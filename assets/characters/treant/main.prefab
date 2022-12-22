@@ -2,7 +2,7 @@
 <prefab>
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavAgent" radius="0.4" height="1.6" speed="7.62" />
+		<item type_name="flame::cNavAgent" radius="0.4" height="1.6" speed="5.33" />
 		<item type_name="flame::cAudioSource" />
 		<item type_name="cCharacter" />
 	</components>
@@ -17,6 +17,9 @@
 						<item first="attack.fani" second="attack" />
 						<item first="idle.fani" second="cast" />
 					</animation_names>
+					<animation_transitions>
+						<item item_0="run" item_1="idle" item_2="0.5" />
+					</animation_transitions>
 				</item>
 			</components>
 			<children>

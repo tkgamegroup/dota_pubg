@@ -183,7 +183,8 @@ void load_character_presets()
 		preset.hp = 500;
 		preset.mp = 100;
 		preset.atk = 56;
-		preset.atk_time = 1.7f;
+		preset.atk_interval = 1.7f;
+		preset.atk_time = 0.8f;
 		preset.atk_point = 0.5f;
 		preset.atk_precast_audio_preset = AudioPreset::find("Dragon Knight Attack Precast");
 		preset.atk_hit_audio_preset = AudioPreset::find("Dragon Knight Attack Hit");
@@ -200,7 +201,8 @@ void load_character_presets()
 		preset.hp = 200;
 		preset.mp = 50;
 		preset.atk = 35;
-		preset.atk_time = 1.7f;
+		preset.atk_interval = 1.7f;
+		preset.atk_time = 0.875f;
 		preset.atk_point = 0.39f;
 	}
 	{
@@ -212,7 +214,8 @@ void load_character_presets()
 		preset.hp = 200;
 		preset.mp = 50;
 		preset.atk = 37;
-		preset.atk_time = 1.7f;
+		preset.atk_interval = 1.7f;
+		preset.atk_time = 0.8f;
 		preset.atk_point = 0.5f;
 	}
 	{
@@ -224,7 +227,8 @@ void load_character_presets()
 		preset.hp = 50;
 		preset.mp = 0;
 		preset.atk = 6;
-		preset.atk_time = 1.35f;
+		preset.atk_interval = 1.35f;
+		preset.atk_time = 0.633f;
 		preset.atk_point = 0.5f;
 		preset.mov_sp = 400;
 		preset.abilities.emplace_back("Stinger", 1);
@@ -238,7 +242,8 @@ void load_character_presets()
 		preset.hp = 550;
 		preset.mp = 200;
 		preset.atk = 15;
-		preset.atk_time = 1.6f;
+		preset.atk_interval = 100.6f;
+		preset.atk_time = 0.958f;
 		preset.atk_point = 0.467f;
 		preset.cast_time = 2.f;
 		preset.cast_point = 1.95f;
@@ -256,21 +261,11 @@ void load_character_presets()
 		preset.hp = 300;
 		preset.mp = 100;
 		preset.atk = 20;
-		preset.atk_time = 1.25f;
+		preset.atk_interval = 1.25f;
+		preset.atk_time = 0.958f;
 		preset.atk_point = 0.5f;
 		preset.mov_sp = 100;
 		preset.abilities.emplace_back("Roar", 1);
-	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Creep";
-		preset.exp_base = 200;
-		preset.hp = 500;
-		preset.mp = 0;
-		preset.atk = 21;
-		preset.atk_time = 1.7f;
-		preset.atk_point = 0.39f;
 	}
 }
 
@@ -693,7 +688,6 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 {
 	if (state & StateStun)
 	{
-		attack_timer = -1.f;
 		nav_agent->stop();
 		action = ActionNone;
 		return;
@@ -701,38 +695,49 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 
 	if (action == ActionAttack)
 	{
-		attack_timer -= delta_time;
-		if (attack_timer <= 0.f)
-		{
-			if (distance(node->pos, target->node->pos) <= preset->atk_distance + 3.5f)
-			{
-				auto attack = [this](cCharacterPtr target) {
-					inflict_damage(target, atk, (DamageType)atk_type);
-					for (auto& ef : attack_effects.list)
-					{
-						if (!target->dead)
-							ef.first(this, target, (DamageType)atk_type, atk);
-					}
-
-					audio_source->play("attack_hit"_h);
-				};
-				if (preset->atk_projectile_preset != -1)
-				{
-					add_projectile(preset->atk_projectile_preset,
-						node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
-						[&](const vec3&, cCharacterPtr t) {
-							if (t)
-								attack(t);
-						});
-				}
-				else
-					attack(target);
-			}
-
-			attack_interval_timer = (preset->atk_time - preset->atk_point) / attack_speed;
-		}
-		action = ActionAttack;
 		nav_agent->set_speed_scale(0.f);
+		nav_agent->set_target(target->node->pos);
+
+		if (attack_hit_timer > 0.f)
+		{
+			attack_hit_timer -= delta_time;
+			if (attack_hit_timer <= 0.f)
+			{
+				if (distance(node->pos, target->node->pos) <= preset->atk_distance + 3.5f)
+				{
+					auto attack = [this](cCharacterPtr target) {
+						inflict_damage(target, atk, (DamageType)atk_type);
+						for (auto& ef : attack_effects.list)
+						{
+							if (!target->dead)
+								ef.first(this, target, (DamageType)atk_type, atk);
+						}
+
+						audio_source->play("attack_hit"_h);
+					};
+					if (preset->atk_projectile_preset != -1)
+					{
+						add_projectile(preset->atk_projectile_preset,
+							node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
+							[&](const vec3&, cCharacterPtr t) {
+								if (t)
+								attack(t);
+							});
+					}
+					else
+						attack(target);
+				}
+
+				attack_interval_timer = (preset->atk_interval - preset->atk_point) / attack_speed;
+			}
+		}
+
+		if (attack_timer > 0.f)
+		{
+			attack_timer -= delta_time;
+			if (attack_timer <= 0.f)
+				action = ActionNone;
+		}
 	}
 	else
 	{
@@ -742,7 +747,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 			if (approached)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f); 
-				attack_timer = preset->atk_point / attack_speed;
+				attack_hit_timer = preset->atk_point / attack_speed;
+				attack_timer = preset->atk_time / attack_speed;
 				action = ActionAttack;
 
 				audio_source->play("attack_precast"_h);

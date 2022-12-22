@@ -109,7 +109,8 @@ struct CharacterPreset
 	uint mp = 100;
 	uint atk = 0;
 	float atk_distance = 1.5f;
-	float atk_time = 2.f; // attack interval
+	float atk_interval = 2.f; // attack interval
+	float atk_time = 1.5f; // animation time
 	float atk_point = 1.f; // hit point
 	int atk_projectile_preset = -1;
 	int atk_precast_audio_preset = -1;
@@ -235,6 +236,7 @@ struct cCharacter : Component
 	float regeneration_timer = 1.f;
 	float search_timer = 0.f;
 	float attack_interval_timer = 0.f;
+	float attack_hit_timer = 0.f;
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
 
