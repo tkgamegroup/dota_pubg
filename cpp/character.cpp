@@ -653,6 +653,8 @@ void cCharacter::start()
 
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
 	audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
+	if (auto path = ppath / L"move.wav"; std::filesystem::exists(path))
+		audio_buffer_names.emplace_back(path, "move");
 	if (auto path = ppath / L"attack_precast.wav"; std::filesystem::exists(path))
 		audio_buffer_names.emplace_back(path, "attack_precast");
 	if (auto path = ppath / L"attack_hit.wav"; std::filesystem::exists(path))
@@ -686,6 +688,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 
 	if ((nav_agent->reached_pos == target || nav_agent->dist < dist) && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
 		return true;
+	audio_source->play("move"_h);
 	action = ActionMove;
 	return false;
 }
@@ -861,6 +864,8 @@ void cCharacter::update()
 			atk_type = PhysicalDamage;
 			atk = preset->atk;
 
+			phy_def = preset->phy_def;
+			mag_def = preset->mag_def;
 			hp_reg = preset->hp_reg;
 			mp_reg = preset->mp_reg;
 			mov_sp = preset->mov_sp;
