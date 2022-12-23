@@ -6,6 +6,8 @@
 
 struct ViewAbility : graphics::GuiView
 {
+	bool modal = false;
+
 	ViewAbility();
 
 	bool on_begin() override;

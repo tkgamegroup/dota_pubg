@@ -6,7 +6,6 @@
 #include "projectile.h"
 #include "chest.h"
 #include "network.h"
-#include "audio.h"
 #include "views/view_ability.h"
 
 #include <flame/graphics/image.h>
@@ -186,11 +185,13 @@ void load_character_presets()
 		preset.atk_interval = 1.7f;
 		preset.atk_time = 0.8f;
 		preset.atk_point = 0.5f;
-		preset.atk_precast_audio_preset = AudioPreset::find("Dragon Knight Attack Precast");
-		preset.atk_hit_audio_preset = AudioPreset::find("Dragon Knight Attack Hit");
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
 		preset.abilities.emplace_back("Strong Body", 0);
+		preset.abilities.emplace_back("Sharp Weapon", 0);
+		preset.abilities.emplace_back("Rapid Strike", 0);
+		preset.abilities.emplace_back("Rapid Foot", 0);
+		preset.abilities.emplace_back("Armor", 0);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -238,11 +239,11 @@ void load_character_presets()
 		preset.id = character_presets.size() - 1;
 		preset.path = L"assets\\characters\\treant\\main.prefab";
 		preset.name = "Treant";
-		preset.exp_base = 200;
+		preset.exp_base = 800;
 		preset.hp = 550;
 		preset.mp = 200;
 		preset.atk = 15;
-		preset.atk_interval = 100.6f;
+		preset.atk_interval = 1.6f;
 		preset.atk_time = 0.958f;
 		preset.atk_point = 0.467f;
 		preset.cast_time = 2.f;
@@ -257,7 +258,7 @@ void load_character_presets()
 		preset.id = character_presets.size() - 1;
 		preset.path = L"assets\\characters\\boar\\main.prefab";
 		preset.name = "Boar";
-		preset.exp_base = 200;
+		preset.exp_base = 1000;
 		preset.hp = 300;
 		preset.mp = 100;
 		preset.atk = 20;
@@ -505,8 +506,11 @@ void cCharacter::gain_exp(uint v)
 
 	if (old_lv != lv)
 	{
+		view_ability.modal = true;
 		view_ability.open();
 		audio_source->play("level_up"_h);
+
+		enable_game(false);
 	}
 }
 
@@ -645,12 +649,14 @@ void cCharacter::start()
 
 	if (!preset)
 		preset = &character_presets[CharacterPreset::find("Dummy")];
+	auto ppath = preset->path.parent_path();
+
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
-	audio_buffer_names.emplace_back(AudioPreset::get(AudioPreset::find("Level Up")).path, "level_up");
-	if (preset->atk_precast_audio_preset != -1)
-		audio_buffer_names.emplace_back(AudioPreset::get(preset->atk_precast_audio_preset).path, "attack_precast");
-	if (preset->atk_hit_audio_preset != -1)
-		audio_buffer_names.emplace_back(AudioPreset::get(preset->atk_hit_audio_preset).path, "attack_hit");
+	audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
+	if (auto path = ppath / L"attack_precast.wav"; std::filesystem::exists(path))
+		audio_buffer_names.emplace_back(path, "attack_precast");
+	if (auto path = ppath / L"attack_hit.wav"; std::filesystem::exists(path))
+		audio_buffer_names.emplace_back(path, "attack_hit");
 	audio_source->set_buffer_names(audio_buffer_names);
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)

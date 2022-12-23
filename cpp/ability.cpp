@@ -32,13 +32,55 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Sharp Weapon";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_uvs = vec4(7.f / 13, 1.f / 15.f, 8.f / 13, 2.f / 15.f);
+		ability.icon_uvs = vec4(1.f / 13, 7.f / 15.f, 2.f / 13, 8.f / 15.f);
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->atk += ins->lv * 10;
 		};
 		ability.show = [](AbilityInstance* ins) {
 			ImGui::Text("Increase ATK by %d", ins->lv * 10);
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
+		ability.name = "Rapid Strike";
+		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
+		ability.icon_uvs = vec4(10.f / 13, 9.f / 15.f, 11.f / 13, 10.f / 15.f);
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+			caster->atk_sp += ins->lv * 10;
+		};
+		ability.show = [](AbilityInstance* ins) {
+			ImGui::Text("Increase ATK SP by %d", ins->lv * 10);
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
+		ability.name = "Rapid Foot";
+		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
+		ability.icon_uvs = vec4(6.f / 13, 10.f / 15.f, 7.f / 13, 11.f / 15.f);
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+			caster->mov_sp += ins->lv * 10;
+		};
+		ability.show = [](AbilityInstance* ins) {
+			ImGui::Text("Increase MOV SP by %d", ins->lv * 10);
+		};
+	}
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
+		ability.name = "Armor";
+		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
+		ability.icon_uvs = vec4(9.f / 13, 9.f / 15.f, 10.f / 13, 10.f / 15.f);
+		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+			caster->phy_def += ins->lv * 10;
+		};
+		ability.show = [](AbilityInstance* ins) {
+			ImGui::Text("Increase Phy DEF by %d", ins->lv * 10);
 		};
 	}
 	{

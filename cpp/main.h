@@ -141,6 +141,7 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
+void enable_game(bool v);
 EntityPtr get_prefab(const std::filesystem::path& path);
 void add_player(vec3& pos, uint& faction, uint& preset_id);
 std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);

@@ -13,7 +13,7 @@ bool ViewAbility::on_begin()
 {
 	bool open = true;
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(40, 40, 40));
-	ImGui::Begin(name.c_str(), &open, ImGuiWindowFlags_NoCollapse);
+	ImGui::Begin(name.c_str(), modal ? nullptr : &open, ImGuiWindowFlags_NoCollapse);
 	ImGui::PopStyleColor();
 	return !open;
 }
@@ -41,7 +41,14 @@ void ViewAbility::on_draw()
 					ImGui::BeginTooltip();
 					ImGui::TextUnformatted(ability.name.c_str());
 					if (ability.show)
+					{
+						ImGui::Text("LV: %d", ins->lv);
 						ability.show(ins);
+						ins->lv++;
+						ImGui::Text("LV: %d", ins->lv);
+						ability.show(ins);
+						ins->lv--;
+					}
 					ImGui::EndTooltip();
 				}
 				dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
@@ -64,6 +71,14 @@ void ViewAbility::on_draw()
 					ins->lv++;
 					main_player.character->ability_points--;
 					main_player.character->stats_dirty = true;
+
+					if (main_player.character->ability_points == 0 && modal)
+					{
+						enable_game(true);
+
+						modal = false;
+						close();
+					}
 				}
 			}
 		}

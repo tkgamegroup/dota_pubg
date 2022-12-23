@@ -26,6 +26,7 @@
 #include <flame/universe/entity.h>
 #include <flame/universe/draw_data.h>
 #include <flame/universe/octree.h>
+#include <flame/universe/world.h>
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/mesh.h>
 #include <flame/universe/components/camera.h>
@@ -1379,10 +1380,13 @@ void cMain::update()
 				}
 			}
 
+			static auto spawnning_timer = 0.f;
+			spawnning_timer += delta_time;
 			for (auto& rule : monster_spawnning_rules)
 			{
-				auto t = total_time / 60.f;
-				if (t < rule.delay)
+				auto t = spawnning_timer / 60.f;
+				t -= rule.delay;
+				if (t < 0.f)
 					continue;
 				
 				auto n = rule.number_function_factor_a * t + rule.number_function_factor_b * t * t + rule.number_function_factor_c;
@@ -1540,6 +1544,12 @@ struct cMainCreate : cMain::Create
 	}
 }cMain_create;
 cMain::Create& cMain::create = cMain_create;
+
+void enable_game(bool v)
+{
+	root->world->update_components = v;
+	sScene::instance()->enable = v;
+}
 
 static std::map<std::filesystem::path, EntityPtr> prefabs;
 

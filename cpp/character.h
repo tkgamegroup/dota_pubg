@@ -113,8 +113,6 @@ struct CharacterPreset
 	float atk_time = 1.5f; // animation time
 	float atk_point = 1.f; // hit point
 	int atk_projectile_preset = -1;
-	int atk_precast_audio_preset = -1;
-	int atk_hit_audio_preset = -1;
 	float cast_time = 1.f; // animation time
 	float cast_point = 1.f; // hit point
 	uint phy_def = 0; // physical defense
