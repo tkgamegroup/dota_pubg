@@ -176,6 +176,8 @@ struct cMain : Component
 	EXPORT static Create& create;
 };
 
+extern float gtime;
+
 void enable_game(bool v);
 EntityPtr get_prefab(const std::filesystem::path& path);
 void add_player(vec3& pos, uint& faction, uint& preset_id);

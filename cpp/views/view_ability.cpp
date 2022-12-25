@@ -53,85 +53,127 @@ void ViewAbility::on_draw()
 		const auto icon_size = 48.f;
 
 		ImGui::Text("Points: %d", main_player.character->ability_points);
-		for (auto i = 0; i < main_player.character->abilities.size(); i++)
+		ImGui::BeginTabBar("##talents");
+		for (auto& tid : main_player.character->talents)
 		{
-			if (i % 6 != 0) ImGui::SameLine();
-			auto pressed = ImGui::InvisibleButton(("ability" + str(i)).c_str(), ImVec2(icon_size, icon_size));
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			auto ins = main_player.character->abilities[i].get();
-			if (ins)
+			auto& talent = Talent::get(tid);
+			if (ImGui::BeginTabItem(talent.name.c_str()))
 			{
-				auto& ability = Ability::get(ins->id);
-				if (ImGui::IsItemHovered())
-				{
-					ImGui::BeginTooltip();
-					ImGui::TextUnformatted(ability.name.c_str());
-					if (ability.show)
+				auto find_ablility = [](uint id) {
+					for (auto i = 0; i < main_player.character->abilities.size(); i++)
 					{
-						ImGui::Text("LV: %d", ins->lv);
-						ability.show(ins);
-						ins->lv++;
-						ImGui::Text("LV: %d", ins->lv);
-						ability.show(ins);
-						ins->lv--;
+						if (main_player.character->abilities[i]->id == id)
+							return i;
 					}
-					ImGui::EndTooltip();
-				}
-				dl->AddImage(ins->lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-				dl->AddRectFilled(p1 - vec2(8, 15), p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-				dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(ins->lv).c_str());
+					return -1;
+				};
 
-				if (ins->lv > 0)
+				auto spent_points = 0;
+				for (auto layer_idx = 0; layer_idx < talent.ablilities_list.size(); layer_idx++)
 				{
-					if (ImGui::BeginDragDropSource())
+					auto& layer = talent.ablilities_list[layer_idx];
+					auto first = true;
+					for (auto id : layer)
 					{
-						ImGui::SetDragDropPayload("ability", &i, sizeof(int));
-						ImGui::EndDragDropSource();
-					}
-				}
+						if (!first) ImGui::SameLine();
+						first = false;
 
-				if (pressed && main_player.character->ability_points > 0)
-				{
-					ins->lv++;
-					main_player.character->ability_points--;
-					main_player.character->stats_dirty = true;
+						auto i = find_ablility(id);
+						auto pressed = ImGui::InvisibleButton(("ability" + str(i)).c_str(), ImVec2(icon_size, icon_size));
+						auto p0 = (vec2)ImGui::GetItemRectMin();
+						auto p1 = (vec2)ImGui::GetItemRectMax();
+						auto ins = main_player.character->abilities[i].get();
+						if (ins)
+						{
+							spent_points += ins->lv;
 
-					if (ins->lv == 1)
-					{
-						auto found = false;
-						for (auto& shortcut : shortcuts)
-						{
-							if (shortcut->id >> 16 == 2 && (shortcut->id & 0xfff) == ins->id)
+							auto& ability = Ability::get(ins->id);
+							if (ImGui::IsItemHovered())
 							{
-								found = true;
-								break;
-							}
-						}
-						if (!found)
-						{
-							for (auto& shortcut : shortcuts)
-							{
-								if (shortcut->id < 0)
+								ImGui::BeginTooltip();
+								ImGui::TextUnformatted(ability.name.c_str());
+								if (ability.show)
 								{
-									auto key = shortcut->key;
-									shortcut.reset(new AbilityShortcut(ins));
-									shortcut->key = key;
-									break;
+									ImGui::Text("LV: %d", ins->lv);
+									ability.show(ins);
+									ins->lv++;
+									ImGui::Text("LV: %d", ins->lv);
+									ability.show(ins);
+									ins->lv--;
+								}
+								ImGui::EndTooltip();
+							}
+							dl->AddImage(ins->lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+							dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(ins->lv).c_str());
+
+							auto can_level_up = false;
+							if (ins->lv < ability.max_lv && main_player.character->ability_points > 0)
+							{
+								if (spent_points >= layer_idx * 5)
+									can_level_up = true;
+							}
+
+							if (can_level_up)
+								dl->AddRect(p0 - vec2(1.f), p1 + vec2(1.f), ImColor(0.f, 1.f, 0.f, 1.f));
+							else if (ins->lv == ability.max_lv)
+								dl->AddRect(p0 - vec2(1.f), p1 + vec2(1.f), ImColor(1.f, 0.7f, 0.f, 1.f));
+
+							if (ins->lv > 0)
+							{
+								if (ImGui::BeginDragDropSource())
+								{
+									ImGui::SetDragDropPayload("ability", &i, sizeof(int));
+									ImGui::EndDragDropSource();
+								}
+							}
+
+							if (can_level_up && pressed && main_player.character->ability_points > 0)
+							{
+								ins->lv++;
+								main_player.character->ability_points--;
+								main_player.character->stats_dirty = true;
+
+								if (ins->lv == 1 && !ability.passive)
+								{
+									auto found = false;
+									for (auto& shortcut : shortcuts)
+									{
+										if (shortcut->id >> 16 == 2 && (shortcut->id & 0xfff) == ins->id)
+										{
+											found = true;
+											break;
+										}
+									}
+									if (!found)
+									{
+										for (auto& shortcut : shortcuts)
+										{
+											if (shortcut->id < 0)
+											{
+												auto key = shortcut->key;
+												shortcut.reset(new AbilityShortcut(ins));
+												shortcut->key = key;
+												break;
+											}
+										}
+									}
+								}
+
+								if (main_player.character->ability_points == 0 && modal)
+								{
+									enable_game(true);
+
+									modal = false;
+									close();
 								}
 							}
 						}
 					}
-
-					if (main_player.character->ability_points == 0 && modal)
-					{
-						enable_game(true);
-
-						modal = false;
-						close();
-					}
 				}
+
+				ImGui::EndTabItem();
 			}
 		}
+		ImGui::EndTabBar();
 	}
 }

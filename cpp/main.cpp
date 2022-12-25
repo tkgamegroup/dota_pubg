@@ -207,7 +207,10 @@ void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 	dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
 
 	if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
+	{
 		dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
+		dl->AddText(p0 + vec2(8.f), ImColor(1.f, 1.f, 1.f, 1.f), std::format("{:.1f}", ins->cd_max - ins->cd_timer).c_str());
+	}
 }
 
 void AbilityShortcut::click()
@@ -354,7 +357,7 @@ void toggle_settings_view()
 		view_settings.close();
 }
 
-static auto spawnning_timer = -1.f;
+float gtime = -1.f;
 
 void cMain::start()
 {
@@ -434,7 +437,7 @@ void cMain::start()
 					//}
 				}
 
-				spawnning_timer = 0.f;
+				gtime = 0.f;
 			}
 		});
 	}
@@ -1396,12 +1399,12 @@ void cMain::update()
 				}
 			}
 
-			if (spawnning_timer >= 0.f)
+			if (gtime >= 0.f)
 			{
-				spawnning_timer += delta_time;
+				gtime += delta_time;
 				for (auto& rule : monster_spawnning_rules)
 				{
-					auto t = spawnning_timer / 60.f;
+					auto t = gtime / 60.f;
 					t -= rule.delay;
 					if (t < 0.f)
 						continue;

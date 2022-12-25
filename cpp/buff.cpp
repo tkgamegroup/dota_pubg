@@ -25,7 +25,7 @@ void load_buffs()
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
 			character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
-				character->inflict_damage(target, 10, MagicDamage);
+				character->inflict_damage(target, MagicDamage, 10);
 			});
 		};
 	}
@@ -53,7 +53,7 @@ void load_buffs()
 		buff.continuous = [](BuffInstance* ins, cCharacterPtr character) {
 			if (ins->f0 - ins->timer >= 1.f)
 			{
-				character->take_damage(character->hp_max * 0.002f, MagicDamage);
+				character->take_damage(MagicDamage, character->hp_max * 0.002f);
 				ins->f0 = ins->timer;
 			}
 		};
@@ -65,7 +65,7 @@ void load_buffs()
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood scavanger.jpg";
 		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.start = [](BuffInstance* ins, cCharacterPtr character) {
-			ins->f0 = main_player.character ? (main_player.character->lv - 1) * 0.05f : 0.f;
+			ins->f0 = uint(gtime / 60.f) * 0.05f;
 		};
 		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
 			if (ins->f0 > 0.f)

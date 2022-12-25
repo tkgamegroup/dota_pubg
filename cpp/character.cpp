@@ -187,12 +187,8 @@ void load_character_presets()
 		preset.atk_point = 0.5f;
 		preset.cast_time = 0.5f;
 		preset.cast_point = 0.3f;
-		preset.abilities.emplace_back("Strong Body", 0);
-		preset.abilities.emplace_back("Sharp Weapon", 0);
-		preset.abilities.emplace_back("Rapid Strike", 0);
-		preset.abilities.emplace_back("Scud", 0);
-		preset.abilities.emplace_back("Armor", 0);
-		preset.abilities.emplace_back("Fire Breath", 0);
+		preset.talents.push_back("Warrior");
+		preset.talents.push_back("Laya Knight");
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -450,7 +446,7 @@ void cCharacter::on_init()
 	}, "character"_h);
 }
 
-void cCharacter::inflict_damage(cCharacterPtr target, uint value, DamageType type)
+void cCharacter::inflict_damage(cCharacterPtr target, DamageType type, uint value)
 {
 	value *= linearRand(0.8f, 1.2f);
 	uint def;
@@ -464,7 +460,7 @@ void cCharacter::inflict_damage(cCharacterPtr target, uint value, DamageType typ
 		break;
 	}
 	;
-	if (target->take_damage(value, type))
+	if (target->take_damage(type, value))
 		gain_exp(target->exp_max * 0.15f);
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
@@ -474,9 +470,9 @@ void cCharacter::inflict_damage(cCharacterPtr target, uint value, DamageType typ
 	}
 }
 
-bool cCharacter::take_damage(uint value, DamageType type)
+bool cCharacter::take_damage(DamageType type, uint value)
 {
-	if (dead)
+	if (dead_flag > 0)
 		return false;
 	if (hp > value)
 	{
@@ -533,11 +529,35 @@ bool cCharacter::gain_item(uint id, uint num)
 
 bool cCharacter::gain_ability(uint id, uint lv)
 {
+	for (auto& ins : abilities)
+	{
+		if (ins->id == id)
+			return false;
+	}
+
 	auto ins = new AbilityInstance;
 	ins->id = id;
 	ins->lv = lv;
 	abilities.emplace_back(ins);
 	stats_dirty = true;
+	return true;
+}
+
+bool cCharacter::gain_talent(uint id)
+{
+	for (auto tid : talents)
+	{
+		if (tid == id)
+			return false;
+	}
+
+	talents.push_back(id);
+	auto& talent = Talent::get(id);
+	for (auto& layer : talent.ablilities_list)
+	{
+		for (auto id : layer)
+			gain_ability(id, 0);
+	}
 	return true;
 }
 
@@ -628,10 +648,10 @@ bool cCharacter::add_marker(uint hash, float time)
 
 void cCharacter::die()
 {
-	if (dead)
+	if (dead_flag > 0)
 		return;
 	set_hp(0);
-	dead = true;
+	dead_flag = 1;
 }
 
 void cCharacter::start()
@@ -666,6 +686,8 @@ void cCharacter::start()
 	{
 		for (auto& i : preset->abilities)
 			gain_ability(Ability::find(i.first), i.second);
+		for (auto& i : preset->talents)
+			gain_talent(Talent::find(i));
 	}
 
 	inventory.resize(16);
@@ -716,10 +738,10 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 				if (distance(node->pos, target->node->pos) <= preset->atk_distance + 3.5f)
 				{
 					auto attack = [this](cCharacterPtr target) {
-						inflict_damage(target, atk, (DamageType)atk_type);
+						inflict_damage(target, (DamageType)atk_type, atk);
 						for (auto& ef : attack_effects.list)
 						{
-							if (!target->dead)
+							if (target->dead_flag == 0)
 								ef.first(this, target, (DamageType)atk_type, atk);
 						}
 
@@ -731,7 +753,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 							node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
 							[&](const vec3&, cCharacterPtr t) {
 								if (t)
-								attack(t);
+									attack(t);
 							});
 					}
 					else
@@ -827,25 +849,30 @@ void cCharacter::update()
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		if (dead)
+		if (dead_flag > 0)
 		{
-			if (!preset->drop_items.empty())
+			if (dead_flag == 1)
 			{
-				std::vector<std::pair<uint, uint>> drops;
-				for (auto& d : preset->drop_items)
+				if (!preset->drop_items.empty())
 				{
-					if (linearRand(0U, 100U) < std::get<1>(d))
-						drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
+					std::vector<std::pair<uint, uint>> drops;
+					for (auto& d : preset->drop_items)
+					{
+						if (linearRand(0U, 100U) < std::get<1>(d))
+							drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
+					}
+					auto p = node->pos;
+					for (auto& d : drops)
+						add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
 				}
-				auto p = node->pos;
-				for (auto& d : drops)
-					add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
-			}
 
-			add_event([this]() {
-				entity->remove_from_parent();
-				return false;
-			});
+				add_event([this]() {
+					entity->remove_from_parent();
+					return false;
+				});
+
+				dead_flag = 2;
+			}
 
 			return;
 		}

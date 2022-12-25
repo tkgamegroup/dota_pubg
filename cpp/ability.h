@@ -19,6 +19,7 @@ struct Ability
 	graphics::ImagePtr		icon_image = nullptr;
 
 	TargetType target_type = TargetNull;
+	uint max_lv = 5;
 	float cast_time = 0.f;
 	float channel_time = 0.f;
 	uint mp = 0;
@@ -38,4 +39,14 @@ struct Ability
 
 	static int find(const std::string& name);
 	static const Ability& get(uint id);
+};
+
+struct Talent
+{
+	uint							id;
+	std::string						name;
+	std::vector<std::vector<uint>>	ablilities_list; // layers of ability ids
+
+	static int find(const std::string& name);
+	static const Talent& get(uint id);
 };

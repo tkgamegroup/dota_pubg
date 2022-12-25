@@ -122,7 +122,8 @@ struct CharacterPreset
 	uint mov_sp = 100; // move speed
 	uint atk_sp = 100; // attack speed
 
-	std::vector<std::pair<std::string, uint>> abilities;
+	std::vector<std::pair<std::string, uint>>		abilities;
+	std::vector<std::string>						talents;
 	std::vector<std::tuple<uint, uint, uint, uint>> drop_items; // id, probability, num min, num max
 
 	static int find(const std::string& name);
@@ -218,13 +219,14 @@ struct cCharacter : Component
 
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
 	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
-	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
+	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
+	std::vector<uint>								talents;
 	std::vector<std::unique_ptr<BuffInstance>>		buffs;
 	std::map<uint, std::pair<float, uint>>			markers;
 	uint ability_points = 0;
 
-	bool dead = false;
+	int dead_flag = 0;
 	bool stats_dirty = true;
 	std::unique_ptr<Command> command;
 	Action action = ActionNone;
@@ -241,11 +243,12 @@ struct cCharacter : Component
 	~cCharacter();
 	void on_init() override;
 
-	void inflict_damage(cCharacterPtr target, uint value, DamageType type);
-	bool take_damage(uint value, DamageType type); // return true if the damage causes the character die
+	void inflict_damage(cCharacterPtr target, DamageType type, uint value);
+	bool take_damage(DamageType type, uint value); // return true if the damage causes the character die
 	void gain_exp(uint v);
 	bool gain_item(uint id, uint num);
 	bool gain_ability(uint id, uint lv = 0);
+	bool gain_talent(uint id);
 	void use_item(ItemInstance* ins);
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
 	void add_buff(uint id, float time, bool replace = false);
