@@ -8,6 +8,7 @@
 #include "object.h"
 #include "character.h"
 #include "projectile.h"
+#include "effect.h"
 #include "chest.h"
 #include "creep_ai.h"
 #include "nw_data_harvester.h"
@@ -135,6 +136,7 @@ MainCamera main_camera;
 MainTerrain main_terrain;
 MainPlayer main_player;
 
+vec3			hovering_pos;
 cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
 bool			hovering_terrain = false;
@@ -144,6 +146,7 @@ std::function<void(cCharacterPtr)>		select_enemy_callback;
 std::function<void(const vec3& pos)>	select_location_callback;
 float									select_distance = 0.f;
 float									select_range = 0.f;
+float									select_angle = 0.f;
 void reset_select()
 {
 	select_mode = TargetNull;
@@ -151,6 +154,7 @@ void reset_select()
 	select_location_callback = nullptr;
 	select_distance = 0.f;
 	select_range = 0.f;
+	select_angle = 0.f;
 }
 
 std::string illegal_op_str;
@@ -158,148 +162,134 @@ float illegal_op_str_timer = 0.f;
 
 std::string tooltip;
 
-struct Shortcut
+ItemShortcut::ItemShortcut(ItemInstance* ins) :
+	ins(ins)
 {
-	KeyboardKey key = KeyboardKey_Count;
+	id = (1 << 16) + ins->id;
+}
 
-	virtual void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) {}
-	virtual void click() {}
-};
-
-struct ItemShortcut : Shortcut
+void ItemShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 {
-	ItemInstance* ins;
-
-	ItemShortcut(ItemInstance* ins) :
-		ins(ins)
+	auto& item = Item::get(ins->id);
+	if (ImGui::IsItemHovered())
 	{
+		ImGui::BeginTooltip();
+		ImGui::TextUnformatted(item.name.c_str());
+		if (item.show)
+			item.show();
+		ImGui::EndTooltip();
 	}
+	dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
+}
 
-	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override
-	{
-		auto& item = Item::get(ins->id);
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::TextUnformatted(item.name.c_str());
-			if (item.show)
-				item.show();
-			ImGui::EndTooltip();
-		}
-		dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
-	}
-
-	void click() override
-	{
-		main_player.character->use_item(ins);
-	}
-};
-
-struct AbilityShortcut : Shortcut
+void ItemShortcut::click()
 {
-	AbilityInstance* ins;
+	main_player.character->use_item(ins);
+}
 
-	AbilityShortcut(AbilityInstance* ins) :
-		ins(ins)
+AbilityShortcut::AbilityShortcut(AbilityInstance* ins) :
+	ins(ins)
+{
+	id = (2 << 16) + ins->id;
+}
+
+void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
+{
+	auto& ability = Ability::get(ins->id);
+	if (ImGui::IsItemHovered())
 	{
+		ImGui::BeginTooltip();
+		ImGui::TextUnformatted(ability.name.c_str());
+		if (ability.show)
+			ability.show(ins);
+		ImGui::EndTooltip();
 	}
+	dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
 
-	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override
+	if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
+		dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
+}
+
+void AbilityShortcut::click()
+{
+	if (ins->cd_timer > 0.f)
 	{
-		auto& ability = Ability::get(ins->id);
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::TextUnformatted(ability.name.c_str());
-			if (ability.show)
-				ability.show(ins);
-			ImGui::EndTooltip();
-		}
-		dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-
-		if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
-			dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
+		illegal_op_str = "Cooldowning.";
+		illegal_op_str_timer = 3.f;
+		return;
 	}
-
-	void click() override
+	auto& ability = Ability::get(ins->id);
+	if (main_player.character->mp < ability.mp)
 	{
-		if (ins->cd_timer > 0.f)
-		{
-			illegal_op_str = "Cooldowning.";
-			illegal_op_str_timer = 3.f;
+		illegal_op_str = "Not Enough MP.";
+		illegal_op_str_timer = 3.f;
+		return;
+	}
+	if (ability.cast_check)
+	{
+		if (!ability.cast_check(ins, main_player.character))
 			return;
-		}
-		auto& ability = Ability::get(ins->id);
-		if (main_player.character->mp < ability.mp)
+	}
+	select_mode = ability.target_type;
+	if (select_mode == TargetNull)
+	{
+		if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+			new CommandCastAbility(main_player.character, ins);
+		else if (multi_player == MultiPlayerAsClient)
 		{
-			illegal_op_str = "Not Enough MP.";
-			illegal_op_str_timer = 3.f;
-			return;
-		}
-		if (ability.cast_check)
-		{
-			if (!ability.cast_check(ins, main_player.character))
-				return;
-		}
-		select_mode = ability.target_type;
-		if (select_mode == TargetNull)
-		{
-			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-				new CommandCastAbility(main_player.character, ins);
-			else if (multi_player == MultiPlayerAsClient)
-			{
-				std::ostringstream res;
-				nwCommandCharacterStruct stru;
-				stru.id = main_player.character->object->uid;
-				stru.type = "CastAbility"_h;
-				stru.id2 = ins->id;
-				pack_msg(res, nwCommandCharacter, stru);
-				so_client->send(res.str());
-			}
-		}
-		else
-		{
-			if (ability.target_type & TargetLocation)
-			{
-				select_location_callback = [this](const vec3& location) {
-					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-						new CommandCastAbilityToLocation(main_player.character, ins, location);
-					else if (multi_player == MultiPlayerAsClient)
-					{
-						std::ostringstream res;
-						nwCommandCharacterStruct stru;
-						stru.id = main_player.character->object->uid;
-						stru.type = "CastAbilityToLocation"_h;
-						stru.id2 = ins->id;
-						stru.t.location = location;
-						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res.str());
-					}
-				};
-				select_distance = ability.distance;
-			}
-			if (ability.target_type & TargetEnemy)
-			{
-				select_enemy_callback = [this](cCharacterPtr character) {
-					if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-						new CommandCastAbilityToTarget(main_player.character, ins, character);
-					else if (multi_player == MultiPlayerAsClient)
-					{
-						std::ostringstream res;
-						nwCommandCharacterStruct stru;
-						stru.id = main_player.character->object->uid;
-						stru.type = "CastAbilityToTarget"_h;
-						stru.id2 = ins->id;
-						stru.t.target = character->object->uid;
-						pack_msg(res, nwCommandCharacter, stru);
-						so_client->send(res.str());
-					}
-				};
-				select_distance = ability.distance;
-			}
+			std::ostringstream res;
+			nwCommandCharacterStruct stru;
+			stru.id = main_player.character->object->uid;
+			stru.type = "CastAbility"_h;
+			stru.id2 = ins->id;
+			pack_msg(res, nwCommandCharacter, stru);
+			so_client->send(res.str());
 		}
 	}
-};
+	else
+	{
+		if (ability.target_type & TargetLocation)
+		{
+			select_location_callback = [this](const vec3& location) {
+				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+					new CommandCastAbilityToLocation(main_player.character, ins, location);
+				else if (multi_player == MultiPlayerAsClient)
+				{
+					std::ostringstream res;
+					nwCommandCharacterStruct stru;
+					stru.id = main_player.character->object->uid;
+					stru.type = "CastAbilityToLocation"_h;
+					stru.id2 = ins->id;
+					stru.t.location = location;
+					pack_msg(res, nwCommandCharacter, stru);
+					so_client->send(res.str());
+				}
+			};
+			select_distance = ability.distance;
+			select_range = ability.range;
+			select_angle = ability.angle;
+		}
+		if (ability.target_type & TargetEnemy)
+		{
+			select_enemy_callback = [this](cCharacterPtr character) {
+				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+					new CommandCastAbilityToTarget(main_player.character, ins, character);
+				else if (multi_player == MultiPlayerAsClient)
+				{
+					std::ostringstream res;
+					nwCommandCharacterStruct stru;
+					stru.id = main_player.character->object->uid;
+					stru.type = "CastAbilityToTarget"_h;
+					stru.id2 = ins->id;
+					stru.t.target = character->object->uid;
+					pack_msg(res, nwCommandCharacter, stru);
+					so_client->send(res.str());
+				}
+			};
+			select_distance = ability.distance;
+		}
+	}
+}
 
 std::unique_ptr<Shortcut> shortcuts[10];
 
@@ -363,6 +353,8 @@ void toggle_settings_view()
 	else
 		view_settings.close();
 }
+
+static auto spawnning_timer = -1.f;
 
 void cMain::start()
 {
@@ -441,6 +433,8 @@ void cMain::start()
 					//	character->entity->add_component<cCreepAI>();
 					//}
 				}
+
+				spawnning_timer = 0.f;
 			}
 		});
 	}
@@ -484,6 +478,21 @@ void cMain::start()
 					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
 					pts[i * 2 + 1] = center + vec3(r * circle_pts[i + 1], 0.f).xzy();
 				}
+				if (select_angle > 0.f)
+				{
+					auto d = hovering_pos - center;
+					auto ang = -degrees(atan2(d.z, d.x));
+					{
+						auto a = radians(ang - select_angle);
+						pts.push_back(center);
+						pts.push_back(center + vec3(cos(a), 0.f, -sin(a)) * r);
+					}
+					{
+						auto a = radians(ang + select_angle);
+						pts.push_back(center);
+						pts.push_back(center + vec3(cos(a), 0.f, -sin(a)) * r);
+					}
+				}
 				draw_data.primitives.emplace_back("LineList"_h, pts.data(), (uint)pts.size(), cvec4(0, 255, 0, 255));
 			}
 			break;
@@ -501,7 +510,6 @@ void cMain::start()
 			if (!graphics::gui_want_mouse())
 			{
 				auto input = sInput::instance();
-				vec3 hovering_pos;
 				auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
 					if (draw_data.categories & CateMesh)
 					{
@@ -758,7 +766,10 @@ void cMain::start()
 				auto& p = character->node->pos;
 				ImGui::Text("  pos: %.2f, %.2f, %.2f", p.x, p.y, p.z);
 				auto& tp = character->nav_agent->target_pos;
-				ImGui::Text("  tpos: %.2f, %.2f, %.2f", tp.x, tp.y, tp.z);
+				auto& td = character->nav_agent->dist;
+				ImGui::Text("  tpos: %.2f, %.2f, %.2f (%.2f)", tp.x, tp.y, tp.z, td);
+				auto& ta = character->nav_agent->ang_diff;
+				ImGui::Text("  tang: %.2f", ta);
 
 				const char* action_name;
 				switch (character->action)
@@ -1261,6 +1272,11 @@ void cMain::update()
 							auto projectle = add_projectile(item.preset_id - 2000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
 							projectle->entity->children[0]->set_enable(false);
 						}
+						else if (item.preset_id < 4000)
+						{
+							auto projectle = add_projectile(item.preset_id - 3000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
+							projectle->entity->children[0]->set_enable(false);
+						}
 						else
 						{
 							auto chest = add_chest(vec3(0.f, -1000.f, 0.f), -1, 0, item.id);
@@ -1380,34 +1396,36 @@ void cMain::update()
 				}
 			}
 
-			static auto spawnning_timer = 0.f;
-			spawnning_timer += delta_time;
-			for (auto& rule : monster_spawnning_rules)
+			if (spawnning_timer >= 0.f)
 			{
-				auto t = spawnning_timer / 60.f;
-				t -= rule.delay;
-				if (t < 0.f)
-					continue;
-				
-				auto n = rule.number_function_factor_a * t + rule.number_function_factor_b * t * t + rule.number_function_factor_c;
-				n -= rule.spawnned_numbers;
-
-				for (auto i = 0; i < n; i++)
+				spawnning_timer += delta_time;
+				for (auto& rule : monster_spawnning_rules)
 				{
-					auto uv = (main_player.node->pos.xz() + circularRand(20.f)) / main_terrain.extent.xz();
-					if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
-					{
-						auto pos = main_terrain.get_coord(uv);
-						if (pos.y > main_terrain.node->pos.y + 3.f)
-						{
-							auto path = sScene::instance()->query_navmesh_path(pos, main_player.node->pos, 0);
-							if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
-							{
-								auto character = add_character(rule.preset_id, pos, FactionCreep);
-								character->add_buff(Buff::find("Cursed"), -1.f, true);
-								new CommandAttackTarget(character, main_player.character);
+					auto t = spawnning_timer / 60.f;
+					t -= rule.delay;
+					if (t < 0.f)
+						continue;
 
-								rule.spawnned_numbers++;
+					auto n = rule.number_function_factor_a * t + rule.number_function_factor_b * t * t + rule.number_function_factor_c;
+					n -= rule.spawnned_numbers;
+
+					for (auto i = 0; i < n; i++)
+					{
+						auto uv = (main_player.node->pos.xz() + circularRand(20.f)) / main_terrain.extent.xz();
+						if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
+						{
+							auto pos = main_terrain.get_coord(uv);
+							if (pos.y > main_terrain.node->pos.y + 3.f)
+							{
+								auto path = sScene::instance()->query_navmesh_path(pos, main_player.node->pos, 0);
+								if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
+								{
+									auto character = add_character(rule.preset_id, pos, FactionCreep);
+									character->add_buff(Buff::find("Cursed"), -1.f, true);
+									new CommandAttackTarget(character, main_player.character);
+
+									rule.spawnned_numbers++;
+								}
 							}
 						}
 					}
@@ -1636,7 +1654,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 	auto object = e->get_component_t<cObject>();
 	object->init(2000 + preset_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
-	projectile->preset_id = preset_id;
+	projectile->preset = &preset;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	projectile->on_end = on_end;
@@ -1653,7 +1671,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	auto object = e->get_component_t<cObject>();
 	object->init(2000 + preset_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
-	projectile->preset_id = preset_id;
+	projectile->preset = &preset;
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
@@ -1663,13 +1681,30 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	return projectile;
 }
 
+cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id)
+{
+	auto& preset = EffectPreset::get(preset_id);
+	auto e = get_prefab(preset.path)->copy();
+	auto node = e->node();
+	node->set_pos(pos);
+	node->set_eul(eul);
+	auto object = e->get_component_t<cObject>();
+	object->init(3000 + preset_id, id);
+	auto effect = e->get_component_t<cEffect>();
+	effect->preset = &preset;
+	effect->duration = duration;
+	root->add_child(e);
+
+	return effect;
+}
+
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
 	auto e = get_prefab(L"assets\\models\\chest.prefab")->copy();
 	e->node()->set_pos(main_terrain.get_coord(pos));
 	root->add_child(e);
 	auto object = e->get_component_t<cObject>();
-	object->init(3000, id);
+	object->init(4000, id);
 	auto chest = e->get_component_t<cChest>();
 	chest->item_id = item_id;
 	chest->item_num = item_num;

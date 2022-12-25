@@ -190,8 +190,9 @@ void load_character_presets()
 		preset.abilities.emplace_back("Strong Body", 0);
 		preset.abilities.emplace_back("Sharp Weapon", 0);
 		preset.abilities.emplace_back("Rapid Strike", 0);
-		preset.abilities.emplace_back("Rapid Foot", 0);
+		preset.abilities.emplace_back("Scud", 0);
 		preset.abilities.emplace_back("Armor", 0);
+		preset.abilities.emplace_back("Fire Breath", 0);
 	}
 	{
 		auto& preset = character_presets.emplace_back();
@@ -240,7 +241,7 @@ void load_character_presets()
 		preset.path = L"assets\\characters\\treant\\main.prefab";
 		preset.name = "Treant";
 		preset.exp_base = 800;
-		preset.hp = 550;
+		preset.hp = 200;
 		preset.mp = 200;
 		preset.atk = 15;
 		preset.atk_interval = 1.6f;

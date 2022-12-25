@@ -12,16 +12,6 @@ std::vector<ProjectilePreset> projectile_presets;
 
 void load_projectile_presets()
 {
-	{
-		auto& preset = projectile_presets.emplace_back();
-		preset.id = projectile_presets.size() - 1;
-		preset.path = L"assets\\models\\fireball.prefab";
-		preset.name = "Fire Ball";
-		preset.update = [](cProjectilePtr pt) {
-			pt->node->scl += 2.5f * delta_time;
-			pt->node->set_scl(pt->node->scl);
-		};
-	}
 }
 
 int ProjectilePreset::find(const std::string& name)
@@ -43,15 +33,10 @@ const ProjectilePreset& ProjectilePreset::get(uint id)
 	return projectile_presets[id];
 }
 
-void cProjectile::start()
-{
-}
-
 void cProjectile::update()
 {
-	auto& preset = get_preset();
-	if (preset.update)
-		preset.update(this);
+	if (preset->update)
+		preset->update(this);
 
 	if (use_target)
 	{

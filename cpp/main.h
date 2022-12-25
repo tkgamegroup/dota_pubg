@@ -10,6 +10,7 @@ FLAME_TYPE(cMain)
 FLAME_TYPE(cObject)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cProjectile)
+FLAME_TYPE(cEffect)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cCreepAI)
 FLAME_TYPE(cNWDataHarvester)
@@ -115,7 +116,41 @@ struct MainPlayer
 };
 extern MainPlayer main_player;
 
-extern cCharacterPtr selecting_target;
+struct ImDrawList;
+struct Shortcut
+{
+	int id = -1;
+	KeyboardKey key = KeyboardKey_Count;
+
+	virtual void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) {}
+	virtual void click() {}
+};
+
+struct ItemInstance;
+struct ItemShortcut : Shortcut
+{
+	ItemInstance* ins;
+
+	ItemShortcut(ItemInstance* ins);
+
+	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override;
+
+	void click() override;
+};
+
+struct AbilityInstance;
+struct AbilityShortcut : Shortcut
+{
+	AbilityInstance* ins;
+
+	AbilityShortcut(AbilityInstance* ins);
+
+	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override;
+
+	void click() override;
+};
+
+extern std::unique_ptr<Shortcut> shortcuts[10];
 
 // Reflect ctor
 struct cMain : Component
@@ -148,6 +183,7 @@ std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint f
 cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
+cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id = 0);
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
 void teleport(cCharacterPtr character, const vec3& location);
 

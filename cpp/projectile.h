@@ -22,11 +22,7 @@ struct cProjectile : Component
 	// Reflect auto_requires
 	cObjectPtr object;
 
-	uint preset_id;
-	inline const ProjectilePreset& get_preset()
-	{
-		return ProjectilePreset::get(preset_id);
-	}
+	const ProjectilePreset* preset = nullptr;
 
 	float speed = 0.1f;
 
@@ -36,7 +32,6 @@ struct cProjectile : Component
 
 	std::function<void(const vec3& l, cCharacterPtr t)> on_end;
 
-	void start() override;
 	void update() override;
 
 	struct Create

@@ -2,6 +2,7 @@
 #include "character.h"
 #include "buff.h"
 #include "projectile.h"
+#include "effect.h"
 
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
@@ -24,7 +25,8 @@ void load_abilities()
 			caster->hp_reg += ins->lv;
 		};
 		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Increase HP Max by %d and HP Reg by %d", ins->lv * 100, ins->lv);
+			ImGui::Text("Passive\n"
+						"Increase HP Max by %d and HP Reg by %d", ins->lv * 100, ins->lv);
 		};
 	}
 	{
@@ -38,7 +40,8 @@ void load_abilities()
 			caster->atk += ins->lv * 10;
 		};
 		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Increase ATK by %d", ins->lv * 10);
+			ImGui::Text("Passive\n"
+						"Increase ATK by %d", ins->lv * 10);
 		};
 	}
 	{
@@ -52,13 +55,14 @@ void load_abilities()
 			caster->atk_sp += ins->lv * 10;
 		};
 		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Increase ATK SP by %d", ins->lv * 10);
+			ImGui::Text("Passive\n"
+						"Increase ATK SP by %d", ins->lv * 10);
 		};
 	}
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
-		ability.name = "Rapid Foot";
+		ability.name = "Scud";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
 		ability.icon_uvs = vec4(6.f / 13, 10.f / 15.f, 7.f / 13, 11.f / 15.f);
 		ability.icon_image = graphics::Image::get(ability.icon_name);
@@ -66,7 +70,8 @@ void load_abilities()
 			caster->mov_sp += ins->lv * 10;
 		};
 		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Increase MOV SP by %d", ins->lv * 10);
+			ImGui::Text("Passive\n"
+						"Increase MOV SP by %d", ins->lv * 10);
 		};
 	}
 	{
@@ -80,37 +85,39 @@ void load_abilities()
 			caster->phy_def += ins->lv * 10;
 		};
 		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Increase Phy DEF by %d", ins->lv * 10);
+			ImGui::Text("Passive\n"
+						"Increase Phy DEF by %d", ins->lv * 10);
 		};
 	}
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
-		ability.name = "Fire Thrower";
+		ability.name = "Fire Breath";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
 		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.2f;
-		ability.mp = 500;
-		ability.cd = 7.f;
-		ability.distance = 8.f;
+		ability.mp = 100;
+		ability.cd = 12.f;
+		ability.distance = 6.f;
+		ability.angle = 45.f;
 		ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& target) {
-			auto e = get_prefab(L"assets\\effects\\fire.prefab")->copy();
-			e->node()->set_pos(vec3(0.f, 1.8f, 0.f));
-			caster->entity->add_child(e);
-			add_event([e]() {
-				e->remove_from_parent();
-				return false; 
-			}, 0.3f);
-			for (auto c : find_characters(caster->node->pos, 8.f, ~caster->faction))
+			auto node = caster->node;
+			auto caster_pos = node->pos;
+			auto d = target - caster_pos;
+			auto target_ang = -degrees(atan2(d.z, d.x));
+			add_effect(EffectPreset::find("Fire"), caster_pos + vec3(0.f, 1.8f, 0.f), vec3(target_ang, 0.f, 0.f), 0.6f);
+			for (auto character : find_characters(caster_pos, 6.f, ~caster->faction))
 			{
-				//		auto hash = "Fire Thrower"_h + (uint)caster;
-				//		if (t->add_marker(hash, 0.5f))
-				//			caster->inflict_damage(t, 100.f + caster->INT * 5.f, MagicDamage);
+				auto d = character->node->pos - caster_pos;
+				if (abs(angle_diff(target_ang, -degrees(atan2(d.z, d.x)))) < 60.f)
+					caster->inflict_damage(character, ins->lv * 80, MagicDamage);
 			}
 		};
 		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
+			ImGui::Text("Target: Location\n"
+						"Range: 6\n"
+						"Unleashes a breath of fire in front you that damage enemies by %d", ins->lv * 80);
 		};
 	}
 	{
