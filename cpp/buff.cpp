@@ -5,14 +5,13 @@
 
 std::vector<Buff> buffs;
 
-void load_buffs()
+void init_buffs()
 {
 	{
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
 		buff.name = "Stun";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood tornado b.jpg";
-		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
 			character->state = State(character->state | StateStun);
 		};
@@ -22,7 +21,6 @@ void load_buffs()
 		buff.id = buffs.size() - 1;
 		buff.name = "Flame Weapon";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
-		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
 			character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
 				character->inflict_damage(target, MagicDamage, 10);
@@ -34,7 +32,6 @@ void load_buffs()
 		buff.id = buffs.size() - 1;
 		buff.name = "Roar";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
-		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
 			character->atk += 20;
 			character->mov_sp += 20;
@@ -46,7 +43,6 @@ void load_buffs()
 		buff.id = buffs.size() - 1;
 		buff.name = "Poisoned";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusgue-ball.jpg";
-		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.start = [](BuffInstance* ins, cCharacterPtr character) {
 			ins->f0 = ins->timer;
 		};
@@ -63,7 +59,6 @@ void load_buffs()
 		buff.id = buffs.size() - 1;
 		buff.name = "Cursed";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood scavanger.jpg";
-		buff.icon_image = graphics::Image::get(buff.icon_name);
 		buff.start = [](BuffInstance* ins, cCharacterPtr character) {
 			ins->f0 = uint(gtime / 60.f) * 0.05f;
 		};
@@ -75,12 +70,24 @@ void load_buffs()
 			}
 		};
 	}
+
+	for (auto& buff : buffs)
+	{
+		if (!buff.icon_name.empty())
+		{
+			buff.icon_image = graphics::Image::get(buff.icon_name);
+			if (buff.icon_image)
+			{
+				auto tile_size = vec2(buff.icon_image->tile_size);
+				if (tile_size != vec2(0.f))
+					buff.icon_uvs = vec4(vec2(buff.icon_tile_coord) / tile_size, vec2(buff.icon_tile_coord + 1U) / tile_size);
+			}
+		}
+	}
 }
 
 int Buff::find(const std::string& name)
 {
-	if (buffs.empty())
-		load_buffs();
 	for (auto i = 0; i < buffs.size(); i++)
 	{
 		if (buffs[i].name == name)
@@ -91,7 +98,5 @@ int Buff::find(const std::string& name)
 
 const Buff& Buff::get(uint id)
 {
-	if (buffs.empty())
-		load_buffs();
 	return buffs[id];
 }

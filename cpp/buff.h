@@ -14,8 +14,9 @@ struct Buff
 	uint					id;
 	std::string				name;
 	std::filesystem::path	icon_name;
-	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
+	uvec2					icon_tile_coord = uvec2(0);
 	graphics::ImagePtr		icon_image = nullptr;
+	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 
 	void(*start)(BuffInstance* ins, cCharacterPtr character) = nullptr;
 	void(*passive)(BuffInstance* ins, cCharacterPtr character) = nullptr;
@@ -25,4 +26,4 @@ struct Buff
 	static const Buff& get(uint id);
 };
 
-void load_buffs();
+void init_buffs();

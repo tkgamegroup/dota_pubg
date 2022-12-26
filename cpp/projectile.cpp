@@ -10,14 +10,12 @@
 
 std::vector<ProjectilePreset> projectile_presets;
 
-void load_projectile_presets()
+void init_projectiles()
 {
 }
 
 int ProjectilePreset::find(const std::string& name)
 {
-	if (projectile_presets.empty())
-		load_projectile_presets();
 	for (auto i = 0; i < projectile_presets.size(); i++)
 	{
 		if (projectile_presets[i].name == name)
@@ -28,8 +26,6 @@ int ProjectilePreset::find(const std::string& name)
 
 const ProjectilePreset& ProjectilePreset::get(uint id)
 {
-	if (projectile_presets.empty())
-		load_projectile_presets();
 	return projectile_presets[id];
 }
 

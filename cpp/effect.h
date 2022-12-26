@@ -39,3 +39,5 @@ struct cEffect : Component
 	// Reflect static
 	EXPORT static Create& create;
 };
+
+void init_effects();

@@ -359,6 +359,42 @@ void toggle_settings_view()
 
 float gtime = -1.f;
 
+void init_spawnning_rules()
+{
+	for (auto& section : parse_ini_file(Path::get(L"assets\\monster_spawnnings.ini")).sections)
+	{
+		auto preset_id = CharacterPreset::find(section.name);
+		if (preset_id != -1)
+		{
+			for (auto& rule : monster_spawnning_rules)
+			{
+				if (rule.preset_id == preset_id)
+				{
+					assert(0);
+					preset_id = -1;
+					break;
+				}
+			}
+			if (preset_id != -1)
+			{
+				auto& rule = monster_spawnning_rules.emplace_back();
+				rule.preset_id = preset_id;
+				for (auto& e : section.entries)
+				{
+					if (e.key == "delay")
+						rule.delay = s2t<float>(e.value);
+					else if (e.key == "number_function_factor_a")
+						rule.number_function_factor_a = s2t<float>(e.value);
+					else if (e.key == "number_function_factor_b")
+						rule.number_function_factor_b = s2t<float>(e.value);
+					else if (e.key == "number_function_factor_c")
+						rule.number_function_factor_c = s2t<float>(e.value);
+				}
+			}
+		}
+	}
+}
+
 void cMain::start()
 {
 	printf("main started\n");
@@ -376,6 +412,14 @@ void cMain::start()
 
 	main_camera.init(entity->find_child("Camera"));
 	main_terrain.init(entity->find_child("terrain"));
+
+	init_items();
+	init_abilities();
+	init_buffs();
+	init_characters();
+	init_projectiles();
+	init_effects();
+	init_spawnning_rules();
 
 	if (auto nav_scene = entity->get_component_t<cNavScene>(); nav_scene)
 	{
@@ -1138,8 +1182,7 @@ void cMain::start()
 			static graphics::ImagePtr icon_cursors = nullptr;
 			if (!icon_cursors)
 				icon_cursors = graphics::Image::get(L"assets\\icons\\rpg_cursor_set.png");
-			const auto cursor_cx = 6U;
-			const auto cursor_cy = 3U;
+			auto tile_size = vec2(icon_cursors->tile_size);
 			int cursor_x = 0, cursor_y = 0;
 			if (select_mode != TargetNull)
 			{
@@ -1149,8 +1192,8 @@ void cMain::start()
 			auto pos = sInput::instance()->mpos + sInput::instance()->offset;
 			auto dl = ImGui::GetForegroundDrawList();
 			dl->AddImage(icon_cursors, pos + vec2(-32.f), pos + vec2(32.f),
-				vec2((float)cursor_x / cursor_cx, (float)cursor_y / cursor_cy),
-				vec2((float)(cursor_x + 1) / cursor_cx, (float)(cursor_y + 1) / cursor_cy));
+				vec2(cursor_x, cursor_y) / tile_size,
+				vec2(cursor_x + 1, cursor_y + 1) / tile_size);
 		}
 	}, (uint)this);
 	graphics::gui_cursor_callbacks.add([this](CursorType cursor) {
@@ -1363,42 +1406,6 @@ void cMain::update()
 	{
 		if (main_player.character)
 		{
-			if (monster_spawnning_rules.empty())
-			{
-				for (auto& section : parse_ini_file(Path::get(L"assets\\monster_spawnnings.ini")).sections)
-				{
-					auto preset_id = CharacterPreset::find(section.name);
-					if (preset_id != -1)
-					{
-						for (auto& rule : monster_spawnning_rules)
-						{
-							if (rule.preset_id == preset_id)
-							{
-								assert(0);
-								preset_id = -1;
-								break;
-							}
-						}
-						if (preset_id != -1)
-						{
-							auto& rule = monster_spawnning_rules.emplace_back();
-							rule.preset_id = preset_id;
-							for (auto& e : section.entries)
-							{
-								if (e.key == "delay")
-									rule.delay = s2t<float>(e.value);
-								else if (e.key == "number_function_factor_a")
-									rule.number_function_factor_a = s2t<float>(e.value);
-								else if (e.key == "number_function_factor_b")
-									rule.number_function_factor_b = s2t<float>(e.value);
-								else if (e.key == "number_function_factor_c")
-									rule.number_function_factor_c = s2t<float>(e.value);
-							}
-						}
-					}
-				}
-			}
-
 			if (gtime >= 0.f)
 			{
 				gtime += delta_time;

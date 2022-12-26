@@ -4,7 +4,7 @@
 
 std::vector<EffectPreset> effect_presets;
 
-void load_effect_presets()
+void init_effects()
 {
 	{
 		auto& preset = effect_presets.emplace_back();
@@ -17,8 +17,6 @@ void load_effect_presets()
 
 int EffectPreset::find(const std::string& name)
 {
-	if (effect_presets.empty())
-		load_effect_presets();
 	for (auto i = 0; i < effect_presets.size(); i++)
 	{
 		if (effect_presets[i].name == name)
@@ -29,8 +27,6 @@ int EffectPreset::find(const std::string& name)
 
 const EffectPreset& EffectPreset::get(uint id)
 {
-	if (effect_presets.empty())
-		load_effect_presets();
 	return effect_presets[id];
 }
 

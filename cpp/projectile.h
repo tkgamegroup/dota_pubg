@@ -41,4 +41,6 @@ struct cProjectile : Component
 	// Reflect static
 	EXPORT static Create& create;
 };
+
+void init_projectiles();
  

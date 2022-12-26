@@ -13,14 +13,13 @@
 std::vector<Ability> abilities;
 std::vector<Talent> talents;
 
-void load_abilities()
+void init_abilities()
 {
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Strong Body";
 		ability.icon_name = L"assets\\icons\\strength.png";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->hp_max += ins->lv * 100;
 			caster->hp_reg += ins->lv;
@@ -35,7 +34,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Strong Mind";
 		ability.icon_name = L"assets\\icons\\intelligence.png";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->mp_max += ins->lv * 100;
 			caster->mp_reg += ins->lv;
@@ -50,8 +48,7 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Sharp Weapon";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_uvs = vec4(1.f / 13, 7.f / 15.f, 2.f / 13, 8.f / 15.f);
-		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.icon_tile_coord = uvec2(1, 7);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->atk += ins->lv * 10;
 		};
@@ -65,8 +62,7 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Rapid Strike";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_uvs = vec4(10.f / 13, 9.f / 15.f, 11.f / 13, 10.f / 15.f);
-		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.icon_tile_coord = uvec2(10, 9);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->atk_sp += ins->lv * 10;
 		};
@@ -80,7 +76,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Scud";
 		ability.icon_name = L"assets\\icons\\agility.png";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->mov_sp += ins->lv * 10;
 		};
@@ -94,8 +89,7 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Armor";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_uvs = vec4(9.f / 13, 9.f / 15.f, 10.f / 13, 10.f / 15.f);
-		ability.icon_image = graphics::Image::get(ability.icon_name);
+		ability.icon_tile_coord = uvec2(9, 9);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->phy_def += ins->lv * 10;
 		};
@@ -109,7 +103,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Grate Cleave";
 		ability.icon_name = L"assets\\icons\\Greate_Cleave.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.max_lv = 4;
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint) {
@@ -135,7 +128,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Vampiric Spirit";
 		ability.icon_name = L"assets\\icons\\Vampiric_Spirit.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.max_lv = 4;
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint value) {
@@ -152,7 +144,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Fire Breath";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.2f;
 		ability.mp = 100;
@@ -183,7 +174,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Shield Bash";
 		ability.icon_name = L"assets\\icons\\shield_alpha.png";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
 		ability.mp = 500;
@@ -203,7 +193,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Flame Weapon";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.cast_time = 0.f;
 		ability.mp = 500;
 		ability.cd = 10.f;
@@ -219,7 +208,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Flame Shield";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma seizmic.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 30.f;
@@ -235,7 +223,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Stinger";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\funguscorrosive spore.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
 				if (linearRand(0U, 99U) < 10)
@@ -251,7 +238,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Roar";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.cast_time = 0.f;
 		ability.mp = 1000;
 		ability.cd = 10.f;
@@ -270,7 +256,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Recover";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\mucus trap.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.cast_time = 3.f;
 		ability.mp = 500;
 		ability.cd = 0.f;
@@ -289,7 +274,6 @@ void load_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Blink";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\Tactical Flight.jpg";
-		ability.icon_image = graphics::Image::get(ability.icon_name);
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.f;
 		ability.mp = 500;
@@ -300,6 +284,20 @@ void load_abilities()
 		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
 		};
+	}
+
+	for (auto& ability : abilities)
+	{
+		if (!ability.icon_name.empty())
+		{
+			ability.icon_image = graphics::Image::get(ability.icon_name);
+			if (ability.icon_image)
+			{
+				auto tile_size = vec2(ability.icon_image->tile_size);
+				if (tile_size != vec2(0.f))
+					ability.icon_uvs = vec4(vec2(ability.icon_tile_coord) / tile_size, vec2(ability.icon_tile_coord + 1U) / tile_size);
+			}
+		}
 	}
 
 	// Talents
@@ -338,8 +336,6 @@ void load_abilities()
 
 int Ability::find(const std::string& name)
 {
-	if (abilities.empty())
-		load_abilities();
 	for (auto i = 0; i < abilities.size(); i++)
 	{
 		if (abilities[i].name == name)
@@ -350,15 +346,11 @@ int Ability::find(const std::string& name)
 
 const Ability& Ability::get(uint id)
 {
-	if (abilities.empty())
-		load_abilities();
 	return abilities[id];
 }
 
 int Talent::find(const std::string& name)
 {
-	if (talents.empty())
-		load_abilities();
 	for (auto i = 0; i < talents.size(); i++)
 	{
 		if (talents[i].name == name)
@@ -369,7 +361,5 @@ int Talent::find(const std::string& name)
 
 const Talent& Talent::get(uint id)
 {
-	if (talents.empty())
-		load_abilities();
 	return talents[id];
 }

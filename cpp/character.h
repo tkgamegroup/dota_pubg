@@ -269,3 +269,5 @@ struct cCharacter : Component
 	// Reflect static
 	EXPORT static Create& create;
 };
+
+void init_characters();

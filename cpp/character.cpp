@@ -166,7 +166,7 @@ void CommandCastAbilityToTarget::update()
 
 std::vector<CharacterPreset> character_presets;
 
-void load_character_presets()
+void init_characters()
 {
 	{
 		auto& preset = character_presets.emplace_back();
@@ -269,8 +269,6 @@ void load_character_presets()
 
 int CharacterPreset::find(const std::string& name)
 {
-	if (character_presets.empty())
-		load_character_presets();
 	for (auto i = 0; i < character_presets.size(); i++)
 	{
 		if (character_presets[i].name == name)
@@ -281,8 +279,6 @@ int CharacterPreset::find(const std::string& name)
 
 const CharacterPreset& CharacterPreset::get(uint id)
 {
-	if (character_presets.empty())
-		load_character_presets();
 	return character_presets[id];
 }
 
