@@ -42,8 +42,7 @@ void ViewInventory::on_draw()
 				{
 					ImGui::BeginTooltip();
 					ImGui::TextUnformatted(item.name.c_str());
-					if (item.show)
-						item.show();
+					ImGui::TextUnformatted(item.description.c_str());
 					ImGui::EndTooltip();
 				}
 				dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());

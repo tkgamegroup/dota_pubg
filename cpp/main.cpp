@@ -175,8 +175,7 @@ void ItemShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 	{
 		ImGui::BeginTooltip();
 		ImGui::TextUnformatted(item.name.c_str());
-		if (item.show)
-			item.show();
+		ImGui::TextUnformatted(item.description.c_str());
 		ImGui::EndTooltip();
 	}
 	dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
@@ -358,6 +357,18 @@ void toggle_settings_view()
 }
 
 float gtime = -1.f;
+
+struct MonsterSpawnningRule
+{
+	uint preset_id;
+	float delay;
+	float number_function_factor_a;
+	float number_function_factor_b;
+	float number_function_factor_c;
+
+	uint spawnned_numbers = 0;
+};
+std::vector<MonsterSpawnningRule> monster_spawnning_rules;
 
 void init_spawnning_rules()
 {
@@ -1204,18 +1215,6 @@ void cMain::start()
 		return CursorNone;
 	}, (uint)this);
 }
-
-struct MonsterSpawnningRule
-{
-	uint preset_id;
-	float delay;
-	float number_function_factor_a;
-	float number_function_factor_b;
-	float number_function_factor_c;
-
-	uint spawnned_numbers = 0;
-};
-std::vector<MonsterSpawnningRule> monster_spawnning_rules;
 
 void cMain::update()
 {

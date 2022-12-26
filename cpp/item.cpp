@@ -18,9 +18,7 @@ void init_items()
 		item.active = [](cCharacterPtr character) {
 			character->gain_exp(character->exp_max);
 		};
-		item.show = []() {
-			ImGui::TextUnformatted("Gain exp as much as current level");
-		};
+		item.description = "Gain exp as much as current level";
 	}
 	{
 		auto& item = items.emplace_back();
@@ -32,9 +30,7 @@ void init_items()
 		item.active = [](cCharacterPtr character) {
 			character->set_hp(min(character->hp + 100, character->hp_max));
 		};
-		item.show = []() {
-			ImGui::TextUnformatted("Recover hp by 100");
-		};
+		item.description = "Recover HP by 100";
 	}
 	{
 		auto& item = items.emplace_back();
@@ -46,9 +42,7 @@ void init_items()
 		item.active = [](cCharacterPtr character) {
 			character->set_mp(min(character->mp + 100, character->mp_max));
 		};
-		item.show = []() {
-			ImGui::TextUnformatted("Recover mp by 50");
-		};
+		item.description = "Recover MP by 100";
 	}
 
 	for (auto& item : items)

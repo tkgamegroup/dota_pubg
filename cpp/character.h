@@ -245,6 +245,8 @@ struct cCharacter : Component
 
 	void inflict_damage(cCharacterPtr target, DamageType type, uint value);
 	bool take_damage(DamageType type, uint value); // return true if the damage causes the character die
+	void restore_hp(uint value);
+	void restore_mp(uint value);
 	void gain_exp(uint v);
 	bool gain_item(uint id, uint num);
 	bool gain_ability(uint id, uint lv = 0);

@@ -480,6 +480,16 @@ bool cCharacter::take_damage(DamageType type, uint value)
 	return true;
 }
 
+void cCharacter::restore_hp(uint value)
+{
+	set_hp(min(hp + value, hp_max));
+}
+
+void cCharacter::restore_mp(uint value)
+{
+	set_hp(min(mp + value, mp_max));
+}
+
 void cCharacter::gain_exp(uint v)
 {
 	if (exp_max == 0)

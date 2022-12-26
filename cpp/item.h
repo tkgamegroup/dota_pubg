@@ -25,9 +25,10 @@ struct Item
 
 	ItemType				type = ItemItem;
 
+	std::string				description;
+
 	void(*active)(cCharacterPtr) = nullptr;
 	void(*passive)(cCharacterPtr) = nullptr;
-	void(*show)() = nullptr;
 
 	static int find(const std::string& name);
 	static const Item& get(uint id);

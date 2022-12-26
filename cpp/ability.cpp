@@ -176,7 +176,7 @@ void init_abilities()
 		ability.icon_name = L"assets\\icons\\shield_alpha.png";
 		ability.target_type = TargetEnemy;
 		ability.cast_time = 0.5f;
-		ability.mp = 500;
+		ability.mp = 50;
 		ability.cd = 10.f;
 		ability.distance = 5.f;
 		ability.active_t = [](AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr target) {
@@ -194,7 +194,7 @@ void init_abilities()
 		ability.name = "Flame Weapon";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
 		ability.cast_time = 0.f;
-		ability.mp = 500;
+		ability.mp = 50;
 		ability.cd = 10.f;
 		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->add_buff(Buff::find("Flame Weapon"), 60.f);
@@ -209,7 +209,7 @@ void init_abilities()
 		ability.name = "Flame Shield";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma seizmic.jpg";
 		ability.cast_time = 0.f;
-		ability.mp = 1000;
+		ability.mp = 100;
 		ability.cd = 30.f;
 		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 
@@ -239,7 +239,7 @@ void init_abilities()
 		ability.name = "Roar";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
 		ability.cast_time = 0.f;
-		ability.mp = 1000;
+		ability.mp = 100;
 		ability.cd = 10.f;
 		ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
@@ -257,7 +257,7 @@ void init_abilities()
 		ability.name = "Recover";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\mucus trap.jpg";
 		ability.cast_time = 3.f;
-		ability.mp = 500;
+		ability.mp = 50;
 		ability.cd = 0.f;
 		ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
@@ -276,7 +276,7 @@ void init_abilities()
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\Tactical Flight.jpg";
 		ability.target_type = TargetLocation;
 		ability.cast_time = 0.f;
-		ability.mp = 500;
+		ability.mp = 50;
 		ability.distance = 15.f;
 		ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& location) {
 			teleport(caster, location);
