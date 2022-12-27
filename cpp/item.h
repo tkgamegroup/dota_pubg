@@ -28,6 +28,8 @@ struct Item
 
 	std::string				description;
 
+	std::vector<std::pair<std::string, uint>> 
+							parameter_names;
 	Parameters				parameters;
 	std::vector<Command>	active;
 	std::vector<Command>	passive;

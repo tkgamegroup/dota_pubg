@@ -13,8 +13,10 @@ typedef std::unordered_map<uint, std::vector<Parameter>> Parameters;
 
 struct Command
 {
+	// Reflect
 	enum Type
 	{
+		tNull,
 		tRestoreHP,
 		tRestoreMP,
 		tLevelUp,
@@ -22,7 +24,7 @@ struct Command
 		tIncreaseMPMax
 	};
 
-	Type type;
+	Type type = tNull;
 	std::vector<uint> parameter_names; // 0 to internal, or to external
 	Parameters internal_parameters;
 

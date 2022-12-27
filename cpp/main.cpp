@@ -377,30 +377,18 @@ void init_spawnning_rules()
 		auto preset_id = CharacterPreset::find(section.name);
 		if (preset_id != -1)
 		{
-			for (auto& rule : monster_spawnning_rules)
+			auto& rule = monster_spawnning_rules.emplace_back();
+			rule.preset_id = preset_id;
+			for (auto& e : section.entries)
 			{
-				if (rule.preset_id == preset_id)
-				{
-					assert(0);
-					preset_id = -1;
-					break;
-				}
-			}
-			if (preset_id != -1)
-			{
-				auto& rule = monster_spawnning_rules.emplace_back();
-				rule.preset_id = preset_id;
-				for (auto& e : section.entries)
-				{
-					if (e.key == "delay")
-						rule.delay = s2t<float>(e.value);
-					else if (e.key == "number_function_factor_a")
-						rule.number_function_factor_a = s2t<float>(e.value);
-					else if (e.key == "number_function_factor_b")
-						rule.number_function_factor_b = s2t<float>(e.value);
-					else if (e.key == "number_function_factor_c")
-						rule.number_function_factor_c = s2t<float>(e.value);
-				}
+				if (e.key == "delay")
+					rule.delay = s2t<float>(e.value);
+				else if (e.key == "number_function_factor_a")
+					rule.number_function_factor_a = s2t<float>(e.value);
+				else if (e.key == "number_function_factor_b")
+					rule.number_function_factor_b = s2t<float>(e.value);
+				else if (e.key == "number_function_factor_c")
+					rule.number_function_factor_c = s2t<float>(e.value);
 			}
 		}
 	}
