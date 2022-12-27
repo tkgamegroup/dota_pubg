@@ -5,87 +5,87 @@
 #include "item.h"
 #include "buff.h"
 
-struct Command
+struct CharacterCommand
 {
 	uint type;
 	cCharacterPtr character;
 
-	Command(uint type, cCharacterPtr character);
-	virtual ~Command() {}
+	CharacterCommand(uint type, cCharacterPtr character);
+	virtual ~CharacterCommand() {}
 	virtual void update() = 0;
 };
 
-struct CommandIdle : Command
+struct CharacterCommandIdle : CharacterCommand
 {
-	CommandIdle(cCharacterPtr character);
+	CharacterCommandIdle(cCharacterPtr character);
 
 	void update() override;
 };
 
-struct CommandMoveTo : Command
+struct CharacterCommandMoveTo : CharacterCommand
 {
 	vec3 location;
 
-	CommandMoveTo(cCharacterPtr character, const vec3& _location);
+	CharacterCommandMoveTo(cCharacterPtr character, const vec3& _location);
 
 	void update() override;
 };
 
-struct CommandAttackTarget : Command
+struct CharacterCommandAttackTarget : CharacterCommand
 {
 	Tracker<cCharacterPtr> target;
 	cCharacterPtr precasted_target = nullptr;
 
-	CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target);
+	CharacterCommandAttackTarget(cCharacterPtr character, cCharacterPtr _target);
 
 	void update() override;
 };
 
-struct CommandAttackLocation : Command
+struct CharacterCommandAttackLocation : CharacterCommand
 {
 	Tracker<cCharacterPtr> target;
 	cCharacterPtr precasted_target = nullptr;
 	vec3 location;
 
-	CommandAttackLocation(cCharacterPtr character, const vec3& _location);
+	CharacterCommandAttackLocation(cCharacterPtr character, const vec3& _location);
 
 	void update() override;
 };
 
-struct CommandPickUp : Command
+struct CharacterCommandPickUp : CharacterCommand
 {
 	Tracker<cChestPtr> target;
 
-	CommandPickUp(cCharacterPtr character, cChestPtr _target);
+	CharacterCommandPickUp(cCharacterPtr character, cChestPtr _target);
 
 	void update() override;
 };
 
-struct CommandCastAbility : Command
+struct CharacterCommandCastAbility : CharacterCommand
 {
 	AbilityInstance* ins;
 
-	CommandCastAbility(cCharacterPtr character, AbilityInstance* ins);
+	CharacterCommandCastAbility(cCharacterPtr character, AbilityInstance* ins);
 
 	void update() override;
 };
 
-struct CommandCastAbilityToLocation : Command
+struct CharacterCommandCastAbilityToLocation : CharacterCommand
 {
 	vec3 location;
 	AbilityInstance* ins;
 
-	CommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location);
+	CharacterCommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location);
 
 	void update() override;
 };
 
-struct CommandCastAbilityToTarget : Command
+struct CharacterCommandCastAbilityToTarget : CharacterCommand
 {
 	Tracker<cCharacterPtr> target;
 	AbilityInstance* ins;
 
-	CommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target);
+	CharacterCommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target);
 
 	void update() override;
 };
@@ -228,7 +228,7 @@ struct cCharacter : Component
 
 	int dead_flag = 0;
 	bool stats_dirty = true;
-	std::unique_ptr<Command> command;
+	std::unique_ptr<CharacterCommand> command;
 	Action action = ActionNone;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;

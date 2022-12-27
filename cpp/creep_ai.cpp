@@ -21,7 +21,7 @@ void cCreepAI::update()
 		aggro_timer -= delta_time;
 		if (aggro_timer <= 0.f)
 		{
-			new CommandMoveTo(character, start_pos);
+			new CharacterCommandMoveTo(character, start_pos);
 			flee_timer = 3.f;
 		}
 	}
@@ -37,7 +37,7 @@ void cCreepAI::update()
 					auto enemies = find_characters(character->node->pos, 5.f, ~character->faction);
 					if (!enemies.empty())
 					{
-						new CommandAttackTarget(character, enemies[0]);
+						new CharacterCommandAttackTarget(character, enemies[0]);
 						found = true;
 					}
 					character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
@@ -49,7 +49,7 @@ void cCreepAI::update()
 			{
 			case "Idle"_h:
 				if (!attack_closest() && linearRand(0U, 600U) < 10)
-					new CommandMoveTo(character, main_terrain.get_coord(start_pos + vec3(linearRand(-3.f, +3.f), 0.f, linearRand(-3.f, +3.f))));
+					new CharacterCommandMoveTo(character, main_terrain.get_coord(start_pos + vec3(linearRand(-3.f, +3.f), 0.f, linearRand(-3.f, +3.f))));
 				break;
 			case "MoveTo"_h:
 				attack_closest();
@@ -67,13 +67,13 @@ void cCreepAI::update()
 								{
 									if (ability.target_type == TargetNull && ability.active)
 									{
-										new CommandCastAbility(character, ins.get());
+										new CharacterCommandCastAbility(character, ins.get());
 										break;
 									}
 									if (ability.target_type == TargetEnemy && ability.active_t)
 									{
-										new CommandCastAbilityToTarget(character, ins.get(),
-											((CommandAttackTarget*)character->command.get())->target.obj);
+										new CharacterCommandCastAbilityToTarget(character, ins.get(),
+											((CharacterCommandAttackTarget*)character->command.get())->target.obj);
 										break;
 									}
 								}

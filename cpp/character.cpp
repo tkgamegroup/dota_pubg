@@ -21,7 +21,7 @@
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
 
-Command::Command(uint type, cCharacterPtr character) :
+CharacterCommand::CharacterCommand(uint type, cCharacterPtr character) :
 	type(type),
 	character(character)
 {
@@ -29,52 +29,52 @@ Command::Command(uint type, cCharacterPtr character) :
 	character->action = ActionNone;
 }
 
-CommandIdle::CommandIdle(cCharacterPtr character) :
-	Command("Idle"_h, character)
+CharacterCommandIdle::CharacterCommandIdle(cCharacterPtr character) :
+	CharacterCommand("Idle"_h, character)
 {
 }
 
-void CommandIdle::update()
+void CharacterCommandIdle::update()
 {
 	character->action = ActionNone;
 }
 
-CommandMoveTo::CommandMoveTo(cCharacterPtr character, const vec3& _location) :
-	Command("MoveTo"_h, character)
+CharacterCommandMoveTo::CharacterCommandMoveTo(cCharacterPtr character, const vec3& _location) :
+	CharacterCommand("MoveTo"_h, character)
 {
 	location = _location;
 }
 
-void CommandMoveTo::update()
+void CharacterCommandMoveTo::update()
 {
 	if (character->process_approach(location))
 	{
 		character->nav_agent->stop();
-		new CommandIdle(character);
+		new CharacterCommandIdle(character);
 	}
 }
 
-CommandAttackTarget::CommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
-	Command("AttackTarget"_h, character)
+CharacterCommandAttackTarget::CharacterCommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
+	CharacterCommand("AttackTarget"_h, character)
 {
 	target.set(_target);
 }
 
-void CommandAttackTarget::update()
+void CharacterCommandAttackTarget::update()
 {
 	if (!target.obj)
-		new CommandIdle(character);
+		new CharacterCommandIdle(character);
 	else
 		character->process_attack_target(target.obj);
 }
 
-CommandAttackLocation::CommandAttackLocation(cCharacterPtr character, const vec3& _location) :
-	Command("AttackLocation"_h, character)
+CharacterCommandAttackLocation::CharacterCommandAttackLocation(cCharacterPtr character, const vec3& _location) :
+	CharacterCommand("AttackLocation"_h, character)
 {
 	location = _location;
 }
 
-void CommandAttackLocation::update()
+void CharacterCommandAttackLocation::update()
 {
 	if (!target.obj && character->action != ActionAttack)
 	{
@@ -97,16 +97,16 @@ void CommandAttackLocation::update()
 	}
 }
 
-CommandPickUp::CommandPickUp(cCharacterPtr character, cChestPtr _target) :
-	Command("PickUp"_h, character)
+CharacterCommandPickUp::CharacterCommandPickUp(cCharacterPtr character, cChestPtr _target) :
+	CharacterCommand("PickUp"_h, character)
 {
 	target.set(_target);
 }
 
-void CommandPickUp::update()
+void CharacterCommandPickUp::update()
 {
 	if (!target.obj)
-		new CommandIdle(character);
+		new CharacterCommandIdle(character);
 	else
 	{
 		if (character->process_approach(target.obj->node->pos, 1.5f))
@@ -121,45 +121,45 @@ void CommandPickUp::update()
 			}
 
 			character->nav_agent->stop();
-			new CommandIdle(character);
+			new CharacterCommandIdle(character);
 		}
 	}
 }
 
-CommandCastAbility::CommandCastAbility(cCharacterPtr character, AbilityInstance* ins) :
-	Command("CastAbility"_h, character),
+CharacterCommandCastAbility::CharacterCommandCastAbility(cCharacterPtr character, AbilityInstance* ins) :
+	CharacterCommand("CastAbility"_h, character),
 	ins(ins)
 {
 }
 
-void CommandCastAbility::update()
+void CharacterCommandCastAbility::update()
 {
 	character->process_cast_ability(ins, vec3(0.f), nullptr);
 }
 
-CommandCastAbilityToLocation::CommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location) :
-	Command("CastAbilityToLocation"_h, character),
+CharacterCommandCastAbilityToLocation::CharacterCommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location) :
+	CharacterCommand("CastAbilityToLocation"_h, character),
 	ins(ins)
 {
 	location = _location;
 }
 
-void CommandCastAbilityToLocation::update()
+void CharacterCommandCastAbilityToLocation::update()
 {
 	character->process_cast_ability(ins, location, nullptr);
 }
 
-CommandCastAbilityToTarget::CommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target) :
-	Command("CastAbilityToTarget"_h, character),
+CharacterCommandCastAbilityToTarget::CharacterCommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target) :
+	CharacterCommand("CastAbilityToTarget"_h, character),
 	ins(ins)
 {
 	target.set(_target);
 }
 
-void CommandCastAbilityToTarget::update()
+void CharacterCommandCastAbilityToTarget::update()
 {
 	if (!target.obj)
-		new CommandIdle(character);
+		new CharacterCommandIdle(character);
 	else
 		character->process_cast_ability(ins, vec3(0.f), target.obj);
 }
@@ -570,7 +570,7 @@ bool cCharacter::gain_talent(uint id)
 void cCharacter::use_item(ItemInstance* ins)
 {
 	auto& item = Item::get(ins->id);
-	if (!item.active)
+	if (item.active.empty())
 		return;
 	if (item.type == ItemConsumable)
 	{
@@ -589,7 +589,8 @@ void cCharacter::use_item(ItemInstance* ins)
 			}
 		}
 	}
-	item.active(this);
+	for (auto& c : item.active)
+		c.execute(this, item.parameters, 0);
 }
 
 void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
@@ -699,7 +700,7 @@ void cCharacter::start()
 	inventory.resize(16);
 
 	if (!command)
-		new CommandIdle(this);
+		new CharacterCommandIdle(this);
 }
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
@@ -824,7 +825,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 		{
 			cast_ability(ins, pos, target);
 			nav_agent->stop();
-			new CommandIdle(this);
+			new CharacterCommandIdle(this);
 		}
 		else
 		{
@@ -840,7 +841,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 			{
 				cast_ability(ins, pos, target);
 				nav_agent->stop();
-				new CommandIdle(this);
+				new CharacterCommandIdle(this);
 			}
 			else
 			{

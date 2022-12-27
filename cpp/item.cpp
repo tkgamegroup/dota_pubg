@@ -15,9 +15,7 @@ void init_items()
 		item.icon_name = L"assets\\icons\\roguelikeitems.png";
 		item.icon_tile_coord = uvec2(0, 3);
 		item.type = ItemConsumable;
-		item.active = [](cCharacterPtr character) {
-			character->gain_exp(character->exp_max);
-		};
+		item.active.push_back(Command("LevelUp"));
 		item.description = "Gain exp as much as current level";
 	}
 	{
@@ -27,9 +25,7 @@ void init_items()
 		item.icon_name = L"assets\\icons\\roguelikeitems.png";
 		item.icon_tile_coord = uvec2(6, 12);
 		item.type = ItemConsumable;
-		item.active = [](cCharacterPtr character) {
-			character->set_hp(min(character->hp + 100, character->hp_max));
-		};
+		item.active.push_back(Command("RestoreHP 100"));
 		item.description = "Recover HP by 100";
 	}
 	{
@@ -39,9 +35,7 @@ void init_items()
 		item.icon_name = L"assets\\icons\\roguelikeitems.png";
 		item.icon_tile_coord = uvec2(1, 13);
 		item.type = ItemConsumable;
-		item.active = [](cCharacterPtr character) {
-			character->set_mp(min(character->mp + 100, character->mp_max));
-		};
+		item.active.push_back(Command("RestoreMP 100"));
 		item.description = "Recover MP by 100";
 	}
 

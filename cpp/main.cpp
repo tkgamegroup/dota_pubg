@@ -236,7 +236,7 @@ void AbilityShortcut::click()
 	if (select_mode == TargetNull)
 	{
 		if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-			new CommandCastAbility(main_player.character, ins);
+			new CharacterCommandCastAbility(main_player.character, ins);
 		else if (multi_player == MultiPlayerAsClient)
 		{
 			std::ostringstream res;
@@ -254,7 +254,7 @@ void AbilityShortcut::click()
 		{
 			select_location_callback = [this](const vec3& location) {
 				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-					new CommandCastAbilityToLocation(main_player.character, ins, location);
+					new CharacterCommandCastAbilityToLocation(main_player.character, ins, location);
 				else if (multi_player == MultiPlayerAsClient)
 				{
 					std::ostringstream res;
@@ -275,7 +275,7 @@ void AbilityShortcut::click()
 		{
 			select_enemy_callback = [this](cCharacterPtr character) {
 				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-					new CommandCastAbilityToTarget(main_player.character, ins, character);
+					new CharacterCommandCastAbilityToTarget(main_player.character, ins, character);
 				else if (multi_player == MultiPlayerAsClient)
 				{
 					std::ostringstream res;
@@ -475,7 +475,7 @@ void cMain::start()
 						//};
 
 					//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-					//	new CommandAttackLocation(character, coord);
+					//	new CharacterCommandAttackLocation(character, coord);
 					//}
 					//for (auto i = 0; i < 100; i++)
 					//{
@@ -715,7 +715,7 @@ void cMain::start()
 								if (hovering_character->faction != main_player.character->faction)
 								{
 									if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-										new CommandAttackTarget(main_player.character, hovering_character);
+										new CharacterCommandAttackTarget(main_player.character, hovering_character);
 									else if (multi_player == MultiPlayerAsClient)
 									{
 										std::ostringstream res;
@@ -731,7 +731,7 @@ void cMain::start()
 							else if (hovering_chest)
 							{
 								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-									new CommandPickUp(main_player.character, hovering_chest);
+									new CharacterCommandPickUp(main_player.character, hovering_chest);
 								else if (multi_player == MultiPlayerAsClient)
 								{
 									std::ostringstream res;
@@ -746,7 +746,7 @@ void cMain::start()
 							else if (hovering_terrain)
 							{
 								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-									new CommandMoveTo(main_player.character, hovering_pos);
+									new CharacterCommandMoveTo(main_player.character, hovering_pos);
 								else if (multi_player == MultiPlayerAsClient)
 								{
 									std::ostringstream res;
@@ -769,7 +769,7 @@ void cMain::start()
 						select_mode = TargetType(TargetEnemy | TargetLocation);
 						select_enemy_callback = [](cCharacterPtr character) {
 							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-								new CommandAttackTarget(main_player.character, character);
+								new CharacterCommandAttackTarget(main_player.character, character);
 							else if (multi_player == MultiPlayerAsClient)
 							{
 								std::ostringstream res;
@@ -783,7 +783,7 @@ void cMain::start()
 						};
 						select_location_callback = [](const vec3& pos) {
 							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-								new CommandAttackLocation(main_player.character, pos);
+								new CharacterCommandAttackLocation(main_player.character, pos);
 							else if (multi_player == MultiPlayerAsClient)
 							{
 								std::ostringstream res;
@@ -1242,26 +1242,26 @@ void cMain::update()
 					switch (stru.type)
 					{
 					case "Idle"_h:
-						new CommandIdle(character);
+						new CharacterCommandIdle(character);
 						break;
 					case "MoveTo"_h:
-						new CommandMoveTo(character, stru.t.location);
+						new CharacterCommandMoveTo(character, stru.t.location);
 						break;
 					case "AttackTarget"_h:
 					{
 						auto it = objects.find(stru.t.target);
 						if (it != objects.end())
-							new CommandAttackTarget(character, it->second->entity->get_component_t<cCharacter>());
+							new CharacterCommandAttackTarget(character, it->second->entity->get_component_t<cCharacter>());
 					}
 						break;
 					case "AttackLocation"_h:
-						new CommandAttackLocation(character, stru.t.location);
+						new CharacterCommandAttackLocation(character, stru.t.location);
 						break;
 					case "PickUp"_h:
 					{
 						auto it = objects.find(stru.t.target);
 						if (it != objects.end())
-							new CommandPickUp(character, it->second->entity->get_component_t<cChest>());
+							new CharacterCommandPickUp(character, it->second->entity->get_component_t<cChest>());
 					}
 						break;
 					case "CastAbility"_h:
@@ -1431,7 +1431,7 @@ void cMain::update()
 								{
 									auto character = add_character(rule.preset_id, pos, FactionCreep);
 									character->add_buff(Buff::find("Cursed"), -1.f, true);
-									new CommandAttackTarget(character, main_player.character);
+									new CharacterCommandAttackTarget(character, main_player.character);
 
 									rule.spawnned_numbers++;
 								}

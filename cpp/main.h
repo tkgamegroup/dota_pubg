@@ -72,11 +72,6 @@ struct Tracker
 	}
 };
 
-struct ParameterPack
-{
-	std::unordered_map<uint, std::vector<float>> parameters;
-};
-
 extern EntityPtr root;
 
 struct MainCamera

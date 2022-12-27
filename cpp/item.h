@@ -1,6 +1,7 @@
 #pragma once
 
 #include "main.h"
+#include "command.h"
 
 enum ItemType
 {
@@ -27,8 +28,9 @@ struct Item
 
 	std::string				description;
 
-	void(*active)(cCharacterPtr) = nullptr;
-	void(*passive)(cCharacterPtr) = nullptr;
+	Parameters				parameters;
+	std::vector<Command>	active;
+	std::vector<Command>	passive;
 
 	static int find(const std::string& name);
 	static const Item& get(uint id);
