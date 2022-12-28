@@ -8,42 +8,32 @@ std::vector<Item> items;
 
 void init_items()
 {
-	//{
-	//	auto& item = items.emplace_back();
-	//	item.id = items.size() - 1;
-	//	item.name = "Magic Candy";
-	//	item.icon_name = L"assets\\icons\\roguelikeitems.png";
-	//	item.icon_tile_coord = uvec2(0, 3);
-	//	item.type = ItemConsumable;
-	//	item.active.push_back(Command("LevelUp"));
-	//	item.description = "Gain exp as much as current level";
-	//}
-	//{
-	//	auto& item = items.emplace_back();
-	//	item.id = items.size() - 1;
-	//	item.name = "Berry";
-	//	item.icon_name = L"assets\\icons\\roguelikeitems.png";
-	//	item.icon_tile_coord = uvec2(6, 12);
-	//	item.type = ItemConsumable;
-	//	item.active.push_back(Command("RestoreHP 100"));
-	//	item.description = "Recover HP by 100";
-	//}
-	//{
-	//	auto& item = items.emplace_back();
-	//	item.id = items.size() - 1;
-	//	item.name = "Mint";
-	//	item.icon_name = L"assets\\icons\\roguelikeitems.png";
-	//	item.icon_tile_coord = uvec2(1, 13);
-	//	item.type = ItemConsumable;
-	//	item.active.push_back(Command("RestoreMP 100"));
-	//	item.description = "Recover MP by 100";
-	//}
-
 	for (auto& section : parse_ini_file(Path::get(L"assets\\items.ini")).sections)
 	{
 		auto& item = items.emplace_back();
 		item.id = items.size() - 1;
 		item.name = section.name;
+		for (auto& e : section.entries)
+		{
+			if (e.key == "icon_name")
+				item.icon_name = e.value;
+			else if (e.key == "icon_tile_coord")
+				item.icon_tile_coord = s2t<2, uint>(e.value);
+			else if (e.key == "type")
+			{
+				if (e.value == "I")
+					item.type = ItemItem;
+				else if (e.value == "C")
+					item.type = ItemConsumable;
+			}
+			else if (e.key == "description")
+				item.description = e.value;
+			else if (e.key == "active")
+			{
+				for (auto& c : SUS::split(e.value, ';'))
+					item.active.push_back(Command(c));
+			}
+		}
 	}
 
 	for (auto& item : items)

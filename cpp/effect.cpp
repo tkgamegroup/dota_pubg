@@ -9,8 +9,8 @@ void init_effects()
 	{
 		auto& preset = effect_presets.emplace_back();
 		preset.id = effect_presets.size() - 1;
-		preset.path = L"assets\\effects\\fire.prefab";
 		preset.name = "Fire";
+		preset.path = L"assets\\effects\\fire.prefab";
 		preset.sound_path = L"assets\\effects\\Breathe_Fire.wav";
 	}
 }

@@ -43,8 +43,12 @@ void Command::execute(cCharacterPtr character, const Parameters& external_parame
 	auto read_parameter = [&](uint idx, uint lv)->const Parameter& {
 		auto name = parameter_names[idx];
 		if (name == 0)
-			return internal_parameters.at(idx)[lv];
-		return external_parameters.at(name)[lv];
+		{
+			auto& vec = internal_parameters.at(idx);
+			return lv <= vec.size() ? vec[lv] : vec[0];
+		}
+		auto& vec = external_parameters.at(idx);
+		return lv <= vec.size() ? vec[lv] : vec[0];
 	};
 
 	switch (type)
