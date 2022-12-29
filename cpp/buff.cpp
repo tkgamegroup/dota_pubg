@@ -12,63 +12,44 @@ void init_buffs()
 		buff.id = buffs.size() - 1;
 		buff.name = "Stun";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood tornado b.jpg";
-		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
-			character->state = State(character->state | StateStun);
-		};
+		//buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
+		//	character->state = State(character->state | StateStun);
+		//};
 	}
 	{
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
 		buff.name = "Flame Weapon";
 		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
-		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
-			character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
-				character->inflict_damage(target, MagicDamage, 10);
-			});
-		};
+		//buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
+		//	character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
+		//		character->inflict_damage(target, MagicDamage, 10);
+		//	});
+		//};
 	}
+
+	for (auto& section : parse_ini_file(Path::get(L"assets\\buffs.ini")).sections)
 	{
 		auto& buff = buffs.emplace_back();
 		buff.id = buffs.size() - 1;
-		buff.name = "Roar";
-		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
-		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
-			character->atk += 20;
-			character->mov_sp += 20;
-			character->atk_sp += 100;
-		};
-	}
-	{
-		auto& buff = buffs.emplace_back();
-		buff.id = buffs.size() - 1;
-		buff.name = "Poisoned";
-		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusgue-ball.jpg";
-		buff.start = [](BuffInstance* ins, cCharacterPtr character) {
-			ins->f0 = ins->timer;
-		};
-		buff.continuous = [](BuffInstance* ins, cCharacterPtr character) {
-			if (ins->f0 - ins->timer >= 1.f)
-			{
-				character->take_damage(MagicDamage, character->hp_max * 0.002f);
-				ins->f0 = ins->timer;
-			}
-		};
-	}
-	{
-		auto& buff = buffs.emplace_back();
-		buff.id = buffs.size() - 1;
-		buff.name = "Cursed";
-		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood scavanger.jpg";
-		buff.start = [](BuffInstance* ins, cCharacterPtr character) {
-			ins->f0 = uint(gtime / 60.f) * 0.05f;
-		};
-		buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
-			if (ins->f0 > 0.f)
-			{
-				character->hp_max *= (1.f + ins->f0);
-				character->atk *= (1.f + ins->f0);
-			}
-		};
+		buff.name = section.name;
+		for (auto& e : section.entries)
+		{
+			if (e.key == "icon_name")
+				buff.icon_name = e.value;
+			else if (e.key == "icon_tile_coord")
+				buff.icon_tile_coord = s2t<2, uint>(e.value);
+			else if (e.key == "interval")
+				buff.interval = s2t<float>(e.value);
+			else if (e.key == "description")
+				buff.description = e.value;
+			else if (e.key == "parameters")
+				read_parameters(buff.parameter_names, buff.parameters, e.value);
+			else if (e.key == "passive")
+				parse_command_list(buff.passive, e.value);
+			else if (e.key == "continuous")
+				parse_command_list(buff.continuous, e.value);
+		}
 	}
 
 	for (auto& buff : buffs)

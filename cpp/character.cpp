@@ -590,7 +590,7 @@ void cCharacter::use_item(ItemInstance* ins)
 		}
 	}
 	for (auto& c : item.active)
-		c.execute(this, item.parameters, 0);
+		c.execute(this, nullptr, vec3(0.f), item.parameters, 0);
 }
 
 void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
@@ -616,7 +616,7 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	set_mp(mp - ability.mp);
 }
 
-void cCharacter::add_buff(uint id, float time, bool replace)
+void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
 {
 	BuffInstance* ins = nullptr;
 	if (replace)
@@ -635,10 +635,13 @@ void cCharacter::add_buff(uint id, float time, bool replace)
 		ins = new BuffInstance;
 		buffs.emplace_back(ins);
 	}
+	auto& buff = Buff::get(id);
 	ins->id = id;
+	ins->lv = lv;
 	ins->timer = time;
-	if (auto& buff = Buff::get(id); buff.start)
-		buff.start(ins, this);
+	ins->t0 = time;
+	ins->interval = buff.interval;
+	ins->duration = time;
 	stats_dirty = true;
 }
 
@@ -745,11 +748,18 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 				if (distance(node->pos, target->node->pos) <= preset->atk_distance + 3.5f)
 				{
 					auto attack = [this](cCharacterPtr target) {
-						inflict_damage(target, (DamageType)atk_type, atk);
-						for (auto& ef : attack_effects.list)
+						auto damage = atk;
+						inflict_damage(target, (DamageType)atk_type, damage);
+						if (target->dead_flag == 0)
 						{
-							if (target->dead_flag == 0)
-								ef.first(this, target, (DamageType)atk_type, atk);
+							static Parameters parameters;
+							parameters["damage_type"_h].push_back({ .i = atk_type });
+							parameters["damage"_h].push_back({ .u = damage });
+							for (auto& ef : attack_effects)
+							{
+								for (auto& c : ef)
+									c.execute(this, target, vec3(0.f), parameters, 0);
+							}
 						}
 
 						audio_source->play("attack_hit"_h);
@@ -906,8 +916,7 @@ void cCharacter::update()
 			mov_sp = preset->mov_sp;
 			atk_sp = preset->atk_sp;
 
-			attack_effects.list.clear();
-			injury_effects.list.clear();
+			attack_effects.clear();
 			for (auto& ins : abilities)
 			{
 				if (ins && ins->lv > 0)
@@ -920,8 +929,8 @@ void cCharacter::update()
 			for (auto& ins : buffs)
 			{
 				auto& buff = Buff::get(ins->id);
-				if (buff.passive)
-					buff.passive(ins.get(), this);
+				for (auto& c : buff.passive)
+					c.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
 			}
 
 			if (hp_max != old_hp_max)
@@ -961,8 +970,13 @@ void cCharacter::update()
 		{
 			auto& ins = *it;
 			auto& buff = Buff::get(ins->id);
-			if (buff.continuous)
-				buff.continuous(ins.get(), this);
+
+			if (ins->t0 - ins->timer > ins->duration)
+			{
+				for (auto& c : buff.continuous)
+					c.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
+				ins->t0 = ins->timer;
+			}
 
 			if (ins->timer > 0)
 			{

@@ -28,11 +28,10 @@ void init_items()
 			}
 			else if (e.key == "description")
 				item.description = e.value;
+			else if (e.key == "parameters")
+				read_parameters(item.parameter_names, item.parameters, e.value);
 			else if (e.key == "active")
-			{
-				for (auto& c : SUS::split(e.value, ';'))
-					item.active.push_back(Command(c));
-			}
+				parse_command_list(item.active, e.value);
 		}
 	}
 

@@ -181,7 +181,7 @@ void init_abilities()
 		ability.distance = 5.f;
 		ability.active_t = [](AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr target) {
 			caster->inflict_damage(target, PhysicalDamage, 50.f);
-			target->add_buff(Buff::find("Stun"), 2.f);
+			target->add_buff(Buff::find("Stun"), 0, 2.f);
 		};
 		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
@@ -197,7 +197,7 @@ void init_abilities()
 		ability.mp = 50;
 		ability.cd = 10.f;
 		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->add_buff(Buff::find("Flame Weapon"), 60.f);
+			caster->add_buff(Buff::find("Flame Weapon"), 0, 60.f);
 		};
 		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");
@@ -225,8 +225,8 @@ void init_abilities()
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\funguscorrosive spore.jpg";
 		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
 			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
-				if (linearRand(0U, 99U) < 10)
-					target->add_buff(Buff::find("Poisoned"), 10.f, true);
+				if (linearRand(0U, 99U) < 7)
+					target->add_buff(Buff::find("Poisoned"), 3.f, true);
 			});
 		};
 		ability.show = [](AbilityInstance* ins) {
@@ -245,7 +245,7 @@ void init_abilities()
 			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
 		};
 		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->add_buff(Buff::find("Roar"), 12.f);
+			caster->add_buff(Buff::find("Roar"), 0, 12.f);
 		};
 		ability.show = [](AbilityInstance* ins) {
 			ImGui::TextUnformatted("");

@@ -28,11 +28,10 @@ struct Item
 
 	std::string				description;
 
-	std::vector<std::pair<std::string, uint>> 
-							parameter_names;
+	ParameterNames			parameter_names;
 	Parameters				parameters;
-	std::vector<Command>	active;
-	std::vector<Command>	passive;
+	CommandList				active;
+	CommandList				passive;
 
 	static int find(const std::string& name);
 	static const Item& get(uint id);

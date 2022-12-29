@@ -1,12 +1,16 @@
 #pragma once
 
 #include "main.h"
+#include "command.h"
 
 struct BuffInstance
 {
 	uint id;
+	uint lv = 0;
 	float timer;
-	float f0, f1, f2, f3;
+	float t0;
+	float interval;
+	float duration;
 };
 
 struct Buff
@@ -18,9 +22,14 @@ struct Buff
 	graphics::ImagePtr		icon_image = nullptr;
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 
-	void(*start)(BuffInstance* ins, cCharacterPtr character) = nullptr;
-	void(*passive)(BuffInstance* ins, cCharacterPtr character) = nullptr;
-	void(*continuous)(BuffInstance* ins, cCharacterPtr character) = nullptr;
+	float					interval;
+
+	std::string				description;
+
+	ParameterNames			parameter_names;
+	Parameters				parameters;
+	CommandList				passive;
+	CommandList				continuous;
 
 	static int find(const std::string& name);
 	static const Buff& get(uint id);

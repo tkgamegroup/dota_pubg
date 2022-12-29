@@ -217,8 +217,7 @@ struct cCharacter : Component
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 20;
 
-	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> attack_effects;
-	Listeners<void(cCharacterPtr character, cCharacterPtr target, DamageType type, uint value)> injury_effects;
+	std::vector<CommandList>						attack_effects;
 	std::vector<std::unique_ptr<ItemInstance>>		inventory;
 	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
 	std::vector<uint>								talents;
@@ -253,7 +252,7 @@ struct cCharacter : Component
 	bool gain_talent(uint id);
 	void use_item(ItemInstance* ins);
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
-	void add_buff(uint id, float time, bool replace = false);
+	void add_buff(uint id, float time, uint lv, bool replace = false);
 	bool add_marker(uint hash, float time);
 	void die();
 

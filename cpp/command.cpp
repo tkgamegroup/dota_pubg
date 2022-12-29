@@ -12,33 +12,19 @@ Command::Command(const std::string& line)
 	for (auto i = 1; i < sp.size(); i++)
 	{
 		auto name = 0;
-		if (std::isdigit(sp[i][0]))
+		auto& p = sp[i];
+		if (std::isdigit(p[0]))
 		{
-			auto sp2 = SUS::split(sp[i], ',');
 			auto& vec = internal_parameters[i - 1];
-			vec.resize(sp2.size());
-			for (auto j = 0; j < vec.size(); j++)
-			{
-				switch (sp2[j].back())
-				{
-				case 'f':
-					vec[j].f = s2t<float>(sp2[j]);
-					break;
-				case 'u':
-					vec[j].f = s2t<uint>(sp2[j]);
-					break;
-				default:
-					vec[j].i = s2t<int>(sp2[j]);
-				}
-			}
+			read_parameter_values(vec, p);
 			parameter_names.push_back(0);
 		}
 		else
-			parameter_names.push_back(sh(sp[i].c_str()));
+			parameter_names.push_back(sh(p.c_str()));
 	}
 }
 
-void Command::execute(cCharacterPtr character, const Parameters& external_parameters, uint lv) const
+void Command::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const Parameters& external_parameters, uint lv) const
 {
 	auto read_parameter = [&](uint idx, uint lv)->const Parameter& {
 		auto name = parameter_names[idx];
@@ -47,7 +33,7 @@ void Command::execute(cCharacterPtr character, const Parameters& external_parame
 			auto& vec = internal_parameters.at(idx);
 			return lv <= vec.size() ? vec[lv] : vec[0];
 		}
-		auto& vec = external_parameters.at(idx);
+		auto& vec = external_parameters.at(name);
 		return lv <= vec.size() ? vec[lv] : vec[0];
 	};
 
@@ -59,8 +45,34 @@ void Command::execute(cCharacterPtr character, const Parameters& external_parame
 	case tRestoreMP:
 		character->restore_mp(read_parameter(0, lv).i);
 		break;
+	case tTakeDamage:
+		break;
+	case tTakeDamagePct:
+		character->take_damage(MagicDamage, character->hp_max * (read_parameter(0, lv).i / 100.f));
+		break;
 	case tLevelUp:
 		character->gain_exp(character->exp_max);
+		break;
+	case tIncreaseHPMax:
+		break;
+	case tIncreaseMPMax:
+		break;
+	case tIncreaseATK:
+		character->atk += read_parameter(0, lv).i;
+		break;
+	case tIncreaseMOVSP:
+		character->mov_sp += read_parameter(0, lv).i;
+		break;
+	case tIncreaseATKSP:
+		character->atk_sp += read_parameter(0, lv).i;
+		break;
+	case tIncreaseHPMaxPct:
+		character->hp_max *= (100 + read_parameter(0, lv).i) / 100.f;
+		break;
+	case tIncreaseMPMaxPct:
+		break;
+	case tIncreaseATKPct:
+		character->atk *= (100 + read_parameter(0, lv).i) / 100.f;
 		break;
 	}
 }

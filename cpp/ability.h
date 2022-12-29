@@ -33,8 +33,6 @@ struct Ability
 	void(*active)(AbilityInstance* ins, cCharacterPtr caster) = nullptr;
 	void(*active_l)(AbilityInstance* ins, cCharacterPtr caster, const vec3&) = nullptr;
 	void(*active_t)(AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr) = nullptr;
-	void(*channel_l)(AbilityInstance* ins, cCharacterPtr caster, const vec3&) = nullptr;
-	void(*channel_t)(AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr) = nullptr;
 	void(*passive)(AbilityInstance* ins, cCharacterPtr caster) = nullptr;
 	void(*show)(AbilityInstance* ins) = nullptr;
 

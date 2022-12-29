@@ -1418,7 +1418,7 @@ void cMain::update()
 								if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
 								{
 									auto character = add_character(rule.preset_id, pos, FactionCreep);
-									character->add_buff(Buff::find("Cursed"), -1.f, true);
+									character->add_buff(Buff::find("Cursed"), -1.f, uint(gtime / 60.f));
 									new CharacterCommandAttackTarget(character, main_player.character);
 
 									rule.spawnned_numbers++;
