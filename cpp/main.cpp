@@ -199,8 +199,7 @@ void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 	{
 		ImGui::BeginTooltip();
 		ImGui::TextUnformatted(ability.name.c_str());
-		if (ability.show)
-			ability.show(ins);
+		ImGui::TextUnformatted(ability.description.c_str());
 		ImGui::EndTooltip();
 	}
 	dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
@@ -226,11 +225,6 @@ void AbilityShortcut::click()
 		illegal_op_str = "Not Enough MP.";
 		illegal_op_str_timer = 3.f;
 		return;
-	}
-	if (ability.cast_check)
-	{
-		if (!ability.cast_check(ins, main_player.character))
-			return;
 	}
 	select_mode = ability.target_type;
 	if (select_mode == TargetNull)

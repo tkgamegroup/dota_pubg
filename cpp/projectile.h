@@ -8,8 +8,6 @@ struct ProjectilePreset
 	std::string				name;
 	std::filesystem::path	path;
 
-	void(*update)(cProjectilePtr) = nullptr;
-
 	static int find(const std::string& name);
 	static const ProjectilePreset& get(uint id);
 };

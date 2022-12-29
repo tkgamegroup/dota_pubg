@@ -20,28 +20,28 @@ void init_abilities()
 		ability.id = abilities.size() - 1;
 		ability.name = "Strong Body";
 		ability.icon_name = L"assets\\icons\\strength.png";
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->hp_max += ins->lv * 100;
-			caster->hp_reg += ins->lv;
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-						"Increase HP Max by %d and HP Reg by %d", ins->lv * 100, ins->lv);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->hp_max += ins->lv * 100;
+		//	caster->hp_reg += ins->lv;
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//				"Increase HP Max by %d and HP Reg by %d", ins->lv * 100, ins->lv);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Strong Mind";
 		ability.icon_name = L"assets\\icons\\intelligence.png";
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->mp_max += ins->lv * 100;
-			caster->mp_reg += ins->lv;
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-				"Increase MP Max by %d and MP Reg by %d", ins->lv * 100, ins->lv);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->mp_max += ins->lv * 100;
+		//	caster->mp_reg += ins->lv;
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//		"Increase MP Max by %d and MP Reg by %d", ins->lv * 100, ins->lv);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -49,13 +49,13 @@ void init_abilities()
 		ability.name = "Sharp Weapon";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
 		ability.icon_tile_coord = uvec2(1, 7);
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->atk += ins->lv * 10;
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-						"Increase ATK by %d", ins->lv * 10);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->atk += ins->lv * 10;
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//				"Increase ATK by %d", ins->lv * 10);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -63,26 +63,26 @@ void init_abilities()
 		ability.name = "Rapid Strike";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
 		ability.icon_tile_coord = uvec2(10, 9);
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->atk_sp += ins->lv * 10;
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-						"Increase ATK SP by %d", ins->lv * 10);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->atk_sp += ins->lv * 10;
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//				"Increase ATK SP by %d", ins->lv * 10);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Scud";
 		ability.icon_name = L"assets\\icons\\agility.png";
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->mov_sp += ins->lv * 10;
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-						"Increase MOV SP by %d", ins->lv * 10);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->mov_sp += ins->lv * 10;
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//				"Increase MOV SP by %d", ins->lv * 10);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -90,13 +90,13 @@ void init_abilities()
 		ability.name = "Armor";
 		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
 		ability.icon_tile_coord = uvec2(9, 9);
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->phy_def += ins->lv * 10;
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-						"Increase Phy DEF by %d", ins->lv * 10);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->phy_def += ins->lv * 10;
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//				"Increase Phy DEF by %d", ins->lv * 10);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -104,24 +104,24 @@ void init_abilities()
 		ability.name = "Grate Cleave";
 		ability.icon_name = L"assets\\icons\\Greate_Cleave.jpg";
 		ability.max_lv = 4;
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint) {
-				auto center = attacker->node->pos;
-				auto ang = attacker->node->eul.x;
-				for (auto character : find_characters(center, 3.f, ~attacker->faction))
-				{
-					if (character == target)
-						continue;
-					auto d = character->node->pos - center;
-					if (abs(angle_diff(ang, -degrees(atan2(d.z, d.x)))) < 60.f)
-						attacker->inflict_damage(character, (DamageType)attacker->atk_type, attacker->atk * (ins->lv * 25.f / 100.f));
-				}
-			});
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-				"Attack will damage nearby enemies by %d%%", ins->lv * 25);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint) {
+		//		auto center = attacker->node->pos;
+		//		auto ang = attacker->node->eul.x;
+		//		for (auto character : find_characters(center, 3.f, ~attacker->faction))
+		//		{
+		//			if (character == target)
+		//				continue;
+		//			auto d = character->node->pos - center;
+		//			if (abs(angle_diff(ang, -degrees(atan2(d.z, d.x)))) < 60.f)
+		//				attacker->inflict_damage(character, (DamageType)attacker->atk_type, attacker->atk * (ins->lv * 25.f / 100.f));
+		//		}
+		//	});
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//		"Attack will damage nearby enemies by %d%%", ins->lv * 25);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -129,15 +129,15 @@ void init_abilities()
 		ability.name = "Vampiric Spirit";
 		ability.icon_name = L"assets\\icons\\Vampiric_Spirit.jpg";
 		ability.max_lv = 4;
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint value) {
-				attacker->set_hp(min(attacker->hp + uint(value * (ins->lv * 10.f / 100.f)), attacker->hp_max));
-			});
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Passive\n"
-				"Restore health based on attack damage by %d%%", ins->lv * 10);
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint value) {
+		//		attacker->set_hp(min(attacker->hp + uint(value * (ins->lv * 10.f / 100.f)), attacker->hp_max));
+		//	});
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Passive\n"
+		//		"Restore health based on attack damage by %d%%", ins->lv * 10);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -150,24 +150,24 @@ void init_abilities()
 		ability.cd = 12.f;
 		ability.distance = 6.f;
 		ability.angle = 60.f;
-		ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& target) {
-			auto node = caster->node;
-			auto center = node->pos;
-			auto d = target - center;
-			auto target_ang = -degrees(atan2(d.z, d.x));
-			add_effect(EffectPreset::find("Fire"), center + vec3(0.f, 1.8f, 0.f), vec3(target_ang, 0.f, 0.f), 0.6f);
-			for (auto character : find_characters(center, 6.f, ~caster->faction))
-			{
-				auto d = character->node->pos - center;
-				if (abs(angle_diff(target_ang, -degrees(atan2(d.z, d.x)))) < 60.f)
-					caster->inflict_damage(character, MagicDamage, ins->lv * 80);
-			}
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::Text("Target: Location\n"
-						"Range: 6\n"
-						"Unleashes a breath of fire in front you that damage enemies by %d", ins->lv * 80);
-		};
+		//ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& target) {
+		//	auto node = caster->node;
+		//	auto center = node->pos;
+		//	auto d = target - center;
+		//	auto target_ang = -degrees(atan2(d.z, d.x));
+		//	add_effect(EffectPreset::find("Fire"), center + vec3(0.f, 1.8f, 0.f), vec3(target_ang, 0.f, 0.f), 0.6f);
+		//	for (auto character : find_characters(center, 6.f, ~caster->faction))
+		//	{
+		//		auto d = character->node->pos - center;
+		//		if (abs(angle_diff(target_ang, -degrees(atan2(d.z, d.x)))) < 60.f)
+		//			caster->inflict_damage(character, MagicDamage, ins->lv * 80);
+		//	}
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::Text("Target: Location\n"
+		//				"Range: 6\n"
+		//				"Unleashes a breath of fire in front you that damage enemies by %d", ins->lv * 80);
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -179,14 +179,14 @@ void init_abilities()
 		ability.mp = 50;
 		ability.cd = 10.f;
 		ability.distance = 5.f;
-		ability.active_t = [](AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr target) {
-			caster->inflict_damage(target, PhysicalDamage, 50.f);
-			target->add_buff(Buff::find("Stun"), 0, 2.f);
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
-				"dealing damage base on your strength and stunning it.");
-		};
+		//ability.active_t = [](AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr target) {
+		//	caster->inflict_damage(target, PhysicalDamage, 50.f);
+		//	target->add_buff(Buff::find("Stun"), 0, 2.f);
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
+		//		"dealing damage base on your strength and stunning it.");
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -196,12 +196,12 @@ void init_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 50;
 		ability.cd = 10.f;
-		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->add_buff(Buff::find("Flame Weapon"), 0, 60.f);
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
-		};
+		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->add_buff(Buff::find("Flame Weapon"), 0, 60.f);
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("");
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -211,27 +211,27 @@ void init_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 100;
 		ability.cd = 30.f;
-		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
-		};
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("");
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
 		ability.name = "Stinger";
 		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\funguscorrosive spore.jpg";
-		ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
-				if (linearRand(0U, 99U) < 7)
-					target->add_buff(Buff::find("Poisoned"), 3.f, true);
-			});
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
-		};
+		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
+		//		if (linearRand(0U, 99U) < 7)
+		//			target->add_buff(Buff::find("Poisoned"), 3.f, true);
+		//	});
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("");
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -241,15 +241,15 @@ void init_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 100;
 		ability.cd = 10.f;
-		ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
-			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
-		};
-		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->add_buff(Buff::find("Roar"), 0, 12.f);
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
-		};
+		//ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	return (float)caster->hp / (float)caster->hp_max <= 0.5f;
+		//};
+		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->add_buff(Buff::find("Roar"), 0, 12.f);
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("");
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -259,15 +259,15 @@ void init_abilities()
 		ability.cast_time = 3.f;
 		ability.mp = 50;
 		ability.cd = 0.f;
-		ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
-			return (float)caster->hp / (float)caster->hp_max <= 0.5f;
-		};
-		ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-			caster->set_hp(min(caster->hp + 100, caster->hp_max));
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
-		};
+		//ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	return (float)caster->hp / (float)caster->hp_max <= 0.5f;
+		//};
+		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
+		//	caster->set_hp(min(caster->hp + 100, caster->hp_max));
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("");
+		//};
 	}
 	{
 		auto& ability = abilities.emplace_back();
@@ -278,12 +278,26 @@ void init_abilities()
 		ability.cast_time = 0.f;
 		ability.mp = 50;
 		ability.distance = 15.f;
-		ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& location) {
-			teleport(caster, location);
-		};
-		ability.show = [](AbilityInstance* ins) {
-			ImGui::TextUnformatted("");
-		};
+		//ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& location) {
+		//	teleport(caster, location);
+		//};
+		//ability.show = [](AbilityInstance* ins) {
+		//	ImGui::TextUnformatted("");
+		//};
+	}
+
+	for (auto& section : parse_ini_file(Path::get(L"assets\\abilities.ini")).sections)
+	{
+		auto& ability = abilities.emplace_back();
+		ability.id = abilities.size() - 1;
+		ability.name = section.name;
+		for (auto& e : section.entries)
+		{
+			if (e.key == "icon_name")
+				ability.icon_name = e.value;
+			else if (e.key == "icon_tile_coord")
+				ability.icon_tile_coord = s2t<2, uint>(e.value);
+		}
 	}
 
 	for (auto& ability : abilities)

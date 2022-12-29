@@ -1,6 +1,7 @@
 #pragma once
 
 #include "main.h"
+#include "command.h"
 
 struct AbilityInstance
 {
@@ -19,22 +20,22 @@ struct Ability
 	graphics::ImagePtr		icon_image = nullptr;
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 
-	TargetType target_type = TargetNull;
-	uint max_lv = 5;
-	float cast_time = 0.f;
-	float channel_time = 0.f;
-	uint mp = 0;
-	float cd = 0.f;
-	float distance = 0.f;
-	float range = 0.f;
-	float angle = 0.f;
+	TargetType				target_type = TargetNull;
+	uint					max_lv = 5;
+	float					cast_time = 0.f;
+	float					channel_time = 0.f;
+	uint					mp = 0;
+	float					cd = 0.f;
+	float					distance = 0.f;
+	float					range = 0.f;
+	float					angle = 0.f;
 
-	bool(*cast_check)(AbilityInstance* ins, cCharacterPtr caster) = nullptr;
-	void(*active)(AbilityInstance* ins, cCharacterPtr caster) = nullptr;
-	void(*active_l)(AbilityInstance* ins, cCharacterPtr caster, const vec3&) = nullptr;
-	void(*active_t)(AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr) = nullptr;
-	void(*passive)(AbilityInstance* ins, cCharacterPtr caster) = nullptr;
-	void(*show)(AbilityInstance* ins) = nullptr;
+	std::string				description;
+
+	ParameterNames			parameter_names;
+	Parameters				parameters;
+	CommandList				active;
+	CommandList				passive;
 
 	static int find(const std::string& name);
 	static const Ability& get(uint id);

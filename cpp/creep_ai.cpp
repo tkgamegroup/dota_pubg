@@ -63,14 +63,14 @@ void cCreepAI::update()
 						{
 							if (auto& ability = Ability::get(ins->id); character->mp >= ability.mp)
 							{
-								if (!ability.cast_check || ability.cast_check(ins.get(), character))
+								//if (!ability.cast_check || ability.cast_check(ins.get(), character))
 								{
-									if (ability.target_type == TargetNull && ability.active)
+									if (ability.target_type == TargetNull && !ability.active.empty())
 									{
 										new CharacterCommandCastAbility(character, ins.get());
 										break;
 									}
-									if (ability.target_type == TargetEnemy && ability.active_t)
+									if (ability.target_type == TargetEnemy && !ability.active.empty())
 									{
 										new CharacterCommandCastAbilityToTarget(character, ins.get(),
 											((CharacterCommandAttackTarget*)character->command.get())->target.obj);

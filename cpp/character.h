@@ -100,6 +100,20 @@ enum Action
 
 struct CharacterPreset
 {
+	struct AbilityInfo
+	{
+		std::string name;
+		uint lv;
+	};
+
+	struct DropItem
+	{
+		uint id;
+		uint probability;
+		uint num_min;
+		uint num_max;
+	};
+
 	uint					id;
 	std::string				name;
 	std::filesystem::path	path;
@@ -109,22 +123,26 @@ struct CharacterPreset
 	uint mp = 100;
 	uint atk = 0;
 	float atk_distance = 1.5f;
-	float atk_interval = 2.f; // attack interval
-	float atk_time = 1.5f; // animation time
-	float atk_point = 1.f; // hit point
+	float atk_interval = 2.f;
+	float atk_time = 1.5f;
+	float atk_point = 1.f;
 	int atk_projectile_preset = -1;
-	float cast_time = 1.f; // animation time
-	float cast_point = 1.f; // hit point
-	uint phy_def = 0; // physical defense
-	uint mag_def = 0; // magic defense
-	uint hp_reg = 0; // hp regeneration
-	uint mp_reg = 0; // mp regeneration
-	uint mov_sp = 100; // move speed
-	uint atk_sp = 100; // attack speed
+	float cast_time = 1.f;
+	float cast_point = 1.f;
+	uint phy_def = 0;
+	uint mag_def = 0;
+	uint hp_reg = 0;
+	uint mp_reg = 0;
+	uint mov_sp = 100;
+	uint atk_sp = 100;
 
-	std::vector<std::pair<std::string, uint>>		abilities;
-	std::vector<std::string>						talents;
-	std::vector<std::tuple<uint, uint, uint, uint>> drop_items; // id, probability, num min, num max
+	std::vector<AbilityInfo>		abilities;
+	std::vector<std::string>		talents;
+	std::vector<DropItem>			drop_items;
+
+	std::filesystem::path	move_sound_path;
+	std::filesystem::path	attack_precast_sound_path;
+	std::filesystem::path	attack_hit_sound_path;
 
 	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);

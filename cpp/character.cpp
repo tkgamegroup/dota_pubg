@@ -176,8 +176,8 @@ void init_characters()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.path = L"assets\\characters\\dragon_knight\\main.prefab";
 		preset.name = "Dragon Knight";
+		preset.path = L"assets\\characters\\dragon_knight\\main.prefab";
 		preset.exp_base = 120;
 		preset.hp = 500;
 		preset.mp = 100;
@@ -193,8 +193,8 @@ void init_characters()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.path = L"assets\\characters\\life_stealer\\main.prefab";
 		preset.name = "Life Stealer";
+		preset.path = L"assets\\characters\\life_stealer\\main.prefab";
 		preset.exp_base = 200;
 		preset.hp = 200;
 		preset.mp = 50;
@@ -206,8 +206,8 @@ void init_characters()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.path = L"assets\\characters\\slark\\main.prefab";
 		preset.name = "Slark";
+		preset.path = L"assets\\characters\\slark\\main.prefab";
 		preset.exp_base = 200;
 		preset.hp = 200;
 		preset.mp = 50;
@@ -219,8 +219,8 @@ void init_characters()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.path = L"assets\\characters\\spiderling\\main.prefab";
 		preset.name = "Spiderling";
+		preset.path = L"assets\\characters\\spiderling\\main.prefab";
 		preset.exp_base = 200;
 		preset.hp = 50;
 		preset.mp = 0;
@@ -234,8 +234,8 @@ void init_characters()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.path = L"assets\\characters\\treant\\main.prefab";
 		preset.name = "Treant";
+		preset.path = L"assets\\characters\\treant\\main.prefab";
 		preset.exp_base = 800;
 		preset.hp = 200;
 		preset.mp = 200;
@@ -253,8 +253,8 @@ void init_characters()
 	{
 		auto& preset = character_presets.emplace_back();
 		preset.id = character_presets.size() - 1;
-		preset.path = L"assets\\characters\\boar\\main.prefab";
 		preset.name = "Boar";
+		preset.path = L"assets\\characters\\boar\\main.prefab";
 		preset.exp_base = 1000;
 		preset.hp = 300;
 		preset.mp = 100;
@@ -264,6 +264,54 @@ void init_characters()
 		preset.atk_point = 0.5f;
 		preset.mov_sp = 100;
 		preset.abilities.emplace_back("Roar", 1);
+	}
+
+	for (auto& section : parse_ini_file(Path::get(L"assets\\characters.ini")).sections)
+	{
+		auto& preset = character_presets.emplace_back();
+		preset.id = character_presets.size() - 1;
+		preset.name = section.name;
+		for (auto& e : section.entries)
+		{
+			if (e.key == "path")
+				preset.path = e.value;
+			else if (e.key == "exp_base")
+				preset.exp_base = s2t<uint>(e.value);
+			else if (e.key == "hp")
+				preset.hp = s2t<uint>(e.value);
+			else if (e.key == "mp")
+				preset.mp = s2t<uint>(e.value);
+			else if (e.key == "atk")
+				preset.atk = s2t<uint>(e.value);
+			else if (e.key == "atk_distance")
+				preset.atk_distance = s2t<float>(e.value);
+			else if (e.key == "atk_interval")
+				preset.atk_interval = s2t<float>(e.value);
+			else if (e.key == "atk_time")
+				preset.atk_time = s2t<float>(e.value);
+			else if (e.key == "atk_point")
+				preset.atk_point = s2t<float>(e.value);
+			else if (e.key == "atk_projectile_preset")
+				preset.atk_projectile_preset = s2t<int>(e.value);
+			else if (e.key == "cast_time")
+				preset.cast_time = s2t<float>(e.value);
+			else if (e.key == "cast_point")
+				preset.cast_point = s2t<float>(e.value);
+			else if (e.key == "phy_def")
+				preset.phy_def = s2t<uint>(e.value);
+			else if (e.key == "mag_def")
+				preset.mag_def = s2t<uint>(e.value);
+			else if (e.key == "hp_reg")
+				preset.hp_reg = s2t<uint>(e.value);
+			else if (e.key == "mp_reg")
+				preset.mp_reg = s2t<uint>(e.value);
+			else if (e.key == "mov_sp")
+				preset.mov_sp = s2t<uint>(e.value);
+			else if (e.key == "atk_sp")
+				preset.atk_sp = s2t<uint>(e.value);
+			else if (e.key == "abilities")
+				;
+		}
 	}
 }
 
@@ -600,17 +648,10 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	auto& ability = Ability::get(ins->id);
 	if (mp < ability.mp)
 		return;
-	if (ability.cast_check)
-	{
-		if (!ability.cast_check(ins, this))
-			return;
-	}
-	if (ability.active)
-		ability.active(ins, this);
-	else if (ability.active_l)
-		ability.active_l(ins, this, location);
-	else if (ability.active_t)
-		ability.active_t(ins, this, target);
+
+	for (auto& c : ability.active)
+		c.execute(this, target, location, ability.parameters, ins->lv);
+
 	ins->cd_max = ability.cd;
 	ins->cd_timer = ins->cd_max;
 	set_mp(mp - ability.mp);
@@ -695,7 +736,7 @@ void cCharacter::start()
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
 		for (auto& i : preset->abilities)
-			gain_ability(Ability::find(i.first), i.second);
+			gain_ability(Ability::find(i.name), i.lv);
 		for (auto& i : preset->talents)
 			gain_talent(Talent::find(i));
 	}
@@ -875,8 +916,8 @@ void cCharacter::update()
 					std::vector<std::pair<uint, uint>> drops;
 					for (auto& d : preset->drop_items)
 					{
-						if (linearRand(0U, 100U) < std::get<1>(d))
-							drops.emplace_back(std::get<0>(d), linearRand(std::get<2>(d), std::get<3>(d)));
+						if (linearRand(0U, 100U) < d.probability)
+							drops.emplace_back(d.id, linearRand(d.num_min, d.num_max));
 					}
 					auto p = node->pos;
 					for (auto& d : drops)
@@ -922,8 +963,8 @@ void cCharacter::update()
 				if (ins && ins->lv > 0)
 				{
 					auto& ability = Ability::get(ins->id);
-					if (ability.passive)
-						ability.passive(ins.get(), this);
+					for (auto& c : ability.passive)
+						c.execute(this, nullptr, vec3(0.f), ability.parameters, ins->lv);
 				}
 			}
 			for (auto& ins : buffs)

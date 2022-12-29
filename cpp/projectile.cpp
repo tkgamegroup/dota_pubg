@@ -12,6 +12,17 @@ std::vector<ProjectilePreset> projectile_presets;
 
 void init_projectiles()
 {
+	for (auto& section : parse_ini_file(Path::get(L"assets\\projectiles.ini")).sections)
+	{
+		auto& preset = projectile_presets.emplace_back();
+		preset.id = projectile_presets.size() - 1;
+		preset.name = section.name;
+		for (auto& e : section.entries)
+		{
+			if (e.key == "path")
+				preset.path = e.value;
+		}
+	}
 }
 
 int ProjectilePreset::find(const std::string& name)

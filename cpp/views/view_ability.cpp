@@ -92,15 +92,7 @@ void ViewAbility::on_draw()
 							{
 								ImGui::BeginTooltip();
 								ImGui::TextUnformatted(ability.name.c_str());
-								if (ability.show)
-								{
-									ImGui::Text("LV: %d", ins->lv);
-									ability.show(ins);
-									ins->lv++;
-									ImGui::Text("LV: %d", ins->lv);
-									ability.show(ins);
-									ins->lv--;
-								}
+								ImGui::TextUnformatted(ability.description.c_str());
 								ImGui::EndTooltip();
 							}
 							dl->AddImage(ins->lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
@@ -133,7 +125,7 @@ void ViewAbility::on_draw()
 								main_player.character->ability_points--;
 								main_player.character->stats_dirty = true;
 
-								if (ins->lv == 1 && !ability.passive)
+								if (ins->lv == 1 && !ability.active.empty())
 								{
 									auto found = false;
 									for (auto& shortcut : shortcuts)

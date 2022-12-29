@@ -6,12 +6,18 @@ std::vector<EffectPreset> effect_presets;
 
 void init_effects()
 {
+	for (auto& section : parse_ini_file(Path::get(L"assets\\effects.ini")).sections)
 	{
 		auto& preset = effect_presets.emplace_back();
 		preset.id = effect_presets.size() - 1;
-		preset.name = "Fire";
-		preset.path = L"assets\\effects\\fire.prefab";
-		preset.sound_path = L"assets\\effects\\Breathe_Fire.wav";
+		preset.name = section.name;
+		for (auto& e : section.entries)
+		{
+			if (e.key == "path")
+				preset.path = e.value;
+			else if (e.key == "sound_path")
+				preset.sound_path = e.value;
+		}
 	}
 }
 
