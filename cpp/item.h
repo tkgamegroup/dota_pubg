@@ -29,7 +29,7 @@ struct Item
 	std::string				description;
 
 	ParameterNames			parameter_names;
-	Parameters				parameters;
+	ParameterPack				parameters;
 	CommandList				active;
 	CommandList				passive;
 

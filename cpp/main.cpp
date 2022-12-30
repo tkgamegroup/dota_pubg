@@ -407,8 +407,8 @@ void cMain::start()
 	main_terrain.init(entity->find_child("terrain"));
 
 	init_items();
-	init_abilities();
 	init_buffs();
+	init_abilities();
 	init_characters();
 	init_projectiles();
 	init_effects();

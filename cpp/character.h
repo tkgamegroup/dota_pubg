@@ -114,35 +114,35 @@ struct CharacterPreset
 		uint num_max;
 	};
 
-	uint					id;
-	std::string				name;
-	std::filesystem::path	path;
+	uint						id;
+	std::string					name;
+	std::filesystem::path		path;
 
-	uint exp_base = 0;
-	uint hp = 100;
-	uint mp = 100;
-	uint atk = 0;
-	float atk_distance = 1.5f;
-	float atk_interval = 2.f;
-	float atk_time = 1.5f;
-	float atk_point = 1.f;
-	int atk_projectile_preset = -1;
-	float cast_time = 1.f;
-	float cast_point = 1.f;
-	uint phy_def = 0;
-	uint mag_def = 0;
-	uint hp_reg = 0;
-	uint mp_reg = 0;
-	uint mov_sp = 100;
-	uint atk_sp = 100;
+	uint						exp_base = 0;
+	uint						hp = 100;
+	uint						mp = 100;
+	uint						atk = 0;
+	float						atk_distance = 1.5f;
+	float						atk_interval = 2.f;
+	float						atk_time = 1.5f;
+	float						atk_point = 1.f;
+	int							atk_projectile_preset = -1;
+	float						cast_time = 1.f;
+	float						cast_point = 1.f;
+	uint						phy_def = 0;
+	uint						mag_def = 0;
+	uint						hp_reg = 0;
+	uint						mp_reg = 0;
+	uint						mov_sp = 100;
+	uint						atk_sp = 100;
 
-	std::vector<AbilityInfo>		abilities;
-	std::vector<std::string>		talents;
-	std::vector<DropItem>			drop_items;
+	std::vector<AbilityInfo>	abilities;
+	std::vector<std::string>	talents;
+	std::vector<DropItem>		drop_items;
 
-	std::filesystem::path	move_sound_path;
-	std::filesystem::path	attack_precast_sound_path;
-	std::filesystem::path	attack_hit_sound_path;
+	std::filesystem::path		move_sound_path;
+	std::filesystem::path		attack_precast_sound_path;
+	std::filesystem::path		attack_hit_sound_path;
 
 	static int find(const std::string& name);
 	static const CharacterPreset& get(uint id);

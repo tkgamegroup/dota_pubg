@@ -42,9 +42,6 @@ const ProjectilePreset& ProjectilePreset::get(uint id)
 
 void cProjectile::update()
 {
-	if (preset->update)
-		preset->update(this);
-
 	if (use_target)
 	{
 		if (!target.obj)

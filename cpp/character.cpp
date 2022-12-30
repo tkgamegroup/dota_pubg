@@ -736,9 +736,15 @@ void cCharacter::start()
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
 		for (auto& i : preset->abilities)
-			gain_ability(Ability::find(i.name), i.lv);
+		{
+			if (auto id = Ability::find(i.name); id != -1)
+				gain_ability(id, i.lv);
+		}
 		for (auto& i : preset->talents)
-			gain_talent(Talent::find(i));
+		{
+			if (auto id = Talent::find(i); id != -1)
+				gain_talent(Talent::find(i));
+		}
 	}
 
 	inventory.resize(16);
@@ -793,7 +799,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 						inflict_damage(target, (DamageType)atk_type, damage);
 						if (target->dead_flag == 0)
 						{
-							static Parameters parameters;
+							static ParameterPack parameters;
 							parameters["damage_type"_h].push_back({ .i = atk_type });
 							parameters["damage"_h].push_back({ .u = damage });
 							for (auto& ef : attack_effects)

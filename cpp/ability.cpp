@@ -18,90 +18,7 @@ void init_abilities()
 	{
 		auto& ability = abilities.emplace_back();
 		ability.id = abilities.size() - 1;
-		ability.name = "Strong Body";
-		ability.icon_name = L"assets\\icons\\strength.png";
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->hp_max += ins->lv * 100;
-		//	caster->hp_reg += ins->lv;
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//				"Increase HP Max by %d and HP Reg by %d", ins->lv * 100, ins->lv);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Strong Mind";
-		ability.icon_name = L"assets\\icons\\intelligence.png";
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->mp_max += ins->lv * 100;
-		//	caster->mp_reg += ins->lv;
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//		"Increase MP Max by %d and MP Reg by %d", ins->lv * 100, ins->lv);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Sharp Weapon";
-		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_tile_coord = uvec2(1, 7);
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->atk += ins->lv * 10;
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//				"Increase ATK by %d", ins->lv * 10);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Rapid Strike";
-		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_tile_coord = uvec2(10, 9);
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->atk_sp += ins->lv * 10;
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//				"Increase ATK SP by %d", ins->lv * 10);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Scud";
-		ability.icon_name = L"assets\\icons\\agility.png";
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->mov_sp += ins->lv * 10;
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//				"Increase MOV SP by %d", ins->lv * 10);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Armor";
-		ability.icon_name = L"assets\\icons\\roguelikeitems.png";
-		ability.icon_tile_coord = uvec2(9, 9);
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->phy_def += ins->lv * 10;
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//				"Increase Phy DEF by %d", ins->lv * 10);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Grate Cleave";
+		ability.name = "Greate Cleave";
 		ability.icon_name = L"assets\\icons\\Greate_Cleave.jpg";
 		ability.max_lv = 4;
 		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
@@ -197,58 +114,7 @@ void init_abilities()
 		ability.mp = 50;
 		ability.cd = 10.f;
 		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->add_buff(Buff::find("Flame Weapon"), 0, 60.f);
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("");
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Flame Shield";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma seizmic.jpg";
-		ability.cast_time = 0.f;
-		ability.mp = 100;
-		ability.cd = 30.f;
-		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("");
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Stinger";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\funguscorrosive spore.jpg";
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
-		//		if (linearRand(0U, 99U) < 7)
-		//			target->add_buff(Buff::find("Poisoned"), 3.f, true);
-		//	});
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("");
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Roar";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\fungusfungusbite2.jpg";
-		ability.cast_time = 0.f;
-		ability.mp = 100;
-		ability.cd = 10.f;
-		//ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	return (float)caster->hp / (float)caster->hp_max <= 0.5f;
-		//};
-		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->add_buff(Buff::find("Roar"), 0, 12.f);
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("");
+		//	caster->add_buff(Buff::find("Flame Weapon") 0, 60.f);
 		//};
 	}
 	{
@@ -259,14 +125,8 @@ void init_abilities()
 		ability.cast_time = 3.f;
 		ability.mp = 50;
 		ability.cd = 0.f;
-		//ability.cast_check = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	return (float)caster->hp / (float)caster->hp_max <= 0.5f;
-		//};
 		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
 		//	caster->set_hp(min(caster->hp + 100, caster->hp_max));
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("");
 		//};
 	}
 	{
@@ -297,6 +157,12 @@ void init_abilities()
 				ability.icon_name = e.value;
 			else if (e.key == "icon_tile_coord")
 				ability.icon_tile_coord = s2t<2, uint>(e.value);
+			else if (e.key == "description")
+				ability.description = e.value;
+			else if (e.key == "active")
+				parse_command_list(ability.active, e.value);
+			else if (e.key == "passive")
+				parse_command_list(ability.passive, e.value);
 		}
 	}
 
@@ -331,7 +197,7 @@ void init_abilities()
 		}
 		{
 			std::vector<uint> layer;
-			layer.push_back(Ability::find("Grate Cleave"));
+			layer.push_back(Ability::find("Greate Cleave"));
 			layer.push_back(Ability::find("Vampiric Spirit"));
 			talent.ablilities_list.push_back(layer);
 		}

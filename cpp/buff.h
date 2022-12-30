@@ -27,7 +27,7 @@ struct Buff
 	std::string				description;
 
 	ParameterNames			parameter_names;
-	Parameters				parameters;
+	ParameterPack				parameters;
 	CommandList				passive;
 	CommandList				continuous;
 
