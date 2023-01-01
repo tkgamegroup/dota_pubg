@@ -4,6 +4,9 @@
 #include "projectile.h"
 #include "effect.h"
 
+#define FLAME_NO_XML
+#define FLAME_NO_JSON
+#include <flame/foundation/typeinfo_serialize.h>
 #include <flame/graphics/image.h>
 #include <flame/graphics/gui.h>
 #include <flame/universe/entity.h>
@@ -86,65 +89,6 @@ void init_abilities()
 		//				"Unleashes a breath of fire in front you that damage enemies by %d", ins->lv * 80);
 		//};
 	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Shield Bash";
-		ability.icon_name = L"assets\\icons\\shield_alpha.png";
-		ability.target_type = TargetEnemy;
-		ability.cast_time = 0.5f;
-		ability.mp = 50;
-		ability.cd = 10.f;
-		ability.distance = 5.f;
-		//ability.active_t = [](AbilityInstance* ins, cCharacterPtr caster, cCharacterPtr target) {
-		//	caster->inflict_damage(target, PhysicalDamage, 50.f);
-		//	target->add_buff(Buff::find("Stun"), 0, 2.f);
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("Smites an enemy unit with your shield, \n"
-		//		"dealing damage base on your strength and stunning it.");
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Flame Weapon";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
-		ability.cast_time = 0.f;
-		ability.mp = 50;
-		ability.cd = 10.f;
-		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->add_buff(Buff::find("Flame Weapon") 0, 60.f);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Recover";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\mucus trap.jpg";
-		ability.cast_time = 3.f;
-		ability.mp = 50;
-		ability.cd = 0.f;
-		//ability.active = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->set_hp(min(caster->hp + 100, caster->hp_max));
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Blink";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\Tactical Flight.jpg";
-		ability.target_type = TargetLocation;
-		ability.cast_time = 0.f;
-		ability.mp = 50;
-		ability.distance = 15.f;
-		//ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& location) {
-		//	teleport(caster, location);
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::TextUnformatted("");
-		//};
-	}
 
 	for (auto& section : parse_ini_file(Path::get(L"assets\\abilities.ini")).sections)
 	{
@@ -154,15 +98,23 @@ void init_abilities()
 		for (auto& e : section.entries)
 		{
 			if (e.key == "icon_name")
-				ability.icon_name = e.value;
+				ability.icon_name = e.values[0];
 			else if (e.key == "icon_tile_coord")
-				ability.icon_tile_coord = s2t<2, uint>(e.value);
+				ability.icon_tile_coord = s2t<2, uint>(e.values[0]);
+			else if (e.key == "target_type")
+				TypeInfo::unserialize_t(e.values[0], ability.target_type);
+			else if (e.key == "distance")
+				ability.distance = s2t<float>(e.values[0]);
+			else if (e.key == "range")
+				ability.range = s2t<float>(e.values[0]);
+			else if (e.key == "angle")
+				ability.angle = s2t<float>(e.values[0]);
 			else if (e.key == "description")
-				ability.description = e.value;
+				ability.description = e.values[0];
 			else if (e.key == "active")
-				parse_command_list(ability.active, e.value);
+				build_command_list(ability.active, e.values);
 			else if (e.key == "passive")
-				parse_command_list(ability.passive, e.value);
+				build_command_list(ability.passive, e.values);
 		}
 	}
 

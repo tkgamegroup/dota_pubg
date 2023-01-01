@@ -34,11 +34,11 @@ void read_parameter_values(std::vector<Variant>& vec, const std::string& text)
 		vec[i] = read_variant(sp[i]);
 }
 
-void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters, const std::string& text)
+void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters, const std::vector<std::string>& tokens)
 {
-	for (auto& p : SUS::split(text))
+	for (auto& t : tokens)
 	{
-		auto sp = SUS::split(p, ':');
+		auto sp = SUS::split(t, ':');
 		auto hash = sh(sp[0].c_str());
 		parameter_names.emplace_back(sp[0], hash);
 		auto& vec = parameters.emplace(hash, std::vector<Variant>()).first->second;
@@ -46,35 +46,10 @@ void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters,
 	}
 }
 
-Command::Command(std::vector<std::string>& tokens)
-{
-	static auto ei_type = find_enum(th<Type>());
-
-	type = (Type)ei_type->find_item(tokens[0])->value;
-	parameters.resize(tokens.size() - 1);
-	for (auto i = 1; i < tokens.size(); i++)
-	{
-		auto& para = parameters[i - 1];
-		auto name = 0;
-		auto& str = tokens[i];
-		if (std::isdigit(str[0]))
-			para = { 0, read_variant(str) };
-		else
-		{
-			if (auto ii = ei_type->find_item(str); ii)
-				para = { 0, { .i = ii->value } };
-			else if (SUS::strip_head_tail_if(str, "\"", "\"_buff"))
-				para = { 0, { .i = Buff::find(str) } };
-			else
-				para = { 1, { .u = sh(str.c_str()) } };
-		}
-	}
-}
-
 void Command::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
 	auto read_parameter = [&](uint idx, uint lv)->const Variant& {
-		auto& para = parameters[idx];
+		auto& para = instructions[idx];
 		if (para.first == 0)
 			return para.second;
 		auto& vec = external_parameters.at(para.second.u);
@@ -90,7 +65,7 @@ void Command::execute(cCharacterPtr character, cCharacterPtr target_character, c
 		case tRollDice100:
 			if (linearRand(0U, 99U) < read_parameter(off, lv).i)
 			{
-				type = (Type)parameters[off + 1].second.i;
+				type = (Type)instructions[off + 1].second.i;
 				off += 2;
 				do_cmd(type);
 			}
@@ -105,6 +80,9 @@ void Command::execute(cCharacterPtr character, cCharacterPtr target_character, c
 			break;
 		case tTakeDamagePct:
 			character->take_damage(MagicDamage, character->hp_max * (read_parameter(off, lv).i / 100.f));
+			break;
+		case tInflictDamge:
+			character->inflict_damage(target_character, (DamageType)read_parameter(off, lv).i, read_parameter(off + 1, lv).i);
 			break;
 		case tLevelUp:
 			character->gain_exp(character->exp_max);
@@ -153,25 +131,51 @@ void Command::execute(cCharacterPtr character, cCharacterPtr target_character, c
 		{
 			CommandList ef;
 			Command cmd;
-			cmd.type = (Type)parameters[off].second.i;
-			cmd.parameters.resize(parameters.size() - off - 1);
-			for (auto i = 0; i < cmd.parameters.size(); i++)
-				cmd.parameters[i] = parameters[i + off + 1];
+			cmd.instructions.resize(instructions.size() - off - 1);
+			for (auto i = 0; i < cmd.instructions.size(); i++)
+				cmd.instructions[i] = instructions[i + off + 1];
 			ef.push_back(cmd);
 			character->attack_effects.push_back(ef);
 		}
 			break;
+		case tTeleportToTarget:
+			teleport(character, target_pos);
+			break;
 		}
 	};
 
-	do_cmd(type);
+	do_cmd((Type)instructions[0].second.i);
 }
 
-void parse_command_list(CommandList& list, const std::string& text)
+void build_command_list(CommandList& list, const std::vector<std::string>& tokens)
 {
-	for (auto& c : SUS::split(text, '&'))
+	static auto ei_type = find_enum(th<Command::Type>());
+
+	Command cmd;
+	for (auto& t : tokens)
 	{
-		auto tokens = SUS::split_quot(SUS::get_trimed(c));
-		list.push_back(Command(tokens));
+		if (t == "&")
+		{
+			list.push_back(cmd);
+			cmd = Command();
+		}
+		else
+		{
+			auto& instr = cmd.instructions.emplace_back();
+
+			auto str = t;
+			if (std::isdigit(str[0]))
+				instr = { 0, read_variant(str) };
+			else
+			{
+				if (auto ii = ei_type->find_item(str); ii)
+					instr = { 0, {.i = ii->value } };
+				else if (int id; parse_literal(str, id))
+					instr = { 0, {.i = id } };
+				else
+					instr = { 1, {.u = sh(str.c_str()) } };
+			}
+		}
 	}
+	list.push_back(cmd);
 }

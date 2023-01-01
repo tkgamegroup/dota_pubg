@@ -20,7 +20,7 @@ void init_projectiles()
 		for (auto& e : section.entries)
 		{
 			if (e.key == "path")
-				preset.path = e.value;
+				preset.path = e.values[0];
 		}
 	}
 }

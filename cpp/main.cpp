@@ -40,6 +40,37 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
 
+bool parse_literal(std::string& str, int& id)
+{
+	if (SUS::strip_head_tail_if(str, "\"", "\"_state"))
+	{
+		CharacterState state;
+		TypeInfo::unserialize_t(str, state);
+		id = state;
+	}
+	else if (SUS::strip_head_tail_if(str, "\"", "\"_buff"))
+	{
+		id = Buff::find(str);
+		return true;
+	}
+	else if (SUS::strip_head_tail_if(str, "\"", "\"_item"))
+	{
+		id = Item::find(str);
+		return true;
+	}
+	else if (SUS::strip_head_tail_if(str, "\"", "\"_ability"))
+	{
+		id = Ability::find(str);
+		return true;
+	}
+	else if (SUS::strip_head_tail_if(str, "\"", "\"_talent"))
+	{
+		id = Talent::find(str);
+		return true;
+	}
+	return false;
+}
+
 bool in_editor = false;
 Entity** editor_p_selecting_entity = nullptr;
 bool* editor_p_control = nullptr;
@@ -376,13 +407,13 @@ void init_spawnning_rules()
 			for (auto& e : section.entries)
 			{
 				if (e.key == "delay")
-					rule.delay = s2t<float>(e.value);
+					rule.delay = s2t<float>(e.values[0]);
 				else if (e.key == "number_function_factor_a")
-					rule.number_function_factor_a = s2t<float>(e.value);
+					rule.number_function_factor_a = s2t<float>(e.values[0]);
 				else if (e.key == "number_function_factor_b")
-					rule.number_function_factor_b = s2t<float>(e.value);
+					rule.number_function_factor_b = s2t<float>(e.values[0]);
 				else if (e.key == "number_function_factor_c")
-					rule.number_function_factor_c = s2t<float>(e.value);
+					rule.number_function_factor_c = s2t<float>(e.values[0]);
 			}
 		}
 	}

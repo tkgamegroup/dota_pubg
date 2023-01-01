@@ -16,22 +16,22 @@ void init_items()
 		for (auto& e : section.entries)
 		{
 			if (e.key == "icon_name")
-				item.icon_name = e.value;
+				item.icon_name = e.values[0];
 			else if (e.key == "icon_tile_coord")
-				item.icon_tile_coord = s2t<2, uint>(e.value);
+				item.icon_tile_coord = s2t<2, uint>(e.values[0]);
 			else if (e.key == "type")
 			{
-				if (e.value == "I")
+				if (e.values[0] == "I")
 					item.type = ItemItem;
-				else if (e.value == "C")
+				else if (e.values[0] == "C")
 					item.type = ItemConsumable;
 			}
 			else if (e.key == "description")
-				item.description = e.value;
+				item.description = e.values[0];
 			else if (e.key == "parameters")
-				read_parameters(item.parameter_names, item.parameters, e.value);
+				read_parameters(item.parameter_names, item.parameters, e.values);
 			else if (e.key == "active")
-				parse_command_list(item.active, e.value);
+				build_command_list(item.active, e.values);
 		}
 	}
 

@@ -17,6 +17,7 @@ FLAME_TYPE(cNWDataHarvester)
 
 const auto CharacterTag = 1 << 1;
 
+// Reflect
 enum Faction
 {
 	FactionCreep = 1 << 0,
@@ -26,6 +27,8 @@ enum Faction
 	FactionParty4 = 1 << 4
 };
 
+
+// Reflect
 enum TargetType
 {
 	TargetNull = 0,
@@ -34,6 +37,7 @@ enum TargetType
 	TargetLocation = 1 << 2
 };
 
+// Reflect
 enum DamageType
 {
 	PhysicalDamage,
@@ -71,6 +75,8 @@ struct Tracker
 		}
 	}
 };
+
+bool parse_literal(std::string& str, int& id);
 
 extern EntityPtr root;
 

@@ -7,27 +7,6 @@ std::vector<Buff> buffs;
 
 void init_buffs()
 {
-	{
-		auto& buff = buffs.emplace_back();
-		buff.id = buffs.size() - 1;
-		buff.name = "Stun";
-		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\blood tornado b.jpg";
-		//buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
-		//	character->state = State(character->state | StateStun);
-		//};
-	}
-	{
-		auto& buff = buffs.emplace_back();
-		buff.id = buffs.size() - 1;
-		buff.name = "Flame Weapon";
-		buff.icon_name = L"assets\\icons\\old Ancient Beast icons\\magma pulverize.jpg";
-		//buff.passive = [](BuffInstance* ins, cCharacterPtr character) {
-		//	character->attack_effects.add([](cCharacterPtr character, cCharacterPtr target, DamageType, uint) {
-		//		character->inflict_damage(target, MagicDamage, 10);
-		//	});
-		//};
-	}
-
 	for (auto& section : parse_ini_file(Path::get(L"assets\\buffs.ini")).sections)
 	{
 		auto& buff = buffs.emplace_back();
@@ -36,19 +15,19 @@ void init_buffs()
 		for (auto& e : section.entries)
 		{
 			if (e.key == "icon_name")
-				buff.icon_name = e.value;
+				buff.icon_name = e.values[0];
 			else if (e.key == "icon_tile_coord")
-				buff.icon_tile_coord = s2t<2, uint>(e.value);
+				buff.icon_tile_coord = s2t<2, uint>(e.values[0]);
 			else if (e.key == "interval")
-				buff.interval = s2t<float>(e.value);
+				buff.interval = s2t<float>(e.values[0]);
 			else if (e.key == "description")
-				buff.description = e.value;
+				buff.description = e.values[0];
 			else if (e.key == "parameters")
-				read_parameters(buff.parameter_names, buff.parameters, e.value);
+				read_parameters(buff.parameter_names, buff.parameters, e.values);
 			else if (e.key == "passive")
-				parse_command_list(buff.passive, e.value);
+				build_command_list(buff.passive, e.values);
 			else if (e.key == "continuous")
-				parse_command_list(buff.continuous, e.value);
+				build_command_list(buff.continuous, e.values);
 		}
 	}
 

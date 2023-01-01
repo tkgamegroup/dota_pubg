@@ -173,98 +173,6 @@ void init_characters()
 		preset.id = character_presets.size() - 1;
 		preset.name = "Dummy";
 	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Dragon Knight";
-		preset.path = L"assets\\characters\\dragon_knight\\main.prefab";
-		preset.exp_base = 120;
-		preset.hp = 500;
-		preset.mp = 100;
-		preset.atk = 56;
-		preset.atk_interval = 1.7f;
-		preset.atk_time = 0.8f;
-		preset.atk_point = 0.5f;
-		preset.cast_time = 0.5f;
-		preset.cast_point = 0.3f;
-		preset.talents.push_back("Warrior");
-		preset.talents.push_back("Laya Knight");
-	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Life Stealer";
-		preset.path = L"assets\\characters\\life_stealer\\main.prefab";
-		preset.exp_base = 200;
-		preset.hp = 200;
-		preset.mp = 50;
-		preset.atk = 35;
-		preset.atk_interval = 1.7f;
-		preset.atk_time = 0.875f;
-		preset.atk_point = 0.39f;
-	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Slark";
-		preset.path = L"assets\\characters\\slark\\main.prefab";
-		preset.exp_base = 200;
-		preset.hp = 200;
-		preset.mp = 50;
-		preset.atk = 37;
-		preset.atk_interval = 1.7f;
-		preset.atk_time = 0.8f;
-		preset.atk_point = 0.5f;
-	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Spiderling";
-		preset.path = L"assets\\characters\\spiderling\\main.prefab";
-		preset.exp_base = 200;
-		preset.hp = 50;
-		preset.mp = 0;
-		preset.atk = 6;
-		preset.atk_interval = 1.35f;
-		preset.atk_time = 0.633f;
-		preset.atk_point = 0.5f;
-		preset.mov_sp = 400;
-		preset.abilities.emplace_back("Stinger", 1);
-	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Treant";
-		preset.path = L"assets\\characters\\treant\\main.prefab";
-		preset.exp_base = 800;
-		preset.hp = 200;
-		preset.mp = 200;
-		preset.atk = 15;
-		preset.atk_interval = 1.6f;
-		preset.atk_time = 0.958f;
-		preset.atk_point = 0.467f;
-		preset.cast_time = 2.f;
-		preset.cast_point = 1.95f;
-		preset.mov_sp = 100;
-		preset.abilities.emplace_back("Recover", 1);
-		preset.drop_items.emplace_back(Item::find("Berry"), 30, 1, 3);
-		preset.drop_items.emplace_back(Item::find("Mint"), 5, 1, 1);
-	}
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Boar";
-		preset.path = L"assets\\characters\\boar\\main.prefab";
-		preset.exp_base = 1000;
-		preset.hp = 300;
-		preset.mp = 100;
-		preset.atk = 20;
-		preset.atk_interval = 1.25f;
-		preset.atk_time = 0.958f;
-		preset.atk_point = 0.5f;
-		preset.mov_sp = 100;
-		preset.abilities.emplace_back("Roar", 1);
-	}
 
 	for (auto& section : parse_ini_file(Path::get(L"assets\\characters.ini")).sections)
 	{
@@ -274,43 +182,85 @@ void init_characters()
 		for (auto& e : section.entries)
 		{
 			if (e.key == "path")
-				preset.path = e.value;
+				preset.path = e.values[0];
 			else if (e.key == "exp_base")
-				preset.exp_base = s2t<uint>(e.value);
+				preset.exp_base = s2t<uint>(e.values[0]);
 			else if (e.key == "hp")
-				preset.hp = s2t<uint>(e.value);
+				preset.hp = s2t<uint>(e.values[0]);
 			else if (e.key == "mp")
-				preset.mp = s2t<uint>(e.value);
+				preset.mp = s2t<uint>(e.values[0]);
 			else if (e.key == "atk")
-				preset.atk = s2t<uint>(e.value);
+				preset.atk = s2t<uint>(e.values[0]);
 			else if (e.key == "atk_distance")
-				preset.atk_distance = s2t<float>(e.value);
+				preset.atk_distance = s2t<float>(e.values[0]);
 			else if (e.key == "atk_interval")
-				preset.atk_interval = s2t<float>(e.value);
+				preset.atk_interval = s2t<float>(e.values[0]);
 			else if (e.key == "atk_time")
-				preset.atk_time = s2t<float>(e.value);
+				preset.atk_time = s2t<float>(e.values[0]);
 			else if (e.key == "atk_point")
-				preset.atk_point = s2t<float>(e.value);
+				preset.atk_point = s2t<float>(e.values[0]);
 			else if (e.key == "atk_projectile_preset")
-				preset.atk_projectile_preset = s2t<int>(e.value);
+				preset.atk_projectile_preset = s2t<int>(e.values[0]);
 			else if (e.key == "cast_time")
-				preset.cast_time = s2t<float>(e.value);
+				preset.cast_time = s2t<float>(e.values[0]);
 			else if (e.key == "cast_point")
-				preset.cast_point = s2t<float>(e.value);
+				preset.cast_point = s2t<float>(e.values[0]);
 			else if (e.key == "phy_def")
-				preset.phy_def = s2t<uint>(e.value);
+				preset.phy_def = s2t<uint>(e.values[0]);
 			else if (e.key == "mag_def")
-				preset.mag_def = s2t<uint>(e.value);
+				preset.mag_def = s2t<uint>(e.values[0]);
 			else if (e.key == "hp_reg")
-				preset.hp_reg = s2t<uint>(e.value);
+				preset.hp_reg = s2t<uint>(e.values[0]);
 			else if (e.key == "mp_reg")
-				preset.mp_reg = s2t<uint>(e.value);
+				preset.mp_reg = s2t<uint>(e.values[0]);
 			else if (e.key == "mov_sp")
-				preset.mov_sp = s2t<uint>(e.value);
+				preset.mov_sp = s2t<uint>(e.values[0]);
 			else if (e.key == "atk_sp")
-				preset.atk_sp = s2t<uint>(e.value);
+				preset.atk_sp = s2t<uint>(e.values[0]);
 			else if (e.key == "abilities")
-				;
+			{
+				for (auto& t : e.values)
+				{
+					auto sp = SUS::split(t, ',');
+					auto& name = sp[0];
+					if (name.size() > 2 && name.front() == '\"' && name.back() == '\"')
+						name = std::string(name.begin() + 1, name.end() - 1);
+					if (auto id = Ability::find(name); id != -1)
+						preset.abilities.emplace_back(id, s2t<uint>(sp[1]));
+					else
+						printf("cannot find ability: %s\n", name.c_str());
+				}
+			}
+			else if (e.key == "talents")
+			{
+				for (auto& t : e.values)
+				{
+					if (auto id = Talent::find(t); id != -1)
+						preset.talents.push_back(id);
+					else
+						printf("cannot find talent: %s\n", t.c_str());
+				}
+			}
+			else if (e.key == "drop_items")
+			{
+				for (auto& t : e.values)
+				{
+					auto sp = SUS::split(t, ',');
+					auto& name = sp[0];
+					if (name.size() > 2 && name.front() == '\"' && name.back() == '\"')
+						name = std::string(name.begin() + 1, name.end() - 1);
+					if (auto id = Item::find(name); id != -1)
+						preset.drop_items.emplace_back(id, s2t<uint>(sp[1]), s2t<uint>(sp[2]), s2t<uint>(sp[3]));
+					else
+						printf("cannot find item: %s\n", name.c_str());
+				}
+			}
+			else if (e.key == "move_sound_path")
+				preset.move_sound_path = e.values[0];
+			else if (e.key == "attack_precast_sound_path")
+				preset.attack_precast_sound_path = e.values[0];
+			else if (e.key == "attack_hit_sound_path")
+				preset.attack_hit_sound_path = e.values[0];
 		}
 	}
 }
@@ -725,26 +675,20 @@ void cCharacter::start()
 
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
 	audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
-	if (auto path = ppath / L"move.wav"; std::filesystem::exists(path))
-		audio_buffer_names.emplace_back(path, "move");
-	if (auto path = ppath / L"attack_precast.wav"; std::filesystem::exists(path))
-		audio_buffer_names.emplace_back(path, "attack_precast");
-	if (auto path = ppath / L"attack_hit.wav"; std::filesystem::exists(path))
-		audio_buffer_names.emplace_back(path, "attack_hit");
+	if (!preset->move_sound_path.empty() && std::filesystem::exists(preset->move_sound_path))
+		audio_buffer_names.emplace_back(preset->move_sound_path, "move");
+	if (!preset->attack_precast_sound_path.empty() && std::filesystem::exists(preset->attack_precast_sound_path))
+		audio_buffer_names.emplace_back(preset->attack_precast_sound_path, "attack_precast");
+	if (!preset->attack_hit_sound_path.empty() && std::filesystem::exists(preset->attack_hit_sound_path))
+		audio_buffer_names.emplace_back(preset->attack_hit_sound_path, "attack_hit");
 	audio_source->set_buffer_names(audio_buffer_names);
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
 		for (auto& i : preset->abilities)
-		{
-			if (auto id = Ability::find(i.name); id != -1)
-				gain_ability(id, i.lv);
-		}
-		for (auto& i : preset->talents)
-		{
-			if (auto id = Talent::find(i); id != -1)
-				gain_talent(Talent::find(i));
-		}
+			gain_ability(i.id, i.lv);
+		for (auto i : preset->talents)
+			gain_talent(i);
 	}
 
 	inventory.resize(16);
@@ -755,7 +699,7 @@ void cCharacter::start()
 
 bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 {
-	if (state & StateStun)
+	if (state & CharacterStateStun)
 	{
 		nav_agent->stop();
 		action = ActionNone;
@@ -775,7 +719,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 
 void cCharacter::process_attack_target(cCharacterPtr target)
 {
-	if (state & StateStun)
+	if (state & CharacterStateStun)
 	{
 		nav_agent->stop();
 		action = ActionNone;
@@ -863,7 +807,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 
 void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
 {
-	if (state & StateStun)
+	if (state & CharacterStateStun)
 	{
 		cast_timer = -1.f;
 		nav_agent->stop();
@@ -946,7 +890,7 @@ void cCharacter::update()
 			if (exp_max == 0)
 				exp_max = preset->exp_base;
 
-			state = StateNormal;
+			state = CharacterStateNormal;
 
 			auto old_hp_max = hp_max;
 			auto old_mp_max = mp_max;

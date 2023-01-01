@@ -14,9 +14,9 @@ void init_effects()
 		for (auto& e : section.entries)
 		{
 			if (e.key == "path")
-				preset.path = e.value;
+				preset.path = e.values[0];
 			else if (e.key == "sound_path")
-				preset.sound_path = e.value;
+				preset.sound_path = e.values[0];
 		}
 	}
 }

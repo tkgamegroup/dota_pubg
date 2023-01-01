@@ -102,7 +102,7 @@ struct CharacterPreset
 {
 	struct AbilityInfo
 	{
-		std::string name;
+		uint id;
 		uint lv;
 	};
 
@@ -137,7 +137,7 @@ struct CharacterPreset
 	uint						atk_sp = 100;
 
 	std::vector<AbilityInfo>	abilities;
-	std::vector<std::string>	talents;
+	std::vector<uint>			talents;
 	std::vector<DropItem>		drop_items;
 
 	std::filesystem::path		move_sound_path;
@@ -148,12 +148,13 @@ struct CharacterPreset
 	static const CharacterPreset& get(uint id);
 };
 
-enum State
+// Reflect
+enum CharacterState
 {
-	StateNormal = 0,
-	StateStun = 1 << 0,
-	StateRoot = 1 << 1,
-	StateSilence = 1 << 2
+	CharacterStateNormal = 0,
+	CharacterStateStun = 1 << 0,
+	CharacterStateRoot = 1 << 1,
+	CharacterStateSilence = 1 << 2
 };
 
 extern std::vector<cCharacterPtr> characters;
@@ -191,7 +192,7 @@ struct cCharacter : Component
 	uint exp_max = 0;
 	void set_exp_max(uint v);
 
-	State state = StateNormal;
+	CharacterState state = CharacterStateNormal;
 
 	// Reflect
 	uint hp = 1000;
