@@ -40,32 +40,32 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
 
-bool parse_literal(std::string& str, int& id)
+bool parse_literal(const std::string& str, int& id)
 {
-	if (SUS::strip_head_tail_if(str, "\"", "\"_state"))
+	if (SUS::match_head_tail(str, "\"", "\"s"))
 	{
 		CharacterState state;
-		TypeInfo::unserialize_t(str, state);
+		TypeInfo::unserialize_t(str.substr(1, str.size() - 3), state);
 		id = state;
 	}
-	else if (SUS::strip_head_tail_if(str, "\"", "\"_buff"))
+	else if (SUS::match_head_tail(str, "\"", "\"b"))
 	{
-		id = Buff::find(str);
+		id = Buff::find(str.substr(1, str.size() - 3));
 		return true;
 	}
-	else if (SUS::strip_head_tail_if(str, "\"", "\"_item"))
+	else if (SUS::match_head_tail(str, "\"", "\"i"))
 	{
-		id = Item::find(str);
+		id = Item::find(str.substr(1, str.size() - 3));
 		return true;
 	}
-	else if (SUS::strip_head_tail_if(str, "\"", "\"_ability"))
+	else if (SUS::match_head_tail(str, "\"", "\"a"))
 	{
-		id = Ability::find(str);
+		id = Ability::find(str.substr(1, str.size() - 3));
 		return true;
 	}
-	else if (SUS::strip_head_tail_if(str, "\"", "\"_talent"))
+	else if (SUS::match_head_tail(str, "\"", "\"t"))
 	{
-		id = Talent::find(str);
+		id = Talent::find(str.substr(1, str.size() - 3));
 		return true;
 	}
 	return false;

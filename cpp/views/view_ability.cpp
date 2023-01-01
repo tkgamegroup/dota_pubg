@@ -125,7 +125,7 @@ void ViewAbility::on_draw()
 								main_player.character->ability_points--;
 								main_player.character->stats_dirty = true;
 
-								if (ins->lv == 1 && !ability.active.empty())
+								if (ins->lv == 1 && ability.active)
 								{
 									auto found = false;
 									for (auto& shortcut : shortcuts)

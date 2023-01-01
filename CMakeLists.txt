@@ -26,7 +26,7 @@ foreach(s ${flame_cmake_cache})
 	endif()
 endforeach()
 
-file(GLOB_RECURSE source_files "cpp/*.h*" "cpp/*.c*")
+file(GLOB_RECURSE source_files "cpp/*.h*" "cpp/*.c*" "assets/*.ini")
 add_library(cpp SHARED ${source_files})
 target_compile_definitions(cpp PUBLIC USE_IMGUI)
 target_compile_definitions(cpp PUBLIC "IMPORT=__declspec(dllimport)")

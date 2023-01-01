@@ -25,9 +25,9 @@ void init_buffs()
 			else if (e.key == "parameters")
 				read_parameters(buff.parameter_names, buff.parameters, e.values);
 			else if (e.key == "passive")
-				build_command_list(buff.passive, e.values);
+				buff.passive.build(e.values);
 			else if (e.key == "continuous")
-				build_command_list(buff.continuous, e.values);
+				buff.continuous.build(e.values);
 		}
 	}
 

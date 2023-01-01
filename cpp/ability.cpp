@@ -112,9 +112,9 @@ void init_abilities()
 			else if (e.key == "description")
 				ability.description = e.values[0];
 			else if (e.key == "active")
-				build_command_list(ability.active, e.values);
+				ability.active.build(e.values);
 			else if (e.key == "passive")
-				build_command_list(ability.passive, e.values);
+				ability.passive.build(e.values);
 		}
 	}
 

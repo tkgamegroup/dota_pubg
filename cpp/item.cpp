@@ -31,7 +31,7 @@ void init_items()
 			else if (e.key == "parameters")
 				read_parameters(item.parameter_names, item.parameters, e.values);
 			else if (e.key == "active")
-				build_command_list(item.active, e.values);
+				item.active.build(e.values);
 		}
 	}
 

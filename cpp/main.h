@@ -76,7 +76,7 @@ struct Tracker
 	}
 };
 
-bool parse_literal(std::string& str, int& id);
+bool parse_literal(const std::string& str, int& id);
 
 extern EntityPtr root;
 

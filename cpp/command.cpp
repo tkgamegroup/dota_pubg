@@ -5,21 +5,18 @@
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
 
-Variant read_variant(std::string& str)
+Variant read_variant(const std::string& str)
 {
 	Variant ret;
 	switch (str.back())
 	{
 	case 'f':
-		str.pop_back();
 		ret.f = s2t<float>(str);
 		break;
 	case 'u':
-		str.pop_back();
 		ret.f = s2t<uint>(str);
 		break;
 	case 'i':
-		str.pop_back();
 	default:
 		ret.i = s2t<int>(str);
 	}
@@ -46,136 +43,225 @@ void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters,
 	}
 }
 
-void Command::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
+void CommandList::init_sub_groups()
+{
+	std::stack<uint> sg_stack;
+	for (auto i = 0; i < cmds.size(); i++)
+	{
+		auto& c = cmds[i];
+		auto type = data[c.first].i;
+		if (type == tBeginSub)
+			sg_stack.push(i);
+		else if (type == tEndSub)
+		{
+			auto idx = sg_stack.top();
+			sg_stack.pop();
+			sub_groups.emplace(idx, i);
+		}
+	}
+}
+
+void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
 	auto read_parameter = [&](uint idx, uint lv)->const Variant& {
-		auto& para = instructions[idx];
-		if (para.first == 0)
-			return para.second;
-		auto& vec = external_parameters.at(para.second.u);
+		if (use_ext_para[idx] == 0)
+			return data[idx];
+		auto& vec = external_parameters.at(data[idx].u);
 		return lv <= vec.size() ? vec[lv] : vec[0];
 	};
 
-	auto off = 0;
-
-	std::function<void(Type type)> do_cmd;
-	do_cmd = [&](Type type) {
-		switch (type)
+	auto i = 0;
+	std::function<void()> do_cmd;
+	do_cmd = [&]() {
+		auto& c = cmds[i];
+		switch (data[c.first].i)
 		{
 		case tRollDice100:
-			if (linearRand(0U, 99U) < read_parameter(off, lv).i)
+		{
+			auto pass = c.second >= 2 && linearRand(0U, 99U) < read_parameter(c.first + 1, lv).i;
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (pass)
 			{
-				type = (Type)instructions[off + 1].second.i;
-				off += 2;
-				do_cmd(type);
+				for (i = i + 1; i <= end_i; )
+					do_cmd();
 			}
+			i = end_i + 1;
+		}
 			break;
 		case tRestoreHP:
-			character->restore_hp(read_parameter(off, lv).i);
+			if (c.second >= 2)
+				character->restore_hp(read_parameter(c.first + 1, lv).i);
+			i++;
 			break;
 		case tRestoreMP:
-			character->restore_mp(read_parameter(off, lv).i);
+			if (c.second >= 2)
+				character->restore_mp(read_parameter(c.first + 1, lv).i);
+			i++;
 			break;
 		case tTakeDamage:
+			if (c.second >= 2)
+				character->take_damage(MagicDamage, read_parameter(c.first + 1, lv).i);
+			i++;
 			break;
 		case tTakeDamagePct:
-			character->take_damage(MagicDamage, character->hp_max * (read_parameter(off, lv).i / 100.f));
+			if (c.second >= 2)
+				character->take_damage(MagicDamage, character->hp_max * (read_parameter(c.first + 1, lv).i / 100.f));
+			i++;
 			break;
 		case tInflictDamge:
-			character->inflict_damage(target_character, (DamageType)read_parameter(off, lv).i, read_parameter(off + 1, lv).i);
+			if (c.second >= 3)
+				character->inflict_damage(target_character, (DamageType)read_parameter(c.first + 1, lv).i, read_parameter(c.first + 2, lv).i);
+			i++;
 			break;
 		case tLevelUp:
 			character->gain_exp(character->exp_max);
+			i++;
 			break;
 		case tIncreaseHPMax:
-			character->hp_max += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->hp_max += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseMPMax:
-			character->mp_max += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->mp_max += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseATK:
-			character->atk += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->atk += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreasePHYDEF:
-			character->phy_def += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->phy_def += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseMAGDEF:
-			character->mag_def += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->mag_def += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseHPREG:
-			character->hp_reg += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->hp_reg += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseMPREG:
-			character->mp_reg += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->mp_reg += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseMOVSP:
-			character->mov_sp += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->mov_sp += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseATKSP:
-			character->atk_sp += read_parameter(off, lv).i;
+			if (c.second >= 2)
+				character->atk_sp += read_parameter(c.first + 1, lv).i;
+			i++;
 			break;
 		case tIncreaseHPMaxPct:
-			character->hp_max *= (100 + read_parameter(off, lv).i) / 100.f;
+			if (c.second >= 2)
+				character->hp_max *= (100 + read_parameter(c.first + 1, lv).i) / 100.f;
+			i++;
 			break;
 		case tIncreaseMPMaxPct:
+			if (c.second >= 2)
+				character->mp_max *= (100 + read_parameter(c.first + 1, lv).i) / 100.f;
+			i++;
 			break;
 		case tIncreaseATKPct:
-			character->atk *= (100 + read_parameter(off, lv).i) / 100.f;
+			if (c.second >= 2)
+				character->atk *= (100 + read_parameter(c.first + 1, lv).i) / 100.f;
+			i++;
 			break;
 		case tAddBuff:
+			if (c.second >= 3)
+				character->add_buff(read_parameter(c.first + 1, lv).i, read_parameter(c.first + 2, lv).f, c.second >= 3 ? read_parameter(c.first + 3, lv).u : 0, c.second >= 4 ? read_parameter(c.first + 4, lv).u : false);
+			i++;
 			break;
 		case tAddBuffToTarget:
-			target_character->add_buff(read_parameter(off, lv).i, read_parameter(off + 1, lv).f, read_parameter(off + 2, lv).u, read_parameter(off + 3, lv).u);
+			if (c.second >= 3)
+				target_character->add_buff(read_parameter(c.first + 1, lv).i, read_parameter(c.first + 2, lv).f, c.second >= 3 ? read_parameter(c.first + 3, lv).u : 0, c.second >= 4 ? read_parameter(c.first + 4, lv).u : false);
+			i++;
 			break;
 		case tAddAttackEffect:
 		{
-			CommandList ef;
-			Command cmd;
-			cmd.instructions.resize(instructions.size() - off - 1);
-			for (auto i = 0; i < cmd.instructions.size(); i++)
-				cmd.instructions[i] = instructions[i + off + 1];
-			ef.push_back(cmd);
-			character->attack_effects.push_back(ef);
+			auto& ef = character->attack_effects.emplace_back();
+
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			auto in_sub = end_i != i + 1;
+			for (i = i + 1 + (in_sub ? 1 : 0); 
+				i <= end_i - (in_sub ? 1 : 0); i++)
+			{
+				auto& c = cmds[i];
+
+				ef.cmds.emplace_back((int)ef.data.size(), c.second);
+				for (auto j = 0; j < c.second; j++)
+				{
+					ef.data.push_back(data[c.first + j]);
+					ef.use_ext_para.push_back(0);
+				}
+				ef.init_sub_groups();
+			}
+
+			i = end_i + 1;
 		}
 			break;
 		case tTeleportToTarget:
 			teleport(character, target_pos);
+			i++;
 			break;
 		}
 	};
 
-	do_cmd((Type)instructions[0].second.i);
+	for (; i < cmds.size(); )
+		do_cmd();
 }
 
-void build_command_list(CommandList& list, const std::vector<std::string>& tokens)
+void CommandList::build(const std::vector<std::string>& tokens)
 {
-	static auto ei_type = find_enum(th<Command::Type>());
+	static auto ei_type = find_enum(th<Type>());
 
-	Command cmd;
 	for (auto& t : tokens)
 	{
-		if (t == "&")
+		auto sp = SUS::split(t, ',');
+		cmds.emplace_back((int)data.size(), (int)sp.size());
+		for (auto& tt : sp)
 		{
-			list.push_back(cmd);
-			cmd = Command();
-		}
-		else
-		{
-			auto& instr = cmd.instructions.emplace_back();
-
-			auto str = t;
-			if (std::isdigit(str[0]))
-				instr = { 0, read_variant(str) };
+			if (std::isdigit(tt[0]))
+			{
+				data.push_back(read_variant(tt));
+				use_ext_para.push_back(0);
+			}
 			else
 			{
-				if (auto ii = ei_type->find_item(str); ii)
-					instr = { 0, {.i = ii->value } };
-				else if (int id; parse_literal(str, id))
-					instr = { 0, {.i = id } };
+				if (auto ii = ei_type->find_item(tt); ii)
+				{
+					data.push_back({ .i = ii->value });
+					use_ext_para.push_back(0);
+				}
+				else if (int id; parse_literal(tt, id))
+				{
+					data.push_back({ .i = id });
+					use_ext_para.push_back(0);
+				}
 				else
-					instr = { 1, {.u = sh(str.c_str()) } };
+				{
+					data.push_back({ .u = sh(tt.c_str()) });
+					use_ext_para.push_back(1);
+				}
 			}
 		}
 	}
-	list.push_back(cmd);
+
+	init_sub_groups();
 }

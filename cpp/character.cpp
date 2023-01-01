@@ -568,7 +568,7 @@ bool cCharacter::gain_talent(uint id)
 void cCharacter::use_item(ItemInstance* ins)
 {
 	auto& item = Item::get(ins->id);
-	if (item.active.empty())
+	if (item.active)
 		return;
 	if (item.type == ItemConsumable)
 	{
@@ -587,8 +587,8 @@ void cCharacter::use_item(ItemInstance* ins)
 			}
 		}
 	}
-	for (auto& c : item.active)
-		c.execute(this, nullptr, vec3(0.f), item.parameters, 0);
+
+	item.active.execute(this, nullptr, vec3(0.f), item.parameters, 0);
 }
 
 void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
@@ -599,8 +599,7 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	if (mp < ability.mp)
 		return;
 
-	for (auto& c : ability.active)
-		c.execute(this, target, location, ability.parameters, ins->lv);
+	ability.active.execute(this, target, location, ability.parameters, ins->lv);
 
 	ins->cd_max = ability.cd;
 	ins->cd_timer = ins->cd_max;
@@ -747,10 +746,7 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 							parameters["damage_type"_h].push_back({ .i = atk_type });
 							parameters["damage"_h].push_back({ .u = damage });
 							for (auto& ef : attack_effects)
-							{
-								for (auto& c : ef)
-									c.execute(this, target, vec3(0.f), parameters, 0);
-							}
+								ef.execute(this, target, vec3(0.f), parameters, 0);
 						}
 
 						audio_source->play("attack_hit"_h);
@@ -913,15 +909,13 @@ void cCharacter::update()
 				if (ins && ins->lv > 0)
 				{
 					auto& ability = Ability::get(ins->id);
-					for (auto& c : ability.passive)
-						c.execute(this, nullptr, vec3(0.f), ability.parameters, ins->lv);
+					ability.passive.execute(this, nullptr, vec3(0.f), ability.parameters, ins->lv);
 				}
 			}
 			for (auto& ins : buffs)
 			{
 				auto& buff = Buff::get(ins->id);
-				for (auto& c : buff.passive)
-					c.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
+				buff.passive.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
 			}
 
 			if (hp_max != old_hp_max)
@@ -964,8 +958,7 @@ void cCharacter::update()
 
 			if (ins->t0 - ins->timer > ins->duration)
 			{
-				for (auto& c : buff.continuous)
-					c.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
+				buff.continuous.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
 				ins->t0 = ins->timer;
 			}
 
