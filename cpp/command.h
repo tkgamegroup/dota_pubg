@@ -21,39 +21,41 @@ void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters,
 struct CommandList
 {
 	// Reflect
-	enum Type
+	enum Command
 	{
-		tNull,
-		tBeginSub,
-		tEndSub,
-		tRollDice100,
-		tRestoreHP,
-		tRestoreMP,
-		tTakeDamage,
-		tTakeDamagePct,
-		tInflictDamge,
-		tLevelUp,
-		tIncreaseHPMax,
-		tIncreaseMPMax,
-		tIncreaseATK,
-		tIncreasePHYDEF,
-		tIncreaseMAGDEF,
-		tIncreaseHPREG,
-		tIncreaseMPREG,
-		tIncreaseMOVSP,
-		tIncreaseATKSP,
-		tIncreaseHPMaxPct,
-		tIncreaseMPMaxPct,
-		tIncreaseATKPct,
-		tAddState,
-		tAddBuff,
-		tAddBuffToTarget,
-		tAddAttackEffect,
-		tTeleportToTarget,
+		cNull,
+		cBeginSub,
+		cEndSub,
+		cIfEqual,
+		cRollDice100,
+		cForNearbyEnemies,
+		cRestoreHP,
+		cRestoreMP,
+		cTakeDamage,
+		cTakeDamagePct,
+		cInflictDamge,
+		cLevelUp,
+		cIncreaseHPMax,
+		cIncreaseMPMax,
+		cIncreaseATK,
+		cIncreasePHYDEF,
+		cIncreaseMAGDEF,
+		cIncreaseHPREG,
+		cIncreaseMPREG,
+		cIncreaseMOVSP,
+		cIncreaseATKSP,
+		cIncreaseHPMaxPct,
+		cIncreaseMPMaxPct,
+		cIncreaseATKPct,
+		cAddState,
+		cAddBuff,
+		cAddBuffToTarget,
+		cAddAttackEffect,
+		cTeleportToTarget,
 	};
 
 	std::vector<Variant> data;
-	std::vector<char> use_ext_para;
+	std::unordered_map<uint, uint> non_immediates;
 	std::vector<std::pair<uint, uint>> cmds;
 	std::unordered_map<uint, uint> sub_groups;
 

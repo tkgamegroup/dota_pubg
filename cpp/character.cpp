@@ -814,7 +814,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
-	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.distance, 15.f);
+	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.cast_distance, 15.f);
 	if (cast_timer > 0.f)
 	{
 		cast_timer -= delta_time;

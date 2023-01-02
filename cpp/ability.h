@@ -19,6 +19,7 @@ struct Ability
 	uvec2					icon_tile_coord = uvec2(0);
 	graphics::ImagePtr		icon_image = nullptr;
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
+	std::string				description;
 
 	TargetType				target_type = TargetNull;
 	uint					max_lv = 5;
@@ -26,11 +27,9 @@ struct Ability
 	float					channel_time = 0.f;
 	uint					mp = 0;
 	float					cd = 0.f;
-	float					distance = 0.f;
-	float					range = 0.f;
-	float					angle = 0.f;
-
-	std::string				description;
+	float					cast_distance = 0.f;
+	float					cast_range = 0.f;
+	float					cast_angle = 0.f;
 
 	ParameterNames			parameter_names;
 	ParameterPack			parameters;

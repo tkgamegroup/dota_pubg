@@ -292,9 +292,9 @@ void AbilityShortcut::click()
 					so_client->send(res.str());
 				}
 			};
-			select_distance = ability.distance;
-			select_range = ability.range;
-			select_angle = ability.angle;
+			select_distance = ability.cast_distance;
+			select_range = ability.cast_range;
+			select_angle = ability.cast_angle;
 		}
 		if (ability.target_type & TargetEnemy)
 		{
@@ -313,7 +313,7 @@ void AbilityShortcut::click()
 					so_client->send(res.str());
 				}
 			};
-			select_distance = ability.distance;
+			select_distance = ability.cast_distance;
 		}
 	}
 }

@@ -4,6 +4,7 @@
 #define FLAME_NO_XML
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
+#include <flame/universe/components/node.h>
 
 Variant read_variant(const std::string& str)
 {
@@ -50,9 +51,9 @@ void CommandList::init_sub_groups()
 	{
 		auto& c = cmds[i];
 		auto type = data[c.first].i;
-		if (type == tBeginSub)
+		if (type == cBeginSub)
 			sg_stack.push(i);
-		else if (type == tEndSub)
+		else if (type == cEndSub)
 		{
 			auto idx = sg_stack.top();
 			sg_stack.pop();
@@ -64,7 +65,8 @@ void CommandList::init_sub_groups()
 void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
 	auto read_parameter = [&](uint idx, uint lv)->const Variant& {
-		if (use_ext_para[idx] == 0)
+		auto it = non_immediates.find(idx);
+		if (it == non_immediates.end())
 			return data[idx];
 		auto& vec = external_parameters.at(data[idx].u);
 		return lv <= vec.size() ? vec[lv] : vec[0];
@@ -76,14 +78,22 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		auto& c = cmds[i];
 		switch (data[c.first].i)
 		{
-		case tRollDice100:
+		case cIfEqual:
 		{
-			auto pass = c.second >= 2 && linearRand(0U, 99U) < read_parameter(c.first + 1, lv).i;
 			auto end_i = i + 1;
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
 
-			if (pass)
+			i = end_i + 1;
+		}
+			break;
+		case cRollDice100:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (c.second >= 2 && linearRand(0U, 99U) < read_parameter(c.first + 1, lv).i)
 			{
 				for (i = i + 1; i <= end_i; )
 					do_cmd();
@@ -91,106 +101,142 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i = end_i + 1;
 		}
 			break;
-		case tRestoreHP:
+		case cForNearbyEnemies:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (c.second >= 2)
+			{
+				auto pos = character->node->pos;
+				auto search_range = read_parameter(c.first + 1, lv).f;
+				auto search_angle = c.second >= 3 ? read_parameter(c.first + 2, lv).f : 0.f;
+				auto target_angle = 0.f;
+				if (search_angle > 0.f)
+				{
+					auto d = target_pos - pos;
+					target_angle = -degrees(atan2(d.z, d.x));
+				}
+				auto beg_i = i + 1;
+				for (auto c : find_characters(pos, search_range, ~character->faction))
+				{
+					if (search_angle > 0.f)
+					{
+						auto d = c->node->pos - pos;
+						if (abs(angle_diff(target_angle, -degrees(atan2(d.z, d.x)))) > search_angle)
+							continue;
+					}
+
+					target_character = c;
+					for (i = beg_i; i <= end_i; )
+						do_cmd();
+				}
+			}
+
+			i = end_i + 1;
+		}
+			break;
+		case cRestoreHP:
 			if (c.second >= 2)
 				character->restore_hp(read_parameter(c.first + 1, lv).i);
 			i++;
 			break;
-		case tRestoreMP:
+		case cRestoreMP:
 			if (c.second >= 2)
 				character->restore_mp(read_parameter(c.first + 1, lv).i);
 			i++;
 			break;
-		case tTakeDamage:
+		case cTakeDamage:
 			if (c.second >= 2)
 				character->take_damage(MagicDamage, read_parameter(c.first + 1, lv).i);
 			i++;
 			break;
-		case tTakeDamagePct:
+		case cTakeDamagePct:
 			if (c.second >= 2)
 				character->take_damage(MagicDamage, character->hp_max * (read_parameter(c.first + 1, lv).i / 100.f));
 			i++;
 			break;
-		case tInflictDamge:
+		case cInflictDamge:
 			if (c.second >= 3)
 				character->inflict_damage(target_character, (DamageType)read_parameter(c.first + 1, lv).i, read_parameter(c.first + 2, lv).i);
 			i++;
 			break;
-		case tLevelUp:
+		case cLevelUp:
 			character->gain_exp(character->exp_max);
 			i++;
 			break;
-		case tIncreaseHPMax:
+		case cIncreaseHPMax:
 			if (c.second >= 2)
 				character->hp_max += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseMPMax:
+		case cIncreaseMPMax:
 			if (c.second >= 2)
 				character->mp_max += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseATK:
+		case cIncreaseATK:
 			if (c.second >= 2)
 				character->atk += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreasePHYDEF:
+		case cIncreasePHYDEF:
 			if (c.second >= 2)
 				character->phy_def += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseMAGDEF:
+		case cIncreaseMAGDEF:
 			if (c.second >= 2)
 				character->mag_def += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseHPREG:
+		case cIncreaseHPREG:
 			if (c.second >= 2)
 				character->hp_reg += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseMPREG:
+		case cIncreaseMPREG:
 			if (c.second >= 2)
 				character->mp_reg += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseMOVSP:
+		case cIncreaseMOVSP:
 			if (c.second >= 2)
 				character->mov_sp += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseATKSP:
+		case cIncreaseATKSP:
 			if (c.second >= 2)
 				character->atk_sp += read_parameter(c.first + 1, lv).i;
 			i++;
 			break;
-		case tIncreaseHPMaxPct:
+		case cIncreaseHPMaxPct:
 			if (c.second >= 2)
 				character->hp_max *= (100 + read_parameter(c.first + 1, lv).i) / 100.f;
 			i++;
 			break;
-		case tIncreaseMPMaxPct:
+		case cIncreaseMPMaxPct:
 			if (c.second >= 2)
 				character->mp_max *= (100 + read_parameter(c.first + 1, lv).i) / 100.f;
 			i++;
 			break;
-		case tIncreaseATKPct:
+		case cIncreaseATKPct:
 			if (c.second >= 2)
 				character->atk *= (100 + read_parameter(c.first + 1, lv).i) / 100.f;
 			i++;
 			break;
-		case tAddBuff:
+		case cAddBuff:
 			if (c.second >= 3)
 				character->add_buff(read_parameter(c.first + 1, lv).i, read_parameter(c.first + 2, lv).f, c.second >= 3 ? read_parameter(c.first + 3, lv).u : 0, c.second >= 4 ? read_parameter(c.first + 4, lv).u : false);
 			i++;
 			break;
-		case tAddBuffToTarget:
+		case cAddBuffToTarget:
 			if (c.second >= 3)
 				target_character->add_buff(read_parameter(c.first + 1, lv).i, read_parameter(c.first + 2, lv).f, c.second >= 3 ? read_parameter(c.first + 3, lv).u : 0, c.second >= 4 ? read_parameter(c.first + 4, lv).u : false);
 			i++;
 			break;
-		case tAddAttackEffect:
+		case cAddAttackEffect:
 		{
 			auto& ef = character->attack_effects.emplace_back();
 
@@ -206,17 +252,14 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 				ef.cmds.emplace_back((int)ef.data.size(), c.second);
 				for (auto j = 0; j < c.second; j++)
-				{
 					ef.data.push_back(data[c.first + j]);
-					ef.use_ext_para.push_back(0);
-				}
 				ef.init_sub_groups();
 			}
 
 			i = end_i + 1;
 		}
 			break;
-		case tTeleportToTarget:
+		case cTeleportToTarget:
 			teleport(character, target_pos);
 			i++;
 			break;
@@ -229,7 +272,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 void CommandList::build(const std::vector<std::string>& tokens)
 {
-	static auto ei_type = find_enum(th<Type>());
+	static auto ei_type = find_enum(th<Command>());
 
 	for (auto& t : tokens)
 	{
@@ -238,26 +281,17 @@ void CommandList::build(const std::vector<std::string>& tokens)
 		for (auto& tt : sp)
 		{
 			if (std::isdigit(tt[0]))
-			{
 				data.push_back(read_variant(tt));
-				use_ext_para.push_back(0);
-			}
 			else
 			{
 				if (auto ii = ei_type->find_item(tt); ii)
-				{
 					data.push_back({ .i = ii->value });
-					use_ext_para.push_back(0);
-				}
 				else if (int id; parse_literal(tt, id))
-				{
 					data.push_back({ .i = id });
-					use_ext_para.push_back(0);
-				}
 				else
 				{
 					data.push_back({ .u = sh(tt.c_str()) });
-					use_ext_para.push_back(1);
+					non_immediates[(uint)data.size() - 1] = 1;
 				}
 			}
 		}

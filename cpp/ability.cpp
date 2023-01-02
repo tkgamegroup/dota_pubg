@@ -39,8 +39,7 @@ void init_abilities()
 		//	});
 		//};
 		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//		"Attack will damage nearby enemies by %d%%", ins->lv * 25);
+		//	ImGui::Text("Attack will damage nearby enemies by %d%%", ins->lv * 25);
 		//};
 	}
 	{
@@ -55,38 +54,7 @@ void init_abilities()
 		//	});
 		//};
 		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Passive\n"
-		//		"Restore health based on attack damage by %d%%", ins->lv * 10);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Fire Breath";
-		ability.icon_name = L"assets\\icons\\old Ancient Beast icons\\magmaspawn lavariver.jpg";
-		ability.target_type = TargetLocation;
-		ability.cast_time = 0.2f;
-		ability.mp = 100;
-		ability.cd = 12.f;
-		ability.distance = 6.f;
-		ability.angle = 60.f;
-		//ability.active_l = [](AbilityInstance* ins, cCharacterPtr caster, const vec3& target) {
-		//	auto node = caster->node;
-		//	auto center = node->pos;
-		//	auto d = target - center;
-		//	auto target_ang = -degrees(atan2(d.z, d.x));
-		//	add_effect(EffectPreset::find("Fire"), center + vec3(0.f, 1.8f, 0.f), vec3(target_ang, 0.f, 0.f), 0.6f);
-		//	for (auto character : find_characters(center, 6.f, ~caster->faction))
-		//	{
-		//		auto d = character->node->pos - center;
-		//		if (abs(angle_diff(target_ang, -degrees(atan2(d.z, d.x)))) < 60.f)
-		//			caster->inflict_damage(character, MagicDamage, ins->lv * 80);
-		//	}
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Target: Location\n"
-		//				"Range: 6\n"
-		//				"Unleashes a breath of fire in front you that damage enemies by %d", ins->lv * 80);
+		//	ImGui::Text("Restore health based on attack damage by %d%%", ins->lv * 10);
 		//};
 	}
 
@@ -101,16 +69,16 @@ void init_abilities()
 				ability.icon_name = e.values[0];
 			else if (e.key == "icon_tile_coord")
 				ability.icon_tile_coord = s2t<2, uint>(e.values[0]);
-			else if (e.key == "target_type")
-				TypeInfo::unserialize_t(e.values[0], ability.target_type);
-			else if (e.key == "distance")
-				ability.distance = s2t<float>(e.values[0]);
-			else if (e.key == "range")
-				ability.range = s2t<float>(e.values[0]);
-			else if (e.key == "angle")
-				ability.angle = s2t<float>(e.values[0]);
 			else if (e.key == "description")
 				ability.description = e.values[0];
+			else if (e.key == "target_type")
+				TypeInfo::unserialize_t(e.values[0], ability.target_type);
+			else if (e.key == "cast_distance")
+				ability.cast_distance = s2t<float>(e.values[0]);
+			else if (e.key == "cast_range")
+				ability.cast_range = s2t<float>(e.values[0]);
+			else if (e.key == "cast_angle")
+				ability.cast_angle = s2t<float>(e.values[0]);
 			else if (e.key == "active")
 				ability.active.build(e.values);
 			else if (e.key == "passive")
