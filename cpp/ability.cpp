@@ -18,46 +18,6 @@ std::vector<Talent> talents;
 
 void init_abilities()
 {
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Greate Cleave";
-		ability.icon_name = L"assets\\icons\\Greate_Cleave.jpg";
-		ability.max_lv = 4;
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint) {
-		//		auto center = attacker->node->pos;
-		//		auto ang = attacker->node->eul.x;
-		//		for (auto character : find_characters(center, 3.f, ~attacker->faction))
-		//		{
-		//			if (character == target)
-		//				continue;
-		//			auto d = character->node->pos - center;
-		//			if (abs(angle_diff(ang, -degrees(atan2(d.z, d.x)))) < 60.f)
-		//				attacker->inflict_damage(character, (DamageType)attacker->atk_type, attacker->atk * (ins->lv * 25.f / 100.f));
-		//		}
-		//	});
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Attack will damage nearby enemies by %d%%", ins->lv * 25);
-		//};
-	}
-	{
-		auto& ability = abilities.emplace_back();
-		ability.id = abilities.size() - 1;
-		ability.name = "Vampiric Spirit";
-		ability.icon_name = L"assets\\icons\\Vampiric_Spirit.jpg";
-		ability.max_lv = 4;
-		//ability.passive = [](AbilityInstance* ins, cCharacterPtr caster) {
-		//	caster->attack_effects.add([ins](cCharacterPtr attacker, cCharacterPtr target, DamageType, uint value) {
-		//		attacker->set_hp(min(attacker->hp + uint(value * (ins->lv * 10.f / 100.f)), attacker->hp_max));
-		//	});
-		//};
-		//ability.show = [](AbilityInstance* ins) {
-		//	ImGui::Text("Restore health based on attack damage by %d%%", ins->lv * 10);
-		//};
-	}
-
 	for (auto& section : parse_ini_file(Path::get(L"assets\\abilities.ini")).sections)
 	{
 		auto& ability = abilities.emplace_back();

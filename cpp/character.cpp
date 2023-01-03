@@ -743,8 +743,8 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 						if (target->dead_flag == 0)
 						{
 							static ParameterPack parameters;
-							parameters["damage_type"_h].push_back({ .i = atk_type });
-							parameters["damage"_h].push_back({ .u = damage });
+							parameters["attack_damage_type"_h].push_back({ .i = atk_type });
+							parameters["attack_damage"_h].push_back({ .u = damage });
 							for (auto& ef : attack_effects)
 								ef.execute(this, target, vec3(0.f), parameters, 0);
 						}

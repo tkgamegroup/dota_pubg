@@ -64,18 +64,39 @@ void CommandList::init_sub_groups()
 
 void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
-	auto read_parameter = [&](uint idx, uint lv)->const Variant& {
+	auto read_parameter = [&](uint& idx, uint lv)->Variant {
 		auto it = non_immediates.find(idx);
 		if (it == non_immediates.end())
 			return data[idx];
-		auto& vec = external_parameters.at(data[idx].u);
-		return lv <= vec.size() ? vec[lv] : vec[0];
+		switch (it->second)
+		{
+		case 1:
+		{
+			auto& vec = external_parameters.at(data[idx].u);
+			return lv <= vec.size() ? vec[lv] : vec[0];
+		}
+			break;
+		case 2:
+		{
+			union
+			{
+				Variant v;
+				Expression e;
+			}cvt;
+			cvt.v = data[idx];
+		}
+			break;
+		}
+		return { .i=0 };
 	};
+
+	auto character_pos = character->node->pos;
 
 	auto i = 0;
 	std::function<void()> do_cmd;
 	do_cmd = [&]() {
 		auto& c = cmds[i];
+		auto parm_idx = c.first + 1;
 		switch (data[c.first].i)
 		{
 		case cIfEqual:
@@ -109,22 +130,16 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 			if (c.second >= 2)
 			{
-				auto pos = character->node->pos;
 				auto search_range = read_parameter(c.first + 1, lv).f;
 				auto search_angle = c.second >= 3 ? read_parameter(c.first + 2, lv).f : 0.f;
-				auto target_angle = 0.f;
-				if (search_angle > 0.f)
-				{
-					auto d = target_pos - pos;
-					target_angle = -degrees(atan2(d.z, d.x));
-				}
+				auto target_angle = search_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
+				auto ori_target_character = target_character;
 				auto beg_i = i + 1;
-				for (auto c : find_characters(pos, search_range, ~character->faction))
+				for (auto c : find_characters(character_pos, search_range, ~character->faction))
 				{
 					if (search_angle > 0.f)
 					{
-						auto d = c->node->pos - pos;
-						if (abs(angle_diff(target_angle, -degrees(atan2(d.z, d.x)))) > search_angle)
+						if (abs(angle_diff(target_angle, angle_xz(character_pos, c->node->pos))) > search_angle)
 							continue;
 					}
 
@@ -132,6 +147,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 					for (i = beg_i; i <= end_i; )
 						do_cmd();
 				}
+				target_character = ori_target_character;
 			}
 
 			i = end_i + 1;
@@ -252,7 +268,12 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 				ef.cmds.emplace_back((int)ef.data.size(), c.second);
 				for (auto j = 0; j < c.second; j++)
-					ef.data.push_back(data[c.first + j]);
+				{
+					auto idx = c.first + j;
+					ef.data.push_back(data[idx]);
+					if (auto it = non_immediates.find(idx); it != non_immediates.end())
+						ef.non_immediates[(uint)ef.data.size() - 1] = it->second;
+				}
 				ef.init_sub_groups();
 			}
 
@@ -260,7 +281,17 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		}
 			break;
 		case cTeleportToTarget:
-			teleport(character, target_pos);
+			teleport(character, target_character ? target_character->node->pos : target_pos);
+			i++;
+			break;
+		case cAddEffect:
+			if (c.second >= 3)
+				add_effect(read_parameter(c.first + 1, lv).u, character_pos, vec3(0.f), read_parameter(c.first + 2, lv).f);
+			i++;
+			break;
+		case cAddEffectFaceTarget:
+			if (c.second >= 3)
+				add_effect(read_parameter(c.first + 1, lv).u, character_pos, vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), read_parameter(c.first + 2, lv).f);
 			i++;
 			break;
 		}
@@ -280,8 +311,39 @@ void CommandList::build(const std::vector<std::string>& tokens)
 		cmds.emplace_back((int)data.size(), (int)sp.size());
 		for (auto& tt : sp)
 		{
+			static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
+			std::smatch res;
+
 			if (std::isdigit(tt[0]))
 				data.push_back(read_variant(tt));
+			else if (std::regex_search(tt, res, reg_exp))
+			{
+				auto op = OpNull;
+				switch (res[2].str()[0])
+				{
+				case '+': op = OpAdd; break;
+				case '-': op = OpMinus; break;
+				case '*': op = OpMultiply; break;
+				case '/': op = OpDivide; break;
+				}
+
+				auto data_off = (uint)data.size();
+
+				union
+				{
+					Variant v;
+					Expression e;
+				}cvt;
+				cvt.e = { op, data_off + 1, data_off + 2 };
+				data.push_back(cvt.v);
+				non_immediates[(uint)data.size() - 1] = 2;
+
+				data.push_back({ .u = sh(res[1].str().c_str())});
+				non_immediates[(uint)data.size() - 1] = 1;
+
+				data.push_back({ .u = sh(res[3].str().c_str()) });
+				non_immediates[(uint)data.size() - 1] = 1;
+			}
 			else
 			{
 				if (auto ii = ei_type->find_item(tt); ii)

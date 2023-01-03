@@ -52,6 +52,24 @@ struct CommandList
 		cAddBuffToTarget,
 		cAddAttackEffect,
 		cTeleportToTarget,
+		cAddEffect,
+		cAddEffectFaceTarget,
+	};
+
+	enum Operator
+	{
+		OpNull,
+		OpAdd,
+		OpMinus,
+		OpMultiply,
+		OpDivide
+	};
+
+	struct Expression
+	{
+		Operator op : 3;
+		uint num1 : 8;
+		uint num2 : 8;
 	};
 
 	std::vector<Variant> data;
