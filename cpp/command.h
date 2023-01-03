@@ -2,11 +2,20 @@
 
 #include "main.h"
 
-union Variant
+#include <flame/foundation/typeinfo.h>
+
+struct Parameter
 {
-	float f;
-	uint u;
-	int i;
+	enum Type
+	{
+		tImmediate,
+		tExternal,
+		tExpression
+	};
+
+	Type type = tImmediate;
+	DataType dt = DataVoid;
+	sVariant v;
 };
 
 typedef std::unordered_map<uint, std::vector<Variant>>	ParameterPack;
