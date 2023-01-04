@@ -10,20 +10,82 @@ struct Parameter
 	{
 		tImmediate,
 		tExternal,
+		tSpecialVariable,
 		tExpression
 	};
 
-	Type type = tImmediate;
-	DataType dt = DataVoid;
-	sVariant v;
+	enum vType
+	{
+		vInt,
+		vUint,
+		vFloat,
+		vPercentage
+	};
+
+	// Reflect
+	enum SpecialVariable
+	{
+		sTargetCharacter
+	};
+
+	enum Operator
+	{
+		OpNull,
+		OpAdd,
+		OpMinus,
+		OpMultiply,
+		OpDivide
+	};
+
+	struct Expression
+	{
+		Operator op : 8 = OpNull;
+		uint num_operand : 8 = 2;
+	};
+
+	Type type : 8 = tImmediate;
+	vType vt : 8 = vInt;
+	union
+	{
+		sVariant v;
+		Expression e;
+	}u = { .v={.i=0} };
+
+	Parameter() {}
+	Parameter(int v) { vt = vInt; u.v.i = v; }
+	Parameter(uint v) { vt = vUint; u.v.u = v; }
+	Parameter(float v) { vt = vFloat; u.v.f = v; }
+	Parameter(const std::string& str);
+
+	inline int to_i()
+	{
+		switch (vt)
+		{
+		case vInt: return u.v.i;
+		case vUint: return u.v.u;
+		case vFloat: return u.v.f;
+		case vPercentage: return u.v.i;
+		}
+		return 0;
+	}
+
+	inline float to_f()
+	{
+		switch (vt)
+		{
+		case vInt: return u.v.i;
+		case vUint: return u.v.u;
+		case vFloat: return u.v.f;
+		case vPercentage: return u.v.i / 100.f;
+		}
+		return 0.f;
+	}
 };
 
-typedef std::unordered_map<uint, std::vector<Variant>>	ParameterPack;
-typedef std::vector<std::pair<std::string, uint>>		ParameterNames;
+typedef std::unordered_map<uint, std::vector<Parameter>>	ParameterPack;
+typedef std::vector<std::pair<std::string, uint>>			ParameterNames;
 
-Variant read_variant(const std::string& str);
-
-void read_parameter_values(std::vector<Variant>& vec, const std::string& text);
+void read_parameter_values(std::vector<Parameter>& vec, const std::string& text);
 
 void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters, const std::vector<std::string>& tokens);
 
@@ -35,6 +97,7 @@ struct CommandList
 		cNull,
 		cBeginSub,
 		cEndSub,
+		cStore,
 		cIfEqual,
 		cRollDice100,
 		cForNearbyEnemies,
@@ -65,25 +128,7 @@ struct CommandList
 		cAddEffectFaceTarget,
 	};
 
-	enum Operator
-	{
-		OpNull,
-		OpAdd,
-		OpMinus,
-		OpMultiply,
-		OpDivide
-	};
-
-	struct Expression
-	{
-		Operator op : 3;
-		uint num1 : 8;
-		uint num2 : 8;
-	};
-
-	std::vector<Variant> data;
-	std::unordered_map<uint, uint> non_immediates;
-	std::vector<std::pair<uint, uint>> cmds;
+	std::vector<std::pair<Command, std::vector<Parameter>>> cmds;
 	std::unordered_map<uint, uint> sub_groups;
 
 	void init_sub_groups();
