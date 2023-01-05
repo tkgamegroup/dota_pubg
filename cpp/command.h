@@ -25,7 +25,11 @@ struct Parameter
 	// Reflect
 	enum SpecialVariable
 	{
-		sTargetCharacter
+		sTargetCharacter,
+		sREG0,
+		sREG1,
+		sREG2,
+		sREG3,
 	};
 
 	enum Operator

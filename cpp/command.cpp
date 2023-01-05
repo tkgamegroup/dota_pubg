@@ -90,18 +90,43 @@ void CommandList::init_sub_groups()
 void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
 	lVariant reg[4] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
-
 	auto character_pos = character->node->pos;
+	auto special_variable_info = [&](Parameter::SpecialVariable sv, voidptr& ptr, uint& size) {
+		switch (sv)
+		{
+		case Parameter::sREG0:
+			ptr = &reg[0];
+			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG1:
+			ptr = &reg[1];
+			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG2:
+			ptr = &reg[2];
+			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG3:
+			ptr = &reg[3];
+			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
+			break;
+		case Parameter::sTargetCharacter:
+			ptr = &target_character;
+			size = size > 0 ? min(size, (uint)sizeof(void*)) : (uint)sizeof(void*);
+			break;
+		}
+	};
 
 	auto i = 0;
 	std::function<void()> do_cmd;
 	do_cmd = [&]() {
 		auto& c = cmds[i];
+
 		std::vector<Parameter> parameters;
 		for (auto i_parm = 0; i_parm < c.second.size(); i_parm++)
 		{
 			auto& sp = c.second[i_parm];
-			switch (sp.type)
+			switch (sp.type)        
 			{
 			case Parameter::tImmediate:
 				parameters.push_back(sp);
@@ -153,7 +178,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 					break;
 				case Parameter::OpDivide:
 				{
-					auto num1 = get_operand();
+					auto num1 = get_operand(); 
 					auto num2 = get_operand();
 					parameters.emplace_back(num1.to_f() / num2.to_f());
 				}
@@ -163,11 +188,20 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				break;
 			}
 		}
+
 		switch (c.first)
 		{
 		case cStore:
 			if (parameters.size() >= 2)
-				;
+			{
+				void* src_ptr = nullptr;
+				void* dst_ptr = nullptr;
+				auto size = 0U;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, size);
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, size);
+				memcpy(dst_ptr, src_ptr, size);
+			}
+
 			i++;
 			break;
 		case cIfEqual:
@@ -175,6 +209,17 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			auto end_i = i + 1;
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
+
+			void* src_ptr = nullptr;
+			void* dst_ptr = nullptr;
+			auto size = 0U;
+			special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, size);
+			special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, size);
+			if (memcmp(src_ptr, dst_ptr, size) == 0)
+			{
+				for (i = i + 1; i <= end_i; )
+					do_cmd();
+			}
 
 			i = end_i + 1;
 		}
@@ -190,6 +235,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				for (i = i + 1; i <= end_i; )
 					do_cmd();
 			}
+
 			i = end_i + 1;
 		}
 			break;
