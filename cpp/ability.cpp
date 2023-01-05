@@ -60,36 +60,23 @@ void init_abilities()
 		}
 	}
 
-	// Talents
+	for (auto& section : parse_ini_file(Path::get(L"assets\\talents.ini")).sections)
 	{
 		auto& talent = talents.emplace_back();
-		talent.id = abilities.size() - 1;
-		talent.name = "Warrior";
+		talent.id = talents.size() - 1;
+		talent.name = section.name;
+		for (auto& e : section.entries)
 		{
-			std::vector<uint> layer;
-			layer.push_back(Ability::find("Strong Body"));
-			layer.push_back(Ability::find("Strong Mind"));
-			layer.push_back(Ability::find("Sharp Weapon"));
-			layer.push_back(Ability::find("Rapid Strike"));
-			layer.push_back(Ability::find("Scud"));
-			layer.push_back(Ability::find("Armor"));
-			talent.ablilities_list.push_back(layer);
-		}
-		{
-			std::vector<uint> layer;
-			layer.push_back(Ability::find("Greate Cleave"));
-			layer.push_back(Ability::find("Vampiric Spirit"));
-			talent.ablilities_list.push_back(layer);
-		}
-	}
-	{
-		auto& talent = talents.emplace_back();
-		talent.id = abilities.size() - 1;
-		talent.name = "Laya Knight";
-		{
-			std::vector<uint> layer;
-			layer.push_back(Ability::find("Fire Breath"));
-			talent.ablilities_list.push_back(layer);
+			if (e.key == "layer")
+			{
+				std::vector<uint> vec;
+				for (auto& t : e.values)
+				{
+					if (auto id = Ability::find(t); id != -1)
+						vec.push_back(id);
+				}
+				talent.ablilities_list.push_back(std::move(vec));
+			}
 		}
 	}
 }

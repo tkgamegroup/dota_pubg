@@ -40,6 +40,18 @@
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/renderer.h>
 
+std::string get_show_name(const std::string& name)
+{
+	auto ret = name;
+	ret[0] = toupper(ret[0]);
+	for (auto i = 0; i < ret.size() - 1; i++)
+	{
+		if (ret[i] == '_')
+			ret[i + 1] = toupper(ret[i + 1]);
+	}
+	return name;
+}
+
 bool parse_literal(const std::string& str, int& id)
 {
 	if (SUS::match_head_tail(str, "\"", "\"s"))
