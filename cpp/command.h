@@ -89,8 +89,6 @@ struct Parameter
 typedef std::unordered_map<uint, std::vector<Parameter>>	ParameterPack;
 typedef std::vector<std::pair<std::string, uint>>			ParameterNames;
 
-void read_parameter_values(std::vector<Parameter>& vec, const std::string& text);
-
 void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters, const std::vector<std::string>& tokens);
 
 struct CommandList
@@ -103,13 +101,14 @@ struct CommandList
 		cEndSub,
 		cStore,
 		cIfEqual,
+		cIfNotEqual,
 		cRollDice100,
 		cForNearbyEnemies,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
 		cTakeDamagePct,
-		cInflictDamge,
+		cInflictDamage,
 		cLevelUp,
 		cIncreaseHPMax,
 		cIncreaseMPMax,

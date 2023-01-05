@@ -39,6 +39,8 @@ void init_abilities()
 				ability.cast_range = s2t<float>(e.values[0]);
 			else if (e.key == "cast_angle")
 				ability.cast_angle = s2t<float>(e.values[0]);
+			else if (e.key == "parameters")
+				read_parameters(ability.parameter_names, ability.parameters, e.values);
 			else if (e.key == "active")
 				ability.active.build(e.values);
 			else if (e.key == "passive")

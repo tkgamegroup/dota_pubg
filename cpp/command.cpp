@@ -50,14 +50,6 @@ Parameter::Parameter(const std::string& str)
 	}
 }
 
-void read_parameter_values(std::vector<Parameter>& vec, const std::string& text)
-{
-	auto sp = SUS::split(text, '/');
-	vec.resize(sp.size());
-	for (auto i = 0; i < vec.size(); i++)
-		vec[i] = Parameter(sp[i]);
-}
-
 void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters, const std::vector<std::string>& tokens)
 {
 	for (auto& t : tokens)
@@ -66,7 +58,8 @@ void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters,
 		auto hash = sh(sp[0].c_str());
 		parameter_names.emplace_back(sp[0], hash);
 		auto& vec = parameters.emplace(hash, std::vector<Parameter>()).first->second;
-		read_parameter_values(vec, sp[1]);
+		for (auto& tt : SUS::split(sp[1], '/'))
+			vec.push_back(Parameter(tt));
 	}
 }
 
@@ -224,6 +217,26 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i = end_i + 1;
 		}
 			break;
+		case cIfNotEqual:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			void* src_ptr = nullptr;
+			void* dst_ptr = nullptr;
+			auto size = 0U;
+			special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, size);
+			special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, size);
+			if (memcmp(src_ptr, dst_ptr, size) != 0)
+			{
+				for (i = i + 1; i <= end_i; )
+					do_cmd();
+			}
+
+			i = end_i + 1;
+		}
+			break;
 		case cRollDice100:
 		{
 			auto end_i = i + 1;
@@ -290,7 +303,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				character->take_damage((DamageType)parameters[0].to_i(), character->hp_max * parameters[1].to_f());
 			i++;
 			break;
-		case cInflictDamge:
+		case cInflictDamage:
 			if (parameters.size() >= 2)
 				character->inflict_damage(target_character, (DamageType)parameters[0].to_i(), parameters[1].to_i());
 			i++;
@@ -433,8 +446,8 @@ void CommandList::build(const std::vector<std::string>& tokens)
 				case '/': p.u.e.op = Parameter::OpDivide; break;
 				}
 
-				c.second.push_back(Parameter(sp[i + 1]));
-				c.second.push_back(Parameter(sp[i + 2]));
+				c.second.push_back(Parameter(res[1].str()));
+				c.second.push_back(Parameter(res[3].str()));
 			}
 			else
 				c.second.push_back(Parameter(tt));
