@@ -113,12 +113,12 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 	auto i = 0;
 	std::function<void()> do_cmd;
 	do_cmd = [&]() {
-		auto& c = cmds[i];
+		auto& cmd = cmds[i];
 
 		std::vector<Parameter> parameters;
-		for (auto i_parm = 0; i_parm < c.second.size(); i_parm++)
+		for (auto i_parm = 0; i_parm < cmd.second.size(); i_parm++)
 		{
-			auto& sp = c.second[i_parm];
+			auto& sp = cmd.second[i_parm];
 			switch (sp.type)        
 			{
 			case Parameter::tImmediate:
@@ -136,16 +136,17 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			case Parameter::tExpression:
 			{
 				auto get_operand = [&]()->Parameter {
-					auto ret = c.second[i_parm++];
+					auto ret = cmd.second[i_parm++];
 					assert(ret.type != Parameter::tExpression);
 					if (ret.type == Parameter::tExternal)
 					{
 						ret.type = Parameter::tImmediate;
-						auto& vec = external_parameters.at(sp.u.v.u);
+						auto& vec = external_parameters.at(ret.u.v.u);
 						ret = lv <= vec.size() ? vec[lv] : vec[0];
 					}
 					return ret;
 				};
+				i_parm++;
 				switch (sp.u.e.op)
 				{
 				case Parameter::OpAdd:
@@ -182,7 +183,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			}
 		}
 
-		switch (c.first)
+		switch (cmd.first)
 		{
 		case cStore:
 			if (parameters.size() >= 2)
@@ -395,6 +396,17 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				i <= end_i - (in_sub ? 1 : 0); i++)
 				ef.cmds.push_back(cmds[i]);
 			ef.init_sub_groups();
+			for (auto& c : ef.cmds)
+			{
+				for (auto& p : c.second)
+				{
+					if (p.type == Parameter::tExternal)
+					{
+						if (auto it = external_parameters.find(p.u.v.u); it != external_parameters.end())
+							p = it->second[lv];
+					}
+				}
+			}
 
 			i = end_i + 1;
 		}
@@ -413,6 +425,8 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				add_effect(parameters[0].to_i(), character_pos, vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
 			i++;
 			break;
+		default:
+			i++;
 		}
 	};
 

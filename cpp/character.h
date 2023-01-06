@@ -195,17 +195,17 @@ struct cCharacter : Component
 	CharacterState state = CharacterStateNormal;
 
 	// Reflect
-	uint hp = 1000;
+	uint hp = 1;
 	void set_hp(uint v);
 	// Reflect
-	uint hp_max = 1000;
+	uint hp_max = 1;
 	void set_hp_max(uint v);
 
 	// Reflect
-	uint mp = 10;
+	uint mp = 1;
 	void set_mp(uint v);
 	// Reflect
-	uint mp_max = 10;
+	uint mp_max = 1;
 	void set_mp_max(uint v);
 
 	// Reflect

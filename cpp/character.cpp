@@ -740,11 +740,18 @@ void cCharacter::process_attack_target(cCharacterPtr target)
 					auto attack = [this](cCharacterPtr target) {
 						auto damage = atk;
 						inflict_damage(target, (DamageType)atk_type, damage);
-						if (target->dead_flag == 0)
 						{
 							static ParameterPack parameters;
-							parameters["attack_damage_type"_h].emplace_back((int)atk_type);
-							parameters["attack_damage"_h].emplace_back(damage);
+							{
+								auto& vec = parameters["attack_damage_type"_h];
+								if (vec.empty()) vec.resize(1);
+								vec[0] = (int)atk_type;
+							}
+							{
+								auto& vec = parameters["attack_damage"_h];
+								if (vec.empty()) vec.resize(1);
+								vec[0] = damage;
+							}
 							for (auto& ef : attack_effects)
 								ef.execute(this, target, vec3(0.f), parameters, 0);
 						}
