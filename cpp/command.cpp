@@ -5,6 +5,7 @@
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
 #include <flame/universe/components/node.h>
+#include <flame/universe/components/nav_agent.h>
 
 Parameter::Parameter(const std::string& str)
 {
@@ -425,7 +426,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cAddEffectFaceTarget:
 			if (parameters.size() >= 2)
-				add_effect(parameters[0].to_i(), character_pos, vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+				add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
 			i++;
 			break;
 		default:
