@@ -40,7 +40,10 @@ Parameter::Parameter(const std::string& str)
 			u.v.i = sv;
 		}
 		else if (int id; parse_literal(str, id))
+		{
+			type = tImmediate;
 			u.v.i = id;
+		}
 		else
 		{
 			type = tExternal;

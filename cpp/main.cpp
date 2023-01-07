@@ -80,6 +80,16 @@ bool parse_literal(const std::string& str, int& id)
 		id = Talent::find(str.substr(1, str.size() - 3));
 		return true;
 	}
+	else if (SUS::match_head_tail(str, "\"", "\"ef"))
+	{
+		id = EffectPreset::find(str.substr(1, str.size() - 4));
+		return true;
+	}
+	else if (SUS::match_head_tail(str, "\"", "\"pt"))
+	{
+		id = ProjectilePreset::find(str.substr(1, str.size() - 4));
+		return true;
+	}
 	return false;
 }
 
@@ -519,12 +529,12 @@ void cMain::start()
 	main_camera.init(entity->find_child("Camera"));
 	main_terrain.init(entity->find_child("terrain"));
 
+	init_effects();
+	init_projectiles();
 	init_items();
 	init_buffs();
 	init_abilities();
 	init_characters();
-	init_projectiles();
-	init_effects();
 	init_spawnning_rules();
 
 	if (auto nav_scene = entity->get_component_t<cNavScene>(); nav_scene)
