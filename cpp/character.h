@@ -157,6 +157,14 @@ enum CharacterState
 	CharacterStateSilence = 1 << 2
 };
 
+enum CharacterMessage
+{
+	CharacterLevelUp,
+	CharacterGainItem,
+	CharacterGainAbility,
+	CharacterAbilityLevelUp,
+};
+
 extern std::vector<cCharacterPtr> characters;
 extern std::map<uint, std::vector<cCharacterPtr>> factions;
 
@@ -257,6 +265,8 @@ struct cCharacter : Component
 	float attack_hit_timer = 0.f;
 	float attack_timer = 0.f;
 	float cast_timer = 0.f;
+
+	Listeners<void(CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3)> message_listeners;
 
 	~cCharacter();
 	void on_init() override;

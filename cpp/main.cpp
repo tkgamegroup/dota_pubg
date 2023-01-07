@@ -172,6 +172,74 @@ void MainPlayer::init(EntityPtr e)
 		node = e->node();
 		nav_agent = e->get_component_t<cNavAgent>();
 		character = e->get_component_t<cCharacter>();
+
+		character->message_listeners.add([](CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3) {
+			switch (msg)
+			{
+			case CharacterGainItem:
+			{
+				auto ins = main_player.character->inventory[p2.i].get();
+				auto& item = Item::get(ins->id);
+				if (item.active)
+				{
+					auto found = false;
+					for (auto& shortcut : shortcuts)
+					{
+						if (shortcut->type == Shortcut::tItem && shortcut->id == ins->id)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						for (auto& shortcut : shortcuts)
+						{
+							if (shortcut->type == Shortcut::tNull)
+							{
+								auto key = shortcut->key;
+								shortcut.reset(new ItemShortcut(ins));
+								shortcut->key = key;
+								break;
+							}
+						}
+					}
+				}
+			}
+				break;
+			case CharacterAbilityLevelUp:
+			{
+				auto ins = main_player.character->abilities[p0.i].get();
+				auto& ability = Ability::get(ins->id);
+				if (ins->lv == 1 && ability.active)
+				{
+					auto found = false;
+					for (auto& shortcut : shortcuts)
+					{
+						if (shortcut->type == Shortcut::tAbility && shortcut->id == ins->id)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						for (auto& shortcut : shortcuts)
+						{
+							if (shortcut->type == Shortcut::tNull)
+							{
+								auto key = shortcut->key;
+								shortcut.reset(new AbilityShortcut(ins));
+								shortcut->key = key;
+								break;
+							}
+						}
+					}
+				}
+			}
+				break;
+			}
+		});
 	}
 }
 
@@ -208,7 +276,8 @@ std::string tooltip;
 ItemShortcut::ItemShortcut(ItemInstance* ins) :
 	ins(ins)
 {
-	id = (1 << 16) + ins->id;
+	type = tItem;
+	id = ins->id;
 }
 
 void ItemShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
@@ -232,7 +301,8 @@ void ItemShortcut::click()
 AbilityShortcut::AbilityShortcut(AbilityInstance* ins) :
 	ins(ins)
 {
-	id = (2 << 16) + ins->id;
+	type = tAbility;
+	id = ins->id;
 }
 
 void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)

@@ -517,17 +517,23 @@ void cCharacter::gain_exp(uint v)
 
 bool cCharacter::gain_item(uint id, uint num)
 {
-	for (auto& ins : inventory)
+	for (auto i = 0; i < inventory.size(); i++)
 	{
+		auto& ins = inventory[i];
 		if (!ins)
 		{
 			ins.reset(new ItemInstance);
 			ins->id = id;
 			ins->num = num;
 			stats_dirty = true;
+
+			for (auto& cb : main_player.character->message_listeners.list)
+				cb.first(CharacterGainItem, { .u = id }, { .u = num }, { .i = i }, {});
+
 			return true;
 		}
 	}
+
 	return false;
 }
 

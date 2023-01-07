@@ -126,6 +126,14 @@ extern MainPlayer main_player;
 struct ImDrawList;
 struct Shortcut
 {
+	enum Type
+	{
+		tNull,
+		tItem,
+		tAbility
+	};
+
+	Type type = tNull;
 	int id = -1;
 	KeyboardKey key = KeyboardKey_Count;
 

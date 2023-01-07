@@ -125,31 +125,8 @@ void ViewAbility::on_draw()
 								main_player.character->ability_points--;
 								main_player.character->stats_dirty = true;
 
-								if (ins->lv == 1 && ability.active)
-								{
-									auto found = false;
-									for (auto& shortcut : shortcuts)
-									{
-										if (shortcut->id >> 16 == 2 && (shortcut->id & 0xfff) == ins->id)
-										{
-											found = true;
-											break;
-										}
-									}
-									if (!found)
-									{
-										for (auto& shortcut : shortcuts)
-										{
-											if (shortcut->id < 0)
-											{
-												auto key = shortcut->key;
-												shortcut.reset(new AbilityShortcut(ins));
-												shortcut->key = key;
-												break;
-											}
-										}
-									}
-								}
+								for (auto& cb : main_player.character->message_listeners.list)
+									cb.first(CharacterAbilityLevelUp, { .i = i }, {}, {}, {});
 
 								if (main_player.character->ability_points == 0 && modal)
 								{
