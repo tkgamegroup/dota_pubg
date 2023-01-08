@@ -33,12 +33,31 @@ void init_abilities()
 				ability.description = e.values[0];
 			else if (e.key == "target_type")
 				TypeInfo::unserialize_t(e.values[0], ability.target_type);
-			else if (e.key == "cast_distance")
-				ability.cast_distance = s2t<float>(e.values[0]);
-			else if (e.key == "cast_range")
-				ability.cast_range = s2t<float>(e.values[0]);
-			else if (e.key == "cast_angle")
-				ability.cast_angle = s2t<float>(e.values[0]);
+			else if (e.key == "mp")
+			{
+				for (auto& t : SUS::split(e.values[0], '/'))
+					ability.mp.push_back(s2t<uint>(t));
+			}
+			else if (e.key == "cd")
+			{
+				for (auto& t : SUS::split(e.values[0], '/'))
+					ability.cd.push_back(s2t<uint>(t));
+			}
+			else if (e.key == "distance")
+			{
+				for (auto& t : SUS::split(e.values[0], '/'))
+					ability.distance.push_back(s2t<float>(t));
+			}
+			else if (e.key == "range")
+			{
+				for (auto& t : SUS::split(e.values[0], '/'))
+					ability.range.push_back(s2t<float>(t));
+			}
+			else if (e.key == "angle")
+			{
+				for (auto& t : SUS::split(e.values[0], '/'))
+					ability.angle.push_back(s2t<float>(t));
+			}
 			else if (e.key == "parameters")
 				read_parameters(ability.parameter_names, ability.parameters, e.values);
 			else if (e.key == "active")

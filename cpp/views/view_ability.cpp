@@ -88,15 +88,6 @@ void ViewAbility::on_draw()
 							spent_points += ins->lv;
 
 							auto& ability = Ability::get(ins->id);
-							if (ImGui::IsItemHovered())
-							{
-								ImGui::BeginTooltip();
-								ImGui::TextUnformatted(ability.name.c_str());
-								ImGui::TextUnformatted(ability.description.c_str());
-								ImGui::EndTooltip();
-							}
-							dl->AddImage(ins->lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-							dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(ins->lv).c_str());
 
 							auto can_level_up = false;
 							if (ins->lv < ability.max_lv && main_player.character->ability_points > 0)
@@ -104,6 +95,48 @@ void ViewAbility::on_draw()
 								if (spent_points >= layer_idx * 5)
 									can_level_up = true;
 							}
+
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::BeginTooltip();
+								ImGui::TextUnformatted(ability.name.c_str());
+								ImGui::PushStyleColor(ImGuiCol_Text, (uint)ImColor(0.8f, 0.8f, 0.8f, 1.f));
+								if (!ability.active)
+									ImGui::TextUnformatted("Passive");
+								else
+								{
+									switch (ability.target_type)
+									{
+									case TargetNull:
+										break;
+									case TargetEnemy:
+										ImGui::TextUnformatted("Target: Enemy");
+										break;
+									case TargetFriendly:
+										ImGui::TextUnformatted("Target: Friendly");
+										break;
+									case TargetLocation:
+										ImGui::TextUnformatted("Target: Location");
+										break;
+									}
+									ImGui::Text("MP: %d", ability.get_mp(ins->lv));
+									if (can_level_up && ability.mp.size() > 1)
+									{
+										ImGui::SameLine();
+										ImGui::Text("-> %d", ability.get_mp(ins->lv + 1));
+									}
+								}
+								ImGui::TextUnformatted(ability.description.c_str());
+								for (auto& p : ability.parameter_names)
+								{
+									auto& vec = ability.parameters.at(p.second);
+
+								}
+								ImGui::PopStyleColor();
+								ImGui::EndTooltip();
+							}
+							dl->AddImage(ins->lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+							dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(ins->lv).c_str());
 
 							if (can_level_up)
 								dl->AddRect(p0 - vec2(1.f), p1 + vec2(1.f), ImColor(0.f, 1.f, 0.f, 1.f));

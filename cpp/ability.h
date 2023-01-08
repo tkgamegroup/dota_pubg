@@ -25,11 +25,46 @@ struct Ability
 	uint					max_lv = 5;
 	float					cast_time = 0.f;
 	float					channel_time = 0.f;
-	uint					mp = 0;
-	float					cd = 0.f;
-	float					cast_distance = 0.f;
-	float					cast_range = 0.f;
-	float					cast_angle = 0.f;
+	std::vector<uint>		mp;
+	std::vector<float>		cd;
+	std::vector<float>		distance;
+	std::vector<float>		range;
+	std::vector<float>		angle;
+
+	inline uint get_mp(uint lv) const
+	{
+		if (mp.empty()) return 0;
+		if (mp.size() == 1) return mp[0];
+		return mp[lv - 1];
+	}
+
+	inline float get_cd(uint lv) const
+	{
+		if (cd.empty()) return 0;
+		if (cd.size() == 1) return cd[0];
+		return cd[lv - 1];
+	}
+
+	inline float get_distance(uint lv) const
+	{
+		if (distance.empty()) return 0;
+		if (distance.size() == 1) return distance[0];
+		return distance[lv - 1];
+	}
+
+	inline float get_range(uint lv) const
+	{
+		if (range.empty()) return 0;
+		if (range.size() == 1) return range[0];
+		return range[lv - 1];
+	}
+
+	inline float get_angle(uint lv) const
+	{
+		if (angle.empty()) return 0;
+		if (angle.size() == 1) return angle[0];
+		return angle[lv - 1];
+	}
 
 	ParameterNames			parameter_names;
 	ParameterPack			parameters;

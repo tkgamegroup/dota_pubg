@@ -344,7 +344,7 @@ void AbilityShortcut::click()
 		return;
 	}
 	auto& ability = Ability::get(ins->id);
-	if (main_player.character->mp < ability.mp)
+	if (main_player.character->mp < ability.get_mp(ins->lv))
 	{
 		illegal_op_str = "Not Enough MP.";
 		illegal_op_str_timer = 3.f;
@@ -385,9 +385,9 @@ void AbilityShortcut::click()
 					so_client->send(res.str());
 				}
 			};
-			select_distance = ability.cast_distance;
-			select_range = ability.cast_range;
-			select_angle = ability.cast_angle;
+			select_distance = ability.get_distance(ins->lv);
+			select_range = ability.get_range(ins->lv);
+			select_angle = ability.get_angle(ins->lv);
 		}
 		if (ability.target_type & TargetEnemy)
 		{
@@ -406,7 +406,7 @@ void AbilityShortcut::click()
 					so_client->send(res.str());
 				}
 			};
-			select_distance = ability.cast_distance;
+			select_distance = ability.get_distance(ins->lv);
 		}
 	}
 }

@@ -835,15 +835,18 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 {
 	if (ins->cd_timer > 0.f)
 		return;
+
 	auto& ability = Ability::get(ins->id);
-	if (mp < ability.mp)
+	auto ability_mp = ability.get_mp(ins->lv);
+	auto ability_cd = ability.get_cd(ins->lv);
+	if (mp < ability_mp)
 		return;
 
 	ability.active.execute(this, target, location, ability.parameters, ins->lv);
 
-	ins->cd_max = ability.cd;
+	ins->cd_max = ability_cd;
 	ins->cd_timer = ins->cd_max;
-	set_mp(mp - ability.mp);
+	set_mp(mp - ability_mp);
 }
 
 void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
@@ -1024,7 +1027,7 @@ void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location
 	auto& ability = Ability::get(ins->id);
 	auto pos = target ? target->node->pos : location;
 
-	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.cast_distance, 15.f);
+	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.get_distance(ins->lv), 15.f);
 	if (cast_timer > 0.f)
 	{
 		cast_timer -= delta_time;

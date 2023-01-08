@@ -61,7 +61,7 @@ void cCreepAI::update()
 					{
 						if (ins->cd_timer <= 0.f)
 						{
-							if (auto& ability = Ability::get(ins->id); character->mp >= ability.mp)
+							if (auto& ability = Ability::get(ins->id); character->mp >= ability.get_mp(ins->lv))
 							{
 								//if (!ability.cast_check || ability.cast_check(ins.get(), character))
 								{
