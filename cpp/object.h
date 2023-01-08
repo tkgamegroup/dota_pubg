@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-extern std::map<uint, cObjectPtr> objects;
+extern std::map<uint, cObjectPtr>			objects;
 extern std::vector<std::pair<uint, uint>>	new_objects; // only in host
 extern std::vector<uint>					removed_objects; // only in host
 

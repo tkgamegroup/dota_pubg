@@ -76,7 +76,7 @@ CharacterCommandAttackLocation::CharacterCommandAttackLocation(cCharacterPtr cha
 
 void CharacterCommandAttackLocation::update()
 {
-	if (!target.obj && character->action != ActionAttack)
+	if (!target.obj)
 	{
 		if (character->search_timer <= 0.f)
 		{
@@ -97,6 +97,31 @@ void CharacterCommandAttackLocation::update()
 	}
 }
 
+CharacterCommandHold::CharacterCommandHold(cCharacterPtr character) :
+	CharacterCommand("Hold"_h, character)
+{
+}
+
+void CharacterCommandHold::update()
+{
+	if (!target.obj)
+	{
+		if (character->search_timer <= 0.f)
+		{
+			auto enemies = find_characters(character->node->pos, max(character->preset->atk_distance, 1.5f), ~character->faction);
+			if (!enemies.empty())
+				target.set(enemies.front());
+
+			character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+		}
+	}
+
+	if (target.obj)
+		character->process_attack_target(target.obj, false);
+	else
+		character->action = ActionNone;
+}
+
 CharacterCommandPickUp::CharacterCommandPickUp(cCharacterPtr character, cChestPtr _target) :
 	CharacterCommand("PickUp"_h, character)
 {
@@ -112,13 +137,7 @@ void CharacterCommandPickUp::update()
 		if (character->process_approach(target.obj->node->pos, 1.5f))
 		{
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
-			{
-				auto entity = target.obj->entity;
-				add_event([entity]() {
-					entity->remove_from_parent();
-					return false;
-				});
-			}
+				target.obj->die();
 
 			character->nav_agent->stop();
 			new CharacterCommandIdle(character);
@@ -281,14 +300,13 @@ const CharacterPreset& CharacterPreset::get(uint id)
 }
 
 std::vector<cCharacterPtr> characters;
-std::map<uint, std::vector<cCharacterPtr>> factions;
+std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
+std::vector<cCharacterPtr> dead_characters;
 
 void cCharacter::set_faction(uint _faction)
 {
 	if (faction == _faction)
 		return;
-	if (faction == 0) // first time
-		characters.push_back(this);
 	std::erase_if(factions[faction], [this](const auto& i) {
 		return i == this;
 	});
@@ -440,226 +458,6 @@ void cCharacter::on_init()
 	}, "character"_h);
 }
 
-void cCharacter::inflict_damage(cCharacterPtr target, DamageType type, uint value)
-{
-	value *= linearRand(0.8f, 1.2f);
-	uint def;
-	switch (type)
-	{
-	case PhysicalDamage:
-		def = target->phy_def;
-		break;
-	case MagicDamage:
-		def = target->mag_def;
-		break;
-	}
-	;
-	if (target->take_damage(type, value))
-		gain_exp(target->exp_max * 0.15f);
-
-	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-	{
-		if (target == main_player.character || this == main_player.character)
-			add_floating_tip(target->node->pos + vec3(0.f, 0.8f, 0.f), str(value), cvec4(255));
-	}
-}
-
-bool cCharacter::take_damage(DamageType type, uint value)
-{
-	if (dead_flag > 0)
-		return false;
-	if (hp > value)
-	{
-		set_hp(hp - value);
-		return false;
-	}
-
-	die();
-	return true;
-}
-
-void cCharacter::restore_hp(uint value)
-{
-	set_hp(min(hp + value, hp_max));
-}
-
-void cCharacter::restore_mp(uint value)
-{
-	set_hp(min(mp + value, mp_max));
-}
-
-void cCharacter::gain_exp(uint v)
-{
-	if (exp_max == 0)
-		return;
-	exp += v;
-
-	auto old_lv = lv;
-	while (exp_max > 0 && exp >= exp_max)
-	{
-		exp -= exp_max;
-		lv++;
-		ability_points++;
-		exp_max *= 1.1f;
-		stats_dirty = true;
-
-	}
-
-	if (old_lv != lv)
-	{
-		view_ability.modal = true;
-		view_ability.open();
-		audio_source->play("level_up"_h);
-
-		enable_game(false);
-	}
-}
-
-bool cCharacter::gain_item(uint id, uint num)
-{
-	for (auto i = 0; i < inventory.size(); i++)
-	{
-		auto& ins = inventory[i];
-		if (!ins)
-		{
-			ins.reset(new ItemInstance);
-			ins->id = id;
-			ins->num = num;
-			stats_dirty = true;
-
-			for (auto& cb : main_player.character->message_listeners.list)
-				cb.first(CharacterGainItem, { .u = id }, { .u = num }, { .i = i }, {});
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool cCharacter::gain_ability(uint id, uint lv)
-{
-	for (auto& ins : abilities)
-	{
-		if (ins->id == id)
-			return false;
-	}
-
-	auto ins = new AbilityInstance;
-	ins->id = id;
-	ins->lv = lv;
-	abilities.emplace_back(ins);
-	stats_dirty = true;
-	return true;
-}
-
-bool cCharacter::gain_talent(uint id)
-{
-	for (auto tid : talents)
-	{
-		if (tid == id)
-			return false;
-	}
-
-	talents.push_back(id);
-	auto& talent = Talent::get(id);
-	for (auto& layer : talent.ablilities_list)
-	{
-		for (auto id : layer)
-			gain_ability(id, 0);
-	}
-	return true;
-}
-
-void cCharacter::use_item(ItemInstance* ins)
-{
-	auto& item = Item::get(ins->id);
-	if (item.active)
-		return;
-	if (item.type == ItemConsumable)
-	{
-		if (ins->num == 0)
-			return;
-		ins->num--;
-		if (ins->num == 0)
-		{
-			for (auto i = 0; i < inventory.size(); i++)
-			{
-				if (inventory[i].get() == ins)
-				{
-					inventory[i].reset(nullptr);
-					break;
-				}
-			}
-		}
-	}
-
-	item.active.execute(this, nullptr, vec3(0.f), item.parameters, 0);
-}
-
-void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
-{
-	if (ins->cd_timer > 0.f)
-		return;
-	auto& ability = Ability::get(ins->id);
-	if (mp < ability.mp)
-		return;
-
-	ability.active.execute(this, target, location, ability.parameters, ins->lv);
-
-	ins->cd_max = ability.cd;
-	ins->cd_timer = ins->cd_max;
-	set_mp(mp - ability.mp);
-}
-
-void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
-{
-	BuffInstance* ins = nullptr;
-	if (replace)
-	{
-		for (auto& i : buffs)
-		{
-			if (i->id == id)
-			{
-				ins = i.get();
-				break;
-			}
-		}
-	}
-	if (!ins)
-	{
-		ins = new BuffInstance;
-		buffs.emplace_back(ins);
-	}
-	auto& buff = Buff::get(id);
-	ins->id = id;
-	ins->lv = lv;
-	ins->timer = time;
-	ins->t0 = time;
-	ins->interval = buff.interval;
-	ins->duration = time;
-	stats_dirty = true;
-}
-
-bool cCharacter::add_marker(uint hash, float time)
-{
-	auto it = markers.find(hash);
-	if (it == markers.end())
-	{
-		markers.emplace(hash, std::make_pair(time, 0));
-		return true;
-	}
-	return false;
-}
-
-void cCharacter::die()
-{
-	if (dead_flag > 0)
-		return;
-	set_hp(0);
-	dead_flag = 1;
-}
-
 void cCharacter::start()
 {
 	entity->tag |= CharacterTag;
@@ -702,198 +500,13 @@ void cCharacter::start()
 		new CharacterCommandIdle(this);
 }
 
-bool cCharacter::process_approach(const vec3& target, float dist, float ang)
-{
-	if (state & CharacterStateStun)
-	{
-		nav_agent->stop();
-		action = ActionNone;
-		return false;
-	}
-
-	move_speed = max(0.1f, mov_sp / 100.f);
-	nav_agent->set_target(target);
-	nav_agent->set_speed_scale(move_speed);
-
-	if ((nav_agent->reached_pos == target || nav_agent->dist < dist) && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
-		return true;
-	audio_source->play("move"_h);
-	action = ActionMove;
-	return false;
-}
-
-void cCharacter::process_attack_target(cCharacterPtr target)
-{
-	if (state & CharacterStateStun)
-	{
-		nav_agent->stop();
-		action = ActionNone;
-		return;
-	}
-
-	if (action == ActionAttack)
-	{
-		nav_agent->set_speed_scale(0.f);
-		nav_agent->set_target(target->node->pos);
-
-		if (attack_hit_timer > 0.f)
-		{
-			attack_hit_timer -= delta_time;
-			if (attack_hit_timer <= 0.f)
-			{
-				if (distance(node->pos, target->node->pos) <= preset->atk_distance + 3.5f)
-				{
-					auto attack = [this](cCharacterPtr target) {
-						auto damage = atk;
-						inflict_damage(target, (DamageType)atk_type, damage);
-						{
-							static ParameterPack parameters;
-							{
-								auto& vec = parameters["attack_damage_type"_h];
-								if (vec.empty()) vec.resize(1);
-								vec[0] = (int)atk_type;
-							}
-							{
-								auto& vec = parameters["attack_damage"_h];
-								if (vec.empty()) vec.resize(1);
-								vec[0] = damage;
-							}
-							for (auto& ef : attack_effects)
-								ef.execute(this, target, vec3(0.f), parameters, 0);
-						}
-
-						audio_source->play("attack_hit"_h);
-					};
-					if (preset->atk_projectile_preset != -1)
-					{
-						add_projectile(preset->atk_projectile_preset,
-							node->pos + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
-							[&](const vec3&, cCharacterPtr t) {
-								if (t)
-									attack(t);
-							});
-					}
-					else
-						attack(target);
-				}
-
-				attack_interval_timer = (preset->atk_interval - preset->atk_point) / attack_speed;
-			}
-		}
-
-		if (attack_timer > 0.f)
-		{
-			attack_timer -= delta_time;
-			if (attack_timer <= 0.f)
-				action = ActionNone;
-		}
-	}
-	else
-	{
-		auto approached = process_approach(target->node->pos, preset->atk_distance, 60.f);
-		if (attack_interval_timer <= 0.f)
-		{
-			if (approached)
-			{
-				attack_speed = max(0.01f, atk_sp / 100.f); 
-				attack_hit_timer = preset->atk_point / attack_speed;
-				attack_timer = preset->atk_time / attack_speed;
-				action = ActionAttack;
-
-				audio_source->play("attack_precast"_h);
-			}
-		}
-		else
-		{
-			if (approached)
-			{
-				action = ActionNone;
-				nav_agent->set_speed_scale(0.f);
-			}
-		}
-	}
-}
-
-void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
-{
-	if (state & CharacterStateStun)
-	{
-		cast_timer = -1.f;
-		nav_agent->stop();
-		action = ActionNone;
-		return;
-	}
-
-	auto& ability = Ability::get(ins->id);
-	auto pos = target ? target->node->pos : location;
-
-	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.cast_distance, 15.f);
-	if (cast_timer > 0.f)
-	{
-		cast_timer -= delta_time;
-		if (cast_timer <= 0.f)
-		{
-			cast_ability(ins, pos, target);
-			nav_agent->stop();
-			new CharacterCommandIdle(this);
-		}
-		else
-		{
-			action = ActionCast;
-			nav_agent->set_speed_scale(0.f);
-		}
-	}
-	else
-	{
-		if (approached)
-		{
-			if (ability.cast_time == 0.f)
-			{
-				cast_ability(ins, pos, target);
-				nav_agent->stop();
-				new CharacterCommandIdle(this);
-			}
-			else
-			{
-				cast_speed = preset->cast_time / ability.cast_time;
-				cast_timer = preset->cast_point / cast_speed;
-			}
-		}
-	}
-}
-
 void cCharacter::update()
 {
+	if (dead)
+		return;
+
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		if (dead_flag > 0)
-		{
-			if (dead_flag == 1)
-			{
-				if (!preset->drop_items.empty())
-				{
-					std::vector<std::pair<uint, uint>> drops;
-					for (auto& d : preset->drop_items)
-					{
-						if (linearRand(0U, 100U) < d.probability)
-							drops.emplace_back(d.id, linearRand(d.num_min, d.num_max));
-					}
-					auto p = node->pos;
-					for (auto& d : drops)
-						add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
-				}
-
-				add_event([this]() {
-					entity->remove_from_parent();
-					return false;
-				});
-
-				dead_flag = 2;
-			}
-
-			return;
-		}
-
 		if (stats_dirty)
 		{
 			if (exp_max == 0)
@@ -1029,6 +642,419 @@ void cCharacter::update()
 			armature->playing_speed = cast_speed;
 			armature->play("cast"_h);
 			break;
+		}
+	}
+}
+
+void cCharacter::die()
+{
+	if (dead)
+		return;
+
+	set_hp(0);
+
+	if (!preset->drop_items.empty())
+	{
+		std::vector<std::pair<uint, uint>> drops;
+		for (auto& d : preset->drop_items)
+		{
+			if (linearRand(0U, 100U) < d.probability)
+				drops.emplace_back(d.id, linearRand(d.num_min, d.num_max));
+		}
+		auto p = node->pos;
+		for (auto& d : drops)
+			add_chest(main_terrain.get_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
+	}
+
+	dead_characters.push_back(this);
+	dead = true;
+}
+
+void cCharacter::inflict_damage(cCharacterPtr target, DamageType type, uint value)
+{
+	value *= linearRand(0.8f, 1.2f);
+	uint def;
+	switch (type)
+	{
+	case PhysicalDamage:
+		def = target->phy_def;
+		break;
+	case MagicDamage:
+		def = target->mag_def;
+		break;
+	}
+	;
+	if (target->take_damage(type, value))
+		gain_exp(target->exp_max * 0.15f);
+
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	{
+		if (target == main_player.character || this == main_player.character)
+			add_floating_tip(target->node->pos + vec3(0.f, 0.8f, 0.f), str(value), cvec4(255));
+	}
+}
+
+bool cCharacter::take_damage(DamageType type, uint value)
+{
+	if (dead)
+		return false;
+	if (hp > value)
+	{
+		set_hp(hp - value);
+		return false;
+	}
+
+	die();
+	return true;
+}
+
+void cCharacter::restore_hp(uint value)
+{
+	set_hp(min(hp + value, hp_max));
+}
+
+void cCharacter::restore_mp(uint value)
+{
+	set_hp(min(mp + value, mp_max));
+}
+
+void cCharacter::gain_exp(uint v)
+{
+	if (exp_max == 0)
+		return;
+	exp += v;
+
+	auto old_lv = lv;
+	while (exp_max > 0 && exp >= exp_max)
+	{
+		exp -= exp_max;
+		lv++;
+		ability_points++;
+		exp_max *= 1.1f;
+		stats_dirty = true;
+
+	}
+
+	if (old_lv != lv)
+	{
+		view_ability.modal = true;
+		view_ability.open();
+		audio_source->play("level_up"_h);
+
+		enable_game(false);
+	}
+}
+
+bool cCharacter::gain_item(uint id, uint num)
+{
+	for (auto i = 0; i < inventory.size(); i++)
+	{
+		auto& ins = inventory[i];
+		if (!ins)
+		{
+			ins.reset(new ItemInstance);
+			ins->id = id;
+			ins->num = num;
+			stats_dirty = true;
+
+			for (auto& cb : main_player.character->message_listeners.list)
+				cb.first(CharacterGainItem, { .u = id }, { .u = num }, { .i = i }, {});
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool cCharacter::gain_ability(uint id, uint lv)
+{
+	for (auto& ins : abilities)
+	{
+		if (ins->id == id)
+			return false;
+	}
+
+	auto ins = new AbilityInstance;
+	ins->id = id;
+	ins->lv = lv;
+	abilities.emplace_back(ins);
+	stats_dirty = true;
+
+	for (auto& cb : main_player.character->message_listeners.list)
+		cb.first(CharacterGainAbility, { .u = id }, { .u = lv }, { .i = (int)abilities.size() - 1 }, {});
+
+	return true;
+}
+
+bool cCharacter::gain_talent(uint id)
+{
+	for (auto tid : talents)
+	{
+		if (tid == id)
+			return false;
+	}
+
+	talents.push_back(id);
+	auto& talent = Talent::get(id);
+	for (auto& layer : talent.ablilities_list)
+	{
+		for (auto id : layer)
+			gain_ability(id, 0);
+	}
+	return true;
+}
+
+void cCharacter::use_item(ItemInstance* ins)
+{
+	auto& item = Item::get(ins->id);
+	if (item.active)
+		return;
+	if (item.type == ItemConsumable)
+	{
+		if (ins->num == 0)
+			return;
+		ins->num--;
+		if (ins->num == 0)
+		{
+			for (auto i = 0; i < inventory.size(); i++)
+			{
+				if (inventory[i].get() == ins)
+				{
+					inventory[i].reset(nullptr);
+					break;
+				}
+			}
+		}
+	}
+
+	item.active.execute(this, nullptr, vec3(0.f), item.parameters, 0);
+}
+
+void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
+{
+	if (ins->cd_timer > 0.f)
+		return;
+	auto& ability = Ability::get(ins->id);
+	if (mp < ability.mp)
+		return;
+
+	ability.active.execute(this, target, location, ability.parameters, ins->lv);
+
+	ins->cd_max = ability.cd;
+	ins->cd_timer = ins->cd_max;
+	set_mp(mp - ability.mp);
+}
+
+void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
+{
+	BuffInstance* ins = nullptr;
+	if (replace)
+	{
+		for (auto& i : buffs)
+		{
+			if (i->id == id)
+			{
+				ins = i.get();
+				break;
+			}
+		}
+	}
+	if (!ins)
+	{
+		ins = new BuffInstance;
+		buffs.emplace_back(ins);
+	}
+	auto& buff = Buff::get(id);
+	ins->id = id;
+	ins->lv = lv;
+	ins->timer = time;
+	ins->t0 = time;
+	ins->interval = buff.interval;
+	ins->duration = time;
+	stats_dirty = true;
+}
+
+bool cCharacter::add_marker(uint hash, float time)
+{
+	auto it = markers.find(hash);
+	if (it == markers.end())
+	{
+		markers.emplace(hash, std::make_pair(time, 0));
+		return true;
+	}
+	return false;
+}
+
+bool cCharacter::process_approach(const vec3& target, float dist, float ang)
+{
+	if (state & CharacterStateStun)
+	{
+		nav_agent->stop();
+		action = ActionNone;
+		return false;
+	}
+
+	move_speed = max(0.1f, mov_sp / 100.f);
+	nav_agent->set_target(target);
+	nav_agent->set_speed_scale(move_speed);
+
+	if ((nav_agent->reached_pos == target || nav_agent->dist < dist) && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
+		return true;
+	audio_source->play("move"_h);
+	action = ActionMove;
+	return false;
+}
+
+void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
+{
+	if (state & CharacterStateStun)
+	{
+		nav_agent->stop();
+		action = ActionNone;
+		return;
+	}
+
+	auto p0 = node->pos;
+	auto p1 = target->node->pos;
+
+	if (action == ActionAttack)
+	{
+		nav_agent->set_speed_scale(0.f);
+		nav_agent->set_target(p1);
+
+		if (attack_hit_timer > 0.f)
+		{
+			attack_hit_timer -= delta_time;
+			if (attack_hit_timer <= 0.f)
+			{
+				if (distance(p0, p1) <= preset->atk_distance + 3.5f)
+				{
+					auto attack = [this](cCharacterPtr target) {
+						auto damage = atk;
+						inflict_damage(target, (DamageType)atk_type, damage);
+						{
+							static ParameterPack parameters;
+							{
+								auto& vec = parameters["attack_damage_type"_h];
+								if (vec.empty()) vec.resize(1);
+								vec[0] = (int)atk_type;
+							}
+							{
+								auto& vec = parameters["attack_damage"_h];
+								if (vec.empty()) vec.resize(1);
+								vec[0] = damage;
+							}
+							for (auto& ef : attack_effects)
+								ef.execute(this, target, vec3(0.f), parameters, 0);
+						}
+
+						audio_source->play("attack_hit"_h);
+					};
+					if (preset->atk_projectile_preset != -1)
+					{
+						add_projectile(preset->atk_projectile_preset,
+							p0 + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
+							[&](const vec3&, cCharacterPtr t) {
+								if (t)
+								attack(t);
+							});
+					}
+					else
+						attack(target);
+				}
+
+				attack_interval_timer = (preset->atk_interval - preset->atk_point) / attack_speed;
+			}
+		}
+
+		if (attack_timer > 0.f)
+		{
+			attack_timer -= delta_time;
+			if (attack_timer <= 0.f)
+				action = ActionNone;
+		}
+	}
+	else
+	{
+		auto approached = false;
+		if (chase_target)
+			approached = process_approach(p1, preset->atk_distance, 60.f);
+		else
+		{
+			nav_agent->set_target(p1);
+			nav_agent->set_speed_scale(0.f);
+
+			approached = nav_agent->dist < preset->atk_distance && abs(nav_agent->ang_diff) < 60.f;
+			action = ActionNone;
+		}
+		if (attack_interval_timer <= 0.f)
+		{
+			if (approached)
+			{
+				attack_speed = max(0.01f, atk_sp / 100.f); 
+				attack_hit_timer = preset->atk_point / attack_speed;
+				attack_timer = preset->atk_time / attack_speed;
+				action = ActionAttack;
+
+				audio_source->play("attack_precast"_h);
+			}
+		}
+		else
+		{
+			if (approached)
+			{
+				action = ActionNone;
+				nav_agent->set_speed_scale(0.f);
+			}
+		}
+	}
+}
+
+void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
+{
+	if (state & CharacterStateStun)
+	{
+		cast_timer = -1.f;
+		nav_agent->stop();
+		action = ActionNone;
+		return;
+	}
+
+	auto& ability = Ability::get(ins->id);
+	auto pos = target ? target->node->pos : location;
+
+	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.cast_distance, 15.f);
+	if (cast_timer > 0.f)
+	{
+		cast_timer -= delta_time;
+		if (cast_timer <= 0.f)
+		{
+			cast_ability(ins, pos, target);
+			nav_agent->stop();
+			new CharacterCommandIdle(this);
+		}
+		else
+		{
+			action = ActionCast;
+			nav_agent->set_speed_scale(0.f);
+		}
+	}
+	else
+	{
+		if (approached)
+		{
+			if (ability.cast_time == 0.f)
+			{
+				cast_ability(ins, pos, target);
+				nav_agent->stop();
+				new CharacterCommandIdle(this);
+			}
+			else
+			{
+				cast_speed = preset->cast_time / ability.cast_time;
+				cast_timer = preset->cast_point / cast_speed;
+			}
 		}
 	}
 }

@@ -34,7 +34,6 @@ struct CharacterCommandMoveTo : CharacterCommand
 struct CharacterCommandAttackTarget : CharacterCommand
 {
 	Tracker<cCharacterPtr> target;
-	cCharacterPtr precasted_target = nullptr;
 
 	CharacterCommandAttackTarget(cCharacterPtr character, cCharacterPtr _target);
 
@@ -44,10 +43,18 @@ struct CharacterCommandAttackTarget : CharacterCommand
 struct CharacterCommandAttackLocation : CharacterCommand
 {
 	Tracker<cCharacterPtr> target;
-	cCharacterPtr precasted_target = nullptr;
 	vec3 location;
 
 	CharacterCommandAttackLocation(cCharacterPtr character, const vec3& _location);
+
+	void update() override;
+};
+
+struct CharacterCommandHold : CharacterCommand
+{
+	Tracker<cCharacterPtr> target;
+
+	CharacterCommandHold(cCharacterPtr character);
 
 	void update() override;
 };
@@ -166,7 +173,8 @@ enum CharacterMessage
 };
 
 extern std::vector<cCharacterPtr> characters;
-extern std::map<uint, std::vector<cCharacterPtr>> factions;
+extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
+extern std::vector<cCharacterPtr> dead_characters;
 
 // Reflect ctor
 struct cCharacter : Component
@@ -252,7 +260,7 @@ struct cCharacter : Component
 	std::map<uint, std::pair<float, uint>>			markers;
 	uint ability_points = 0;
 
-	int dead_flag = 0;
+	bool dead = false;
 	bool stats_dirty = true;
 	std::unique_ptr<CharacterCommand> command;
 	Action action = ActionNone;
@@ -270,6 +278,9 @@ struct cCharacter : Component
 
 	~cCharacter();
 	void on_init() override;
+	void start() override;
+	void update() override;
+	void die();
 
 	void inflict_damage(cCharacterPtr target, DamageType type, uint value);
 	bool take_damage(DamageType type, uint value); // return true if the damage causes the character die
@@ -283,14 +294,10 @@ struct cCharacter : Component
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
 	void add_buff(uint id, float time, uint lv, bool replace = false);
 	bool add_marker(uint hash, float time);
-	void die();
 
 	bool process_approach(const vec3& target, float dist = 0.f, float ang = 0.f);
-	void process_attack_target(cCharacterPtr target);
+	void process_attack_target(cCharacterPtr target, bool chase_target = true);
 	void process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
-
-	void start() override;
-	void update() override;
 
 	struct Create
 	{

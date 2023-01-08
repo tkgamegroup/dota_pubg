@@ -40,8 +40,21 @@ const ProjectilePreset& ProjectilePreset::get(uint id)
 	return projectile_presets[id];
 }
 
+std::vector<cProjectilePtr> projectiles;
+std::vector<cProjectilePtr> dead_projectiles;
+
+cProjectile::~cProjectile()
+{
+	std::erase_if(projectiles, [this](const auto& i) {
+		return i == this;
+	});
+}
+
 void cProjectile::update()
 {
+	if (dead)
+		return;
+
 	if (use_target)
 	{
 		if (!target.obj)
@@ -51,10 +64,7 @@ void cProjectile::update()
 				if (on_end)
 					on_end(node->pos, nullptr);
 
-				add_event([this]() {
-					entity->remove_from_parent();
-					return false;
-				});
+				die();
 			}
 			return;
 		}
@@ -70,16 +80,22 @@ void cProjectile::update()
 			if (on_end)
 				on_end(node->pos, target.obj);
 
-			add_event([this]() {
-				entity->remove_from_parent();
-				return false;
-			});
+			die();
 		}
 		return;
 	}
 
 	node->add_pos(normalize(location - self_pos) * sp);
 	node->look_at(location);
+}
+
+void cProjectile::die()
+{
+	if (dead)
+		return;
+
+	dead_projectiles.push_back(this);
+	dead = true;
 }
 
 struct cProjectileCreate : cProjectile::Create

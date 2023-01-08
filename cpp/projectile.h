@@ -12,6 +12,9 @@ struct ProjectilePreset
 	static const ProjectilePreset& get(uint id);
 };
 
+extern std::vector<cProjectilePtr> projectiles;
+extern std::vector<cProjectilePtr> dead_projectiles;
+
 // Reflect ctor
 struct cProjectile : Component
 {
@@ -30,7 +33,11 @@ struct cProjectile : Component
 
 	std::function<void(const vec3& l, cCharacterPtr t)> on_end;
 
+	bool dead = false;
+
+	~cProjectile();
 	void update() override;
+	void die();
 
 	struct Create
 	{

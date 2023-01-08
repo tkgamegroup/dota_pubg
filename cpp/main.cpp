@@ -184,34 +184,48 @@ void MainPlayer::init(EntityPtr e)
 		character = e->get_component_t<cCharacter>();
 
 		character->message_listeners.add([](CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3) {
+			auto find_shortcut = [](Shortcut::Type type, int id) {
+				for (auto& shortcut : shortcuts)
+				{
+					if (shortcut->type == type && shortcut->id == id)
+						return true;
+				}
+				return false;
+			};
+
 			switch (msg)
 			{
 			case CharacterGainItem:
 			{
 				auto ins = main_player.character->inventory[p2.i].get();
-				auto& item = Item::get(ins->id);
-				if (item.active)
+				if (Item::get(ins->id).active && !find_shortcut(Shortcut::tItem, ins->id))
 				{
-					auto found = false;
 					for (auto& shortcut : shortcuts)
 					{
-						if (shortcut->type == Shortcut::tItem && shortcut->id == ins->id)
+						if (shortcut->type == Shortcut::tNull)
 						{
-							found = true;
+							auto key = shortcut->key;
+							shortcut.reset(new ItemShortcut(ins));
+							shortcut->key = key;
 							break;
 						}
 					}
-					if (!found)
+				}
+			}
+				break;
+			case CharacterGainAbility:
+			{
+				auto ins = main_player.character->abilities[p2.i].get();
+				if (Ability::get(ins->id).active && !find_shortcut(Shortcut::tAbility, ins->id))
+				{
+					for (auto& shortcut : shortcuts)
 					{
-						for (auto& shortcut : shortcuts)
+						if (shortcut->type == Shortcut::tNull)
 						{
-							if (shortcut->type == Shortcut::tNull)
-							{
-								auto key = shortcut->key;
-								shortcut.reset(new ItemShortcut(ins));
-								shortcut->key = key;
-								break;
-							}
+							auto key = shortcut->key;
+							shortcut.reset(new AbilityShortcut(ins));
+							shortcut->key = key;
+							break;
 						}
 					}
 				}
@@ -220,29 +234,16 @@ void MainPlayer::init(EntityPtr e)
 			case CharacterAbilityLevelUp:
 			{
 				auto ins = main_player.character->abilities[p0.i].get();
-				auto& ability = Ability::get(ins->id);
-				if (ins->lv == 1 && ability.active)
+				if (ins->lv == 1 && Ability::get(ins->id).active && !find_shortcut(Shortcut::tAbility, ins->id))
 				{
-					auto found = false;
 					for (auto& shortcut : shortcuts)
 					{
-						if (shortcut->type == Shortcut::tAbility && shortcut->id == ins->id)
+						if (shortcut->type == Shortcut::tNull)
 						{
-							found = true;
+							auto key = shortcut->key;
+							shortcut.reset(new AbilityShortcut(ins));
+							shortcut->key = key;
 							break;
-						}
-					}
-					if (!found)
-					{
-						for (auto& shortcut : shortcuts)
-						{
-							if (shortcut->type == Shortcut::tNull)
-							{
-								auto key = shortcut->key;
-								shortcut.reset(new AbilityShortcut(ins));
-								shortcut->key = key;
-								break;
-							}
 						}
 					}
 				}
@@ -1323,6 +1324,28 @@ void cMain::start()
 
 void cMain::update()
 {
+	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	{
+		for (auto o : dead_effects)
+			o->entity->remove_from_parent();
+		for (auto o : dead_projectiles)
+			o->entity->remove_from_parent();
+		for (auto o : dead_chests)
+			o->entity->remove_from_parent();
+		for (auto o : dead_characters)
+			o->entity->remove_from_parent();
+		dead_effects.clear();
+		dead_projectiles.clear();
+		dead_chests.clear();
+		dead_characters.clear();
+
+		if (main_player.character)
+		{
+			if (main_player.character->command && main_player.character->command->type == "Idle"_h)
+				new CharacterCommandHold(main_player.character);
+		}
+	}
+
 	switch (multi_player)
 	{
 	case MultiPlayerAsHost:
@@ -1744,6 +1767,7 @@ cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint 
 	auto object = e->get_component_t<cObject>();
 	object->init(1000 + preset_id, id);
 	auto character = e->get_component_t<cCharacter>();
+	characters.push_back(character);
 	character->preset = &preset;
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
@@ -1768,6 +1792,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 	auto object = e->get_component_t<cObject>();
 	object->init(2000 + preset_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
+	projectiles.push_back(projectile);
 	projectile->preset = &preset;
 	projectile->target.set(target);
 	projectile->speed = speed;
@@ -1785,6 +1810,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	auto object = e->get_component_t<cObject>();
 	object->init(2000 + preset_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
+	projectiles.push_back(projectile);
 	projectile->preset = &preset;
 	projectile->use_target = false;
 	projectile->location = location;
@@ -1805,6 +1831,7 @@ cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float du
 	auto object = e->get_component_t<cObject>();
 	object->init(3000 + preset_id, id);
 	auto effect = e->get_component_t<cEffect>();
+	effects.push_back(effect);
 	effect->preset = &preset;
 	effect->duration = duration;
 	root->add_child(e);
@@ -1820,6 +1847,7 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 	auto object = e->get_component_t<cObject>();
 	object->init(4000, id);
 	auto chest = e->get_component_t<cChest>();
+	chests.push_back(chest);
 	chest->item_id = item_id;
 	chest->item_num = item_num;
 

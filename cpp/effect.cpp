@@ -36,6 +36,16 @@ const EffectPreset& EffectPreset::get(uint id)
 	return effect_presets[id];
 }
 
+std::vector<cEffectPtr> effects;
+std::vector<cEffectPtr> dead_effects;
+
+cEffect::~cEffect()
+{
+	std::erase_if(effects, [this](const auto& i) {
+		return i == this;
+	});
+}
+
 void cEffect::start()
 {
 	timer = duration;
@@ -49,17 +59,24 @@ void cEffect::start()
 
 void cEffect::update()
 {
+	if (dead)
+		return;
+
 	if (timer > 0.f)
 	{
 		timer -= delta_time;
 		if (timer < 0.f)
-		{
-			add_event([this]() {
-				entity->remove_from_parent();
-				return false;
-			});
-		}
+			die();
 	}
+}
+
+void cEffect::die()
+{
+	if (dead)
+		return;
+
+	dead_effects.push_back(this);
+	dead = true;
 }
 
 struct cEffectCreate : cEffect::Create

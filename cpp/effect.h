@@ -14,6 +14,9 @@ struct EffectPreset
 	static const EffectPreset& get(uint id);
 };
 
+extern std::vector<cEffectPtr> effects;
+extern std::vector<cEffectPtr> dead_effects;
+
 // Reflect ctor
 struct cEffect : Component
 {
@@ -29,8 +32,12 @@ struct cEffect : Component
 	float duration = 0.f;
 	float timer = 0.f;
 
+	bool dead = false;
+
+	~cEffect();
 	void start() override;
 	void update() override;
+	void die();
 
 	struct Create
 	{
