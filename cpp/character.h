@@ -292,7 +292,7 @@ struct cCharacter : Component
 	bool gain_talent(uint id);
 	void use_item(ItemInstance* ins);
 	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
-	void add_buff(uint id, float time, uint lv, bool replace = false);
+	void add_buff(uint id, float time, uint lv = 1, bool replace = false);
 	bool add_marker(uint hash, float time);
 
 	bool process_approach(const vec3& target, float dist = 0.f, float ang = 0.f);

@@ -902,6 +902,14 @@ void cMain::start()
 							}
 						};
 					}
+					if (input->kpressed(Keyboard_S))
+					{
+						new CharacterCommandIdle(main_player.character);
+					}
+					if (input->kpressed(Keyboard_H))
+					{
+						new CharacterCommandHold(main_player.character);
+					}
 					for (auto i = 0; i < countof(shortcuts); i++)
 					{
 						auto shortcut = shortcuts[i].get();
@@ -1558,7 +1566,7 @@ void cMain::update()
 								if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
 								{
 									auto character = add_character(rule.preset_id, pos, FactionCreep);
-									character->add_buff(Buff::find("Cursed"), -1.f, uint(gtime / 60.f));
+									character->add_buff(Buff::find("Cursed"), -1.f, uint(gtime / 60.f) + 1);
 									new CharacterCommandAttackTarget(character, main_player.character);
 
 									rule.spawnned_numbers++;
