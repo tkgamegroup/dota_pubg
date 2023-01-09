@@ -647,8 +647,7 @@ void cMain::start()
 				}
 				if (select_angle > 0.f)
 				{
-					auto d = hovering_pos - center;
-					auto ang = -degrees(atan2(d.z, d.x));
+					auto ang = angle_xz(hovering_pos - center);
 					{
 						auto a = radians(ang - select_angle);
 						pts.push_back(center);
