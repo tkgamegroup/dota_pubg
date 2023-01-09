@@ -85,12 +85,12 @@ void ViewAbility::on_draw()
 						auto ins = main_player.character->abilities[i].get();
 						if (ins)
 						{
-							spent_points += ins->lv;
-
 							auto& ability = Ability::get(ins->id);
+							auto lv = ins->lv;
+							spent_points += lv;
 
 							auto can_level_up = false;
-							if (ins->lv < ability.max_lv && main_player.character->ability_points > 0)
+							if (lv < ability.max_lv && main_player.character->ability_points > 0)
 							{
 								if (spent_points >= layer_idx * 5)
 									can_level_up = true;
@@ -119,31 +119,51 @@ void ViewAbility::on_draw()
 										ImGui::TextUnformatted("Target: Location");
 										break;
 									}
-									ImGui::Text("MP: %d", ability.get_mp(ins->lv));
+									ImGui::Text("MP: %d", ability.get_mp(lv));
 									if (can_level_up && ability.mp.size() > 1)
 									{
 										ImGui::SameLine();
-										ImGui::Text("-> %d", ability.get_mp(ins->lv + 1));
+										ImGui::Text("-> %d", ability.get_mp(lv + 1));
+									}
+									ImGui::Text("CD: %.1f", ability.get_cd(lv));
+									if (can_level_up && ability.cd.size() > 1)
+									{
+										ImGui::SameLine();
+										ImGui::Text("-> %.1f", ability.get_cd(lv + 1));
+									}
+									if (ability.target_type != TargetNull)
+									{
+										ImGui::Text("Distance: %.1f", ability.get_distance(lv));
+										if (can_level_up && ability.distance.size() > 1)
+										{
+											ImGui::SameLine();
+											ImGui::Text("-> %.1f", ability.get_distance(lv + 1));
+										}
 									}
 								}
 								ImGui::TextUnformatted(ability.description.c_str());
 								for (auto& p : ability.parameter_names)
 								{
 									auto& vec = ability.parameters.at(p.second);
-
+									ImGui::Text("%s: %s", get_show_name(p.first).c_str(), lv == 0 ? "0" : vec.size() == 1 ? vec[0].to_str().c_str() : vec[lv - 1].to_str().c_str());
+									if (can_level_up && vec.size() > 1)
+									{
+										ImGui::SameLine();
+										ImGui::Text("-> %s", vec[lv].to_str().c_str());
+									}
 								}
 								ImGui::PopStyleColor();
 								ImGui::EndTooltip();
 							}
-							dl->AddImage(ins->lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-							dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(ins->lv).c_str());
+							dl->AddImage(lv == 0 ? get_gray_icon(ability.icon_image) : ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+							dl->AddText(p1 - vec2(8, 15), ImColor(1.f, 1.f, 1.f), str(lv).c_str());
 
 							if (can_level_up)
 								dl->AddRect(p0 - vec2(1.f), p1 + vec2(1.f), ImColor(0.f, 1.f, 0.f, 1.f));
-							else if (ins->lv == ability.max_lv)
+							else if (lv == ability.max_lv)
 								dl->AddRect(p0 - vec2(1.f), p1 + vec2(1.f), ImColor(1.f, 0.7f, 0.f, 1.f));
 
-							if (ins->lv > 0)
+							if (lv > 0)
 							{
 								if (ImGui::BeginDragDropSource())
 								{

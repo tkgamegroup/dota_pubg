@@ -47,9 +47,12 @@ std::string get_show_name(const std::string& name)
 	for (auto i = 0; i < ret.size() - 1; i++)
 	{
 		if (ret[i] == '_')
+		{
+			ret[i] = ' ';
 			ret[i + 1] = toupper(ret[i + 1]);
+		}
 	}
-	return name;
+	return ret;
 }
 
 bool parse_literal(const std::string& str, int& id)

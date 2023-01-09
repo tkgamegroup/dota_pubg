@@ -131,7 +131,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			case Parameter::tExternal:
 			{
 				auto& vec = external_parameters.at(sp.u.v.u);
-				parameters.push_back(lv <= vec.size() ? vec[lv - 1] : vec[0]);
+				parameters.push_back(vec.size() == 1 ? vec[0] : vec[lv - 1]);
 			}
 				break;
 			case Parameter::tSpecialVariable:
@@ -146,7 +146,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 					{
 						ret.type = Parameter::tImmediate;
 						auto& vec = external_parameters.at(ret.u.v.u);
-						ret = lv <= vec.size() ? vec[lv - 1] : vec[0];
+						ret = vec.size() == 1 ? vec[0] : vec[lv - 1];
 					}
 					return ret;
 				};

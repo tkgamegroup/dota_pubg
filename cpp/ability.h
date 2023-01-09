@@ -33,35 +33,35 @@ struct Ability
 
 	inline uint get_mp(uint lv) const
 	{
-		if (mp.empty()) return 0;
+		if (mp.empty() || lv == 0) return 0;
 		if (mp.size() == 1) return mp[0];
 		return mp[lv - 1];
 	}
 
 	inline float get_cd(uint lv) const
 	{
-		if (cd.empty()) return 0;
+		if (cd.empty() || lv == 0) return 0;
 		if (cd.size() == 1) return cd[0];
 		return cd[lv - 1];
 	}
 
 	inline float get_distance(uint lv) const
 	{
-		if (distance.empty()) return 0;
+		if (distance.empty() || lv == 0) return 0;
 		if (distance.size() == 1) return distance[0];
 		return distance[lv - 1];
 	}
 
 	inline float get_range(uint lv) const
 	{
-		if (range.empty()) return 0;
+		if (range.empty() || lv == 0) return 0;
 		if (range.size() == 1) return range[0];
 		return range[lv - 1];
 	}
 
 	inline float get_angle(uint lv) const
 	{
-		if (angle.empty()) return 0;
+		if (angle.empty() || lv == 0) return 0;
 		if (angle.size() == 1) return angle[0];
 		return angle[lv - 1];
 	}

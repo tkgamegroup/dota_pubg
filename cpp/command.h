@@ -61,7 +61,7 @@ struct Parameter
 	Parameter(float v) { vt = vFloat; u.v.f = v; }
 	Parameter(const std::string& str);
 
-	inline int to_i()
+	inline int to_i() const
 	{
 		switch (vt)
 		{
@@ -73,7 +73,7 @@ struct Parameter
 		return 0;
 	}
 
-	inline float to_f()
+	inline float to_f() const
 	{
 		switch (vt)
 		{
@@ -83,6 +83,18 @@ struct Parameter
 		case vPercentage: return u.v.i / 100.f;
 		}
 		return 0.f;
+	}
+
+	inline std::string to_str() const
+	{
+		switch (vt)
+		{
+		case vInt: return std::format("{}", u.v.i);
+		case vUint: return std::format("{}", u.v.u);
+		case vFloat: return std::format("{.1f}", u.v.f);
+		case vPercentage: return std::format("{}%", u.v.i);
+		}
+		return "";
 	}
 };
 
