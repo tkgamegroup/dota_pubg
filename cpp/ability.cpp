@@ -54,10 +54,9 @@ void init_abilities()
 					ability.range.push_back(s2t<float>(t));
 			}
 			else if (e.key == "angle")
-			{
-				for (auto& t : SUS::split(e.values[0], '/'))
-					ability.angle.push_back(s2t<float>(t));
-			}
+				ability.angle = s2t<float>(e.values[0]);
+			else if (e.key == "start_radius")
+				ability.start_radius = s2t<float>(e.values[0]);
 			else if (e.key == "parameters")
 				read_parameters(ability.parameter_names, ability.parameters, e.values);
 			else if (e.key == "active")

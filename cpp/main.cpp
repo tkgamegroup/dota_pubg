@@ -272,6 +272,7 @@ std::function<void(const vec3& pos)>	select_location_callback;
 float									select_distance = 0.f;
 float									select_range = 0.f;
 float									select_angle = 0.f;
+float									select_start_radius = 0.f;
 void reset_select()
 {
 	select_mode = TargetNull;
@@ -280,6 +281,7 @@ void reset_select()
 	select_distance = 0.f;
 	select_range = 0.f;
 	select_angle = 0.f;
+	select_start_radius = 0.f;
 }
 
 std::string illegal_op_str;
@@ -390,7 +392,8 @@ void AbilityShortcut::click()
 			};
 			select_distance = ability.get_distance(ins->lv);
 			select_range = ability.get_range(ins->lv);
-			select_angle = ability.get_angle(ins->lv);
+			select_angle = ability.angle;
+			select_start_radius = ability.start_radius;
 		}
 		if (ability.target_type & TargetEnemy)
 		{
@@ -632,47 +635,86 @@ void cMain::start()
 			}
 			break;
 		case PassPrimitive:
+		{
+			auto circle_lod = [](float r) {
+				return r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0)));
+			};
 			if (main_player.character)
 			{
 				auto r = main_player.nav_agent->radius;
-				auto circle_pts = graphics::get_circle_points(r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0))));
-				auto n = (int)circle_pts.size();
-				circle_pts.push_back(circle_pts[0]);
-				std::vector<vec3> pts(n * 2);
+				auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+				std::vector<vec3> pts(circle_draw.pts.size() * 2);
 				auto center = main_player.node->pos;
-				for (auto i = 0; i < n; i++)
+				for (auto i = 0; i < circle_draw.pts.size(); i++)
 				{
-					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
-					pts[i * 2 + 1] = center + vec3(r * circle_pts[i + 1], 0.f).xzy();
+					pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+					pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
 				}
-				draw_data.primitives.emplace_back("LineList"_h, pts, cvec4(255, 255, 255, 255));
+				draw_data.primitives.emplace_back("LineList"_h, std::move(pts), cvec4(255, 255, 255, 255));
 			}
 			if (select_distance > 0.f)
 			{
-				auto r = select_distance;
-				auto circle_pts = graphics::get_circle_points(r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0))));
-				auto n = (int)circle_pts.size();
-				circle_pts.push_back(circle_pts[0]);
-				std::vector<vec3> pts(n * 2);
-				auto center = main_player.node->pos;
-				for (auto i = 0; i < n; i++)
-				{
-					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
-					pts[i * 2 + 1] = center + vec3(r * circle_pts[i + 1], 0.f).xzy();
-				}
 				if (select_angle > 0.f)
 				{
-					auto ang = angle_xz(hovering_pos - center);
-					auto ang0 = ang - select_angle;
-					auto ang1 = ang + select_angle;
+					auto r = select_distance;
+					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+					auto center = main_player.node->pos;
+					auto dir = hovering_pos - center;
+					center -= normalize(dir) * select_start_radius;
+					auto ang = angle_xz(dir);
+					std::vector<vec3> pts;
+					auto i_beg = circle_draw.get_idx(ang - select_angle);
+					auto i_end = circle_draw.get_idx(ang + select_angle);
+					for (auto i = i_beg; i < i_end; i++)
+					{
+						auto a = center + vec3(select_start_radius * circle_draw.get_pt(i + 1), 0.f).xzy();
+						auto b = center + vec3(select_start_radius * circle_draw.get_pt(i), 0.f).xzy();
+						auto c = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+						auto d = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
 
-					pts.push_back(center);
-					pts.push_back(center + dir_xz(ang0) * r);
-					pts.push_back(center);
-					pts.push_back(center + dir_xz(ang1) * r);
+						pts.push_back(a);
+						pts.push_back(b);
+						pts.push_back(d);
+
+						pts.push_back(d);
+						pts.push_back(b);
+						pts.push_back(c);
+					}
+
+					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));
 				}
-				draw_data.primitives.emplace_back("LineList"_h, pts, cvec4(0, 255, 0, 255));
+				else if (select_range > 0.f)
+				{
+					auto r = select_range;
+					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+					auto center = hovering_pos;
+					std::vector<vec3> pts(circle_draw.pts.size() * 3);
+					for (auto i = 0; i < circle_draw.pts.size(); i++)
+					{
+						pts[i * 2 + 0] = center;
+						pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+						pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+					}
+
+					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));
+				}
+				else
+				{
+					auto r = select_distance;
+					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+					auto center = main_player.node->pos;
+					std::vector<vec3> pts(circle_draw.pts.size() * 3);
+					for (auto i = 0; i < circle_draw.pts.size(); i++)
+					{
+						pts[i * 2 + 0] = center;
+						pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+						pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+					}
+
+					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));
+				}
 			}
+		}
 			break;
 		}
 	}, "main"_h);
@@ -1353,9 +1395,17 @@ void cMain::update()
 		for (auto o : dead_projectiles)
 			o->entity->remove_from_parent();
 		for (auto o : dead_chests)
+		{
+			if (hovering_chest == o)
+				hovering_chest = nullptr;
 			o->entity->remove_from_parent();
+		}
 		for (auto o : dead_characters)
+		{
+			if (hovering_character == o)
+				hovering_character = nullptr;
 			o->entity->remove_from_parent();
+		}
 		dead_effects.clear();
 		dead_projectiles.clear();
 		dead_chests.clear();

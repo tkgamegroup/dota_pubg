@@ -29,7 +29,8 @@ struct Ability
 	std::vector<float>		cd;
 	std::vector<float>		distance;
 	std::vector<float>		range;
-	std::vector<float>		angle;
+	float					angle = 0.f;
+	float					start_radius = 0.f;
 
 	inline uint get_mp(uint lv) const
 	{
@@ -57,13 +58,6 @@ struct Ability
 		if (range.empty() || lv == 0) return 0;
 		if (range.size() == 1) return range[0];
 		return range[lv - 1];
-	}
-
-	inline float get_angle(uint lv) const
-	{
-		if (angle.empty() || lv == 0) return 0;
-		if (angle.size() == 1) return angle[0];
-		return angle[lv - 1];
 	}
 
 	ParameterNames			parameter_names;
