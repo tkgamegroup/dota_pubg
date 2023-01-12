@@ -74,9 +74,9 @@ void init_abilities()
 			ability.icon_image = graphics::Image::get(ability.icon_name);
 			if (ability.icon_image)
 			{
-				auto tile_size = vec2(ability.icon_image->tile_size);
-				if (tile_size != vec2(0.f))
-					ability.icon_uvs = vec4(vec2(ability.icon_tile_coord) / tile_size, vec2(ability.icon_tile_coord + 1U) / tile_size);
+				auto tiles = vec2(ability.icon_image->tiles);
+				if (tiles != vec2(0.f))
+					ability.icon_uvs = vec4(vec2(ability.icon_tile_coord) / tiles, vec2(ability.icon_tile_coord + 1U) / tiles);
 			}
 		}
 	}

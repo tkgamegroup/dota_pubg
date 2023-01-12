@@ -38,9 +38,9 @@ void init_buffs()
 			buff.icon_image = graphics::Image::get(buff.icon_name);
 			if (buff.icon_image)
 			{
-				auto tile_size = vec2(buff.icon_image->tile_size);
-				if (tile_size != vec2(0.f))
-					buff.icon_uvs = vec4(vec2(buff.icon_tile_coord) / tile_size, vec2(buff.icon_tile_coord + 1U) / tile_size);
+				auto tiles = vec2(buff.icon_image->tiles);
+				if (tiles != vec2(0.f))
+					buff.icon_uvs = vec4(vec2(buff.icon_tile_coord) / tiles, vec2(buff.icon_tile_coord + 1U) / tiles);
 			}
 		}
 	}

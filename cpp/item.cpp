@@ -42,9 +42,9 @@ void init_items()
 			item.icon_image = graphics::Image::get(item.icon_name);
 			if (item.icon_image)
 			{
-				auto tile_size = vec2(item.icon_image->tile_size);
-				if (tile_size != vec2(0.f))
-					item.icon_uvs = vec4(vec2(item.icon_tile_coord) / tile_size, vec2(item.icon_tile_coord + 1U) / tile_size);
+				auto tiles = vec2(item.icon_image->tiles);
+				if (tiles != vec2(0.f))
+					item.icon_uvs = vec4(vec2(item.icon_tile_coord) / tiles, vec2(item.icon_tile_coord + 1U) / tiles);
 			}
 		}
 	}

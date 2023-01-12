@@ -89,12 +89,7 @@ void ViewAbility::on_draw()
 							auto lv = ins->lv;
 							spent_points += lv;
 
-							auto can_level_up = false;
-							if (lv < ability.max_lv && main_player.character->ability_points > 0)
-							{
-								if (spent_points >= layer_idx * 5)
-									can_level_up = true;
-							}
+							auto can_level_up = lv < ability.max_lv && main_player.character->ability_points > 0 && spent_points >= layer_idx * 5;
 
 							if (ImGui::IsItemHovered())
 							{

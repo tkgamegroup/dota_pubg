@@ -632,6 +632,21 @@ void cMain::start()
 			}
 			break;
 		case PassPrimitive:
+			if (main_player.character)
+			{
+				auto r = main_player.nav_agent->radius;
+				auto circle_pts = graphics::get_circle_points(r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0))));
+				auto n = (int)circle_pts.size();
+				circle_pts.push_back(circle_pts[0]);
+				std::vector<vec3> pts(n * 2);
+				auto center = main_player.node->pos;
+				for (auto i = 0; i < n; i++)
+				{
+					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
+					pts[i * 2 + 1] = center + vec3(r * circle_pts[i + 1], 0.f).xzy();
+				}
+				draw_data.primitives.emplace_back("LineList"_h, pts, cvec4(255, 255, 255, 255));
+			}
 			if (select_distance > 0.f)
 			{
 				auto r = select_distance;
@@ -639,7 +654,7 @@ void cMain::start()
 				auto n = (int)circle_pts.size();
 				circle_pts.push_back(circle_pts[0]);
 				std::vector<vec3> pts(n * 2);
-				auto center = main_player.character->node->pos;
+				auto center = main_player.node->pos;
 				for (auto i = 0; i < n; i++)
 				{
 					pts[i * 2 + 0] = center + vec3(r * circle_pts[i + 0], 0.f).xzy();
@@ -648,18 +663,15 @@ void cMain::start()
 				if (select_angle > 0.f)
 				{
 					auto ang = angle_xz(hovering_pos - center);
-					{
-						auto a = radians(ang - select_angle);
-						pts.push_back(center);
-						pts.push_back(center + vec3(cos(a), 0.f, -sin(a)) * r);
-					}
-					{
-						auto a = radians(ang + select_angle);
-						pts.push_back(center);
-						pts.push_back(center + vec3(cos(a), 0.f, -sin(a)) * r);
-					}
+					auto ang0 = ang - select_angle;
+					auto ang1 = ang + select_angle;
+
+					pts.push_back(center);
+					pts.push_back(center + dir_xz(ang0) * r);
+					pts.push_back(center);
+					pts.push_back(center + dir_xz(ang1) * r);
 				}
-				draw_data.primitives.emplace_back("LineList"_h, pts.data(), (uint)pts.size(), cvec4(0, 255, 0, 255));
+				draw_data.primitives.emplace_back("LineList"_h, pts, cvec4(0, 255, 0, 255));
 			}
 			break;
 		}
@@ -1309,7 +1321,7 @@ void cMain::start()
 			static graphics::ImagePtr icon_cursors = nullptr;
 			if (!icon_cursors)
 				icon_cursors = graphics::Image::get(L"assets\\icons\\rpg_cursor_set.png");
-			auto tile_size = vec2(icon_cursors->tile_size);
+			auto tiles = vec2(icon_cursors->tiles);
 			int cursor_x = 0, cursor_y = 0;
 			if (select_mode != TargetNull)
 			{
@@ -1319,8 +1331,8 @@ void cMain::start()
 			auto pos = sInput::instance()->mpos + sInput::instance()->offset;
 			auto dl = ImGui::GetForegroundDrawList();
 			dl->AddImage(icon_cursors, pos + vec2(-32.f), pos + vec2(32.f),
-				vec2(cursor_x, cursor_y) / tile_size,
-				vec2(cursor_x + 1, cursor_y + 1) / tile_size);
+				vec2(cursor_x, cursor_y) / tiles,
+				vec2(cursor_x + 1, cursor_y + 1) / tiles);
 		}
 	}, (uint)this);
 	graphics::gui_cursor_callbacks.add([this](CursorType cursor) {
