@@ -184,15 +184,10 @@ void CharacterCommandCastAbilityToTarget::update()
 }
 
 std::vector<CharacterPreset> character_presets;
+static CharacterPreset dummy_preset;
 
 void init_characters()
 {
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = "Dummy";
-	}
-
 	for (auto& section : parse_ini_file(Path::get(L"assets\\characters.ini")).sections)
 	{
 		auto& preset = character_presets.emplace_back();
@@ -200,44 +195,63 @@ void init_characters()
 		preset.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "path")
-				preset.path = e.values[0];
-			else if (e.key == "exp_base")
-				preset.exp_base = s2t<uint>(e.values[0]);
-			else if (e.key == "hp")
-				preset.hp = s2t<uint>(e.values[0]);
-			else if (e.key == "mp")
-				preset.mp = s2t<uint>(e.values[0]);
-			else if (e.key == "atk")
-				preset.atk = s2t<uint>(e.values[0]);
-			else if (e.key == "atk_distance")
-				preset.atk_distance = s2t<float>(e.values[0]);
-			else if (e.key == "atk_interval")
-				preset.atk_interval = s2t<float>(e.values[0]);
-			else if (e.key == "atk_time")
-				preset.atk_time = s2t<float>(e.values[0]);
-			else if (e.key == "atk_point")
-				preset.atk_point = s2t<float>(e.values[0]);
-			else if (e.key == "atk_projectile_preset")
-				preset.atk_projectile_preset = s2t<int>(e.values[0]);
-			else if (e.key == "cast_time")
-				preset.cast_time = s2t<float>(e.values[0]);
-			else if (e.key == "cast_point")
-				preset.cast_point = s2t<float>(e.values[0]);
-			else if (e.key == "phy_def")
-				preset.phy_def = s2t<uint>(e.values[0]);
-			else if (e.key == "mag_def")
-				preset.mag_def = s2t<uint>(e.values[0]);
-			else if (e.key == "hp_reg")
-				preset.hp_reg = s2t<uint>(e.values[0]);
-			else if (e.key == "mp_reg")
-				preset.mp_reg = s2t<uint>(e.values[0]);
-			else if (e.key == "mov_sp")
-				preset.mov_sp = s2t<uint>(e.values[0]);
-			else if (e.key == "atk_sp")
-				preset.atk_sp = s2t<uint>(e.values[0]);
-			else if (e.key == "abilities")
+			switch (e.key_hash)
 			{
+			case "path"_h:
+				preset.path = e.values[0];
+				break;
+			case "exp_base"_h:
+				preset.exp_base = s2t<uint>(e.values[0]);
+				break;
+			case "hp"_h:
+				preset.hp = s2t<uint>(e.values[0]);
+				break;
+			case "mp"_h:
+				preset.mp = s2t<uint>(e.values[0]);
+				break;
+			case "atk"_h:
+				preset.atk = s2t<uint>(e.values[0]);
+				break;
+			case "atk_distance"_h:
+				preset.atk_distance = s2t<uint>(e.values[0]);
+				break;
+			case "atk_interval"_h:
+				preset.atk_interval = s2t<float>(e.values[0]);
+				break;
+			case "atk_time"_h:
+				preset.atk_time = s2t<float>(e.values[0]);
+				break;
+			case "atk_point"_h:
+				preset.atk_point = s2t<float>(e.values[0]);
+				break;
+			case "atk_projectile_preset"_h:
+				preset.atk_projectile_preset = s2t<int>(e.values[0]);
+				break;
+			case "cast_time"_h:
+				preset.cast_time = s2t<float>(e.values[0]);
+				break;
+			case "cast_point"_h:
+				preset.cast_point = s2t<float>(e.values[0]);
+				break;
+			case "phy_def"_h:
+				preset.phy_def = s2t<uint>(e.values[0]);
+				break;
+			case "mag_def"_h:
+				preset.mag_def = s2t<uint>(e.values[0]);
+				break;
+			case "hp_reg"_h:
+				preset.hp_reg = s2t<uint>(e.values[0]);
+				break;
+			case "mp_reg"_h:
+				preset.mp_reg = s2t<uint>(e.values[0]);
+				break;
+			case "mov_sp"_h:
+				preset.mov_sp = s2t<uint>(e.values[0]);
+				break;
+			case "atk_sp"_h:
+				preset.atk_sp = s2t<uint>(e.values[0]);
+				break;
+			case "abilities"_h:
 				for (auto& t : e.values)
 				{
 					auto sp = SUS::split(t, ',');
@@ -249,9 +263,8 @@ void init_characters()
 					else
 						printf("cannot find ability: %s\n", name.c_str());
 				}
-			}
-			else if (e.key == "talents")
-			{
+				break;
+			case "talents"_h:
 				for (auto& t : e.values)
 				{
 					if (auto id = Talent::find(t); id != -1)
@@ -259,9 +272,8 @@ void init_characters()
 					else
 						printf("cannot find talent: %s\n", t.c_str());
 				}
-			}
-			else if (e.key == "drop_items")
-			{
+				break;
+			case "drop_items"_h:
 				for (auto& t : e.values)
 				{
 					auto sp = SUS::split(t, ',');
@@ -273,13 +285,17 @@ void init_characters()
 					else
 						printf("cannot find item: %s\n", name.c_str());
 				}
-			}
-			else if (e.key == "move_sound_path")
+				break;
+			case "move_sound_path"_h:
 				preset.move_sound_path = e.values[0];
-			else if (e.key == "attack_precast_sound_path")
+				break;
+			case "attack_precast_sound_path"_h:
 				preset.attack_precast_sound_path = e.values[0];
-			else if (e.key == "attack_hit_sound_path")
+				break;
+			case "attack_hit_sound_path"_h:
 				preset.attack_hit_sound_path = e.values[0];
+				break;
+			}
 		}
 	}
 }
@@ -473,7 +489,7 @@ void cCharacter::start()
 	}
 
 	if (!preset)
-		preset = &character_presets[CharacterPreset::find("Dummy")];
+		preset = &dummy_preset;
 	auto ppath = preset->path.parent_path();
 
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;

@@ -505,14 +505,21 @@ void init_spawnning_rules()
 			rule.preset_id = preset_id;
 			for (auto& e : section.entries)
 			{
-				if (e.key == "delay")
+				switch (e.key_hash)
+				{
+				case "delay"_h:
 					rule.delay = s2t<float>(e.values[0]);
-				else if (e.key == "number_function_factor_a")
+					break;
+				case "number_function_factor_a"_h:
 					rule.number_function_factor_a = s2t<float>(e.values[0]);
-				else if (e.key == "number_function_factor_b")
+					break;
+				case "number_function_factor_b"_h:
 					rule.number_function_factor_b = s2t<float>(e.values[0]);
-				else if (e.key == "number_function_factor_c")
+					break;
+				case "number_function_factor_c"_h:
 					rule.number_function_factor_c = s2t<float>(e.values[0]);
+					break;
+				}
 			}
 		}
 	}

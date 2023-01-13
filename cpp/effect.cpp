@@ -3,6 +3,7 @@
 #include <flame/universe/components/audio_source.h>
 
 std::vector<EffectPreset> effect_presets;
+static EffectPreset dummy_preset;
 
 void init_effects()
 {
@@ -13,10 +14,15 @@ void init_effects()
 		preset.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "path")
+			switch (e.key_hash)
+			{
+			case "path"_h:
 				preset.path = e.values[0];
-			else if (e.key == "sound_path")
+				break;
+			case "sound_path"_h:
 				preset.sound_path = e.values[0];
+				break;
+			}
 		}
 	}
 }
@@ -49,6 +55,9 @@ cEffect::~cEffect()
 void cEffect::start()
 {
 	timer = duration;
+
+	if (!preset)
+		preset = &dummy_preset;
 
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
 	if (!preset->sound_path.empty())

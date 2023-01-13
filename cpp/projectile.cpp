@@ -19,8 +19,12 @@ void init_projectiles()
 		preset.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "path")
+			switch (e.key_hash)
+			{
+			case "path"_h:
 				preset.path = e.values[0];
+				break;
+			}
 		}
 	}
 }

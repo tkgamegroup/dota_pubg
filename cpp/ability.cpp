@@ -25,44 +25,52 @@ void init_abilities()
 		ability.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "icon_name")
-				ability.icon_name = e.values[0];
-			else if (e.key == "icon_tile_coord")
-				ability.icon_tile_coord = s2t<2, uint>(e.values[0]);
-			else if (e.key == "description")
-				ability.description = e.values[0];
-			else if (e.key == "target_type")
-				TypeInfo::unserialize_t(e.values[0], ability.target_type);
-			else if (e.key == "mp")
+			switch (e.key_hash)
 			{
+			case "icon_name"_h:
+				ability.icon_name = e.values[0];
+				break;
+			case "icon_tile_coord"_h:
+				ability.icon_tile_coord = s2t<2, uint>(e.values[0]);
+				break;
+			case "description"_h:
+				ability.description = e.values[0];
+				break;
+			case "target_type"_h:
+				TypeInfo::unserialize_t(e.values[0], ability.target_type);
+				break;
+			case "mp"_h:
 				for (auto& t : SUS::split(e.values[0], '/'))
 					ability.mp.push_back(s2t<uint>(t));
-			}
-			else if (e.key == "cd")
-			{
+				break;
+			case "cd"_h:
 				for (auto& t : SUS::split(e.values[0], '/'))
 					ability.cd.push_back(s2t<uint>(t));
-			}
-			else if (e.key == "distance")
-			{
+				break;
+			case "distance"_h:
 				for (auto& t : SUS::split(e.values[0], '/'))
 					ability.distance.push_back(s2t<float>(t));
-			}
-			else if (e.key == "range")
-			{
+				break;
+			case "range"_h:
 				for (auto& t : SUS::split(e.values[0], '/'))
 					ability.range.push_back(s2t<float>(t));
-			}
-			else if (e.key == "angle")
+				break;
+			case "angle"_h:
 				ability.angle = s2t<float>(e.values[0]);
-			else if (e.key == "start_radius")
+				break;
+			case "start_radius"_h:
 				ability.start_radius = s2t<float>(e.values[0]);
-			else if (e.key == "parameters")
+				break;
+			case "parameters"_h:
 				read_parameters(ability.parameter_names, ability.parameters, e.values);
-			else if (e.key == "active")
+				break;
+			case "active"_h:
 				ability.active.build(e.values);
-			else if (e.key == "passive")
+				break;
+			case "passive"_h:
 				ability.passive.build(e.values);
+				break;
+			}
 		}
 	}
 
@@ -87,7 +95,9 @@ void init_abilities()
 		talent.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "layer")
+			switch (e.key_hash)
+			{
+			case "layer"_h:
 			{
 				std::vector<uint> vec;
 				for (auto& t : e.values)
@@ -96,6 +106,8 @@ void init_abilities()
 						vec.push_back(id);
 				}
 				talent.ablilities_list.push_back(std::move(vec));
+			}
+				break;
 			}
 		}
 	}

@@ -10,7 +10,7 @@
 		<item file_id="335e6e4c4b81ab7d038d848f9fb6d080">
 			<components>
 				<item type_name="flame::cNode" />
-				<item type_name="flame::cParticleSystem" particle_life_time="1.25" particle_speed="8" emitt_type="1449132757" emitt_time="0.3" emitt_num="200" emitt_angle="22.5" material_name="fireball.fmat" />
+				<item type_name="flame::cParticleSystem" particle_life_time="1.25" particle_speed="8" emitt_type="1449132757" emitt_duration="0.3" emitt_num="200" emitt_angle="22.5" material_name="fireball.fmat" />
 			</components>
 		</item>
 	</children>

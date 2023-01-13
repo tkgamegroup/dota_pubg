@@ -15,23 +15,30 @@ void init_items()
 		item.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "icon_name")
-				item.icon_name = e.values[0];
-			else if (e.key == "icon_tile_coord")
-				item.icon_tile_coord = s2t<2, uint>(e.values[0]);
-			else if (e.key == "type")
+			switch (e.key_hash)
 			{
+			case "icon_name"_h:
+				item.icon_name = e.values[0];
+				break;
+			case "icon_tile_coord"_h:
+				item.icon_tile_coord = s2t<2, uint>(e.values[0]);
+				break;
+			case "type"_h:
 				if (e.values[0] == "I")
 					item.type = ItemItem;
 				else if (e.values[0] == "C")
 					item.type = ItemConsumable;
-			}
-			else if (e.key == "description")
+				break;
+			case "description"_h:
 				item.description = e.values[0];
-			else if (e.key == "parameters")
+				break;
+			case "parameters"_h:
 				read_parameters(item.parameter_names, item.parameters, e.values);
-			else if (e.key == "active")
+				break;
+			case "active"_h:
 				item.active.build(e.values);
+				break;
+			}
 		}
 	}
 

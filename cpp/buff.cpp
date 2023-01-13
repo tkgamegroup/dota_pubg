@@ -14,20 +14,30 @@ void init_buffs()
 		buff.name = section.name;
 		for (auto& e : section.entries)
 		{
-			if (e.key == "icon_name")
+			switch (e.key_hash)
+			{
+			case "icon_name"_h:
 				buff.icon_name = e.values[0];
-			else if (e.key == "icon_tile_coord")
+				break;
+			case "icon_tile_coord"_h:
 				buff.icon_tile_coord = s2t<2, uint>(e.values[0]);
-			else if (e.key == "interval")
+				break;
+			case "interval"_h:
 				buff.interval = s2t<float>(e.values[0]);
-			else if (e.key == "description")
+				break;
+			case "description"_h:
 				buff.description = e.values[0];
-			else if (e.key == "parameters")
+				break;
+			case "parameters"_h:
 				read_parameters(buff.parameter_names, buff.parameters, e.values);
-			else if (e.key == "passive")
+				break;
+			case "passive"_h:
 				buff.passive.build(e.values);
-			else if (e.key == "continuous")
+				break;
+			case "continuous"_h:
 				buff.continuous.build(e.values);
+				break;
+			}
 		}
 	}
 
