@@ -11,6 +11,7 @@ FLAME_TYPE(cObject)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cProjectile)
 FLAME_TYPE(cEffect)
+FLAME_TYPE(cSectorCollider)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cCreepAI)
 FLAME_TYPE(cNWDataHarvester)
@@ -79,6 +80,7 @@ struct Tracker
 std::string get_show_name(const std::string& name);
 bool parse_literal(const std::string& str, int& id);
 
+extern bool in_editor;
 extern EntityPtr root;
 
 struct MainCamera
@@ -180,6 +182,8 @@ struct cMain : Component
 
 	~cMain();
 
+	void on_active() override;
+	void on_inactive() override;
 	void start() override;
 	void update() override;
 
