@@ -37,4 +37,6 @@ struct Item
 	static const Item& get(uint id);
 };
 
+extern std::vector<Item> items;
+
 void init_items();

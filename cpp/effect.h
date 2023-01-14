@@ -14,6 +14,8 @@ struct EffectPreset
 	static const EffectPreset& get(uint id);
 };
 
+extern std::vector<EffectPreset> effect_presets;
+
 extern std::vector<cEffectPtr> effects;
 extern std::vector<cEffectPtr> dead_effects;
 

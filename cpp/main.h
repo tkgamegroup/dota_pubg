@@ -200,7 +200,7 @@ extern float gtime;
 void enable_game(bool v);
 EntityPtr get_prefab(const std::filesystem::path& path);
 void add_player(vec3& pos, uint& faction, uint& preset_id);
-std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction);
+std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float r1, float r0 = 0.f, float central_angle = 360.f, float direction_angle = 0.f);
 cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);

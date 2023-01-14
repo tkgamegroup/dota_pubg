@@ -155,6 +155,8 @@ struct CharacterPreset
 	static const CharacterPreset& get(uint id);
 };
 
+extern std::vector<CharacterPreset> character_presets;
+
 // Reflect
 enum CharacterState
 {

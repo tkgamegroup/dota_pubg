@@ -138,6 +138,7 @@ struct CommandList
 		cAddBuff,
 		cAddBuffToTarget,
 		cAddAttackEffect,
+		cSetSectorCollideCallback,
 		cTeleportToTarget,
 		cAddEffect,
 		cAddEffectFaceTarget,

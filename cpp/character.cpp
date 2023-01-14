@@ -80,7 +80,7 @@ void CharacterCommandAttackLocation::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = find_characters(character->node->pos, max(character->preset->atk_distance, 5.f), ~character->faction);
+			auto enemies = find_characters(~character->faction, character->node->pos, max(character->preset->atk_distance, 5.f));
 			if (!enemies.empty())
 				target.set(enemies.front());
 
@@ -108,7 +108,7 @@ void CharacterCommandHold::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = find_characters(character->node->pos, max(character->preset->atk_distance, 1.5f), ~character->faction);
+			auto enemies = find_characters(~character->faction, character->node->pos, max(character->preset->atk_distance, 1.5f));
 			if (!enemies.empty())
 				target.set(enemies.front());
 

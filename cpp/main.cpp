@@ -34,6 +34,7 @@
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/terrain.h>
 #include <flame/universe/components/volume.h>
+#include <flame/universe/components/particle_system.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/components/nav_scene.h>
 #include <flame/universe/systems/input.h>
@@ -219,7 +220,7 @@ void MainPlayer::init(EntityPtr e)
 			case CharacterGainAbility:
 			{
 				auto ins = main_player.character->abilities[p2.i].get();
-				if (Ability::get(ins->id).active && !find_shortcut(Shortcut::tAbility, ins->id))
+				if (ins->lv > 0 && Ability::get(ins->id).active && !find_shortcut(Shortcut::tAbility, ins->id))
 				{
 					for (auto& shortcut : shortcuts)
 					{
@@ -335,8 +336,13 @@ void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 
 	if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
 	{
-		dl->AddRectFilled(p0, vec2(p1.x, mix(p0.y, p1.y, ins->cd_timer / ins->cd_max)), ImColor(0.f, 0.f, 0.f, 0.5f));
-		dl->AddText(p0 + vec2(8.f), ImColor(1.f, 1.f, 1.f, 1.f), std::format("{:.1f}", ins->cd_max - ins->cd_timer).c_str());
+		dl->PushClipRect(p0, p1);
+		auto c = (p0 + p1) * 0.5f;
+		dl->PathLineTo(c);
+		dl->PathArcTo(c, p1.x - p0.x, ((ins->cd_timer / ins->cd_max) * 2.f - 0.5f) * glm::pi<float>(), -0.5f * glm::pi<float>());
+		dl->PathFillConvex(ImColor(0.f, 0.f, 0.f, 0.5f));
+		dl->AddText(p0 + vec2(8.f), ImColor(1.f, 1.f, 1.f, 1.f), std::format("{:.1f}", ins->cd_timer).c_str());
+		dl->PopClipRect();
 	}
 }
 
@@ -964,9 +970,9 @@ void cMain::on_active()
 			auto p0 = (vec2)ImGui::GetItemRectMin();
 			auto p1 = (vec2)ImGui::GetItemRectMax();
 			dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-			auto shortcut = shortcuts[i].get();
 			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
 
+			auto shortcut = shortcuts[i].get();
 			shortcut->draw(dl, p0, p1);
 
 			if (ImGui::BeginDragDropSource())
@@ -1324,7 +1330,7 @@ void cMain::start()
 
 	main_camera.init(entity->find_child("Camera"));
 	main_terrain.init(entity->find_child("terrain"));
-
+	 
 	init_effects();
 	init_projectiles();
 	init_items();
@@ -1332,6 +1338,13 @@ void cMain::start()
 	init_abilities();
 	init_characters();
 	init_spawnning_rules();
+	for (auto& preset : effect_presets)
+	{
+		get_prefab(preset.path)->forward_traversal([](EntityPtr e) {
+			if (auto particle_system = e->get_component_t<cParticleSystem>(); particle_system)
+				sRenderer::instance()->get_material_res(particle_system->material);
+		});
+	}
 
 	if (auto nav_scene = entity->get_component_t<cNavScene>(); nav_scene)
 	{
@@ -1818,29 +1831,34 @@ void add_player(vec3& pos, uint& faction, uint& preset_id)
 	idx++;
 }
 
-std::vector<cCharacterPtr> find_characters(const vec3& pos, float radius, uint faction)
+std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float r1, float r0, float central_angle, float direction_angle)
 {
 	std::vector<cCharacterPtr> ret;
 
 	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(pos.xz(), radius, objs, CharacterTag);
+	sScene::instance()->octree->get_colliding(pos.xz(), r1, objs, CharacterTag);
 	for (auto obj : objs)
 	{
 		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
-			ret.push_back(chr);
+		{
+			if (central_angle == 360.f || 
+				circle_sector_intersect(obj->pos, chr->nav_agent->radius, pos, r0, r1, central_angle, direction_angle))
+				ret.push_back(chr);
+		}
 	}
 
-	std::vector<std::pair<float, cCharacterPtr>> dist_list(ret.size());
+	// sort them by distances
+	std::vector<std::pair<float, cCharacterPtr>> distance_list(ret.size());
 	for (auto i = 0; i < ret.size(); i++)
 	{
 		auto c = ret[i];
-		dist_list[i] = std::make_pair(distance(c->node->pos, pos), c);
+		distance_list[i] = std::make_pair(distance(c->node->pos, pos), c);
 	}
-	std::sort(dist_list.begin(), dist_list.end(), [](const auto& a, const auto& b) {
+	std::sort(distance_list.begin(), distance_list.end(), [](const auto& a, const auto& b) {
 		return a.first < b.first;
 	});
 	for (auto i = 0; i < ret.size(); i++)
-		ret[i] = dist_list[i].second;
+		ret[i] = distance_list[i].second;
 	return ret;
 }
 

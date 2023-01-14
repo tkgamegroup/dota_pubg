@@ -5,7 +5,7 @@
 		<item type_name="flame::cAudioSource" />
 		<item type_name="cObject" />
 		<item type_name="cEffect" />
-		<item type_name="cSectorCollider" radius="3" start_radius="2" length="2.2" angle="22.5" speed="8" />
+		<item type_name="cSectorCollider" radius="3" start_radius="2" window_length="2.2" central_angle="22.5" speed="8" />
 	</components>
 	<children>
 		<item file_id="335e6e4c4b81ab7d038d848f9fb6d080">

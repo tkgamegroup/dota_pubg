@@ -12,6 +12,8 @@ struct ProjectilePreset
 	static const ProjectilePreset& get(uint id);
 };
 
+extern std::vector<ProjectilePreset> projectile_presets;
+
 extern std::vector<cProjectilePtr> projectiles;
 extern std::vector<cProjectilePtr> dead_projectiles;
 

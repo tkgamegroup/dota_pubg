@@ -35,4 +35,6 @@ struct Buff
 	static const Buff& get(uint id);
 };
 
+extern std::vector<Buff> buffs;
+
 void init_buffs();

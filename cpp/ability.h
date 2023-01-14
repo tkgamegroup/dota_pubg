@@ -79,4 +79,7 @@ struct Talent
 	static const Talent& get(uint id);
 };
 
+extern std::vector<Ability> abilities;
+extern std::vector<Talent> talents;
+
 void init_abilities();

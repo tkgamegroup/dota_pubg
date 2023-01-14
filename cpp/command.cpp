@@ -1,5 +1,7 @@
 #include "command.h"
 #include "character.h"
+#include "effect.h"
+#include "collider.h"
 
 #define FLAME_NO_XML
 #define FLAME_NO_JSON
@@ -87,7 +89,10 @@ void CommandList::init_sub_groups()
 void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
 	lVariant reg[4] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
+	uint ul;
+	auto i = 0;
 	auto character_pos = character->node->pos;
+
 	auto special_variable_info = [&](Parameter::SpecialVariable sv, voidptr& ptr, uint& size) {
 		switch (sv)
 		{
@@ -114,7 +119,31 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		}
 	};
 
-	auto i = 0;
+	auto add_callback = [&](int i, int end_i, CommandList& cl) {
+		auto in_sub = end_i != i + 1;
+		for (auto j = i + 1; j <= end_i; j++)
+		{
+			if (in_sub)
+			{
+				if (j == i + 1 || j == end_i)
+					continue;
+			}
+			cl.cmds.push_back(cmds[j]);
+		}
+		cl.init_sub_groups();
+		for (auto& c : cl.cmds)
+		{
+			for (auto& p : c.second)
+			{
+				if (p.type == Parameter::tExternal)
+				{
+					if (auto it = external_parameters.find(p.u.v.u); it != external_parameters.end())
+						p = it->second[lv - 1];
+				}
+			}
+		}
+	};
+
 	std::function<void()> do_cmd;
 	do_cmd = [&]() {
 		auto& cmd = cmds[i];
@@ -194,10 +223,9 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				void* src_ptr = nullptr;
 				void* dst_ptr = nullptr;
-				auto size = 0U;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, size);
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, size);
-				memcpy(dst_ptr, src_ptr, size);
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+				memcpy(dst_ptr, src_ptr, ul);
 			}
 
 			i++;
@@ -210,10 +238,9 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 			void* src_ptr = nullptr;
 			void* dst_ptr = nullptr;
-			auto size = 0U;
-			special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, size);
-			special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, size);
-			if (memcmp(src_ptr, dst_ptr, size) == 0)
+			special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+			special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+			if (memcmp(src_ptr, dst_ptr, ul) == 0)
 			{
 				for (i = i + 1; i <= end_i; )
 					do_cmd();
@@ -266,18 +293,13 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			if (parameters.size() >= 1)
 			{
 				auto search_range = parameters[0].to_f();
-				auto search_angle = parameters.size() >= 2 ? parameters[1].to_f() : 0.f;
-				auto target_angle = search_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
+				auto start_radius = parameters.size() >= 2 ? parameters[1].to_f() : 0.f;
+				auto central_angle = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
+				auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
 				auto ori_target_character = target_character;
 				auto beg_i = i + 1;
-				for (auto c : find_characters(character_pos, search_range, ~character->faction))
+				for (auto c : find_characters(~character->faction, character_pos, search_range, start_radius, central_angle, direction_angle))
 				{
-					if (search_angle > 0.f)
-					{
-						if (abs(angle_diff(target_angle, angle_xz(character_pos, c->node->pos))) > search_angle)
-							continue;
-					}
-
 					target_character = c;
 					for (i = beg_i; i <= end_i; )
 						do_cmd();
@@ -389,25 +411,32 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cAddAttackEffect:
 		{
-			auto& ef = character->attack_effects.emplace_back();
-
 			auto end_i = i + 1;
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
 
-			auto in_sub = end_i != i + 1;
-			for (i = i + 1 + (in_sub ? 1 : 0); 
-				i <= end_i - (in_sub ? 1 : 0); i++)
-				ef.cmds.push_back(cmds[i]);
-			ef.init_sub_groups();
-			for (auto& c : ef.cmds)
+			add_callback(i, end_i, character->attack_effects.emplace_back());
+
+			i = end_i + 1;
+		}
+			break;
+		case cSetSectorCollideCallback:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (parameters.size() >= 1)
 			{
-				for (auto& p : c.second)
+				void* entity_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), entity_ptr, ul);
+				if (auto entity = *(EntityPtr*)entity_ptr; entity)
 				{
-					if (p.type == Parameter::tExternal)
+					if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
 					{
-						if (auto it = external_parameters.find(p.u.v.u); it != external_parameters.end())
-							p = it->second[lv - 1];
+						collider->faction = ~character->faction;
+						collider->host = character;
+						add_callback(i, end_i, collider->callback);
 					}
 				}
 			}
@@ -421,12 +450,18 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cAddEffect:
 			if (parameters.size() >= 2)
-				add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
+			{
+				auto effect = add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
+				reg[0].p = effect->entity;
+			}
 			i++;
 			break;
 		case cAddEffectFaceTarget:
 			if (parameters.size() >= 2)
-				add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+			{
+				auto effect = add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+				reg[0].p = effect->entity;
+			}
 			i++;
 			break;
 		default:

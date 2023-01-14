@@ -1,6 +1,7 @@
 #pragma once
 
 #include "main.h"
+#include "command.h"
 
 // Reflect ctor
 struct cSectorCollider : Component
@@ -13,23 +14,29 @@ struct cSectorCollider : Component
 	// Reflect
 	float start_radius = 0.f;
 	// Reflect
-	float length = 0.f;
+	float window_length = 0.f;
 	// Reflect
-	float angle = 0.f;
+	float central_angle = 0.f;
 	// Reflect
-	float dir = 0.f;
+	float direction_angle = 0.f;
 	// Reflect
 	float speed = 0.f;
 	// Reflect
 	uint faction = 0;
+	// Reflect
+	vec2 collide_time = vec2(0.f, 1.f);
 
 	float off = 0.f;
+	float r0, r1;
+	vec3 c;
+	float t;
+	uint rnd;
 
-	Listeners<void(const std::vector<cCharacterPtr>& characters)> callbacks;
+	CommandList callback;
+	cCharacterPtr host = nullptr;
 
 	void on_active() override;
 	void on_inactive() override;
-	void start() override;
 	void update() override;
 
 	struct Create
