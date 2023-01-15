@@ -625,9 +625,9 @@ void cMain::on_active()
 					std::vector<vec3> pts(circle_draw.pts.size() * 3);
 					for (auto i = 0; i < circle_draw.pts.size(); i++)
 					{
-						pts[i * 2 + 0] = center;
-						pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-						pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+						pts[i * 3 + 0] = center;
+						pts[i * 3 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+						pts[i * 3 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
 					}
 
 					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));

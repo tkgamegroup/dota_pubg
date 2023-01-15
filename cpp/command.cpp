@@ -452,6 +452,13 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			if (parameters.size() >= 2)
 			{
 				auto effect = add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
+				if (parameters.size() >= 3)
+				{
+					void* ptr = nullptr;
+					special_variable_info((Parameter::SpecialVariable)parameters[2].to_i(), ptr, ul);
+					if (effect->special_effect)
+						effect->special_effect->init(ptr, ul);
+				}
 				reg[0].p = effect->entity;
 			}
 			i++;

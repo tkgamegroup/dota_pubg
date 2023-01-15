@@ -22,6 +22,8 @@ extern std::vector<cEffectPtr> dead_effects;
 struct SpecialEffect
 {
 	virtual ~SpecialEffect() {}
+
+	virtual void init(void* data, uint size) = 0;
 	virtual void update() = 0;
 };
 
@@ -31,6 +33,8 @@ struct LinkEffect : SpecialEffect
 	vec3 target_pos = vec3(0.f);
 
 	LinkEffect(cEffectPtr effect);
+
+	void init(void* data, uint size) override;
 	void update() override;
 };
 
@@ -48,6 +52,8 @@ struct cEffect : Component
 
 	// Reflect hash=Normal|Link
 	uint type = "Normal"_h;
+	// Reflect
+	void set_type(uint t);
 
 	const EffectPreset* preset = nullptr;
 

@@ -1,4 +1,5 @@
 #include "effect.h"
+#include "character.h"
 
 #include <flame/universe/components/node.h>
 #include <flame/universe/components/particle_system.h>
@@ -52,6 +53,20 @@ LinkEffect::LinkEffect(cEffectPtr effect) :
 {
 }
 
+void LinkEffect::init(void* data, uint size)
+{
+	if (size >= sizeof(void*))
+	{
+		auto target_character = *(cCharacterPtr*)data;
+		auto node = target_character->node;
+		target_pos = node->pos;
+		target_character->node->data_listeners.add([this, node](uint hash) {
+			if (hash == "pos"_h)
+				target_pos = node->pos;
+		});
+	}
+}
+
 void LinkEffect::update()
 {
 	if (auto ps = effect->particle_system; ps)
@@ -81,18 +96,28 @@ cEffect::~cEffect()
 	});
 }
 
+void cEffect::set_type(uint t)
+{
+	if (type == t)
+		return;
+	type = t;
+
+	switch (type)
+	{
+	case "Normal"_h:
+		special_effect.reset(nullptr);
+		break;
+	case "Link"_h:
+		special_effect.reset(new LinkEffect(this));
+		break;
+	}
+}
+
 void cEffect::start()
 {
 	particle_system = entity->get_component_t<cParticleSystem>();
 	if (!particle_system && !entity->children.empty())
 		particle_system = entity->children[0]->get_component_t<cParticleSystem>();
-
-	switch (type)
-	{
-	case "Link"_h:
-		special_effect.reset(new LinkEffect(this));
-		break;
-	}
 
 	timer = duration;
 
