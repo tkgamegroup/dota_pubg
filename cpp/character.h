@@ -12,6 +12,7 @@ struct CharacterCommand
 
 	CharacterCommand(uint type, cCharacterPtr character);
 	virtual ~CharacterCommand() {}
+
 	virtual void update() = 0;
 };
 

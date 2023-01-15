@@ -6,6 +6,6 @@
 		<item v="bdc=OneMinusSrcAlpha" />
 	</shader_defines>
 	<textures>
-		<item filename="Fireball.png" srgb="true" auto_mipmap="true" />
+		<item filename="Ice.png" srgb="true" auto_mipmap="true" />
 	</textures>
 </material>

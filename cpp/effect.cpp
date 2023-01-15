@@ -1,5 +1,7 @@
 #include "effect.h"
 
+#include <flame/universe/components/node.h>
+#include <flame/universe/components/particle_system.h>
 #include <flame/universe/components/audio_source.h>
 
 std::vector<EffectPreset> effect_presets;
@@ -45,6 +47,33 @@ const EffectPreset& EffectPreset::get(uint id)
 std::vector<cEffectPtr> effects;
 std::vector<cEffectPtr> dead_effects;
 
+LinkEffect::LinkEffect(cEffectPtr effect) :
+	effect(effect)
+{
+}
+
+void LinkEffect::update()
+{
+	if (auto ps = effect->particle_system; ps)
+	{
+		auto ptcs = ps->get_particles();
+		int n = ptcs.size();
+		auto p0 = ps->node->g_pos;
+		auto p1 = target_pos;
+		auto ang = radians(angle_xz(p1 - p0));
+		auto len = distance(p0, p1) / n * 0.5f;
+		auto mat_inv = inverse(ps->node->transform);
+		for (auto i = 0; i < n; i++)
+		{
+			auto& ptc = ptcs[i];
+			ptc.pos = mat_inv * vec4(mix(p0, p1, float(i + 1) / float(n + 1)), 1.f);
+			ptc.size.x = len;
+			ptc.rot = ang;
+		}
+		ps->set_particles(ptcs);
+	}
+}
+
 cEffect::~cEffect()
 {
 	std::erase_if(effects, [this](const auto& i) {
@@ -54,6 +83,17 @@ cEffect::~cEffect()
 
 void cEffect::start()
 {
+	particle_system = entity->get_component_t<cParticleSystem>();
+	if (!particle_system && !entity->children.empty())
+		particle_system = entity->children[0]->get_component_t<cParticleSystem>();
+
+	switch (type)
+	{
+	case "Link"_h:
+		special_effect.reset(new LinkEffect(this));
+		break;
+	}
+
 	timer = duration;
 
 	if (!preset)
@@ -70,6 +110,9 @@ void cEffect::update()
 {
 	if (dead)
 		return;
+
+	if (special_effect)
+		special_effect->update();
 
 	if (timer > 0.f)
 	{

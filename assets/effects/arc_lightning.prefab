@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<prefab file_id="fde4c8b3428a6aaa188c3881bacababd">
+	<components>
+		<item type_name="flame::cNode" />
+		<item type_name="flame::cAudioSource" />
+		<item type_name="cObject" />
+		<item type_name="cEffect" type="2145249257" />
+	</components>
+	<children>
+		<item file_id="8e8b8f444d717cf5f734dc92c27f19ef">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cParticleSystem" particle_life_time="10000" particle_size="1,0.2" particle_speed="0" emitt_duration="-1" emitt_num="0" emitt_start_num="1" render_type="1329570752" material_name="ice.fmat" />
+			</components>
+		</item>
+	</children>
+</prefab>
