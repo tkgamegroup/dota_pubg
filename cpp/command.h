@@ -112,7 +112,7 @@ struct CommandList
 		cRollDice100,
 		cWait,
 		cGetFaction,
-		cForNearbyEnemies, //
+		cForNearbyCharacters,
 		cNearestCharacter,
 		cRestoreHP,
 		cRestoreMP,

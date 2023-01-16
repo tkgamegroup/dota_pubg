@@ -192,6 +192,13 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		}
 	};
 
+	auto set_effect_special_init_data = [&](cEffectPtr effect, const Parameter& parameter) {
+		void* ptr = nullptr;
+		variable_addr(parameter.to_i(), ptr, ul);
+		if (effect->special_effect)
+			effect->special_effect->init(ptr, ul);
+	};
+
 	std::function<void()> do_cmd;
 	do_cmd = [&]() {
 		auto& cmd = cmds[i];
@@ -385,17 +392,18 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
 			i++;
 			break;
-		case cForNearbyEnemies:
+		case cForNearbyCharacters:
 		{
 			auto end_i = i + 1;
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
 
-			if (parameters.size() >= 1)
+			if (parameters.size() >= 2)
 			{
-				auto search_range = parameters[0].to_f();
-				auto start_radius = parameters.size() >= 2 ? parameters[1].to_f() : 0.f;
-				auto central_angle = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
+				auto faction = parameters[0].to_i();
+				auto search_range = parameters[1].to_f();
+				auto start_radius = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
+				auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
 				auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
 				auto ori_target_character = target_character;
 				auto beg_i = i + 1;
@@ -575,12 +583,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				auto effect = add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
 				if (parameters.size() >= 3)
-				{
-					void* ptr = nullptr;
-					variable_addr(parameters[2].to_i(), ptr, ul);
-					if (effect->special_effect)
-						effect->special_effect->init(ptr, ul);
-				}
+					set_effect_special_init_data(effect, parameters[2]);
 				reg[0].p = effect->entity;
 			}
 			i++;
@@ -590,12 +593,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				auto effect = add_effect(parameters[1].to_i(), vec3(0.f), vec3(0.f), parameters[2].to_f(), variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->entity);
 				if (parameters.size() >= 4)
-				{
-					void* ptr = nullptr;
-					variable_addr(parameters[3].to_i(), ptr, ul);
-					if (effect->special_effect)
-						effect->special_effect->init(ptr, ul);
-				}
+					set_effect_special_init_data(effect, parameters[3]);
 				reg[0].p = effect->entity;
 			}
 			i++;
@@ -605,12 +603,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				auto effect = add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
 				if (parameters.size() >= 3)
-				{
-					void* ptr = nullptr;
-					variable_addr(parameters[2].to_i(), ptr, ul);
-					if (effect->special_effect)
-						effect->special_effect->init(ptr, ul);
-				}
+					set_effect_special_init_data(effect, parameters[2]);
 				reg[0].p = effect->entity;
 			}
 			i++;
