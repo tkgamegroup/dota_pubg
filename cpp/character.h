@@ -178,6 +178,7 @@ enum CharacterMessage
 extern std::vector<cCharacterPtr> characters;
 extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 extern std::vector<cCharacterPtr> dead_characters;
+extern bool removing_dead_characters;
 
 // Reflect ctor
 struct cCharacter : Component

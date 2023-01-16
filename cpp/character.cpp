@@ -318,6 +318,7 @@ const CharacterPreset& CharacterPreset::get(uint id)
 std::vector<cCharacterPtr> characters;
 std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 std::vector<cCharacterPtr> dead_characters;
+bool removing_dead_characters = false;
 
 void cCharacter::set_faction(uint _faction)
 {
@@ -458,6 +459,12 @@ cCharacter::~cCharacter()
 	std::erase_if(factions[faction], [this](const auto& i) {
 		return i == this;
 	});
+	if (dead && !removing_dead_characters)
+	{
+		std::erase_if(dead_characters, [this](const auto& i) {
+			return i == this;
+		});
+	}
 }
 
 void cCharacter::on_init()

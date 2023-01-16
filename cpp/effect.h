@@ -18,6 +18,7 @@ extern std::vector<EffectPreset> effect_presets;
 
 extern std::vector<cEffectPtr> effects;
 extern std::vector<cEffectPtr> dead_effects;
+extern bool removing_dead_effects;
 
 struct SpecialEffect
 {

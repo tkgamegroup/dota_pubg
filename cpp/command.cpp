@@ -11,7 +11,7 @@
 
 Parameter::Parameter(const std::string& str)
 {
-	if (str.empty())
+	if (str.empty() || str == "_")
 	{
 		type = tEmpty;
 		return;
@@ -151,11 +151,10 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		}
 	};
 
-	auto variable_as_ptr = [&](int sv) {
-		void* ptr;
-		uint sz;
+	auto variable_as = [&]<typename T>(int sv)->T& {
+		void* ptr; uint sz;
 		variable_addr(sv, ptr, sz);
-		return ptr;
+		return *(T*)ptr;
 	};
 
 	auto parameter_addr = [&](Parameter& parameter, voidptr& ptr, uint& size) {
@@ -281,8 +280,8 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		case cBitInverse:
 			if (parameters.size() >= 1)
 			{
-				auto ptr = (uint*)variable_as_ptr(parameters[0].to_i());
-				*ptr = ~(*ptr);
+				auto& v = variable_as.operator()<uint>(parameters[0].to_i());
+				v = ~v;
 			}
 			i++;
 			break;
@@ -363,7 +362,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cGenerateRnd:
 			if (parameters.size() >= 1)
-				*(uint*)variable_as_ptr(parameters[0].to_i()) = rand();
+				variable_as.operator()<uint>(parameters[0].to_i()) = rand();
 			i++;
 			break;
 		case cRollDice100:
@@ -383,7 +382,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cGetFaction:
 			if (parameters.size() >= 2)
-				*(uint*)variable_as_ptr(parameters[1].to_i()) = (*(cCharacterPtr*)variable_as_ptr(parameters[0].to_i()))->faction;
+				variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
 			i++;
 			break;
 		case cForNearbyEnemies:
@@ -412,44 +411,29 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i = end_i + 1;
 		}
 			break;
-		case cCharacterNearestCharacter:
+		case cNearestCharacter:
 			if (parameters.size() >= 3)
 			{
-				void* character_ptr = nullptr;
-				variable_addr(parameters[0].to_i(), character_ptr, ul);
-				auto character = *(cCharacterPtr*)character_ptr;
-				auto res = find_characters(parameters[1].to_i(), character->node->pos, parameters[2].to_f());
+				auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
+				auto faction = variable_as.operator()<uint>(parameters[1].to_i());
+				auto res = find_characters(faction, character->node->pos, parameters[2].to_f());
 				reg[0].p = nullptr;
-				if (!res.empty())
+				auto marker = 0U;
+				auto marker_time = 0.f;
+				if (parameters.size() >= 5)
 				{
-					if (res[0] != character)
-						reg[0].p = res[0];
-					else if (res.size() > 1)
-						reg[0].p = res[1];
+					marker = variable_as.operator() < uint > (parameters[3].to_i());
+					marker_time = parameters[4].to_f();
 				}
-			}
-			i++;
-			break;
-		case cCharacterNearestUnMarkedCharacter:
-			if (parameters.size() >= 5)
-			{
-				void* character_ptr = nullptr;
-				variable_addr(parameters[0].to_i(), character_ptr, ul);
-				void* faction_ptr = nullptr;
-				variable_addr(parameters[1].to_i(), faction_ptr, ul);
-				auto character = *(cCharacterPtr*)character_ptr;
-				auto res = find_characters(*(uint*)faction_ptr, character->node->pos, parameters[2].to_f());
-				reg[0].p = nullptr;
-				void* mark_ptr = nullptr;
-				variable_addr(parameters[3].to_i(), mark_ptr, ul);
-				auto mark = *(uint*)mark_ptr;
-				auto time = parameters[4].to_f();
 				for (auto c : res)
 				{
-					if (c != character && c->add_marker(mark, time))
+					if (c != character)
 					{
-						reg[0].p = c;
-						break;
+						if (marker && c->add_marker(marker, marker_time))
+						{
+							reg[0].p = c;
+							break;
+						}
 					}
 				}
 			}
@@ -467,12 +451,12 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cTakeDamage:
 			if (parameters.size() >= 2)
-				character->take_damage((DamageType)parameters[0].to_i(), parameters[1].to_i());
-			i++;
-			break;
-		case cTakeDamagePct:
-			if (parameters.size() >= 2)
-				character->take_damage((DamageType)parameters[0].to_i(), character->hp_max * parameters[1].to_f());
+			{
+				if (parameters[1].vt == Parameter::vPercentage)
+					character->take_damage((DamageType)parameters[0].to_i(), character->hp_max * parameters[1].to_f());
+				else
+					character->take_damage((DamageType)parameters[0].to_i(), parameters[1].to_i());
+			}
 			i++;
 			break;
 		case cInflictDamage:
@@ -486,17 +470,32 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cIncreaseHPMax:
 			if (parameters.size() >= 1)
-				character->hp_max += parameters[0].to_i();
+			{
+				if (parameters[0].vt == Parameter::vPercentage)
+					character->hp_max *= 1.f + parameters[0].to_f();
+				else
+					character->hp_max += parameters[0].to_i();
+			}
 			i++;
 			break;
 		case cIncreaseMPMax:
 			if (parameters.size() >= 1)
-				character->mp_max += parameters[0].to_i();
+			{
+				if (parameters[0].vt == Parameter::vPercentage)
+					character->mp_max *= 1.f + parameters[0].to_f();
+				else
+					character->mp_max += parameters[0].to_i();
+			}
 			i++;
 			break;
 		case cIncreaseATK:
 			if (parameters.size() >= 1)
-				character->atk += parameters[0].to_i();
+			{
+				if (parameters[0].vt == Parameter::vPercentage)
+					character->atk *= 1.f + parameters[0].to_f();
+				else
+					character->atk += parameters[0].to_i();
+			}
 			i++;
 			break;
 		case cIncreasePHYDEF:
@@ -529,29 +528,9 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				character->atk_sp += parameters[0].to_i();
 			i++;
 			break;
-		case cIncreaseHPMaxPct:
-			if (parameters.size() >= 1)
-				character->hp_max *= 1.f + parameters[0].to_f();
-			i++;
-			break;
-		case cIncreaseMPMaxPct:
-			if (parameters.size() >= 1)
-				character->mp_max *= 1.f + parameters[0].to_f();
-			i++;
-			break;
-		case cIncreaseATKPct:
-			if (parameters.size() >= 1)
-				character->atk *= 1.f + parameters[0].to_f();
-			i++;
-			break;
 		case cAddBuff:
-			if (parameters.size() >= 2)
-				character->add_buff(parameters[0].to_i(), parameters[1].to_f(), parameters.size() >= 3 ? parameters[2].to_i() : 0, parameters.size() >= 4 ? parameters[3].to_i() : false);
-			i++;
-			break;
-		case cAddBuffToTarget:
-			if (parameters.size() >= 2)
-				target_character->add_buff(parameters[0].to_i(), parameters[1].to_f(), parameters.size() >= 3 ? parameters[2].to_i() : 0, parameters.size() >= 4 ? parameters[3].to_i() : false);
+			if (parameters.size() >= 3)
+				variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[0].to_i(), parameters[1].to_f(), parameters.size() >= 3 ? parameters[2].to_i() : 0, parameters.size() >= 4 ? parameters[3].to_i() : false);
 			i++;
 			break;
 		case cAddAttackEffect:
@@ -573,9 +552,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 			if (parameters.size() >= 1)
 			{
-				void* entity_ptr = nullptr;
-				variable_addr(parameters[0].to_i(), entity_ptr, ul);
-				if (auto entity = *(EntityPtr*)entity_ptr; entity)
+				if (auto entity = variable_as.operator()<EntityPtr>(parameters[0].to_i()); entity)
 				{
 					if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
 					{
@@ -611,9 +588,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		case cAddEffectToCharacter:
 			if (parameters.size() >= 3)
 			{
-				void* character_ptr = nullptr;
-				variable_addr(parameters[0].to_i(), character_ptr, ul);
-				auto effect = add_effect(parameters[1].to_i(), vec3(0.f), vec3(0.f), parameters[2].to_f(), (*(cCharacterPtr*)character_ptr)->entity);
+				auto effect = add_effect(parameters[1].to_i(), vec3(0.f), vec3(0.f), parameters[2].to_f(), variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->entity);
 				if (parameters.size() >= 4)
 				{
 					void* ptr = nullptr;

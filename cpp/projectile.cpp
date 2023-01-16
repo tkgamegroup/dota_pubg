@@ -46,12 +46,19 @@ const ProjectilePreset& ProjectilePreset::get(uint id)
 
 std::vector<cProjectilePtr> projectiles;
 std::vector<cProjectilePtr> dead_projectiles;
+bool removing_dead_projectiles = false;
 
 cProjectile::~cProjectile()
 {
 	std::erase_if(projectiles, [this](const auto& i) {
 		return i == this;
 	});
+	if (dead && !removing_dead_projectiles)
+	{
+		std::erase_if(dead_projectiles, [this](const auto& i) {
+			return i == this;
+		});
+	}
 }
 
 void cProjectile::update()

@@ -16,6 +16,7 @@ extern std::vector<ProjectilePreset> projectile_presets;
 
 extern std::vector<cProjectilePtr> projectiles;
 extern std::vector<cProjectilePtr> dead_projectiles;
+extern bool removing_dead_projectiles;
 
 // Reflect ctor
 struct cProjectile : Component

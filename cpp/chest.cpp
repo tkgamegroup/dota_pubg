@@ -4,12 +4,19 @@
 
 std::vector<cChestPtr> chests;
 std::vector<cChestPtr> dead_chests;
+bool removing_dead_chests = false;
 
 cChest::~cChest()
 {
 	std::erase_if(chests, [this](const auto& i) {
 		return i == this;
 	});
+	if (dead && !removing_dead_chests)
+	{
+		std::erase_if(dead_chests, [this](const auto& i) {
+			return i == this;
+		});
+	}
 }
 void cChest::on_init()
 {

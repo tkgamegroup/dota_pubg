@@ -112,13 +112,11 @@ struct CommandList
 		cRollDice100,
 		cWait,
 		cGetFaction,
-		cForNearbyEnemies,
-		cCharacterNearestCharacter,
-		cCharacterNearestUnMarkedCharacter,
+		cForNearbyEnemies, //
+		cNearestCharacter,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
-		cTakeDamagePct,
 		cInflictDamage,
 		cLevelUp,
 		cIncreaseHPMax,
@@ -130,18 +128,14 @@ struct CommandList
 		cIncreaseMPREG,
 		cIncreaseMOVSP,
 		cIncreaseATKSP,
-		cIncreaseHPMaxPct,
-		cIncreaseMPMaxPct,
-		cIncreaseATKPct,
 		cAddState,
 		cAddBuff,
-		cAddBuffToTarget,
 		cAddAttackEffect,
 		cSetSectorCollideCallback,
-		cTeleportToTarget,
+		cTeleportToTarget, //
 		cAddEffect,
-		cAddEffectToCharacter,
-		cAddEffectFaceTarget,
+		cAddEffectToCharacter, //
+		cAddEffectFaceTarget, //
 	};
 
 	// Reflect

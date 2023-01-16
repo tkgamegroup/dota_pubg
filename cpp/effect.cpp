@@ -47,6 +47,7 @@ const EffectPreset& EffectPreset::get(uint id)
 
 std::vector<cEffectPtr> effects;
 std::vector<cEffectPtr> dead_effects;
+bool removing_dead_effects = false;
 
 LinkEffect::LinkEffect(cEffectPtr effect) :
 	effect(effect)
@@ -94,7 +95,7 @@ cEffect::~cEffect()
 	std::erase_if(effects, [this](const auto& i) {
 		return i == this;
 	});
-	if (dead)
+	if (dead && !removing_dead_effects)
 	{
 		std::erase_if(dead_effects, [this](const auto& i) {
 			return i == this;

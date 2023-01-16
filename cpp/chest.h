@@ -4,6 +4,7 @@
 
 extern std::vector<cChestPtr> chests;
 extern std::vector<cChestPtr> dead_chests;
+extern bool removing_dead_chests;
 
 // Reflect ctor
 struct cChest : Component
