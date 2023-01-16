@@ -11,6 +11,12 @@
 
 Parameter::Parameter(const std::string& str)
 {
+	if (str.empty())
+	{
+		type = tEmpty;
+		return;
+	}
+
 	if (std::isdigit(str[0]))
 	{
 		switch (str.back())
@@ -37,8 +43,8 @@ Parameter::Parameter(const std::string& str)
 	{
 		if (str[0] == '%')
 		{
-			type = tSpecialVariable;
-			SpecialVariable sv;
+			type = tVariable;
+			CommandList::Variable sv;
 			TypeInfo::unserialize_t(str.substr(1), sv);
 			u.v.i = sv;
 		}
@@ -88,55 +94,77 @@ void CommandList::init_sub_groups()
 
 void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
+	static lVariant zero_reg = { .p = nullptr };
 	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
 	int l;
 	uint ul;
 	int i = 0; int loop_n; int loop_end_i;
 	auto character_pos = character->node->pos;
 
-	auto special_variable_info = [&](Parameter::SpecialVariable sv, voidptr& ptr, uint& size) {
+	auto variable_addr = [&](int sv, voidptr& ptr, uint& size) {
 		switch (sv)
 		{
-		case Parameter::sCharacter:
+		case vCharacter:
 			ptr = &character;
 			size = (uint)sizeof(void*);
 			break;
-		case Parameter::sTargetCharacter:
+		case vTargetCharacter:
 			ptr = &target_character;
 			size = (uint)sizeof(void*);
 			break;
-		case Parameter::sREG0:
+		case vREG0:
 			ptr = &reg[0];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG1:
+		case vREG1:
 			ptr = &reg[1];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG2:
+		case vREG2:
 			ptr = &reg[2];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG3:
+		case vREG3:
 			ptr = &reg[3];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG4:
+		case vREG4:
 			ptr = &reg[4];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG5:
+		case vREG5:
 			ptr = &reg[5];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG6:
+		case vREG6:
 			ptr = &reg[6];
 			size = (uint)sizeof(lVariant);
 			break;
-		case Parameter::sREG7:
+		case vREG7:
 			ptr = &reg[7];
 			size = (uint)sizeof(lVariant);
 			break;
+		case vZeroREG:
+			ptr = &zero_reg;
+			size = (uint)sizeof(lVariant);
+			break;
+		}
+	};
+
+	auto variable_as_ptr = [&](int sv) {
+		void* ptr;
+		uint sz;
+		variable_addr(sv, ptr, sz);
+		return ptr;
+	};
+
+	auto parameter_addr = [&](Parameter& parameter, voidptr& ptr, uint& size) {
+		if (parameter.type == Parameter::tVariable)
+			variable_addr(parameter.u.v.i, ptr, size);
+		else
+		{
+			ptr = &parameter.u.v;
+			size = sizeof(Parameter::u.v);
 		}
 	};
 
@@ -184,7 +212,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				parameters.push_back(vec.size() == 1 ? vec[0] : vec[lv - 1]);
 			}
 				break;
-			case Parameter::tSpecialVariable:
+			case Parameter::tVariable:
 				parameters.push_back(sp);
 				break;
 			case Parameter::tExpression:
@@ -244,15 +272,23 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				void* src_ptr = nullptr;
 				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul); l = ul;
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+				parameter_addr(parameters[0], src_ptr, ul); l = ul;
+				parameter_addr(parameters[1], dst_ptr, ul);
 				memcpy(dst_ptr, src_ptr, min((uint)l, ul));
 			}
-
+			i++;
+			break;
+		case cBitInverse:
+			if (parameters.size() >= 1)
+			{
+				auto ptr = (uint*)variable_as_ptr(parameters[0].to_i());
+				*ptr = ~(*ptr);
+			}
 			i++;
 			break;
 		case cIfEqual:
 		{
+			auto beg_i = i;
 			auto end_i = i + 1;
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
@@ -261,8 +297,8 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				void* src_ptr = nullptr;
 				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul); l = ul;
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+				parameter_addr(parameters[0], src_ptr, ul); l = ul;
+				parameter_addr(parameters[1], dst_ptr, ul);
 				if (memcmp(src_ptr, dst_ptr, min((uint)l, ul)) == 0)
 				{
 					i = i + 1 + (end_i != i + 1 ? 1 : 0);
@@ -271,11 +307,13 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				}
 			}
 
-			i = end_i + 1;
+			if (i >= beg_i && i <= end_i)
+				i = end_i + 1;
 		}
 			break;
 		case cIfNotEqual:
 		{
+			auto beg_i = i;
 			auto end_i = i + 1;
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
@@ -284,8 +322,8 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				void* src_ptr = nullptr;
 				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul); l = ul;
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+				parameter_addr(parameters[0], src_ptr, ul); l = ul;
+				parameter_addr(parameters[1], dst_ptr, ul);
 				if (memcmp(src_ptr, dst_ptr, min((uint)l, ul)) != 0)
 				{
 					i = i + 1 + (end_i != i + 1 ? 1 : 0);
@@ -294,93 +332,8 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				}
 			}
 
-			i = end_i + 1;
-		}
-			break;
-		case cIfEqualImm:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 2)
-			{
-				void* src_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
-				if (memcmp(src_ptr, &parameters[1].u, min(ul, (uint)sizeof(Parameter::u))) == 0)
-				{
-					i = i + 1 + (end_i != i + 1 ? 1 : 0);
-					for (; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cIfNotEqualImm:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 2)
-			{
-				void* src_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
-				if (memcmp(src_ptr, &parameters[1].u, min(ul, (uint)sizeof(Parameter::u))) != 0)
-				{
-					i = i + 1 + (end_i != i + 1 ? 1 : 0);
-					for (; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cIfEqualZero:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 1)
-			{
-				void* src_ptr = nullptr;
-				void* zero = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
-				if (memcmp(src_ptr, &zero, ul) == 0)
-				{
-					i = i + 1 + (end_i != i + 1 ? 1 : 0);
-					for (; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cIfNotEqualZero:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 1)
-			{
-				void* src_ptr = nullptr;
-				void* zero = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
-				if (memcmp(src_ptr, &zero, ul) != 0)
-				{
-					i = i + 1 + (end_i != i + 1 ? 1 : 0);
-					for (; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			i = end_i + 1;
+			if (i >= beg_i && i <= end_i)
+				i = end_i + 1;
 		}
 			break;
 		case cLoop:
@@ -410,12 +363,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cGenerateRnd:
 			if (parameters.size() >= 1)
-			{
-				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), dst_ptr, ul);
-
-				*(uint*)dst_ptr = rand();
-			}
+				*(uint*)variable_as_ptr(parameters[0].to_i()) = rand();
 			i++;
 			break;
 		case cRollDice100:
@@ -435,26 +383,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cGetFaction:
 			if (parameters.size() >= 2)
-			{
-				void* character_ptr = nullptr;
-				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
-
-				*(uint*)dst_ptr = (*(cCharacterPtr*)character_ptr)->faction;
-			}
-			i++;
-			break;
-		case cGetContraryFaction:
-			if (parameters.size() >= 2)
-			{
-				void* character_ptr = nullptr;
-				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
-
-				*(uint*)dst_ptr = ~((*(cCharacterPtr*)character_ptr)->faction);
-			}
+				*(uint*)variable_as_ptr(parameters[1].to_i()) = (*(cCharacterPtr*)variable_as_ptr(parameters[0].to_i()))->faction;
 			i++;
 			break;
 		case cForNearbyEnemies:
@@ -483,11 +412,11 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i = end_i + 1;
 		}
 			break;
-		case cNearestCharacter:
+		case cCharacterNearestCharacter:
 			if (parameters.size() >= 3)
 			{
 				void* character_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				variable_addr(parameters[0].to_i(), character_ptr, ul);
 				auto character = *(cCharacterPtr*)character_ptr;
 				auto res = find_characters(parameters[1].to_i(), character->node->pos, parameters[2].to_f());
 				reg[0].p = nullptr;
@@ -501,18 +430,18 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			}
 			i++;
 			break;
-		case cNearestUnMarkedCharacter:
+		case cCharacterNearestUnMarkedCharacter:
 			if (parameters.size() >= 5)
 			{
 				void* character_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				variable_addr(parameters[0].to_i(), character_ptr, ul);
 				void* faction_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), faction_ptr, ul);
+				variable_addr(parameters[1].to_i(), faction_ptr, ul);
 				auto character = *(cCharacterPtr*)character_ptr;
 				auto res = find_characters(*(uint*)faction_ptr, character->node->pos, parameters[2].to_f());
 				reg[0].p = nullptr;
 				void* mark_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[3].to_i(), mark_ptr, ul);
+				variable_addr(parameters[3].to_i(), mark_ptr, ul);
 				auto mark = *(uint*)mark_ptr;
 				auto time = parameters[4].to_f();
 				for (auto c : res)
@@ -645,7 +574,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			if (parameters.size() >= 1)
 			{
 				void* entity_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), entity_ptr, ul);
+				variable_addr(parameters[0].to_i(), entity_ptr, ul);
 				if (auto entity = *(EntityPtr*)entity_ptr; entity)
 				{
 					if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
@@ -671,7 +600,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				if (parameters.size() >= 3)
 				{
 					void* ptr = nullptr;
-					special_variable_info((Parameter::SpecialVariable)parameters[2].to_i(), ptr, ul);
+					variable_addr(parameters[2].to_i(), ptr, ul);
 					if (effect->special_effect)
 						effect->special_effect->init(ptr, ul);
 				}
@@ -683,12 +612,12 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			if (parameters.size() >= 3)
 			{
 				void* character_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				variable_addr(parameters[0].to_i(), character_ptr, ul);
 				auto effect = add_effect(parameters[1].to_i(), vec3(0.f), vec3(0.f), parameters[2].to_f(), (*(cCharacterPtr*)character_ptr)->entity);
 				if (parameters.size() >= 4)
 				{
 					void* ptr = nullptr;
-					special_variable_info((Parameter::SpecialVariable)parameters[3].to_i(), ptr, ul);
+					variable_addr(parameters[3].to_i(), ptr, ul);
 					if (effect->special_effect)
 						effect->special_effect->init(ptr, ul);
 				}
@@ -703,7 +632,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				if (parameters.size() >= 3)
 				{
 					void* ptr = nullptr;
-					special_variable_info((Parameter::SpecialVariable)parameters[2].to_i(), ptr, ul);
+					variable_addr(parameters[2].to_i(), ptr, ul);
 					if (effect->special_effect)
 						effect->special_effect->init(ptr, ul);
 				}

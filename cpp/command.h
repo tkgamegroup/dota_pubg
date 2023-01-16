@@ -8,9 +8,10 @@ struct Parameter
 {
 	enum Type
 	{
+		tEmpty,
 		tImmediate,
 		tExternal,
-		tSpecialVariable,
+		tVariable,
 		tExpression
 	};
 
@@ -20,21 +21,6 @@ struct Parameter
 		vUint,
 		vFloat,
 		vPercentage
-	};
-
-	// Reflect
-	enum SpecialVariable
-	{
-		sCharacter,
-		sTargetCharacter,
-		sREG0,
-		sREG1,
-		sREG2,
-		sREG3,
-		sREG4,
-		sREG5,
-		sREG6,
-		sREG7,
 	};
 
 	enum Operator
@@ -117,21 +103,18 @@ struct CommandList
 		cBeginSub,
 		cEndSub,
 		cStore,
+		cBitInverse,
 		cIfEqual,
 		cIfNotEqual,
-		cIfEqualImm,
-		cIfNotEqualImm,
-		cIfEqualZero,
-		cIfNotEqualZero,
 		cLoop,
 		cBreak,
 		cGenerateRnd,
 		cRollDice100,
+		cWait,
 		cGetFaction,
-		cGetContraryFaction,
 		cForNearbyEnemies,
-		cNearestCharacter,
-		cNearestUnMarkedCharacter,
+		cCharacterNearestCharacter,
+		cCharacterNearestUnMarkedCharacter,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
@@ -159,6 +142,23 @@ struct CommandList
 		cAddEffect,
 		cAddEffectToCharacter,
 		cAddEffectFaceTarget,
+	};
+
+	// Reflect
+	enum Variable
+	{
+		vCharacter,
+		vTargetCharacter,
+		vTargetPos,
+		vREG0,
+		vREG1,
+		vREG2,
+		vREG3,
+		vREG4,
+		vREG5,
+		vREG6,
+		vREG7,
+		vZeroREG
 	};
 
 	std::vector<std::pair<Command, std::vector<Parameter>>> cmds;
