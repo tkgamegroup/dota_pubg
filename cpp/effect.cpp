@@ -94,6 +94,12 @@ cEffect::~cEffect()
 	std::erase_if(effects, [this](const auto& i) {
 		return i == this;
 	});
+	if (dead)
+	{
+		std::erase_if(dead_effects, [this](const auto& i) {
+			return i == this;
+		});
+	}
 }
 
 void cEffect::set_type(uint t)

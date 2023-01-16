@@ -204,7 +204,7 @@ std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float 
 cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
 cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
-cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id = 0);
+cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, EntityPtr parent = root, uint id = 0);
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
 void teleport(cCharacterPtr character, const vec3& location);
 

@@ -25,11 +25,16 @@ struct Parameter
 	// Reflect
 	enum SpecialVariable
 	{
+		sCharacter,
 		sTargetCharacter,
 		sREG0,
 		sREG1,
 		sREG2,
 		sREG3,
+		sREG4,
+		sREG5,
+		sREG6,
+		sREG7,
 	};
 
 	enum Operator
@@ -114,8 +119,19 @@ struct CommandList
 		cStore,
 		cIfEqual,
 		cIfNotEqual,
+		cIfEqualImm,
+		cIfNotEqualImm,
+		cIfEqualZero,
+		cIfNotEqualZero,
+		cLoop,
+		cBreak,
+		cGenerateRnd,
 		cRollDice100,
+		cGetFaction,
+		cGetContraryFaction,
 		cForNearbyEnemies,
+		cNearestCharacter,
+		cNearestUnMarkedCharacter,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
@@ -141,6 +157,7 @@ struct CommandList
 		cSetSectorCollideCallback,
 		cTeleportToTarget,
 		cAddEffect,
+		cAddEffectToCharacter,
 		cAddEffectFaceTarget,
 	};
 

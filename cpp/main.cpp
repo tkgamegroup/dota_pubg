@@ -1924,7 +1924,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	return projectile;
 }
 
-cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id)
+cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, EntityPtr parent, uint id)
 {
 	auto& preset = EffectPreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
@@ -1937,7 +1937,7 @@ cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float du
 	effects.push_back(effect);
 	effect->preset = &preset;
 	effect->duration = duration;
-	root->add_child(e);
+	parent->add_child(e);
 
 	return effect;
 }

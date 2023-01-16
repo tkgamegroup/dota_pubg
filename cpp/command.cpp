@@ -88,33 +88,54 @@ void CommandList::init_sub_groups()
 
 void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
 {
-	lVariant reg[4] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
+	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
+	int l;
 	uint ul;
-	auto i = 0;
+	int i = 0; int loop_n; int loop_end_i;
 	auto character_pos = character->node->pos;
 
 	auto special_variable_info = [&](Parameter::SpecialVariable sv, voidptr& ptr, uint& size) {
 		switch (sv)
 		{
-		case Parameter::sREG0:
-			ptr = &reg[0];
-			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
-			break;
-		case Parameter::sREG1:
-			ptr = &reg[1];
-			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
-			break;
-		case Parameter::sREG2:
-			ptr = &reg[2];
-			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
-			break;
-		case Parameter::sREG3:
-			ptr = &reg[3];
-			size = size > 0 ? min(size, (uint)sizeof(lVariant)) : (uint)sizeof(lVariant);
+		case Parameter::sCharacter:
+			ptr = &character;
+			size = (uint)sizeof(void*);
 			break;
 		case Parameter::sTargetCharacter:
 			ptr = &target_character;
-			size = size > 0 ? min(size, (uint)sizeof(void*)) : (uint)sizeof(void*);
+			size = (uint)sizeof(void*);
+			break;
+		case Parameter::sREG0:
+			ptr = &reg[0];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG1:
+			ptr = &reg[1];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG2:
+			ptr = &reg[2];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG3:
+			ptr = &reg[3];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG4:
+			ptr = &reg[4];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG5:
+			ptr = &reg[5];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG6:
+			ptr = &reg[6];
+			size = (uint)sizeof(lVariant);
+			break;
+		case Parameter::sREG7:
+			ptr = &reg[7];
+			size = (uint)sizeof(lVariant);
 			break;
 		}
 	};
@@ -223,9 +244,9 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			{
 				void* src_ptr = nullptr;
 				void* dst_ptr = nullptr;
-				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul); l = ul;
 				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
-				memcpy(dst_ptr, src_ptr, ul);
+				memcpy(dst_ptr, src_ptr, min((uint)l, ul));
 			}
 
 			i++;
@@ -236,14 +257,18 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
 
-			void* src_ptr = nullptr;
-			void* dst_ptr = nullptr;
-			special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
-			special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
-			if (memcmp(src_ptr, dst_ptr, ul) == 0)
+			if (parameters.size() >= 2)
 			{
-				for (i = i + 1; i <= end_i; )
-					do_cmd();
+				void* src_ptr = nullptr;
+				void* dst_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul); l = ul;
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+				if (memcmp(src_ptr, dst_ptr, min((uint)l, ul)) == 0)
+				{
+					i = i + 1 + (end_i != i + 1 ? 1 : 0);
+					for (; i <= end_i; )
+						do_cmd();
+				}
 			}
 
 			i = end_i + 1;
@@ -255,19 +280,143 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
 				end_i = it->second;
 
-			void* src_ptr = nullptr;
-			void* dst_ptr = nullptr;
-			auto size = 0U;
-			special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, size);
-			special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, size);
-			if (memcmp(src_ptr, dst_ptr, size) != 0)
+			if (parameters.size() >= 2)
 			{
-				for (i = i + 1; i <= end_i; )
-					do_cmd();
+				void* src_ptr = nullptr;
+				void* dst_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul); l = ul;
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+				if (memcmp(src_ptr, dst_ptr, min((uint)l, ul)) != 0)
+				{
+					i = i + 1 + (end_i != i + 1 ? 1 : 0);
+					for (; i <= end_i; )
+						do_cmd();
+				}
 			}
 
 			i = end_i + 1;
 		}
+			break;
+		case cIfEqualImm:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (parameters.size() >= 2)
+			{
+				void* src_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+				if (memcmp(src_ptr, &parameters[1].u, min(ul, (uint)sizeof(Parameter::u))) == 0)
+				{
+					i = i + 1 + (end_i != i + 1 ? 1 : 0);
+					for (; i <= end_i; )
+						do_cmd();
+				}
+			}
+
+			i = end_i + 1;
+		}
+			break;
+		case cIfNotEqualImm:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (parameters.size() >= 2)
+			{
+				void* src_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+				if (memcmp(src_ptr, &parameters[1].u, min(ul, (uint)sizeof(Parameter::u))) != 0)
+				{
+					i = i + 1 + (end_i != i + 1 ? 1 : 0);
+					for (; i <= end_i; )
+						do_cmd();
+				}
+			}
+
+			i = end_i + 1;
+		}
+			break;
+		case cIfEqualZero:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (parameters.size() >= 1)
+			{
+				void* src_ptr = nullptr;
+				void* zero = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+				if (memcmp(src_ptr, &zero, ul) == 0)
+				{
+					i = i + 1 + (end_i != i + 1 ? 1 : 0);
+					for (; i <= end_i; )
+						do_cmd();
+				}
+			}
+
+			i = end_i + 1;
+		}
+			break;
+		case cIfNotEqualZero:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+
+			if (parameters.size() >= 1)
+			{
+				void* src_ptr = nullptr;
+				void* zero = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), src_ptr, ul);
+				if (memcmp(src_ptr, &zero, ul) != 0)
+				{
+					i = i + 1 + (end_i != i + 1 ? 1 : 0);
+					for (; i <= end_i; )
+						do_cmd();
+				}
+			}
+
+			i = end_i + 1;
+		}
+			break;
+		case cLoop:
+		{
+			auto end_i = i + 1;
+			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
+				end_i = it->second;
+			loop_end_i = end_i + 1;
+
+			if (parameters.size() >= 1)
+			{
+				auto beg_i = i + 1 + (end_i != i + 1 ? 1 : 0);
+				loop_n = parameters[0].to_i();
+				for (auto j = 0; j < loop_n; j++)
+				{
+					for (i = beg_i; i <= end_i; )
+						do_cmd();
+				}
+			}
+
+			i = loop_end_i;
+		}
+			break;
+		case cBreak:
+			loop_n = 0;
+			i = loop_end_i;
+			break;
+		case cGenerateRnd:
+			if (parameters.size() >= 1)
+			{
+				void* dst_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), dst_ptr, ul);
+
+				*(uint*)dst_ptr = rand();
+			}
+			i++;
 			break;
 		case cRollDice100:
 		{
@@ -283,6 +432,30 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 			i = end_i + 1;
 		}
+			break;
+		case cGetFaction:
+			if (parameters.size() >= 2)
+			{
+				void* character_ptr = nullptr;
+				void* dst_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+
+				*(uint*)dst_ptr = (*(cCharacterPtr*)character_ptr)->faction;
+			}
+			i++;
+			break;
+		case cGetContraryFaction:
+			if (parameters.size() >= 2)
+			{
+				void* character_ptr = nullptr;
+				void* dst_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), dst_ptr, ul);
+
+				*(uint*)dst_ptr = ~((*(cCharacterPtr*)character_ptr)->faction);
+			}
+			i++;
 			break;
 		case cForNearbyEnemies:
 		{
@@ -309,6 +482,49 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 
 			i = end_i + 1;
 		}
+			break;
+		case cNearestCharacter:
+			if (parameters.size() >= 3)
+			{
+				void* character_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				auto character = *(cCharacterPtr*)character_ptr;
+				auto res = find_characters(parameters[1].to_i(), character->node->pos, parameters[2].to_f());
+				reg[0].p = nullptr;
+				if (!res.empty())
+				{
+					if (res[0] != character)
+						reg[0].p = res[0];
+					else if (res.size() > 1)
+						reg[0].p = res[1];
+				}
+			}
+			i++;
+			break;
+		case cNearestUnMarkedCharacter:
+			if (parameters.size() >= 5)
+			{
+				void* character_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				void* faction_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[1].to_i(), faction_ptr, ul);
+				auto character = *(cCharacterPtr*)character_ptr;
+				auto res = find_characters(*(uint*)faction_ptr, character->node->pos, parameters[2].to_f());
+				reg[0].p = nullptr;
+				void* mark_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[3].to_i(), mark_ptr, ul);
+				auto mark = *(uint*)mark_ptr;
+				auto time = parameters[4].to_f();
+				for (auto c : res)
+				{
+					if (c != character && c->add_marker(mark, time))
+					{
+						reg[0].p = c;
+						break;
+					}
+				}
+			}
+			i++;
 			break;
 		case cRestoreHP:
 			if (parameters.size() >= 1)
@@ -463,10 +679,34 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			}
 			i++;
 			break;
+		case cAddEffectToCharacter:
+			if (parameters.size() >= 3)
+			{
+				void* character_ptr = nullptr;
+				special_variable_info((Parameter::SpecialVariable)parameters[0].to_i(), character_ptr, ul);
+				auto effect = add_effect(parameters[1].to_i(), vec3(0.f), vec3(0.f), parameters[2].to_f(), (*(cCharacterPtr*)character_ptr)->entity);
+				if (parameters.size() >= 4)
+				{
+					void* ptr = nullptr;
+					special_variable_info((Parameter::SpecialVariable)parameters[3].to_i(), ptr, ul);
+					if (effect->special_effect)
+						effect->special_effect->init(ptr, ul);
+				}
+				reg[0].p = effect->entity;
+			}
+			i++;
+			break;
 		case cAddEffectFaceTarget:
 			if (parameters.size() >= 2)
 			{
 				auto effect = add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+				if (parameters.size() >= 3)
+				{
+					void* ptr = nullptr;
+					special_variable_info((Parameter::SpecialVariable)parameters[2].to_i(), ptr, ul);
+					if (effect->special_effect)
+						effect->special_effect->init(ptr, ul);
+				}
 				reg[0].p = effect->entity;
 			}
 			i++;
