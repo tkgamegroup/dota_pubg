@@ -96,6 +96,14 @@ void LinkEffect::update()
 	}
 }
 
+void LinkEffect::send_message(uint hash, void* data, uint size)
+{
+	switch (hash)
+	{
+
+	}
+}
+
 cEffect::~cEffect()
 {
 	std::erase_if(effects, [this](const auto& i) {
@@ -158,6 +166,12 @@ void cEffect::update()
 		if (timer < 0.f)
 			die();
 	}
+}
+
+void cEffect::send_message(uint hash, void* data, uint size)
+{
+	if (special_effect)
+		special_effect->send_message(hash, data, size);
 }
 
 void cEffect::die()

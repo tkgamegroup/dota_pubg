@@ -24,21 +24,23 @@ struct SpecialEffect
 {
 	virtual ~SpecialEffect() {}
 
-	virtual void init(void* data, uint size) = 0;
 	virtual void update() = 0;
+	virtual void send_message(uint hash, void* data, uint size) {}
 };
 
 struct LinkEffect : SpecialEffect
 {
 	cEffectPtr effect;
-	Tracker<cCharacterPtr> target_character;
-	vec3 target_pos = vec3(0.f);
+	Tracker<cCharacterPtr> character0;
+	Tracker<cCharacterPtr> character1;
+	vec3 pos0 = vec3(0.f);
+	vec3 pos1 = vec3(0.f);
 
 	LinkEffect(cEffectPtr effect);
 	~LinkEffect();
 
-	void init(void* data, uint size) override;
 	void update() override;
+	void send_message(uint hash, void* data, uint size) override;
 };
 
 // Reflect ctor
@@ -69,6 +71,7 @@ struct cEffect : Component
 	~cEffect();
 	void start() override;
 	void update() override;
+	void send_message(uint hash, void* data, uint size) override;
 	void die();
 
 	struct Create
