@@ -405,7 +405,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
 				auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
 				auto beg_i = i + 1;
-				for (auto c : find_characters(~character->faction, character_pos, search_range, start_radius, central_angle, direction_angle))
+				for (auto c : find_characters(faction, character_pos, search_range, start_radius, central_angle, direction_angle))
 				{
 					reg[0].p = c;
 					for (i = beg_i; i <= end_i; )
