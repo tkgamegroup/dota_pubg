@@ -54,17 +54,23 @@ LinkEffect::LinkEffect(cEffectPtr effect) :
 {
 }
 
+LinkEffect::~LinkEffect()
+{
+	if (target_character.obj)
+		target_character.obj->node->data_listeners.remove("link_effect"_h);
+}
+
 void LinkEffect::init(void* data, uint size)
 {
 	if (size >= sizeof(void*))
 	{
-		auto target_character = *(cCharacterPtr*)data;
-		auto node = target_character->node;
+		target_character.set(*(cCharacterPtr*)data);
+		auto node = target_character.obj->node;
 		target_pos = node->pos;
-		target_character->node->data_listeners.add([this, node](uint hash) {
+		node->data_listeners.add([this, node](uint hash) {
 			if (hash == "pos"_h)
 				target_pos = node->pos;
-		});
+		}, "link_effect"_h);
 	}
 }
 

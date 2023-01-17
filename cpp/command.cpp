@@ -96,8 +96,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 {
 	static lVariant zero_reg = { .p = nullptr };
 	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
-	int l;
-	uint ul;
+	int l; uint ul;
 	int i = 0; int loop_n; int loop_end_i;
 	auto character_pos = character->node->pos;
 
@@ -360,7 +359,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				}
 			}
 
-			i = loop_end_i;
+			i = end_i + 1;
 		}
 			break;
 		case cBreak:
@@ -405,15 +404,13 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 				auto start_radius = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
 				auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
 				auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
-				auto ori_target_character = target_character;
 				auto beg_i = i + 1;
 				for (auto c : find_characters(~character->faction, character_pos, search_range, start_radius, central_angle, direction_angle))
 				{
-					target_character = c;
+					reg[0].p = c;
 					for (i = beg_i; i <= end_i; )
 						do_cmd();
 				}
-				target_character = ori_target_character;
 			}
 
 			i = end_i + 1;
@@ -468,8 +465,8 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i++;
 			break;
 		case cInflictDamage:
-			if (parameters.size() >= 2)
-				character->inflict_damage(target_character, (DamageType)parameters[0].to_i(), parameters[1].to_i());
+			if (parameters.size() >= 4)
+				variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->inflict_damage(variable_as.operator()<cCharacterPtr>(parameters[1].to_i()), (DamageType)parameters[2].to_i(), parameters[3].to_i());
 			i++;
 			break;
 		case cLevelUp:
@@ -538,7 +535,7 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			break;
 		case cAddBuff:
 			if (parameters.size() >= 3)
-				variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[0].to_i(), parameters[1].to_f(), parameters.size() >= 3 ? parameters[2].to_i() : 0, parameters.size() >= 4 ? parameters[3].to_i() : false);
+				variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[1].to_i(), parameters[2].to_f(), parameters.size() >= 4 ? parameters[3].to_i() : 0, parameters.size() >= 5 ? parameters[4].to_i() : false);
 			i++;
 			break;
 		case cAddAttackEffect:
@@ -652,4 +649,10 @@ void CommandList::build(const std::vector<std::string>& tokens)
 	}
 
 	init_sub_groups();
+}
+
+bool CommandListExecuteThread::step()
+{
+
+	return true;
 }

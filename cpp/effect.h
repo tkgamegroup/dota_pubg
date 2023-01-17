@@ -31,9 +31,11 @@ struct SpecialEffect
 struct LinkEffect : SpecialEffect
 {
 	cEffectPtr effect;
+	Tracker<cCharacterPtr> target_character;
 	vec3 target_pos = vec3(0.f);
 
 	LinkEffect(cEffectPtr effect);
+	~LinkEffect();
 
 	void init(void* data, uint size) override;
 	void update() override;

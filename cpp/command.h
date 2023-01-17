@@ -167,3 +167,20 @@ struct CommandList
 		return !cmds.empty();
 	}
 };
+
+struct CommandListExecuteThread
+{
+	const CommandList& cl;
+	cCharacterPtr character;
+	cCharacterPtr target_character;
+	vec3 target_pos;
+	const ParameterPack& external_parameters;
+	uint lv;
+
+	int i = 0;
+	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
+
+	float wait_timer = 0.f;
+
+	bool step();
+};
