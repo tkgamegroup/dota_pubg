@@ -1422,22 +1422,20 @@ void cMain::update()
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		for (auto& thread : cl_threads)
+		for (auto it = cl_threads.begin(); it != cl_threads.end();)
 		{
+			auto& thread = *it;
 			if (thread.wait_timer > 0.f)
 				thread.wait_timer -= delta_time;
 			else
 			{
 				while (!thread.frames.empty() && thread.wait_timer <= 0.f)
 					thread.execute();
+				if (thread.frames.empty())
+					it = cl_threads.erase(it);
+				else
+					it++;
 			}
-		}
-		for (auto it = cl_threads.begin(); it != cl_threads.end();)
-		{
-			if (it->frames.empty())
-				it = cl_threads.erase(it);
-			else
-				it++;
 		}
 
 		removing_dead_effects = true;
