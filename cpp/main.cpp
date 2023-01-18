@@ -1422,6 +1422,26 @@ void cMain::update()
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
+		for (auto& thread : cl_threads)
+		{
+			while (!thread.frames.empty())
+			{
+				if (thread.wait_timer > 0.f)
+				{
+					thread.wait_timer -= delta_time;
+					break;
+				}
+				thread.execute();
+			}
+		}
+		for (auto it = cl_threads.begin(); it != cl_threads.end();)
+		{
+			if (it->frames.empty())
+				it = cl_threads.erase(it);
+			else
+				it++;
+		}
+
 		removing_dead_effects = true;
 		for (auto o : dead_effects)
 			o->entity->remove_from_parent();

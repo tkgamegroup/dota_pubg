@@ -597,6 +597,11 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		do_cmd();
 }
 
+void CommandList::execute2(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
+{
+	cl_threads.emplace_back(*this, character, target_character, target_pos, external_parameters, lv);
+}
+
 void CommandList::build(const std::vector<std::string>& tokens)
 {
 	static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
@@ -653,10 +658,88 @@ void CommandListExecuteThread::execute()
 {
 	auto& frame = frames.top();
 	auto& cmd = cl.cmds[frame.i];
+
+	std::vector<Parameter> parameters;
+	for (auto i = 0; i < cmd.second.size(); i++)
+	{
+		auto& sp = cmd.second[i];
+		switch (sp.type)
+		{
+		case Parameter::tImmediate:
+			parameters.push_back(sp);
+			break;
+		case Parameter::tExternal:
+		{
+			auto& vec = external_parameters.at(sp.u.v.u);
+			parameters.push_back(vec.size() == 1 ? vec[0] : vec[lv - 1]);
+		}
+			break;
+		case Parameter::tVariable:
+			parameters.push_back(sp);
+			break;
+		case Parameter::tExpression:
+		{
+			auto get_operand = [&]()->Parameter {
+				auto ret = cmd.second[i++];
+				assert(ret.type != Parameter::tExpression);
+				if (ret.type == Parameter::tExternal)
+				{
+					ret.type = Parameter::tImmediate;
+					auto& vec = external_parameters.at(ret.u.v.u);
+					ret = vec.size() == 1 ? vec[0] : vec[lv - 1];
+				}
+				return ret;
+			};
+			i++;
+			switch (sp.u.e.op)
+			{
+			case Parameter::OpAdd:
+			{
+				auto num1 = get_operand();
+				auto num2 = get_operand();
+				parameters.emplace_back(num1.to_f() + num2.to_f());
+			}
+				break;
+			case Parameter::OpMinus:
+			{
+				auto num1 = get_operand();
+				auto num2 = get_operand();
+				parameters.emplace_back(num1.to_f() - num2.to_f());
+			}
+				break;
+			case Parameter::OpMultiply:
+			{
+				auto num1 = get_operand();
+				auto num2 = get_operand();
+				parameters.emplace_back(num1.to_f() * num2.to_f());
+			}
+				break;
+			case Parameter::OpDivide:
+			{
+				auto num1 = get_operand();
+				auto num2 = get_operand();
+				parameters.emplace_back(num1.to_f() / num2.to_f());
+			}
+				break;
+			}
+		}
+			break;
+		}
+	}
+
 	switch (cmd.first)
 	{
-
+	case CommandList::cPrint:
+		printf("Test\n");
+		break;
+	case CommandList::cWait:
+		if (parameters.size() == 1)
+			wait_timer = parameters[0].to_f();
+		break;
 	}
+
+	if (++frame.i > frame.end_i)
+		frames.pop();
 }
 
 std::list<CommandListExecuteThread> cl_threads;
