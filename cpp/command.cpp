@@ -597,11 +597,6 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		do_cmd();
 }
 
-void CommandList::execute2(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
-{
-	cl_threads.emplace_back(*this, character, target_character, target_pos, external_parameters, lv);
-}
-
 void CommandList::build(const std::vector<std::string>& tokens)
 {
 	static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
@@ -656,6 +651,73 @@ CommandListExecuteThread::CommandListExecuteThread(const CommandList& cl, cChara
 
 void CommandListExecuteThread::execute()
 {
+	static lVariant zero_reg = { .p = nullptr };
+	auto variable_addr = [&](int sv, voidptr& ptr, uint& size) {
+		switch (sv)
+		{
+		case CommandList::vCharacter:
+			ptr = &character;
+			size = (uint)sizeof(void*);
+			break;
+		case CommandList::vTargetCharacter:
+			ptr = &target_character;
+			size = (uint)sizeof(void*);
+			break;
+		case CommandList::vREG0:
+			ptr = &reg[0];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG1:
+			ptr = &reg[1];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG2:
+			ptr = &reg[2];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG3:
+			ptr = &reg[3];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG4:
+			ptr = &reg[4];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG5:
+			ptr = &reg[5];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG6:
+			ptr = &reg[6];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vREG7:
+			ptr = &reg[7];
+			size = (uint)sizeof(lVariant);
+			break;
+		case CommandList::vZeroREG:
+			ptr = &zero_reg;
+			size = (uint)sizeof(lVariant);
+			break;
+		}
+	};
+
+	auto variable_as = [&]<typename T>(int sv)->T& {
+		void* ptr; uint sz;
+		variable_addr(sv, ptr, sz);
+		return *(T*)ptr;
+	};
+
+	auto parameter_addr = [&](Parameter& parameter, voidptr& ptr, uint& size) {
+		if (parameter.type == Parameter::tVariable)
+			variable_addr(parameter.u.v.i, ptr, size);
+		else
+		{
+			ptr = &parameter.u.v;
+			size = sizeof(Parameter::u.v);
+		}
+	};
+
 	auto& frame = frames.top();
 	auto& cmd = cl.cmds[frame.i];
 
@@ -731,6 +793,8 @@ void CommandListExecuteThread::execute()
 	{
 	case CommandList::cPrint:
 		printf("Test\n");
+		break;
+	case CommandList::cIfEqual:
 		break;
 	case CommandList::cWait:
 		if (parameters.size() == 1)

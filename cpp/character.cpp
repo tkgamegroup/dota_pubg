@@ -865,7 +865,7 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	if (mp < ability_mp)
 		return;
 
-	ability.active.execute2(this, target, location, ability.parameters, ins->lv);
+	cl_threads.emplace_back(ability.active, this, target, location, ability.parameters, ins->lv);
 
 	ins->cd_max = ability_cd;
 	ins->cd_timer = ins->cd_max;

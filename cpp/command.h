@@ -174,7 +174,6 @@ struct CommandList
 	void init_sub_groups();
 	void build(const std::vector<std::string>& tokens);
 	void execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const;
-	void execute2(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const;
 
 	inline operator bool() const
 	{
