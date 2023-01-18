@@ -1424,14 +1424,12 @@ void cMain::update()
 	{
 		for (auto& thread : cl_threads)
 		{
-			while (!thread.frames.empty())
+			if (thread.wait_timer > 0.f)
+				thread.wait_timer -= delta_time;
+			else
 			{
-				if (thread.wait_timer > 0.f)
-				{
-					thread.wait_timer -= delta_time;
-					break;
-				}
-				thread.execute();
+				while (!thread.frames.empty() && thread.wait_timer <= 0.f)
+					thread.execute();
 			}
 		}
 		for (auto it = cl_threads.begin(); it != cl_threads.end();)
