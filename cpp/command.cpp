@@ -191,13 +191,6 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 		}
 	};
 
-	auto set_effect_special_init_data = [&](cEffectPtr effect, const Parameter& parameter) {
-		void* ptr = nullptr;
-		variable_addr(parameter.to_i(), ptr, ul);
-		if (effect->special_effect)
-			effect->special_effect->init(ptr, ul);
-	};
-
 	std::function<void()> do_cmd;
 	do_cmd = [&]() {
 		auto& cmd = cmds[i];
@@ -549,6 +542,20 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i = end_i + 1;
 		}
 			break;
+		case cTeleportToTarget:
+			teleport(character, target_character ? target_character->node->pos : target_pos);
+			i++;
+			break;
+		case cSendMessage:
+			if (parameters.size() >= 3)
+			{
+				auto comp = variable_as.operator()<ComponentPtr>(parameters[0].to_i());
+				void* ptr = nullptr;
+				variable_addr(parameters[2].to_i(), ptr, ul);
+				comp->send_message(parameters[1].to_u(), ptr, ul);
+			}
+			i++;
+			break;
 		case cSetSectorCollideCallback:
 		{
 			auto end_i = i + 1;
@@ -571,38 +578,14 @@ void CommandList::execute(cCharacterPtr character, cCharacterPtr target_characte
 			i = end_i + 1;
 		}
 			break;
-		case cTeleportToTarget:
-			teleport(character, target_character ? target_character->node->pos : target_pos);
-			i++;
-			break;
 		case cAddEffect:
 			if (parameters.size() >= 2)
-			{
-				auto effect = add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
-				if (parameters.size() >= 3)
-					set_effect_special_init_data(effect, parameters[2]);
-				reg[0].p = effect->entity;
-			}
-			i++;
-			break;
-		case cAddEffectToCharacter:
-			if (parameters.size() >= 3)
-			{
-				auto effect = add_effect(parameters[1].to_i(), vec3(0.f), vec3(0.f), parameters[2].to_f(), variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->entity);
-				if (parameters.size() >= 4)
-					set_effect_special_init_data(effect, parameters[3]);
-				reg[0].p = effect->entity;
-			}
+				reg[0].p = add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
 			i++;
 			break;
 		case cAddEffectFaceTarget:
 			if (parameters.size() >= 2)
-			{
-				auto effect = add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
-				if (parameters.size() >= 3)
-					set_effect_special_init_data(effect, parameters[2]);
-				reg[0].p = effect->entity;
-			}
+				reg[0].p = add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
 			i++;
 			break;
 		default:
@@ -621,6 +604,7 @@ void CommandList::build(const std::vector<std::string>& tokens)
 
 	for (auto& t : tokens)
 	{
+		if (t.empty()) continue;
 		auto sp = SUS::split(t, ',');
 		auto& c = cmds.emplace_back();
 		TypeInfo::unserialize_t(sp[0], c.first);
@@ -651,8 +635,28 @@ void CommandList::build(const std::vector<std::string>& tokens)
 	init_sub_groups();
 }
 
-bool CommandListExecuteThread::step()
+CommandListExecuteThread::CommandListExecuteThread(const CommandList& cl, cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) :
+	cl(cl),
+	character(character),
+	target_character(target_character),
+	target_pos(target_pos),
+	external_parameters(external_parameters),
+	lv(lv)
 {
-
-	return true;
+	auto& frame = frames.emplace();
+	frame.beg_i = 0;
+	frame.end_i = cl.cmds.size() - 1;
+	frame.i = 0;
 }
+
+void CommandListExecuteThread::execute()
+{
+	auto& frame = frames.top();
+	auto& cmd = cl.cmds[frame.i];
+	switch (cmd.first)
+	{
+
+	}
+}
+
+std::list<CommandListExecuteThread> cl_threads;

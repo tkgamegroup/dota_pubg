@@ -64,6 +64,18 @@ struct Parameter
 		return 0;
 	}
 
+	inline uint to_u() const
+	{
+		switch (vt)
+		{
+		case vInt: return u.v.i;
+		case vUint: return u.v.u;
+		case vFloat: return u.v.f;
+		case vPercentage: return u.v.i;
+		}
+		return 0;
+	}
+
 	inline float to_f() const
 	{
 		switch (vt)
@@ -131,10 +143,10 @@ struct CommandList
 		cAddState,
 		cAddBuff,
 		cAddAttackEffect,
-		cSetSectorCollideCallback,
 		cTeleportToTarget, //
+		cSendMessage,
+		cSetSectorCollideCallback,
 		cAddEffect,
-		cAddEffectToCharacter, //
 		cAddEffectFaceTarget, //
 	};
 
@@ -170,6 +182,15 @@ struct CommandList
 
 struct CommandListExecuteThread
 {
+	struct ExecuteFrame
+	{
+		uint beg_i;
+		uint end_i;
+		uint i;
+		uint loop_n = 0;
+		int loop_vec = -1;
+	};
+
 	const CommandList& cl;
 	cCharacterPtr character;
 	cCharacterPtr target_character;
@@ -177,10 +198,14 @@ struct CommandListExecuteThread
 	const ParameterPack& external_parameters;
 	uint lv;
 
-	int i = 0;
 	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
 
 	float wait_timer = 0.f;
 
-	bool step();
+	std::stack<ExecuteFrame> frames;
+
+	CommandListExecuteThread(const CommandList& cl, cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv);
+	void execute();
 };
+
+extern std::list<CommandListExecuteThread> cl_threads;

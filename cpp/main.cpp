@@ -58,11 +58,17 @@ std::string get_show_name(const std::string& name)
 
 bool parse_literal(const std::string& str, int& id)
 {
-	if (SUS::match_head_tail(str, "\"", "\"s"))
+	if (SUS::match_head_tail(str, "\"", "\"h"))
+	{
+		id = sh(str.substr(1, str.size() - 3).c_str());
+		return true;
+	}
+	else if (SUS::match_head_tail(str, "\"", "\"s"))
 	{
 		CharacterState state;
 		TypeInfo::unserialize_t(str.substr(1, str.size() - 3), state);
 		id = state;
+		return true;
 	}
 	else if (SUS::match_head_tail(str, "\"", "\"b"))
 	{
@@ -1936,7 +1942,7 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	return projectile;
 }
 
-cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, EntityPtr parent, uint id)
+cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id)
 {
 	auto& preset = EffectPreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
@@ -1949,7 +1955,7 @@ cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float du
 	effects.push_back(effect);
 	effect->preset = &preset;
 	effect->duration = duration;
-	parent->add_child(e);
+	root->add_child(e);
 
 	return effect;
 }

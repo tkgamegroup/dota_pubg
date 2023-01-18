@@ -31,8 +31,9 @@ struct SpecialEffect
 struct LinkEffect : SpecialEffect
 {
 	cEffectPtr effect;
-	Tracker<cCharacterPtr> character0;
-	Tracker<cCharacterPtr> character1;
+	uint rnd;
+	Tracker<cCharacterPtr> target0;
+	Tracker<cCharacterPtr> target1;
 	vec3 pos0 = vec3(0.f);
 	vec3 pos1 = vec3(0.f);
 
