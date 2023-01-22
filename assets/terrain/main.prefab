@@ -2,31 +2,7 @@
 <prefab file_id="318a777f4d3654d1e5786f8e1326b6b9" name="terrain">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cVolume" extent="128,128,128" blocks="1,1,1" material_name="terrain.fmat" />
-		<item type_name="flame::cProcedureVolume">
-			<structure_octaves>
-				<item v="1.01" />
-				<item v="0.47" />
-				<item v="0.247" />
-				<item v="0.123" />
-				<item v="0.063" />
-				<item v="0.031" />
-				<item v="0.017" />
-				<item v="0.009" />
-			</structure_octaves>
-			<detail_octaves>
-				<item v="1.98" />
-				<item v="4.03" />
-				<item v="7.97" />
-				<item v="8.07" />
-				<item v="16.07" />
-				<item v="31.99" />
-				<item v="64.11" />
-			</detail_octaves>
-			<planes>
-				<item v="1,0.3,3,40" />
-			</planes>
-		</item>
+		<item type_name="flame::cTerrain" height_map_name="height2.png" splash_map_name="splash2.png" material_name="default" />
 		<item type_name="flame::cNavMesh" />
 	</components>
 </prefab>

@@ -652,6 +652,8 @@ CommandListExecuteThread::CommandListExecuteThread(const CommandList& cl, cChara
 void CommandListExecuteThread::execute()
 {
 	static lVariant zero_reg = { .p = nullptr };
+	uint ul, ul2;
+
 	auto variable_addr = [&](int sv, voidptr& ptr, uint& size) {
 		switch (sv)
 		{
@@ -720,6 +722,8 @@ void CommandListExecuteThread::execute()
 
 	auto& frame = frames.top();
 	auto& cmd = cl.cmds[frame.i];
+	if (++frame.i > frame.end_i)
+		frames.pop();
 
 	std::vector<Parameter> parameters;
 	for (auto i = 0; i < cmd.second.size(); i++)
@@ -795,15 +799,23 @@ void CommandListExecuteThread::execute()
 		printf("Test\n");
 		break;
 	case CommandList::cIfEqual:
+		if (parameters.size() >= 2)
+		{
+			void* src_ptr = nullptr;
+			void* dst_ptr = nullptr;
+			parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
+			parameter_addr(parameters[1], dst_ptr, ul);
+			if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) == 0)
+			{
+
+			}
+		}
 		break;
 	case CommandList::cWait:
 		if (parameters.size() == 1)
 			wait_timer = parameters[0].to_f();
 		break;
 	}
-
-	if (++frame.i > frame.end_i)
-		frames.pop();
 }
 
 std::list<CommandListExecuteThread> cl_threads;

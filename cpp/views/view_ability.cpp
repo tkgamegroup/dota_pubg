@@ -140,7 +140,7 @@ void ViewAbility::on_draw()
 								for (auto& p : ability.parameter_names)
 								{
 									auto& vec = ability.parameters.at(p.second);
-									ImGui::Text("%s: %s", get_show_name(p.first).c_str(), lv == 0 ? "0" : vec.size() == 1 ? vec[0].to_str().c_str() : vec[lv - 1].to_str().c_str());
+									ImGui::Text("%s: %s", get_display_name(p.first).c_str(), lv == 0 ? "0" : vec.size() == 1 ? vec[0].to_str().c_str() : vec[lv - 1].to_str().c_str());
 									if (can_level_up && vec.size() > 1)
 									{
 										ImGui::SameLine();

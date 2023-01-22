@@ -21,7 +21,7 @@
 		</item>
 		<item file_id="82f4ac9944dcaea2d43185a721b76f02" name="renderer_settings">
 			<components>
-				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" post_shading_code_file="shaders\post_shading.glsl" />
+				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" post_shading_code_file1="shaders\post_shading.glsl" />
 			</components>
 		</item>
 		<item filename="terrain\main.prefab">
