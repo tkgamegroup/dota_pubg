@@ -124,9 +124,9 @@ struct CommandList
 		cGenerateRnd,
 		cRollDice100,
 		cWait,
-		cGetFaction,
 		cForNearbyCharacters,
 		cNearestCharacter,
+		cGetFaction,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
@@ -173,7 +173,6 @@ struct CommandList
 
 	void init_sub_groups();
 	void build(const std::vector<std::string>& tokens);
-	void execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const;
 
 	inline operator bool() const
 	{
@@ -200,6 +199,7 @@ struct CommandListExecuteThread
 	uint lv;
 
 	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
+	std::vector<lVariant> vec[1];
 
 	float wait_timer = 0.f;
 

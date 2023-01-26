@@ -11,6 +11,7 @@ cLauncher::~cLauncher()
 void enter_scene(EntityPtr root)
 {
 	add_event([root]() {
+		graphics::gui_set_clear(false, vec4(0.f));
 		root->remove_component<cLauncher>();
 		root->load(L"assets\\main.prefab");
 		return false;

@@ -92,511 +92,6 @@ void CommandList::init_sub_groups()
 	}
 }
 
-void CommandList::execute(cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) const
-{
-	static lVariant zero_reg = { .p = nullptr };
-	lVariant reg[8] = { {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr}, {.p = nullptr} };
-	int l; uint ul;
-	int i = 0; int loop_n; int loop_end_i;
-	auto character_pos = character->node->pos;
-
-	auto variable_addr = [&](int sv, voidptr& ptr, uint& size) {
-		switch (sv)
-		{
-		case vCharacter:
-			ptr = &character;
-			size = (uint)sizeof(void*);
-			break;
-		case vTargetCharacter:
-			ptr = &target_character;
-			size = (uint)sizeof(void*);
-			break;
-		case vREG0:
-			ptr = &reg[0];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG1:
-			ptr = &reg[1];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG2:
-			ptr = &reg[2];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG3:
-			ptr = &reg[3];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG4:
-			ptr = &reg[4];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG5:
-			ptr = &reg[5];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG6:
-			ptr = &reg[6];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vREG7:
-			ptr = &reg[7];
-			size = (uint)sizeof(lVariant);
-			break;
-		case vZeroREG:
-			ptr = &zero_reg;
-			size = (uint)sizeof(lVariant);
-			break;
-		}
-	};
-
-	auto variable_as = [&]<typename T>(int sv)->T& {
-		void* ptr; uint sz;
-		variable_addr(sv, ptr, sz);
-		return *(T*)ptr;
-	};
-
-	auto parameter_addr = [&](Parameter& parameter, voidptr& ptr, uint& size) {
-		if (parameter.type == Parameter::tVariable)
-			variable_addr(parameter.u.v.i, ptr, size);
-		else
-		{
-			ptr = &parameter.u.v;
-			size = sizeof(Parameter::u.v);
-		}
-	};
-
-	auto add_callback = [&](int i, int end_i, CommandList& cl) {
-		auto in_sub = end_i != i + 1;
-		for (auto j = i + 1; j <= end_i; j++)
-		{
-			if (in_sub)
-			{
-				if (j == i + 1 || j == end_i)
-					continue;
-			}
-			cl.cmds.push_back(cmds[j]);
-		}
-		cl.init_sub_groups();
-		for (auto& c : cl.cmds)
-		{
-			for (auto& p : c.second)
-			{
-				if (p.type == Parameter::tExternal)
-				{
-					if (auto it = external_parameters.find(p.u.v.u); it != external_parameters.end())
-						p = it->second[lv - 1];
-				}
-			}
-		}
-	};
-
-	std::function<void()> do_cmd;
-	do_cmd = [&]() {
-		auto& cmd = cmds[i];
-
-		std::vector<Parameter> parameters;
-		for (auto i_parm = 0; i_parm < cmd.second.size(); i_parm++)
-		{
-			auto& sp = cmd.second[i_parm];
-			switch (sp.type)        
-			{
-			case Parameter::tImmediate:
-				parameters.push_back(sp);
-				break;
-			case Parameter::tExternal:
-			{
-				auto& vec = external_parameters.at(sp.u.v.u);
-				parameters.push_back(vec.size() == 1 ? vec[0] : vec[lv - 1]);
-			}
-				break;
-			case Parameter::tVariable:
-				parameters.push_back(sp);
-				break;
-			case Parameter::tExpression:
-			{
-				auto get_operand = [&]()->Parameter {
-					auto ret = cmd.second[i_parm++];
-					assert(ret.type != Parameter::tExpression);
-					if (ret.type == Parameter::tExternal)
-					{
-						ret.type = Parameter::tImmediate;
-						auto& vec = external_parameters.at(ret.u.v.u);
-						ret = vec.size() == 1 ? vec[0] : vec[lv - 1];
-					}
-					return ret;
-				};
-				i_parm++;
-				switch (sp.u.e.op)
-				{
-				case Parameter::OpAdd:
-				{
-					auto num1 = get_operand();
-					auto num2 = get_operand();
-					parameters.emplace_back(num1.to_f() + num2.to_f());
-				}
-					break;
-				case Parameter::OpMinus:
-				{
-					auto num1 = get_operand();
-					auto num2 = get_operand();
-					parameters.emplace_back(num1.to_f() - num2.to_f());
-				}
-					break;
-				case Parameter::OpMultiply:
-				{
-					auto num1 = get_operand();
-					auto num2 = get_operand();
-					parameters.emplace_back(num1.to_f() * num2.to_f());
-				}
-					break;
-				case Parameter::OpDivide:
-				{
-					auto num1 = get_operand(); 
-					auto num2 = get_operand();
-					parameters.emplace_back(num1.to_f() / num2.to_f());
-				}
-					break;
-				}
-			}
-				break;
-			}
-		}
-
-		switch (cmd.first)
-		{
-		case cStore:
-			if (parameters.size() >= 2)
-			{
-				void* src_ptr = nullptr;
-				void* dst_ptr = nullptr;
-				parameter_addr(parameters[0], src_ptr, ul); l = ul;
-				parameter_addr(parameters[1], dst_ptr, ul);
-				memcpy(dst_ptr, src_ptr, min((uint)l, ul));
-			}
-			i++;
-			break;
-		case cBitInverse:
-			if (parameters.size() >= 1)
-			{
-				auto& v = variable_as.operator()<uint>(parameters[0].to_i());
-				v = ~v;
-			}
-			i++;
-			break;
-		case cIfEqual:
-		{
-			auto beg_i = i;
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 2)
-			{
-				void* src_ptr = nullptr;
-				void* dst_ptr = nullptr;
-				parameter_addr(parameters[0], src_ptr, ul); l = ul;
-				parameter_addr(parameters[1], dst_ptr, ul);
-				if (memcmp(src_ptr, dst_ptr, min((uint)l, ul)) == 0)
-				{
-					i = i + 1 + (end_i != i + 1 ? 1 : 0);
-					for (; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			if (i >= beg_i && i <= end_i)
-				i = end_i + 1;
-		}
-			break;
-		case cIfNotEqual:
-		{
-			auto beg_i = i;
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 2)
-			{
-				void* src_ptr = nullptr;
-				void* dst_ptr = nullptr;
-				parameter_addr(parameters[0], src_ptr, ul); l = ul;
-				parameter_addr(parameters[1], dst_ptr, ul);
-				if (memcmp(src_ptr, dst_ptr, min((uint)l, ul)) != 0)
-				{
-					i = i + 1 + (end_i != i + 1 ? 1 : 0);
-					for (; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			if (i >= beg_i && i <= end_i)
-				i = end_i + 1;
-		}
-			break;
-		case cLoop:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-			loop_end_i = end_i + 1;
-
-			if (parameters.size() >= 1)
-			{
-				auto beg_i = i + 1 + (end_i != i + 1 ? 1 : 0);
-				loop_n = parameters[0].to_i();
-				for (auto j = 0; j < loop_n; j++)
-				{
-					for (i = beg_i; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cBreak:
-			loop_n = 0;
-			i = loop_end_i;
-			break;
-		case cGenerateRnd:
-			if (parameters.size() >= 1)
-				variable_as.operator()<uint>(parameters[0].to_i()) = rand();
-			i++;
-			break;
-		case cRollDice100:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 1 && linearRand(0U, 99U) < parameters[0].to_i())
-			{
-				for (i = i + 1; i <= end_i; )
-					do_cmd();
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cGetFaction:
-			if (parameters.size() >= 2)
-				variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
-			i++;
-			break;
-		case cForNearbyCharacters:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 2)
-			{
-				auto faction = parameters[0].to_i();
-				auto search_range = parameters[1].to_f();
-				auto start_radius = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
-				auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
-				auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
-				auto beg_i = i + 1;
-				for (auto c : find_characters(faction, character_pos, search_range, start_radius, central_angle, direction_angle))
-				{
-					reg[0].p = c;
-					for (i = beg_i; i <= end_i; )
-						do_cmd();
-				}
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cNearestCharacter:
-			if (parameters.size() >= 3)
-			{
-				auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
-				auto faction = variable_as.operator()<uint>(parameters[1].to_i());
-				auto res = find_characters(faction, character->node->pos, parameters[2].to_f());
-				reg[0].p = nullptr;
-				auto marker = 0U;
-				auto marker_time = 0.f;
-				if (parameters.size() >= 5)
-				{
-					marker = variable_as.operator() < uint > (parameters[3].to_i());
-					marker_time = parameters[4].to_f();
-				}
-				for (auto c : res)
-				{
-					if (c != character)
-					{
-						if (marker && c->add_marker(marker, marker_time))
-						{
-							reg[0].p = c;
-							break;
-						}
-					}
-				}
-			}
-			i++;
-			break;
-		case cRestoreHP:
-			if (parameters.size() >= 1)
-				character->restore_hp(parameters[0].to_i());
-			i++;
-			break;
-		case cRestoreMP:
-			if (parameters.size() >= 1)
-				character->restore_mp(parameters[0].to_i());
-			i++;
-			break;
-		case cTakeDamage:
-			if (parameters.size() >= 2)
-			{
-				if (parameters[1].vt == Parameter::vPercentage)
-					character->take_damage((DamageType)parameters[0].to_i(), character->hp_max * parameters[1].to_f());
-				else
-					character->take_damage((DamageType)parameters[0].to_i(), parameters[1].to_i());
-			}
-			i++;
-			break;
-		case cInflictDamage:
-			if (parameters.size() >= 4)
-				variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->inflict_damage(variable_as.operator()<cCharacterPtr>(parameters[1].to_i()), (DamageType)parameters[2].to_i(), parameters[3].to_i());
-			i++;
-			break;
-		case cLevelUp:
-			character->gain_exp(character->exp_max);
-			i++;
-			break;
-		case cIncreaseHPMax:
-			if (parameters.size() >= 1)
-			{
-				if (parameters[0].vt == Parameter::vPercentage)
-					character->hp_max *= 1.f + parameters[0].to_f();
-				else
-					character->hp_max += parameters[0].to_i();
-			}
-			i++;
-			break;
-		case cIncreaseMPMax:
-			if (parameters.size() >= 1)
-			{
-				if (parameters[0].vt == Parameter::vPercentage)
-					character->mp_max *= 1.f + parameters[0].to_f();
-				else
-					character->mp_max += parameters[0].to_i();
-			}
-			i++;
-			break;
-		case cIncreaseATK:
-			if (parameters.size() >= 1)
-			{
-				if (parameters[0].vt == Parameter::vPercentage)
-					character->atk *= 1.f + parameters[0].to_f();
-				else
-					character->atk += parameters[0].to_i();
-			}
-			i++;
-			break;
-		case cIncreasePHYDEF:
-			if (parameters.size() >= 1)
-				character->phy_def += parameters[0].to_i();
-			i++;
-			break;
-		case cIncreaseMAGDEF:
-			if (parameters.size() >= 1)
-				character->mag_def += parameters[0].to_i();
-			i++;
-			break;
-		case cIncreaseHPREG:
-			if (parameters.size() >= 1)
-				character->hp_reg += parameters[0].to_i();
-			i++;
-			break;
-		case cIncreaseMPREG:
-			if (parameters.size() >= 1)
-				character->mp_reg += parameters[0].to_i();
-			i++;
-			break;
-		case cIncreaseMOVSP:
-			if (parameters.size() >= 1)
-				character->mov_sp += parameters[0].to_i();
-			i++;
-			break;
-		case cIncreaseATKSP:
-			if (parameters.size() >= 1)
-				character->atk_sp += parameters[0].to_i();
-			i++;
-			break;
-		case cAddBuff:
-			if (parameters.size() >= 3)
-				variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[1].to_i(), parameters[2].to_f(), parameters.size() >= 4 ? parameters[3].to_i() : 0, parameters.size() >= 5 ? parameters[4].to_i() : false);
-			i++;
-			break;
-		case cAddAttackEffect:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			add_callback(i, end_i, character->attack_effects.emplace_back());
-
-			i = end_i + 1;
-		}
-			break;
-		case cTeleportToTarget:
-			teleport(character, target_character ? target_character->node->pos : target_pos);
-			i++;
-			break;
-		case cSendMessage:
-			if (parameters.size() >= 3)
-			{
-				auto comp = variable_as.operator()<ComponentPtr>(parameters[0].to_i());
-				void* ptr = nullptr;
-				variable_addr(parameters[2].to_i(), ptr, ul);
-				comp->send_message(parameters[1].to_u(), ptr, ul);
-			}
-			i++;
-			break;
-		case cSetSectorCollideCallback:
-		{
-			auto end_i = i + 1;
-			if (auto it = sub_groups.find(i + 1); it != sub_groups.end())
-				end_i = it->second;
-
-			if (parameters.size() >= 1)
-			{
-				if (auto entity = variable_as.operator()<EntityPtr>(parameters[0].to_i()); entity)
-				{
-					if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
-					{
-						collider->faction = ~character->faction;
-						collider->host = character;
-						add_callback(i, end_i, collider->callback);
-					}
-				}
-			}
-
-			i = end_i + 1;
-		}
-			break;
-		case cAddEffect:
-			if (parameters.size() >= 2)
-				reg[0].p = add_effect(parameters[0].to_i(), character_pos, vec3(0.f), parameters[1].to_f());
-			i++;
-			break;
-		case cAddEffectFaceTarget:
-			if (parameters.size() >= 2)
-				reg[0].p = add_effect(parameters[0].to_i(), character_pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character_pos, target_pos), 0.f, 0.f), parameters[1].to_f());
-			i++;
-			break;
-		default:
-			i++;
-		}
-	};
-
-	for (; i < cmds.size(); )
-		do_cmd();
-}
-
 void CommandList::build(const std::vector<std::string>& tokens)
 {
 	static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
@@ -720,10 +215,27 @@ void CommandListExecuteThread::execute()
 		}
 	};
 
+	auto add_callback = [&](int beg_i, int end_i, CommandList& new_cl) {
+		for (auto j = beg_i; j <= end_i; j++)
+			new_cl.cmds.push_back(cl.cmds[j]);
+		new_cl.init_sub_groups();
+		for (auto& c : new_cl.cmds)
+		{
+			for (auto& p : c.second)
+			{
+				if (p.type == Parameter::tExternal)
+				{
+					if (auto it = external_parameters.find(p.u.v.u); it != external_parameters.end())
+						p = it->second[lv - 1];
+				}
+			}
+		}
+	};
+
 	auto& frame = frames.top();
 	auto& cmd = cl.cmds[frame.i];
-	if (++frame.i > frame.end_i)
-		frames.pop();
+	auto next_i = frame.i + 1;
+	ivec4 new_frame = ivec4(-1);
 
 	std::vector<Parameter> parameters;
 	for (auto i = 0; i < cmd.second.size(); i++)
@@ -798,16 +310,150 @@ void CommandListExecuteThread::execute()
 	case CommandList::cPrint:
 		printf("Test\n");
 		break;
+	case CommandList::cStore:
+		if (parameters.size() == 2)
+		{
+			void* src_ptr = nullptr;
+			void* dst_ptr = nullptr;
+			parameter_addr(parameters[0], src_ptr, ul);
+			parameter_addr(parameters[1], dst_ptr, ul2);
+			memcpy(dst_ptr, src_ptr, min(ul, ul2));
+		}
+		break;
+	case CommandList::cBitInverse:
+		if (parameters.size() == 1)
+		{
+			auto& v = variable_as.operator()<uint>(parameters[0].to_i());
+			v = ~v;
+		}
+		break;
 	case CommandList::cIfEqual:
-		if (parameters.size() >= 2)
+	{
+		auto end_i = next_i;
+		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+			end_i = it->second;
+
+		if (parameters.size() == 2)
 		{
 			void* src_ptr = nullptr;
 			void* dst_ptr = nullptr;
 			parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
 			parameter_addr(parameters[1], dst_ptr, ul);
-			if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) == 0)
-			{
+			if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) != 0) // jump to the end of the if block
+				next_i = end_i + 1;
+		}
+		else
+			next_i = end_i + 1;
+	}
+		break;
+	case CommandList::cIfNotEqual:
+	{
+		auto end_i = next_i;
+		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+			end_i = it->second;
 
+		if (parameters.size() == 2)
+		{
+			void* src_ptr = nullptr;
+			void* dst_ptr = nullptr;
+			parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
+			parameter_addr(parameters[1], dst_ptr, ul);
+			if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) == 0) // jump to the end of the if block
+				next_i = end_i + 1;
+		}
+		else
+			next_i = end_i + 1;
+	}
+		break;
+	case CommandList::cLoop:
+		if (parameters.size() == 1)
+		{
+			new_frame.x = next_i;
+			if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+			{
+				new_frame.y = it->second;
+				next_i = it->second + 1;
+			}
+			else
+			{
+				new_frame.y = next_i;
+				next_i++;
+			}
+			new_frame.z = parameters[0].to_i();
+		}
+		break;
+	case CommandList::cBreak:
+		next_i = frame.end_i + 1;
+		frame.loop_n = 0;
+		break;
+	case CommandList::cGenerateRnd:
+		if (parameters.size() == 1)
+			variable_as.operator()<uint>(parameters[0].to_i()) = rand();
+		break;
+	case CommandList::cRollDice100:
+		if (parameters.size() == 1)
+		{
+			if (linearRand(0U, 99U) >= parameters[0].to_i()) // jump to the end of the block
+			{
+				if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+					next_i = it->second + 1;
+				else
+					next_i++;
+			}
+		}
+		break;
+	case CommandList::cForNearbyCharacters:
+	{
+		auto end_i = next_i;
+		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+			end_i = it->second;
+
+		if (parameters.size() >= 2 && parameters.size() <= 4)
+		{
+			auto character_pos = character->node->pos;
+			auto faction = parameters[0].to_i();
+			auto search_range = parameters[1].to_f();
+			auto start_radius = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
+			auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
+			auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
+			auto characters = find_characters(faction, character_pos, search_range, start_radius, central_angle, direction_angle);
+			new_frame.x = next_i;
+			new_frame.y = end_i;
+			new_frame.z = characters.size();
+			vec[0].resize(characters.size());
+			for (auto i = 0; i < characters.size(); i++)
+				vec[0][i].p = characters[i];
+			new_frame.w = 0;
+			if (!vec[0].empty())
+				reg[0].p = vec[0][0].p;
+		}
+
+		next_i = end_i + 1;
+	}
+		break;
+	case CommandList::cNearestCharacter:
+		if (parameters.size() >= 3 && parameters.size() <= 5)
+		{
+			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
+			auto faction = variable_as.operator()<uint>(parameters[1].to_i());
+			auto res = find_characters(faction, character->node->pos, parameters[2].to_f());
+			reg[0].p = nullptr;
+			auto marker = 0U; auto marker_time = 0.f;
+			if (parameters.size() == 5)
+			{
+				marker = variable_as.operator()<uint>(parameters[3].to_i());
+				marker_time = parameters[4].to_f();
+			}
+			for (auto c : res)
+			{
+				if (c != character)
+				{
+					if (marker && c->add_marker(marker, marker_time))
+					{
+						reg[0].p = c;
+						break;
+					}
+				}
 			}
 		}
 		break;
@@ -815,6 +461,166 @@ void CommandListExecuteThread::execute()
 		if (parameters.size() == 1)
 			wait_timer = parameters[0].to_f();
 		break;
+	case CommandList::cGetFaction:
+		if (parameters.size() == 2)
+			variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
+		break;
+	case CommandList::cRestoreHP:
+		if (parameters.size() == 1)
+			character->restore_hp(parameters[0].to_i());
+		break;
+	case CommandList::cRestoreMP:
+		if (parameters.size() == 1)
+			character->restore_mp(parameters[0].to_i());
+		break;
+	case CommandList::cTakeDamage:
+		if (parameters.size() == 2)
+			character->take_damage((DamageType)parameters[0].to_i(), parameters[1].vt == Parameter::vPercentage ? character->hp_max * parameters[1].to_f() : parameters[1].to_i());
+		break;
+	case CommandList::cInflictDamage:
+		if (parameters.size() == 4)
+			variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->inflict_damage(variable_as.operator()<cCharacterPtr>(parameters[1].to_i()), (DamageType)parameters[2].to_i(), parameters[3].vt == Parameter::vPercentage ? character->hp_max * parameters[3].to_f() : parameters[3].to_i());
+		break;
+	case CommandList::cLevelUp:
+		character->gain_exp(character->exp_max);
+		break;
+	case CommandList::cIncreaseHPMax:
+		if (parameters.size() == 1)
+		{
+			if (parameters[0].vt == Parameter::vPercentage)
+				character->hp_max *= 1.f + parameters[0].to_f();
+			else
+				character->hp_max += parameters[0].to_i();
+		}
+		break;
+	case CommandList::cIncreaseMPMax:
+		if (parameters.size() == 1)
+		{
+			if (parameters[0].vt == Parameter::vPercentage)
+				character->mp_max *= 1.f + parameters[0].to_f();
+			else
+				character->mp_max += parameters[0].to_i();
+		}
+		break;
+	case CommandList::cIncreaseATK:
+		if (parameters.size() == 1)
+		{
+			if (parameters[0].vt == Parameter::vPercentage)
+				character->atk *= 1.f + parameters[0].to_f();
+			else
+				character->atk += parameters[0].to_i();
+		}
+		break;
+	case CommandList::cIncreasePHYDEF:
+		if (parameters.size() == 1)
+			character->phy_def += parameters[0].to_i();
+		break;
+	case CommandList::cIncreaseMAGDEF:
+		if (parameters.size() == 1)
+			character->mag_def += parameters[0].to_i();
+		break;
+	case CommandList::cIncreaseHPREG:
+		if (parameters.size() == 1)
+			character->hp_reg += parameters[0].to_i();
+		break;
+	case CommandList::cIncreaseMPREG:
+		if (parameters.size() == 1)
+			character->mp_reg += parameters[0].to_i();
+		break;
+	case CommandList::cIncreaseMOVSP:
+		if (parameters.size() == 1)
+			character->mov_sp += parameters[0].to_i();
+		break;
+	case CommandList::cIncreaseATKSP:
+		if (parameters.size() == 1)
+			character->atk_sp += parameters[0].to_i();
+		break;
+	case CommandList::cAddBuff:
+		if (parameters.size() >= 3 && parameters.size() <= 5)
+			variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[1].to_i(), parameters[2].to_f(), parameters.size() >= 4 ? parameters[3].to_i() : 0, parameters.size() >= 5 ? parameters[4].to_i() : false);
+		break;
+	case CommandList::cAddAttackEffect:
+		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+		{
+			add_callback(next_i, it->second, character->attack_effects.emplace_back());
+			next_i = it->second + 1;
+		}
+		else
+		{
+			add_callback(next_i, next_i, character->attack_effects.emplace_back());
+			next_i++;
+		}
+		break;
+	case CommandList::cTeleportToTarget:
+		teleport(character, target_character ? target_character->node->pos : target_pos);
+		break;
+	case CommandList::cSendMessage:
+		if (parameters.size() == 3)
+		{
+			auto comp = variable_as.operator()<ComponentPtr>(parameters[0].to_i());
+			void* ptr = nullptr;
+			variable_addr(parameters[2].to_i(), ptr, ul);
+			comp->send_message(parameters[1].to_u(), ptr, ul);
+		}
+		break;
+	case CommandList::cSetSectorCollideCallback:
+	{
+		auto end_i = next_i;
+		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+			end_i = it->second;
+
+		if (parameters.size() == 1)
+		{
+			if (auto entity = variable_as.operator()<EntityPtr>(parameters[0].to_i()); entity)
+			{
+				if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
+				{
+					collider->faction = ~character->faction;
+					collider->host = character;
+					add_callback(next_i, end_i, collider->callback);
+				}
+			}
+		}
+
+		next_i = end_i + 1;
+	}
+		break;
+	case CommandList::cAddEffect:
+		if (parameters.size() == 2)
+			reg[0].p = add_effect(parameters[0].to_i(), character->node->pos, vec3(0.f), parameters[1].to_f());
+		break;
+	case CommandList::cAddEffectFaceTarget:
+		if (parameters.size() == 2)
+			reg[0].p = add_effect(parameters[0].to_i(), character->node->pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character->node->pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+		break;
+	}
+
+	if (next_i > frame.end_i)
+	{
+		if (frame.loop_n > 0)
+		{
+			if (frame.loop_vec != -1)
+			{
+				auto& v = vec[frame.loop_vec];
+				reg[0].p = v[v.size() - frame.loop_n].p;
+			}
+			frame.loop_n--;
+			frame.i = frame.beg_i;
+		}
+		else
+			frames.pop();
+	}
+	else
+		frame.i = next_i;
+
+	if (new_frame.x != -1 && new_frame.z > 0)
+	{
+		auto& frame = frames.emplace();
+		frame.beg_i = new_frame.x;
+		frame.end_i = new_frame.y;
+		frame.i = new_frame.x;
+		frame.loop_n = new_frame.z - 1;
+		frame.loop_vec = new_frame.w;
 	}
 }
 

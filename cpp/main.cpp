@@ -151,7 +151,7 @@ void MainTerrain::init(EntityPtr e)
 vec3 MainTerrain::get_coord(const vec2& uv)
 {
 	if (hf_terrain)
-		return node->pos + extent * vec3(uv.x, 1.f - hf_terrain->height_map->linear_sample(uv).r, uv.y);
+		return node->pos + extent * vec3(uv.x, hf_terrain->height_map->linear_sample(uv).r, uv.y);
 	else if (mc_terrain)
 		return node->pos + extent * vec3(uv.x, 1.f - mc_terrain->height_map->linear_sample(uv).r, uv.y);
 	return vec3(0.f);
@@ -632,22 +632,34 @@ void cMain::on_active()
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
 		auto tar_ext = sRenderer::instance()->target_extent();
-	if (tar_ext.x <= 0.f || tar_ext.y <= 0.f)
-		return;
+		if (tar_ext.x <= 0.f || tar_ext.y <= 0.f)
+			return;
 
-	if (!editor_p_control || !*editor_p_control)
-	{
-		if (!graphics::gui_want_mouse())
+		if (!editor_p_control || !*editor_p_control)
 		{
-			auto input = sInput::instance();
-			auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
-				if (draw_data.categories & CateMesh)
-				{
-					if (auto character = n->entity->get_component_t<cCharacter>(); character)
+			if (!graphics::gui_want_mouse())
+			{
+				auto input = sInput::instance();
+				auto hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
+					if (draw_data.categories & CateMesh)
 					{
-						if (character != main_player.character && character->armature)
+						if (auto character = n->entity->get_component_t<cCharacter>(); character)
 						{
-							for (auto& c : character->armature->entity->children)
+							if (character != main_player.character && character->armature)
+							{
+								for (auto& c : character->armature->entity->children)
+								{
+									if (auto mesh = c->get_component_t<cMesh>(); mesh)
+									{
+										if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+											draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+									}
+								}
+							}
+						}
+						if (auto chest = n->entity->get_component_t<cChest>(); chest)
+						{
+							for (auto& c : chest->entity->get_all_children())
 							{
 								if (auto mesh = c->get_component_t<cMesh>(); mesh)
 								{
@@ -657,88 +669,77 @@ void cMain::on_active()
 							}
 						}
 					}
-					if (auto chest = n->entity->get_component_t<cChest>(); chest)
+					if (draw_data.categories & CateTerrain)
 					{
-						for (auto& c : chest->entity->get_all_children())
+						if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
 						{
-							if (auto mesh = c->get_component_t<cMesh>(); mesh)
+							if (terrain->instance_id != -1)
+								draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
+						}
+					}
+					if (draw_data.categories & CateMarchingCubes)
+					{
+						if (auto volume = n->entity->get_component_t<cVolume>(); volume)
+						{
+							if (volume->marching_cubes)
 							{
-								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+								if (volume->instance_id != -1)
+									draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
 							}
 						}
 					}
-				}
-			if (draw_data.categories & CateTerrain)
-			{
-				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
-				{
-					if (terrain->instance_id != -1)
-						draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
-				}
-			}
-			if (draw_data.categories & CateMarchingCubes)
-			{
-				if (auto volume = n->entity->get_component_t<cVolume>(); volume)
-				{
-					if (volume->marching_cubes)
-					{
-						if (volume->instance_id != -1)
-							draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
-					}
-				}
-			}
-			if (sInput::instance()->kpressed(Keyboard_F12))
-				draw_data.graphics_debug = true;
+					if (sInput::instance()->kpressed(Keyboard_F12))
+						draw_data.graphics_debug = true;
 				});
-			hovering_character = nullptr;
-			hovering_chest = nullptr;
-			hovering_terrain = false;
-			tooltip.clear();
-			if (hovering_node)
-			{
-				auto can_select = [](cCharacterPtr character) {
-					if (!(select_mode & TargetEnemy) && main_player.character->faction != character->faction)
-						return false;
-					if (!(select_mode & TargetFriendly) && main_player.character->faction == character->faction)
-						return false;
-					return true;
-				};
-				sScene::instance()->navmesh_nearest_point(hovering_pos, vec3(2.f, 4.f, 2.f), hovering_pos);
-				if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
+				hovering_character = nullptr;
+				hovering_chest = nullptr;
+				hovering_terrain = false;
+				tooltip.clear();
+				if (hovering_node)
 				{
-					if (select_mode == TargetNull || can_select(character))
-						hovering_character = character;
-				}
-				if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
-				{
-					hovering_chest = chest;
-					tooltip = Item::get(hovering_chest->item_id).name;
-				}
-				if (hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
-				{
-					hovering_terrain = true;
-
-					if ((select_mode & TargetLocation) == 0)
+					auto can_select = [](cCharacterPtr character) {
+						if (!(select_mode & TargetEnemy) && main_player.character->faction != character->faction)
+							return false;
+						if (!(select_mode & TargetFriendly) && main_player.character->faction == character->faction)
+							return false;
+						return true;
+					};
+					sScene::instance()->navmesh_nearest_point(hovering_pos, vec3(2.f, 4.f, 2.f), hovering_pos);
+					if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
 					{
-						if ((select_mode & TargetEnemy) || (select_mode & TargetFriendly))
+						if (select_mode == TargetNull || can_select(character))
+							hovering_character = character;
+					}
+					if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
+					{
+						hovering_chest = chest;
+						tooltip = Item::get(hovering_chest->item_id).name;
+					}
+					if (hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
+					{
+						hovering_terrain = true;
+
+						if ((select_mode & TargetLocation) == 0)
 						{
-							std::vector<cNodePtr> objs;
-							sScene::instance()->octree->get_colliding(hovering_pos, 5.f, objs, CharacterTag);
-							if (!objs.empty())
+							if ((select_mode & TargetEnemy) || (select_mode & TargetFriendly))
 							{
-								auto min_dist = 10000.f;
-								for (auto n : objs)
+								std::vector<cNodePtr> objs;
+								sScene::instance()->octree->get_colliding(hovering_pos, 5.f, objs, CharacterTag);
+								if (!objs.empty())
 								{
-									if (auto character = n->entity->get_component_t<cCharacter>(); character)
+									auto min_dist = 10000.f;
+									for (auto n : objs)
 									{
-										if (!can_select(character))
-											continue;
-										auto dist = distance(n->pos, hovering_pos);
-										if (dist < min_dist)
+										if (auto character = n->entity->get_component_t<cCharacter>(); character)
 										{
-											hovering_character = character;
-											min_dist = dist;
+											if (!can_select(character))
+												continue;
+											auto dist = distance(n->pos, hovering_pos);
+											if (dist < min_dist)
+											{
+												hovering_character = character;
+												min_dist = dist;
+											}
 										}
 									}
 								}
@@ -746,554 +747,553 @@ void cMain::on_active()
 						}
 					}
 				}
-			}
 
-			if (input->mpressed(Mouse_Left))
-			{
-				if (select_mode == TargetNull)
-				{
-					focus_character.set(hovering_character ? hovering_character : nullptr);
-				}
-				else
-				{
-					if (select_mode & TargetEnemy)
-					{
-						if (hovering_character && main_player.character->faction != hovering_character->faction)
-						{
-							if (select_enemy_callback)
-								select_enemy_callback(hovering_character);
-							reset_select();
-						}
-					}
-					if (select_mode & TargetLocation)
-					{
-						if (hovering_terrain)
-						{
-							if (select_location_callback)
-								select_location_callback(hovering_pos);
-							reset_select();
-						}
-					}
-				}
-			}
-			if (main_player.character)
-			{
-				if (input->mpressed(Mouse_Right))
+				if (input->mpressed(Mouse_Left))
 				{
 					if (select_mode == TargetNull)
 					{
-						if (hovering_character)
+						focus_character.set(hovering_character ? hovering_character : nullptr);
+					}
+					else
+					{
+						if (select_mode & TargetEnemy)
 						{
-							if (hovering_character->faction != main_player.character->faction)
+							if (hovering_character && main_player.character->faction != hovering_character->faction)
+							{
+								if (select_enemy_callback)
+									select_enemy_callback(hovering_character);
+								reset_select();
+							}
+						}
+						if (select_mode & TargetLocation)
+						{
+							if (hovering_terrain)
+							{
+								if (select_location_callback)
+									select_location_callback(hovering_pos);
+								reset_select();
+							}
+						}
+					}
+				}
+				if (main_player.character)
+				{
+					if (input->mpressed(Mouse_Right))
+					{
+						if (select_mode == TargetNull)
+						{
+							if (hovering_character)
+							{
+								if (hovering_character->faction != main_player.character->faction)
+								{
+									if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+										new CharacterCommandAttackTarget(main_player.character, hovering_character);
+									else if (multi_player == MultiPlayerAsClient)
+									{
+										std::ostringstream res;
+										nwCommandCharacterStruct stru;
+										stru.id = main_player.character->object->uid;
+										stru.type = "AttackTarget"_h;
+										stru.t.target = hovering_character->object->uid;
+										pack_msg(res, nwCommandCharacter, stru);
+										so_client->send(res.str());
+									}
+								}
+							}
+							else if (hovering_chest)
 							{
 								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-									new CharacterCommandAttackTarget(main_player.character, hovering_character);
+									new CharacterCommandPickUp(main_player.character, hovering_chest);
 								else if (multi_player == MultiPlayerAsClient)
 								{
 									std::ostringstream res;
 									nwCommandCharacterStruct stru;
 									stru.id = main_player.character->object->uid;
-									stru.type = "AttackTarget"_h;
-									stru.t.target = hovering_character->object->uid;
+									stru.type = "PickUp"_h;
+									stru.t.target = hovering_chest->object->uid;
 									pack_msg(res, nwCommandCharacter, stru);
 									so_client->send(res.str());
 								}
 							}
+							else if (hovering_terrain)
+							{
+								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+									new CharacterCommandMoveTo(main_player.character, hovering_pos);
+								else if (multi_player == MultiPlayerAsClient)
+								{
+									std::ostringstream res;
+									nwCommandCharacterStruct stru;
+									stru.id = main_player.character->object->uid;
+									stru.type = "MoveTo"_h;
+									stru.t.location = hovering_pos;
+									pack_msg(res, nwCommandCharacter, stru);
+									so_client->send(res.str());
+								}
+								add_location_icon(hovering_pos);
+							}
 						}
-						else if (hovering_chest)
-						{
+						else
+							reset_select();
+					}
+
+					if (input->kpressed(Keyboard_A))
+					{
+						select_mode = TargetType(TargetEnemy | TargetLocation);
+						select_enemy_callback = [](cCharacterPtr character) {
 							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-								new CharacterCommandPickUp(main_player.character, hovering_chest);
+								new CharacterCommandAttackTarget(main_player.character, character);
 							else if (multi_player == MultiPlayerAsClient)
 							{
 								std::ostringstream res;
 								nwCommandCharacterStruct stru;
 								stru.id = main_player.character->object->uid;
-								stru.type = "PickUp"_h;
-								stru.t.target = hovering_chest->object->uid;
+								stru.type = "AttackTarget"_h;
+								stru.t.target = character->object->uid;
 								pack_msg(res, nwCommandCharacter, stru);
 								so_client->send(res.str());
 							}
-						}
-						else if (hovering_terrain)
-						{
+						};
+						select_location_callback = [](const vec3& pos) {
 							if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-								new CharacterCommandMoveTo(main_player.character, hovering_pos);
+								new CharacterCommandAttackLocation(main_player.character, pos);
 							else if (multi_player == MultiPlayerAsClient)
 							{
 								std::ostringstream res;
 								nwCommandCharacterStruct stru;
 								stru.id = main_player.character->object->uid;
-								stru.type = "MoveTo"_h;
-								stru.t.location = hovering_pos;
+								stru.type = "AttackLocation"_h;
+								stru.t.location = pos;
 								pack_msg(res, nwCommandCharacter, stru);
 								so_client->send(res.str());
 							}
-							add_location_icon(hovering_pos);
+						};
+					}
+					if (input->kpressed(Keyboard_S))
+					{
+						new CharacterCommandIdle(main_player.character);
+					}
+					if (input->kpressed(Keyboard_H))
+					{
+						new CharacterCommandHold(main_player.character);
+					}
+					for (auto i = 0; i < countof(shortcuts); i++)
+					{
+						auto shortcut = shortcuts[i].get();
+						if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
+							shortcut->click();
+					}
+				}
+				if (input->kpressed(Keyboard_Esc))
+					reset_select();
+				if (input->kpressed(Keyboard_F1))
+					toggle_equipment_view();
+				if (input->kpressed(Keyboard_F2))
+					toggle_ability_view();
+				if (input->kpressed(Keyboard_F3))
+					toggle_inventory_view();
+			}
+		}
+
+		if (true || in_editor)
+		{
+			ImGui::Begin("Status");
+
+			auto character_status = [](cCharacterPtr character) {
+				ImGui::Text("Name: %s", character->entity->name.c_str());
+
+				auto& p = character->node->pos;
+				ImGui::Text("  pos: %.2f, %.2f, %.2f", p.x, p.y, p.z);
+				auto& tp = character->nav_agent->target_pos;
+				auto& td = character->nav_agent->dist;
+				ImGui::Text("  tpos: %.2f, %.2f, %.2f (%.2f)", tp.x, tp.y, tp.z, td);
+				auto& ta = character->nav_agent->ang_diff;
+				ImGui::Text("  tang: %.2f", ta);
+
+				const char* action_name;
+				switch (character->action)
+				{
+				case ActionNone:
+					action_name = "None";
+					break;
+				case ActionMove:
+					action_name = "Move";
+					break;
+				case ActionAttack:
+					action_name = "Attack";
+					break;
+				case ActionCast:
+					action_name = "Cast";
+					break;
+				}
+				ImGui::Text("  action: %s", action_name);
+			};
+
+			ImGui::TextUnformatted("Main player:");
+			if (main_player.character)
+				character_status(main_player.character);
+			ImGui::TextUnformatted("Focus:");
+			if (focus_character.obj)
+				character_status(focus_character.obj);
+
+			if (ImGui::Button("Set 'selecting entity' As Main Player"))
+			{
+				if (editor_p_selecting_entity && *editor_p_selecting_entity)
+					main_player.init(*editor_p_selecting_entity);
+			}
+
+			ImGui::End();
+		}
+
+		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x * 0.5f, tar_ext.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
+		ImGui::SetNextWindowSize(ImVec2(600.f, 42.f), ImGuiCond_Always);
+		ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+		if (main_player.character)
+		{
+			ImGui::BeginGroup();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1.f, 1.f));
+			auto dl = ImGui::GetWindowDrawList();
+			const auto icon_size = 32.f;
+			for (auto i = 0; i < countof(shortcuts); i++)
+			{
+				if (i > 0) ImGui::SameLine();
+				auto pressed = ImGui::InvisibleButton(("shortcut" + str(i)).c_str(), ImVec2(icon_size, icon_size));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
+				dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+
+				auto shortcut = shortcuts[i].get();
+				shortcut->draw(dl, p0, p1);
+
+				if (ImGui::BeginDragDropSource())
+				{
+					ImGui::SetDragDropPayload("shortcut", &i, sizeof(int));
+					ImGui::EndDragDropSource();
+				}
+
+				if (pressed)
+					shortcut->click();
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (auto payload = ImGui::AcceptDragDropPayload("shortcut"); payload)
+					{
+						auto j = *(int*)payload->Data;
+						if (i != j)
+						{
+							std::swap(shortcuts[i]->key, shortcuts[j]->key);
+							std::swap(shortcuts[i], shortcuts[j]);
 						}
 					}
-					else
-						reset_select();
+					if (auto payload = ImGui::AcceptDragDropPayload("ability"); payload)
+					{
+						auto j = *(int*)payload->Data;
+						auto key = shortcut->key;
+						shortcut = new AbilityShortcut(main_player.character->abilities[j].get());
+						shortcut->key = key;
+						shortcuts[i].reset(shortcut);
+					}
+					ImGui::EndDragDropTarget();
 				}
-
-				if (input->kpressed(Keyboard_A))
-				{
-					select_mode = TargetType(TargetEnemy | TargetLocation);
-					select_enemy_callback = [](cCharacterPtr character) {
-						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-							new CharacterCommandAttackTarget(main_player.character, character);
-						else if (multi_player == MultiPlayerAsClient)
-						{
-							std::ostringstream res;
-							nwCommandCharacterStruct stru;
-							stru.id = main_player.character->object->uid;
-							stru.type = "AttackTarget"_h;
-							stru.t.target = character->object->uid;
-							pack_msg(res, nwCommandCharacter, stru);
-							so_client->send(res.str());
-						}
-					};
-					select_location_callback = [](const vec3& pos) {
-						if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-							new CharacterCommandAttackLocation(main_player.character, pos);
-						else if (multi_player == MultiPlayerAsClient)
-						{
-							std::ostringstream res;
-							nwCommandCharacterStruct stru;
-							stru.id = main_player.character->object->uid;
-							stru.type = "AttackLocation"_h;
-							stru.t.location = pos;
-							pack_msg(res, nwCommandCharacter, stru);
-							so_client->send(res.str());
-						}
-					};
-				}
-				if (input->kpressed(Keyboard_S))
-				{
-					new CharacterCommandIdle(main_player.character);
-				}
-				if (input->kpressed(Keyboard_H))
-				{
-					new CharacterCommandHold(main_player.character);
-				}
-				for (auto i = 0; i < countof(shortcuts); i++)
-				{
-					auto shortcut = shortcuts[i].get();
-					if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
-						shortcut->click();
-				}
+				if (shortcut && shortcut->key != KeyboardKey_Count)
+					dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), TypeInfo::serialize_t(shortcut->key).c_str());
 			}
-			if (input->kpressed(Keyboard_Esc))
-				reset_select();
-			if (input->kpressed(Keyboard_F1))
-				toggle_equipment_view();
-			if (input->kpressed(Keyboard_F2))
-				toggle_ability_view();
-			if (input->kpressed(Keyboard_F3))
-				toggle_inventory_view();
-		}
-	}
+			ImGui::PopStyleVar();
+			ImGui::EndGroup();
 
-	if (true || in_editor)
-	{
-		ImGui::Begin("Status");
-
-		auto character_status = [](cCharacterPtr character) {
-			ImGui::Text("Name: %s", character->entity->name.c_str());
-
-			auto& p = character->node->pos;
-			ImGui::Text("  pos: %.2f, %.2f, %.2f", p.x, p.y, p.z);
-			auto& tp = character->nav_agent->target_pos;
-			auto& td = character->nav_agent->dist;
-			ImGui::Text("  tpos: %.2f, %.2f, %.2f (%.2f)", tp.x, tp.y, tp.z, td);
-			auto& ta = character->nav_agent->ang_diff;
-			ImGui::Text("  tang: %.2f", ta);
-
-			const char* action_name;
-			switch (character->action)
+			ImGui::SameLine();
+			ImGui::BeginGroup();
 			{
-			case ActionNone:
-				action_name = "None";
-				break;
-			case ActionMove:
-				action_name = "Move";
-				break;
-			case ActionAttack:
-				action_name = "Attack";
-				break;
-			case ActionCast:
-				action_name = "Cast";
-				break;
+				static auto img = graphics::Image::get("assets\\icons\\head.png");
+				auto pressed = ImGui::InvisibleButton("btn_equipment", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					toggle_equipment_view();
 			}
-			ImGui::Text("  action: %s", action_name);
+			ImGui::SameLine();
+			{
+				static auto img = graphics::Image::get("assets\\icons\\book.png");
+				auto pressed = ImGui::InvisibleButton("btn_ability", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					toggle_ability_view();
+			}
+			ImGui::SameLine();
+			{
+				static auto img = graphics::Image::get("assets\\icons\\bag.png");
+				auto pressed = ImGui::InvisibleButton("btn_bag", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					toggle_inventory_view();
+			}
+			ImGui::SameLine();
+			{
+				static auto img = graphics::Image::get("assets\\icons\\gear.png");
+				auto pressed = ImGui::InvisibleButton("btn_settings", ImVec2(icon_size, icon_size));
+				auto hovered = ImGui::IsItemHovered();
+				auto active = ImGui::IsItemActive();
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
+				dl->AddImage(img, p0, p1);
+				if (pressed)
+					toggle_settings_view();
+			}
+			ImGui::EndGroup();
+		}
+		ImGui::End();
+
+		auto show_buffs = [](ImDrawList* dl, cCharacterPtr character) {
+
+			for (auto i = 0; i < character->buffs.size(); i++)
+			{
+				if (i > 0) ImGui::SameLine();
+				auto& ins = character->buffs[i];
+				auto& buff = Buff::get(ins->id);
+				ImGui::Dummy(ImVec2(16, 16));
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::BeginTooltip();
+					ImGui::TextUnformatted(buff.name.c_str());
+					ImGui::Text("%d s", (int)ins->timer);
+					ImGui::EndTooltip();
+				}
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
+			}
 		};
 
-		ImGui::TextUnformatted("Main player:");
-		if (main_player.character)
-			character_status(main_player.character);
-		ImGui::TextUnformatted("Focus:");
-		if (focus_character.obj)
-			character_status(focus_character.obj);
-
-		if (ImGui::Button("Set 'selecting entity' As Main Player"))
-		{
-			if (editor_p_selecting_entity && *editor_p_selecting_entity)
-				main_player.init(*editor_p_selecting_entity);
-		}
-
-		ImGui::End();
-	}
-
-	ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x * 0.5f, tar_ext.y), ImGuiCond_Always, ImVec2(0.5f, 1.f));
-	ImGui::SetNextWindowSize(ImVec2(600.f, 42.f), ImGuiCond_Always);
-	ImGui::Begin("##main_panel", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
-	if (main_player.character)
-	{
-		ImGui::BeginGroup();
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1.f, 1.f));
-		auto dl = ImGui::GetWindowDrawList();
-		const auto icon_size = 32.f;
-		for (auto i = 0; i < countof(shortcuts); i++)
-		{
-			if (i > 0) ImGui::SameLine();
-			auto pressed = ImGui::InvisibleButton(("shortcut" + str(i)).c_str(), ImVec2(icon_size, icon_size));
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddRectFilled(p0, p1, ImColor(0.f, 0.f, 0.f, 0.5f));
-			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-
-			auto shortcut = shortcuts[i].get();
-			shortcut->draw(dl, p0, p1);
-
-			if (ImGui::BeginDragDropSource())
-			{
-				ImGui::SetDragDropPayload("shortcut", &i, sizeof(int));
-				ImGui::EndDragDropSource();
-			}
-
-			if (pressed)
-				shortcut->click();
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (auto payload = ImGui::AcceptDragDropPayload("shortcut"); payload)
-				{
-					auto j = *(int*)payload->Data;
-					if (i != j)
-					{
-						std::swap(shortcuts[i]->key, shortcuts[j]->key);
-						std::swap(shortcuts[i], shortcuts[j]);
-					}
-				}
-				if (auto payload = ImGui::AcceptDragDropPayload("ability"); payload)
-				{
-					auto j = *(int*)payload->Data;
-					auto key = shortcut->key;
-					shortcut = new AbilityShortcut(main_player.character->abilities[j].get());
-					shortcut->key = key;
-					shortcuts[i].reset(shortcut);
-				}
-				ImGui::EndDragDropTarget();
-			}
-			if (shortcut && shortcut->key != KeyboardKey_Count)
-				dl->AddText(p0 + vec2(4.f, 0.f), ImColor(1.f, 1.f, 1.f), TypeInfo::serialize_t(shortcut->key).c_str());
-		}
-		ImGui::PopStyleVar();
-		ImGui::EndGroup();
-
-		ImGui::SameLine();
-		ImGui::BeginGroup();
-		{
-			static auto img = graphics::Image::get("assets\\icons\\head.png");
-			auto pressed = ImGui::InvisibleButton("btn_equipment", ImVec2(icon_size, icon_size));
-			auto hovered = ImGui::IsItemHovered();
-			auto active = ImGui::IsItemActive();
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
-			dl->AddImage(img, p0, p1);
-			if (pressed)
-				toggle_equipment_view();
-		}
-		ImGui::SameLine();
-		{
-			static auto img = graphics::Image::get("assets\\icons\\book.png");
-			auto pressed = ImGui::InvisibleButton("btn_ability", ImVec2(icon_size, icon_size));
-			auto hovered = ImGui::IsItemHovered();
-			auto active = ImGui::IsItemActive();
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
-			dl->AddImage(img, p0, p1);
-			if (pressed)
-				toggle_ability_view();
-		}
-		ImGui::SameLine();
-		{
-			static auto img = graphics::Image::get("assets\\icons\\bag.png");
-			auto pressed = ImGui::InvisibleButton("btn_bag", ImVec2(icon_size, icon_size));
-			auto hovered = ImGui::IsItemHovered();
-			auto active = ImGui::IsItemActive();
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
-			dl->AddImage(img, p0, p1);
-			if (pressed)
-				toggle_inventory_view();
-		}
-		ImGui::SameLine();
-		{
-			static auto img = graphics::Image::get("assets\\icons\\gear.png");
-			auto pressed = ImGui::InvisibleButton("btn_settings", ImVec2(icon_size, icon_size));
-			auto hovered = ImGui::IsItemHovered();
-			auto active = ImGui::IsItemActive();
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddRectFilled(p0, p1, active ? ImColor(0.f, 0.1f, 0.3f, 1.f) : (hovered ? ImColor(0.f, 0.2f, 0.5f, 1.f) : ImColor(0.f, 0.2f, 0.5f, 0.5f)));
-			dl->AddImage(img, p0, p1);
-			if (pressed)
-				toggle_settings_view();
-		}
-		ImGui::EndGroup();
-	}
-	ImGui::End();
-
-	auto show_buffs = [](ImDrawList* dl, cCharacterPtr character) {
-
-		for (auto i = 0; i < character->buffs.size(); i++)
-		{
-			if (i > 0) ImGui::SameLine();
-			auto& ins = character->buffs[i];
-			auto& buff = Buff::get(ins->id);
-			ImGui::Dummy(ImVec2(16, 16));
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::TextUnformatted(buff.name.c_str());
-				ImGui::Text("%d s", (int)ins->timer);
-				ImGui::EndTooltip();
-			}
-			auto p0 = (vec2)ImGui::GetItemRectMin();
-			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddImage(buff.icon_image, p0, p1, buff.icon_uvs.xy(), buff.icon_uvs.zw());
-		}
-	};
-
-	auto hp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
-		ImGui::Dummy(ImVec2(width, height));
-		auto p0 = (vec2)ImGui::GetItemRectMin();
-		auto p1 = (vec2)ImGui::GetItemRectMax();
-		dl->AddRectFilled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * width, height), ImColor(0.3f, 0.7f, 0.2f));
-		dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-		auto str = std::format("{}/{}", character->hp, character->hp_max);
-		auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-		dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-	};
-	auto mp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
-		ImGui::Dummy(ImVec2(width, height));
-		auto p0 = (vec2)ImGui::GetItemRectMin();
-		auto p1 = (vec2)ImGui::GetItemRectMax();
-		dl->AddRectFilled(p0, p0 + vec2((float)character->mp / (float)character->mp_max * width, height), ImColor(0.2f, 0.3f, 0.7f));
-		dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-		auto str = std::format("{}/{}", character->mp, character->mp_max);
-		auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-		dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-	};
-	auto exp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
-		ImGui::Dummy(ImVec2(width, height));
-		auto p0 = (vec2)ImGui::GetItemRectMin();
-		auto p1 = (vec2)ImGui::GetItemRectMax();
-		dl->AddRectFilled(p0, p0 + vec2((float)character->exp / (float)character->exp_max * width, height), ImColor(0.7f, 0.7f, 0.2f));
-		dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
-		auto str = std::format("LV {}  {}/{}", character->lv, character->exp, character->exp_max);
-		auto text_width = ImGui::CalcTextSize(str.c_str()).x;
-		dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
-	};
-	auto action_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
-		float time = 0.f;
-		if (character->attack_timer > 0.f)
-			time = character->attack_timer;
-		else if (character->cast_timer > 0.f)
-			time = character->cast_timer;
-		if (time > 0.f)
-		{
+		auto hp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
 			ImGui::Dummy(ImVec2(width, height));
 			auto p0 = (vec2)ImGui::GetItemRectMin();
 			auto p1 = (vec2)ImGui::GetItemRectMax();
-			dl->AddRectFilled(p0, p0 + vec2((1.f - fract(time)) * width, height), ImColor(0.7f, 0.7f, 0.7f));
-			dl->AddRect(p0, p1, ImColor(0.3f, 0.3f, 0.3f));
-			dl->AddText(vec2((p0.x + p1.x) * 0.5f - 3.f, p0.y - 7.f), ImColor(1.f, 1.f, 1.f), str((int)time).c_str());
-		}
-	};
-
-	if (main_player.character)
-	{
-		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
-		ImGui::SetNextWindowSize(ImVec2(200.f, 120.f), ImGuiCond_Always);
-		ImGui::Begin("##main_player", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
-
-		auto dl = ImGui::GetWindowDrawList();
-		const auto bar_width = ImGui::GetContentRegionAvail().x;
-		const auto bar_height = 16.f;
-		hp_bar(dl, bar_width, bar_height, main_player.character);
-		mp_bar(dl, bar_width, bar_height, main_player.character);
-		exp_bar(dl, bar_width, bar_height, main_player.character);
-		show_buffs(dl, main_player.character);
-		action_bar(dl, bar_width, 4.f, main_player.character);
-		auto pos = main_player.character->node->pos;
-		ImGui::Text("%d, %d", (int)pos.x, (int)pos.z);
-
-		ImGui::End();
-	}
-
-	if (focus_character.obj)
-	{
-		ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
-		ImGui::SetNextWindowSize(ImVec2(100.f, 100.f), ImGuiCond_Always);
-		ImGui::Begin("##focus_character", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
-
-		auto dl = ImGui::GetWindowDrawList();
-		const auto bar_width = ImGui::GetContentRegionAvail().x;
-		const auto bar_height = 16.f;
-		hp_bar(dl, bar_width, bar_height, focus_character.obj);
-		mp_bar(dl, bar_width, bar_height, focus_character.obj);
-
-		show_buffs(dl, focus_character.obj);
-		action_bar(dl, bar_width, 4.f, focus_character.obj);
-
-		ImGui::End();
-	}
-
-	if (main_player.character && main_camera.camera)
-	{
-		for (auto character : characters)
-		{
-			//if (character->object->visible_flags & main_player.faction)
+			dl->AddRectFilled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * width, height), ImColor(0.3f, 0.7f, 0.2f));
+			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+			auto str = std::format("{}/{}", character->hp, character->hp_max);
+			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+		};
+		auto mp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			ImGui::Dummy(ImVec2(width, height));
+			auto p0 = (vec2)ImGui::GetItemRectMin();
+			auto p1 = (vec2)ImGui::GetItemRectMax();
+			dl->AddRectFilled(p0, p0 + vec2((float)character->mp / (float)character->mp_max * width, height), ImColor(0.2f, 0.3f, 0.7f));
+			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+			auto str = std::format("{}/{}", character->mp, character->mp_max);
+			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+		};
+		auto exp_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			ImGui::Dummy(ImVec2(width, height));
+			auto p0 = (vec2)ImGui::GetItemRectMin();
+			auto p1 = (vec2)ImGui::GetItemRectMax();
+			dl->AddRectFilled(p0, p0 + vec2((float)character->exp / (float)character->exp_max * width, height), ImColor(0.7f, 0.7f, 0.2f));
+			dl->AddRect(p0, p1, ImColor(0.7f, 0.7f, 0.7f));
+			auto str = std::format("LV {}  {}/{}", character->lv, character->exp, character->exp_max);
+			auto text_width = ImGui::CalcTextSize(str.c_str()).x;
+			dl->AddText(p0 + vec2((width - text_width) * 0.5f, 0.f), ImColor(1.f, 1.f, 1.f), str.c_str());
+		};
+		auto action_bar = [](ImDrawList* dl, float width, float height, cCharacterPtr character) {
+			float time = 0.f;
+			if (character->attack_timer > 0.f)
+				time = character->attack_timer;
+			else if (character->cast_timer > 0.f)
+				time = character->cast_timer;
+			if (time > 0.f)
 			{
-				auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
-				if (p.x > 0.f && p.y > 0.f)
+				ImGui::Dummy(ImVec2(width, height));
+				auto p0 = (vec2)ImGui::GetItemRectMin();
+				auto p1 = (vec2)ImGui::GetItemRectMax();
+				dl->AddRectFilled(p0, p0 + vec2((1.f - fract(time)) * width, height), ImColor(0.7f, 0.7f, 0.7f));
+				dl->AddRect(p0, p1, ImColor(0.3f, 0.3f, 0.3f));
+				dl->AddText(vec2((p0.x + p1.x) * 0.5f - 3.f, p0.y - 7.f), ImColor(1.f, 1.f, 1.f), str((int)time).c_str());
+			}
+		};
+
+		if (main_player.character)
+		{
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(8.f, 4.f), ImGuiCond_Always, ImVec2(0.f, 0.f));
+			ImGui::SetNextWindowSize(ImVec2(200.f, 120.f), ImGuiCond_Always);
+			ImGui::Begin("##main_player", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+
+			auto dl = ImGui::GetWindowDrawList();
+			const auto bar_width = ImGui::GetContentRegionAvail().x;
+			const auto bar_height = 16.f;
+			hp_bar(dl, bar_width, bar_height, main_player.character);
+			mp_bar(dl, bar_width, bar_height, main_player.character);
+			exp_bar(dl, bar_width, bar_height, main_player.character);
+			show_buffs(dl, main_player.character);
+			action_bar(dl, bar_width, 4.f, main_player.character);
+			auto pos = main_player.character->node->pos;
+			ImGui::Text("%d, %d", (int)pos.x, (int)pos.z);
+
+			ImGui::End();
+		}
+
+		if (focus_character.obj)
+		{
+			ImGui::SetNextWindowPos(sInput::instance()->offset + vec2(tar_ext.x - 8.f, 4.f), ImGuiCond_Always, ImVec2(1.f, 0.f));
+			ImGui::SetNextWindowSize(ImVec2(100.f, 100.f), ImGuiCond_Always);
+			ImGui::Begin("##focus_character", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
+
+			auto dl = ImGui::GetWindowDrawList();
+			const auto bar_width = ImGui::GetContentRegionAvail().x;
+			const auto bar_height = 16.f;
+			hp_bar(dl, bar_width, bar_height, focus_character.obj);
+			mp_bar(dl, bar_width, bar_height, focus_character.obj);
+
+			show_buffs(dl, focus_character.obj);
+			action_bar(dl, bar_width, 4.f, focus_character.obj);
+
+			ImGui::End();
+		}
+
+		if (main_player.character && main_camera.camera)
+		{
+			for (auto character : characters)
+			{
+				//if (character->object->visible_flags & main_player.faction)
 				{
-					p += sInput::instance()->offset;
-					auto dl = ImGui::GetBackgroundDrawList();
-					const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
-					const auto bar_height = 5.f;
-					p.x -= bar_width * 0.5f;
-					dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
-						character->faction == main_player.faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
+					auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
+					if (p.x > 0.f && p.y > 0.f)
+					{
+						p += sInput::instance()->offset;
+						auto dl = ImGui::GetBackgroundDrawList();
+						const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
+						const auto bar_height = 5.f;
+						p.x -= bar_width * 0.5f;
+						dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
+							character->faction == main_player.faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
+					}
 				}
 			}
 		}
-	}
 
-	if (!tooltip.empty())
-	{
-		auto dl = ImGui::GetBackgroundDrawList();
-		ImGui::BeginTooltip();
-		ImGui::TextUnformatted(tooltip.c_str());
-		ImGui::EndTooltip();
-	}
-
-	if (main_camera.camera)
-	{
-		if (!floating_tips.empty())
+		if (!tooltip.empty())
 		{
-			for (auto& t : floating_tips)
-			{
-				auto p = main_camera.camera->world_to_screen(t.pos);
-				if (p.x > 0.f && p.y > 0.f)
-				{
-					p.xy += sInput::instance()->offset;
-					auto dl = ImGui::GetBackgroundDrawList();
-					if (t.size.x == 0.f || t.size.y == 0.f)
-						t.size = ImGui::CalcTextSize(t.text.c_str());
-					dl->AddText(p - vec2(t.size.x * 0.5f, 0.f), ImColor(t.color.r, t.color.g, t.color.b, 255), t.text.c_str());
-				}
-				t.pos.y += 1.8f * delta_time;
-			}
-			for (auto it = floating_tips.begin(); it != floating_tips.end();)
-			{
-				it->ticks--;
-				if (it->ticks == 0)
-					it = floating_tips.erase(it);
-				else
-					it++;
-			}
+			auto dl = ImGui::GetBackgroundDrawList();
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted(tooltip.c_str());
+			ImGui::EndTooltip();
 		}
 
-		if (!location_tips.empty())
+		if (main_camera.camera)
 		{
-			static graphics::ImagePtr icon_location = nullptr;
-			if (!icon_location)
-				icon_location = graphics::Image::get(L"assets\\icons\\location.png");
-			for (auto& t : location_tips)
+			if (!floating_tips.empty())
 			{
-				auto p = main_camera.camera->world_to_screen(t.second);
-				if (p.x > 0.f && p.y > 0.f)
+				for (auto& t : floating_tips)
 				{
-					p.xy += sInput::instance()->offset;
-					auto dl = ImGui::GetBackgroundDrawList();
-					auto ext = (vec2)icon_location->extent;
-					dl->AddImage(icon_location, p - vec2(ext.x * 0.5f, ext.y), p + vec2(ext.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
+					auto p = main_camera.camera->world_to_screen(t.pos);
+					if (p.x > 0.f && p.y > 0.f)
+					{
+						p.xy += sInput::instance()->offset;
+						auto dl = ImGui::GetBackgroundDrawList();
+						if (t.size.x == 0.f || t.size.y == 0.f)
+							t.size = ImGui::CalcTextSize(t.text.c_str());
+						dl->AddText(p - vec2(t.size.x * 0.5f, 0.f), ImColor(t.color.r, t.color.g, t.color.b, 255), t.text.c_str());
+					}
+					t.pos.y += 1.8f * delta_time;
+				}
+				for (auto it = floating_tips.begin(); it != floating_tips.end();)
+				{
+					it->ticks--;
+					if (it->ticks == 0)
+						it = floating_tips.erase(it);
+					else
+						it++;
 				}
 			}
-			for (auto it = location_tips.begin(); it != location_tips.end();)
+
+			if (!location_tips.empty())
 			{
-				it->first--;
-				if (it->first == 0)
-					it = location_tips.erase(it);
-				else
-					it++;
+				static graphics::ImagePtr icon_location = nullptr;
+				if (!icon_location)
+					icon_location = graphics::Image::get(L"assets\\icons\\location.png");
+				for (auto& t : location_tips)
+				{
+					auto p = main_camera.camera->world_to_screen(t.second);
+					if (p.x > 0.f && p.y > 0.f)
+					{
+						p.xy += sInput::instance()->offset;
+						auto dl = ImGui::GetBackgroundDrawList();
+						auto ext = (vec2)icon_location->extent;
+						dl->AddImage(icon_location, p - vec2(ext.x * 0.5f, ext.y), p + vec2(ext.x * 0.5f, 0.f), vec2(0.f), vec2(1.f), ImColor(1.f, 1.f, 1.f, max(0.f, t.first / 30.f)));
+					}
+				}
+				for (auto it = location_tips.begin(); it != location_tips.end();)
+				{
+					it->first--;
+					if (it->first == 0)
+						it = location_tips.erase(it);
+					else
+						it++;
+				}
 			}
 		}
-	}
 
-	if (illegal_op_str_timer > 0.f)
-	{
-		auto dl = ImGui::GetForegroundDrawList();
-		auto text_size = (vec2)ImGui::CalcTextSize(illegal_op_str.c_str());
-		auto p = vec2((tar_ext.x - text_size.x) * 0.5f, tar_ext.y - 160.f - text_size.y);
-		p.xy += sInput::instance()->offset;
-		auto alpha = 1.f;
-		if (illegal_op_str_timer < 1.f)
-			alpha *= mix(0.f, 1.f, illegal_op_str_timer);
-		auto border = 0.f;
-		if (illegal_op_str_timer > 2.9f)
-			border = mix(8.f, 0.f, (illegal_op_str_timer - 2.9f) / 0.1f);
-		else if (illegal_op_str_timer > 2.5f)
-			border = mix(0.f, 8.f, (illegal_op_str_timer - 2.5f) / 0.4f);
-		dl->AddRectFilled(p - vec2(2.f + border), p + text_size + vec2(2.f + border), ImColor(1.f, 0.f, 0.f, 0.5f * alpha));
-		dl->AddText(p, ImColor(1.f, 1.f, 1.f, 1.f * alpha), illegal_op_str.c_str());
-		illegal_op_str_timer -= delta_time;
-	}
-
-	{
-		static graphics::ImagePtr icon_cursors = nullptr;
-		if (!icon_cursors)
-			icon_cursors = graphics::Image::get(L"assets\\icons\\rpg_cursor_set.png");
-		auto tiles = vec2(icon_cursors->tiles);
-		int cursor_x = 0, cursor_y = 0;
-		if (select_mode != TargetNull)
+		if (illegal_op_str_timer > 0.f)
 		{
-			cursor_x = 3;
-			cursor_y = 0;
+			auto dl = ImGui::GetForegroundDrawList();
+			auto text_size = (vec2)ImGui::CalcTextSize(illegal_op_str.c_str());
+			auto p = vec2((tar_ext.x - text_size.x) * 0.5f, tar_ext.y - 160.f - text_size.y);
+			p.xy += sInput::instance()->offset;
+			auto alpha = 1.f;
+			if (illegal_op_str_timer < 1.f)
+				alpha *= mix(0.f, 1.f, illegal_op_str_timer);
+			auto border = 0.f;
+			if (illegal_op_str_timer > 2.9f)
+				border = mix(8.f, 0.f, (illegal_op_str_timer - 2.9f) / 0.1f);
+			else if (illegal_op_str_timer > 2.5f)
+				border = mix(0.f, 8.f, (illegal_op_str_timer - 2.5f) / 0.4f);
+			dl->AddRectFilled(p - vec2(2.f + border), p + text_size + vec2(2.f + border), ImColor(1.f, 0.f, 0.f, 0.5f * alpha));
+			dl->AddText(p, ImColor(1.f, 1.f, 1.f, 1.f * alpha), illegal_op_str.c_str());
+			illegal_op_str_timer -= delta_time;
 		}
-		auto pos = sInput::instance()->mpos + sInput::instance()->offset;
-		auto dl = ImGui::GetForegroundDrawList();
-		dl->AddImage(icon_cursors, pos + vec2(-32.f), pos + vec2(32.f),
-			vec2(cursor_x, cursor_y) / tiles,
-			vec2(cursor_x + 1, cursor_y + 1) / tiles);
-	}
-		}, (uint)this);
+
+		{
+			static graphics::ImagePtr icon_cursors = nullptr;
+			if (!icon_cursors)
+				icon_cursors = graphics::Image::get(L"assets\\icons\\rpg_cursor_set.png");
+			auto tiles = vec2(icon_cursors->tiles);
+			int cursor_x = 0, cursor_y = 0;
+			if (select_mode != TargetNull)
+			{
+				cursor_x = 3;
+				cursor_y = 0;
+			}
+			auto pos = sInput::instance()->mpos + sInput::instance()->offset;
+			auto dl = ImGui::GetForegroundDrawList();
+			dl->AddImage(icon_cursors, pos + vec2(-32.f), pos + vec2(32.f),
+				vec2(cursor_x, cursor_y) / tiles,
+				vec2(cursor_x + 1, cursor_y + 1) / tiles);
+		}
+	}, (uint)this);
 	graphics::gui_cursor_callbacks.add([this](CursorType cursor) {
 		auto mpos = sInput::instance()->mpos;
-	auto screen_ext = sRenderer::instance()->target_extent();
-	if (mpos.x < 0.f || mpos.x > screen_ext.x || mpos.y < 0.f || mpos.y > screen_ext.y)
-		return cursor;
-	return CursorNone;
-		}, (uint)this);
+		auto screen_ext = sRenderer::instance()->target_extent();
+		if (mpos.x < 0.f || mpos.x > screen_ext.x || mpos.y < 0.f || mpos.y > screen_ext.y)
+			return cursor;
+		return CursorNone;
+	}, (uint)this);
 }
 
 void cMain::on_inactive()
@@ -1411,7 +1411,10 @@ void cMain::update()
 		{
 			auto& thread = *it;
 			if (thread.wait_timer > 0.f)
+			{
 				thread.wait_timer -= delta_time;
+				it++;
+			}
 			else
 			{
 				while (!thread.frames.empty() && thread.wait_timer <= 0.f)
@@ -1669,7 +1672,7 @@ void cMain::update()
 						if (uv.x > 0.f && uv.x < 1.f && uv.y > 0.f && uv.y < 1.f)
 						{
 							auto pos = main_terrain.get_coord(uv);
-							if (pos.y > main_terrain.node->pos.y + 3.f)
+							//if (pos.y > main_terrain.node->pos.y + 3.f)
 							{
 								auto path = sScene::instance()->query_navmesh_path(pos, main_player.node->pos, 0);
 								if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)

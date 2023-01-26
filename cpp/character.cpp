@@ -558,13 +558,15 @@ void cCharacter::update()
 				if (ins && ins->lv > 0)
 				{
 					auto& ability = Ability::get(ins->id);
-					ability.passive.execute(this, nullptr, vec3(0.f), ability.parameters, ins->lv);
+					if (!ability.passive.cmds.empty())
+						CommandListExecuteThread(ability.passive, this, nullptr, vec3(0.f), ability.parameters, ins->lv).execute();
 				}
 			}
 			for (auto& ins : buffs)
 			{
 				auto& buff = Buff::get(ins->id);
-				buff.passive.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
+				if (!buff.passive.cmds.empty())
+					CommandListExecuteThread(buff.passive, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
 			}
 
 			if (hp_max != old_hp_max)
@@ -607,7 +609,8 @@ void cCharacter::update()
 
 			if (ins->t0 - ins->timer > ins->duration)
 			{
-				buff.continuous.execute(this, nullptr, vec3(0.f), buff.parameters, ins->lv);
+				if (!buff.continuous.cmds.empty())
+					CommandListExecuteThread(buff.continuous, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
 				ins->t0 = ins->timer;
 			}
 
@@ -851,7 +854,8 @@ void cCharacter::use_item(ItemInstance* ins)
 		}
 	}
 
-	item.active.execute(this, nullptr, vec3(0.f), item.parameters, 0);
+	if (!item.active.cmds.empty())
+		cl_threads.emplace_back(item.active, this, nullptr, vec3(0.f), item.parameters, 0);
 }
 
 void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
@@ -865,11 +869,12 @@ void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cChara
 	if (mp < ability_mp)
 		return;
 
-	cl_threads.emplace_back(ability.active, this, target, location, ability.parameters, ins->lv);
-
 	ins->cd_max = ability_cd;
 	ins->cd_timer = ins->cd_max;
 	set_mp(mp - ability_mp);
+
+	if (!ability.active.cmds.empty())
+		cl_threads.emplace_back(ability.active, this, target, location, ability.parameters, ins->lv);
 }
 
 void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
@@ -972,7 +977,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 								vec[0] = damage;
 							}
 							for (auto& ef : attack_effects)
-								ef.execute(this, target, vec3(0.f), parameters, 0);
+								cl_threads.emplace_back(ef, this, target, vec3(0.f), parameters, 0);
 						}
 
 						audio_source->play("attack_hit"_h);
@@ -983,7 +988,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 							p0 + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
 							[&](const vec3&, cCharacterPtr t) {
 								if (t)
-								attack(t);
+									attack(t);
 							});
 					}
 					else

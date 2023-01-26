@@ -72,7 +72,7 @@ void cSectorCollider::update()
 		{
 			static ParameterPack parameters;
 			if (character->add_marker(rnd, collide_time.y))
-				callback.execute(host, character, vec3(0.f), parameters, 0);
+				cl_threads.emplace_back(callback, host, character, vec3(0.f), parameters, 0);
 		}
 	}
 }
