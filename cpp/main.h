@@ -77,6 +77,12 @@ struct Tracker
 	}
 };
 
+struct IDAndPos
+{
+	uint id;
+	vec3 pos;
+};
+
 bool parse_literal(const std::string& str, int& id);
 
 extern bool in_editor;

@@ -86,14 +86,15 @@ void LinkEffect::update()
 	}
 }
 
-void LinkEffect::send_message(uint hash, void* data, uint size)
+void LinkEffect::send_message(uint hash, void* _data, uint size)
 {
 	switch (hash)
 	{
 	case "Target0"_h:
-		if (size == sizeof(vec4))
+		if (size == sizeof(IDAndPos))
 		{
-			if (auto it = objects.find(*(uint*)data); it != objects.end())
+			auto& data = *(IDAndPos*)_data;
+			if (auto it = objects.find(data.id); it != objects.end())
 			{
 				auto character = it->second->entity->get_component_t<cCharacter>();
 				target0.set(character);
@@ -103,13 +104,14 @@ void LinkEffect::send_message(uint hash, void* data, uint size)
 						pos0 = node->pos;
 				}, rnd);
 			}
-			pos0 = *(vec3*)((char*)data + sizeof(uint));
+			pos0 = data.pos;
 		}
 		break;
 	case "Target1"_h:
-		if (size == sizeof(vec4))
+		if (size == sizeof(IDAndPos))
 		{
-			if (auto it = objects.find(*(uint*)data); it != objects.end())
+			auto& data = *(IDAndPos*)_data;
+			if (auto it = objects.find(data.id); it != objects.end())
 			{
 				auto character = it->second->entity->get_component_t<cCharacter>();
 				target1.set(character);
@@ -119,7 +121,7 @@ void LinkEffect::send_message(uint hash, void* data, uint size)
 						pos1 = node->pos;
 				}, rnd);
 			}
-			pos1 = *(vec3*)((char*)data + sizeof(uint));
+			pos1 = data.pos;
 		}
 		break;
 	}

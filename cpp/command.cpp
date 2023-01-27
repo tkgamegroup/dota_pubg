@@ -527,12 +527,10 @@ void CommandListExecuteThread::execute()
 	case CommandList::cGetCharacterIDAndPos:
 		if (parameters.size() == 2)
 		{
-			void* ptr;
-			variable_addr(parameters[1].to_i(), ptr, ul);
-			
 			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
-			*(uint*)ptr = character->object->uid;
-			*(vec3*)((char*)ptr + sizeof(uint)) = character->node->pos;
+			auto& data = variable_as.operator()<IDAndPos>(parameters[1].to_i());
+			data.id = character->object->uid;
+			data.pos = character->node->pos;
 		}
 		break;
 	case CommandList::cRestoreHP:
