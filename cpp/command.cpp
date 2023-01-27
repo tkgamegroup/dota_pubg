@@ -1,4 +1,5 @@
 #include "command.h"
+#include "object.h"
 #include "character.h"
 #include "effect.h"
 #include "collider.h"
@@ -44,9 +45,14 @@ Parameter::Parameter(const std::string& str)
 		if (str[0] == '%')
 		{
 			type = tVariable;
-			CommandList::Variable sv;
-			TypeInfo::unserialize_t(str.substr(1), sv);
-			u.v.i = sv;
+			if (str[1] == '_' || std::islower(str[1]))
+				u.v.u = sh(str.c_str());
+			else
+			{
+				CommandList::Variable sv;
+				TypeInfo::unserialize_t(str.substr(1), sv);
+				u.v.i = sv;
+			}
 		}
 		else if (int id; parse_literal(str, id))
 		{
@@ -80,7 +86,7 @@ void CommandList::init_sub_groups()
 	std::stack<uint> sg_stack;
 	for (auto i = 0; i < cmds.size(); i++)
 	{
-		auto c = cmds[i].first;
+		auto c = std::get<0>(cmds[i]);
 		if (c == cBeginSub)
 			sg_stack.push(i);
 		else if (c == cEndSub)
@@ -94,22 +100,56 @@ void CommandList::init_sub_groups()
 
 void CommandList::build(const std::vector<std::string>& tokens)
 {
+	static auto reg_ret = std::regex(R"((%[\w]+)\:\=(.*))");
 	static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
 	std::smatch res;
+
+	uint used_reg[vREG7 - vREG0 + 1];
+	memset(used_reg, 0, sizeof(used_reg));
+	auto mark_used_reg = [&](uint v) {
+		if (v >= vREG0 && v <= vREG7)
+			used_reg[v - vREG0] = 1;
+	};
+	auto find_reg = [&](uint h)->Variable {
+		for (auto i = 0; i < countof(used_reg); i++)
+		{
+			if (used_reg[i] == h)
+				return (Variable)(vREG0 + i);
+		}
+		for (auto i = 0; i < countof(used_reg); i++)
+		{
+			if (used_reg[i] == 0)
+			{
+				used_reg[i] = h;
+				return (Variable)(vREG0 + i);
+			}
+		}
+	};
 
 	for (auto& t : tokens)
 	{
 		if (t.empty()) continue;
-		auto sp = SUS::split(t, ',');
-		auto& c = cmds.emplace_back();
-		TypeInfo::unserialize_t(sp[0], c.first);
+
+		auto& cmd = cmds.emplace_back();
+		std::get<2>(cmd) = vNull;
+
+		std::vector<std::string> sp;
+		if (std::regex_search(t, res, reg_ret))
+		{
+			std::get<2>(cmd) = (Variable)Parameter(res[1].str()).u.v.u;
+			sp = SUS::split(res[2], ',');
+		}
+		else
+			sp = SUS::split(t, ',');
+
+		TypeInfo::unserialize_t(sp[0], std::get<0>(cmd));
 
 		for (auto i = 1; i < sp.size(); i++)
 		{
 			auto& tt = sp[i];
 			if (std::regex_search(tt, res, reg_exp))
 			{
-				auto& p = c.second.emplace_back();
+				auto& p = std::get<1>(cmd).emplace_back();
 				p.type = Parameter::tExpression;
 				switch (res[2].str()[0])
 				{
@@ -119,11 +159,32 @@ void CommandList::build(const std::vector<std::string>& tokens)
 				case '/': p.u.e.op = Parameter::OpDivide; break;
 				}
 
-				c.second.push_back(Parameter(res[1].str()));
-				c.second.push_back(Parameter(res[3].str()));
+				std::get<1>(cmd).push_back(Parameter(res[1].str()));
+				std::get<1>(cmd).push_back(Parameter(res[3].str()));
 			}
 			else
-				c.second.push_back(Parameter(tt));
+				std::get<1>(cmd).push_back(Parameter(tt));
+		}
+	}
+
+	for (auto& cmd : cmds)
+	{
+		if (std::get<2>(cmd) != vNull)
+			mark_used_reg(std::get<2>(cmd));
+		for (auto& p : std::get<1>(cmd))
+		{
+			if (p.type == Parameter::tVariable)
+				mark_used_reg(p.u.v.i);
+		}
+	}
+	for (auto& cmd : cmds)
+	{
+		if (std::get<2>(cmd) != vNull && std::get<2>(cmd) > vCount)
+			std::get<2>(cmd) = find_reg(std::get<2>(cmd));
+		for (auto& p : std::get<1>(cmd))
+		{
+			if (p.type == Parameter::tVariable && p.u.v.u > vCount)
+				p.u.v.i = find_reg(p.u.v.i);
 		}
 	}
 
@@ -192,6 +253,10 @@ void CommandListExecuteThread::execute()
 			ptr = &reg[7];
 			size = (uint)sizeof(lVariant);
 			break;
+		case CommandList::vVEC0:
+			ptr = &vec[0];
+			size = (uint)sizeof(lVariant);
+			break;
 		case CommandList::vZeroREG:
 			ptr = &zero_reg;
 			size = (uint)sizeof(lVariant);
@@ -221,7 +286,7 @@ void CommandListExecuteThread::execute()
 		new_cl.init_sub_groups();
 		for (auto& c : new_cl.cmds)
 		{
-			for (auto& p : c.second)
+			for (auto& p : std::get<1>(c))
 			{
 				if (p.type == Parameter::tExternal)
 				{
@@ -235,12 +300,12 @@ void CommandListExecuteThread::execute()
 	auto& frame = frames.top();
 	auto& cmd = cl.cmds[frame.i];
 	auto next_i = frame.i + 1;
-	ivec4 new_frame = ivec4(-1);
+	ivec3 new_frame = ivec3(-1);
 
 	std::vector<Parameter> parameters;
-	for (auto i = 0; i < cmd.second.size(); i++)
+	for (auto i = 0; i < std::get<1>(cmd).size(); i++)
 	{
-		auto& sp = cmd.second[i];
+		auto& sp = std::get<1>(cmd)[i];
 		switch (sp.type)
 		{
 		case Parameter::tImmediate:
@@ -258,7 +323,7 @@ void CommandListExecuteThread::execute()
 		case Parameter::tExpression:
 		{
 			auto get_operand = [&]()->Parameter {
-				auto ret = cmd.second[i++];
+				auto ret = std::get<1>(cmd)[i++];
 				assert(ret.type != Parameter::tExpression);
 				if (ret.type == Parameter::tExternal)
 				{
@@ -305,7 +370,7 @@ void CommandListExecuteThread::execute()
 		}
 	}
 
-	switch (cmd.first)
+	switch (std::get<0>(cmd))
 	{
 	case CommandList::cPrint:
 		printf("Test\n");
@@ -402,12 +467,7 @@ void CommandListExecuteThread::execute()
 			}
 		}
 		break;
-	case CommandList::cForNearbyCharacters:
-	{
-		auto end_i = next_i;
-		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-			end_i = it->second;
-
+	case CommandList::cGetNearbyCharacters:
 		if (parameters.size() >= 2 && parameters.size() <= 4)
 		{
 			auto character_pos = character->node->pos;
@@ -417,19 +477,15 @@ void CommandListExecuteThread::execute()
 			auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
 			auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
 			auto characters = find_characters(faction, character_pos, search_range, start_radius, central_angle, direction_angle);
-			new_frame.x = next_i;
-			new_frame.y = end_i;
-			new_frame.z = characters.size();
-			vec[0].resize(characters.size());
-			for (auto i = 0; i < characters.size(); i++)
-				vec[0][i].p = characters[i];
-			new_frame.w = 0;
-			if (!vec[0].empty())
-				reg[0].p = vec[0][0].p;
-		}
 
-		next_i = end_i + 1;
-	}
+			if (std::get<2>(cmd) != CommandList::vNull)
+			{
+				auto vec = variable_as.operator()<std::vector<lVariant>>(std::get<2>(cmd));
+				vec.resize(characters.size());
+				for (auto i = 0; i < vec.size(); i++)
+					vec[i].p = characters[i];
+			}
+		}
 		break;
 	case CommandList::cNearestCharacter:
 		if (parameters.size() >= 3 && parameters.size() <= 5)
@@ -437,7 +493,7 @@ void CommandListExecuteThread::execute()
 			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
 			auto faction = variable_as.operator()<uint>(parameters[1].to_i());
 			auto res = find_characters(faction, character->node->pos, parameters[2].to_f());
-			reg[0].p = nullptr;
+			cCharacterPtr ret = nullptr;
 			auto marker = 0U; auto marker_time = 0.f;
 			if (parameters.size() == 5)
 			{
@@ -450,11 +506,14 @@ void CommandListExecuteThread::execute()
 				{
 					if (marker && c->add_marker(marker, marker_time))
 					{
-						reg[0].p = c;
+						ret = c;
 						break;
 					}
 				}
 			}
+
+			if (std::get<2>(cmd) != CommandList::vNull)
+				variable_as.operator()<cCharacterPtr>(std::get<2>(cmd)) = ret;
 		}
 		break;
 	case CommandList::cWait:
@@ -464,6 +523,17 @@ void CommandListExecuteThread::execute()
 	case CommandList::cGetFaction:
 		if (parameters.size() == 2)
 			variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
+		break;
+	case CommandList::cGetCharacterIDAndPos:
+		if (parameters.size() == 2)
+		{
+			void* ptr;
+			variable_addr(parameters[1].to_i(), ptr, ul);
+			
+			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
+			*(uint*)ptr = character->object->uid;
+			*(vec3*)((char*)ptr + sizeof(uint)) = character->node->pos;
+		}
 		break;
 	case CommandList::cRestoreHP:
 		if (parameters.size() == 1)
@@ -587,11 +657,19 @@ void CommandListExecuteThread::execute()
 		break;
 	case CommandList::cAddEffect:
 		if (parameters.size() == 2)
-			reg[0].p = add_effect(parameters[0].to_i(), character->node->pos, vec3(0.f), parameters[1].to_f());
+		{
+			auto ret = add_effect(parameters[0].to_i(), character->node->pos, vec3(0.f), parameters[1].to_f());
+			if (std::get<2>(cmd) != CommandList::vNull)
+				variable_as.operator()<voidptr>(std::get<2>(cmd)) = ret;
+		}
 		break;
 	case CommandList::cAddEffectFaceTarget:
 		if (parameters.size() == 2)
-			reg[0].p = add_effect(parameters[0].to_i(), character->node->pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character->node->pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+		{
+			auto ret = add_effect(parameters[0].to_i(), character->node->pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character->node->pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+			if (std::get<2>(cmd) != CommandList::vNull)
+				variable_as.operator()<voidptr>(std::get<2>(cmd)) = ret;
+		}
 		break;
 	}
 
@@ -599,11 +677,6 @@ void CommandListExecuteThread::execute()
 	{
 		if (frame.loop_n > 0)
 		{
-			if (frame.loop_vec != -1)
-			{
-				auto& v = vec[frame.loop_vec];
-				reg[0].p = v[v.size() - frame.loop_n].p;
-			}
 			frame.loop_n--;
 			frame.i = frame.beg_i;
 		}
@@ -620,7 +693,6 @@ void CommandListExecuteThread::execute()
 		frame.end_i = new_frame.y;
 		frame.i = new_frame.x;
 		frame.loop_n = new_frame.z - 1;
-		frame.loop_vec = new_frame.w;
 	}
 }
 

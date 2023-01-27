@@ -1,4 +1,5 @@
 #include "effect.h"
+#include "object.h"
 #include "character.h"
 
 #include <flame/universe/components/node.h>
@@ -90,29 +91,35 @@ void LinkEffect::send_message(uint hash, void* data, uint size)
 	switch (hash)
 	{
 	case "Target0"_h:
-		if (size >= sizeof(void*))
+		if (size == sizeof(vec4))
 		{
-			auto character = *(cCharacterPtr*)data;
-			target0.set(character);
-			auto node = character->node;
-			pos0 = node->pos;
-			node->data_listeners.add([this, node](uint hash) {
-				if (hash == "pos"_h)
-					pos0 = node->pos;
-			}, rnd);
+			if (auto it = objects.find(*(uint*)data); it != objects.end())
+			{
+				auto character = it->second->entity->get_component_t<cCharacter>();
+				target0.set(character);
+				auto node = character->node;
+				node->data_listeners.add([this, node](uint hash) {
+					if (hash == "pos"_h)
+						pos0 = node->pos;
+				}, rnd);
+			}
+			pos0 = *(vec3*)((char*)data + sizeof(uint));
 		}
 		break;
 	case "Target1"_h:
-		if (size >= sizeof(void*))
+		if (size == sizeof(vec4))
 		{
-			auto character = *(cCharacterPtr*)data;
-			target1.set(character);
-			auto node = character->node;
-			pos1 = node->pos;
-			node->data_listeners.add([this, node](uint hash) {
-				if (hash == "pos"_h)
-					pos1 = node->pos;
-			}, rnd);
+			if (auto it = objects.find(*(uint*)data); it != objects.end())
+			{
+				auto character = it->second->entity->get_component_t<cCharacter>();
+				target1.set(character);
+				auto node = character->node;
+				node->data_listeners.add([this, node](uint hash) {
+					if (hash == "pos"_h)
+						pos1 = node->pos;
+				}, rnd);
+			}
+			pos1 = *(vec3*)((char*)data + sizeof(uint));
 		}
 		break;
 	}

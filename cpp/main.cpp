@@ -1496,21 +1496,15 @@ void cMain::update()
 						new CharacterCommandMoveTo(character, stru.t.location);
 						break;
 					case "AttackTarget"_h:
-					{
-						auto it = objects.find(stru.t.target);
-						if (it != objects.end())
+						if (auto it = objects.find(stru.t.target); it != objects.end())
 							new CharacterCommandAttackTarget(character, it->second->entity->get_component_t<cCharacter>());
-					}
 						break;
 					case "AttackLocation"_h:
 						new CharacterCommandAttackLocation(character, stru.t.location);
 						break;
 					case "PickUp"_h:
-					{
-						auto it = objects.find(stru.t.target);
-						if (it != objects.end())
+						if (auto it = objects.find(stru.t.target); it != objects.end())
 							new CharacterCommandPickUp(character, it->second->entity->get_component_t<cChest>());
-					}
 						break;
 					case "CastAbility"_h:
 						break;

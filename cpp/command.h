@@ -116,17 +116,21 @@ struct CommandList
 		cBeginSub,
 		cEndSub,
 		cStore,
+		cStoreVecReg,
+		cStoreRegVec,
 		cBitInverse,
 		cIfEqual,
 		cIfNotEqual,
 		cLoop,
+		cLoopVec,
 		cBreak,
 		cGenerateRnd,
 		cRollDice100,
 		cWait,
-		cForNearbyCharacters,
+		cGetNearbyCharacters,
 		cNearestCharacter,
 		cGetFaction,
+		cGetCharacterIDAndPos,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
@@ -152,8 +156,9 @@ struct CommandList
 	};
 
 	// Reflect
-	enum Variable
+	enum Variable : uint
 	{
+		vNull,
 		vCharacter,
 		vTargetCharacter,
 		vTargetPos,
@@ -165,10 +170,12 @@ struct CommandList
 		vREG5,
 		vREG6,
 		vREG7,
-		vZeroREG
+		vVEC0,
+		vZeroREG,
+		vCount
 	};
 
-	std::vector<std::pair<Command, std::vector<Parameter>>> cmds;
+	std::vector<std::tuple<Command, std::vector<Parameter>, Variable>> cmds;
 	std::unordered_map<uint, uint> sub_groups;
 
 	void init_sub_groups();
@@ -187,8 +194,8 @@ struct CommandListExecuteThread
 		uint beg_i;
 		uint end_i;
 		uint i;
+		uint loop_i = 0;
 		uint loop_n = 0;
-		int loop_vec = -1;
 	};
 
 	const CommandList& cl;
