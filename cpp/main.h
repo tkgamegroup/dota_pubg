@@ -83,6 +83,12 @@ struct IDAndPos
 	vec3 pos;
 };
 
+struct ObjAndPosXZ
+{
+	void* obj;
+	vec2 pos_xz;
+};
+
 bool parse_literal(const std::string& str, int& id);
 
 extern bool in_editor;

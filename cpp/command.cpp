@@ -490,9 +490,10 @@ void CommandListExecuteThread::execute()
 	case CommandList::cNearestCharacter:
 		if (parameters.size() >= 3 && parameters.size() <= 5)
 		{
-			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
+			auto& oap = variable_as.operator()<ObjAndPosXZ>(parameters[0].to_i());
+			auto character = (cCharacterPtr)oap.obj;
 			auto faction = variable_as.operator()<uint>(parameters[1].to_i());
-			auto res = find_characters(faction, character->node->pos, parameters[2].to_f());
+			auto res = find_characters(faction, character ? character->node->pos : vec3(oap.pos_xz, 0.f).xzy(), parameters[2].to_f());
 			cCharacterPtr ret = nullptr;
 			auto marker = 0U; auto marker_time = 0.f;
 			if (parameters.size() == 5)
@@ -528,9 +529,21 @@ void CommandListExecuteThread::execute()
 		if (parameters.size() == 2)
 		{
 			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
-			auto& data = variable_as.operator()<IDAndPos>(parameters[1].to_i());
-			data.id = character->object->uid;
-			data.pos = character->node->pos;
+			auto& iap = variable_as.operator()<IDAndPos>(parameters[1].to_i());
+			iap.id = character->object->uid;
+			iap.pos = character->node->pos;
+		}
+		break;
+	case CommandList::cGetCharacterFromIDAndPos:
+		if (parameters.size() == 2)
+		{
+			auto& iap = variable_as.operator()<IDAndPos>(parameters[0].to_i());
+			auto& oap = variable_as.operator()<ObjAndPosXZ>(parameters[1].to_i());
+			if (auto it = objects.find(iap.id); it != objects.end())
+				oap.obj = it->second;
+			else
+				oap.obj = nullptr;
+			oap.pos_xz = iap.pos.xz();
 		}
 		break;
 	case CommandList::cRestoreHP:

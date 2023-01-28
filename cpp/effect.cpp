@@ -86,15 +86,15 @@ void LinkEffect::update()
 	}
 }
 
-void LinkEffect::send_message(uint hash, void* _data, uint size)
+void LinkEffect::send_message(uint hash, void* data, uint size)
 {
 	switch (hash)
 	{
 	case "Target0"_h:
 		if (size == sizeof(IDAndPos))
 		{
-			auto& data = *(IDAndPos*)_data;
-			if (auto it = objects.find(data.id); it != objects.end())
+			auto& iap = *(IDAndPos*)data;
+			if (auto it = objects.find(iap.id); it != objects.end())
 			{
 				auto character = it->second->entity->get_component_t<cCharacter>();
 				target0.set(character);
@@ -104,14 +104,14 @@ void LinkEffect::send_message(uint hash, void* _data, uint size)
 						pos0 = node->pos;
 				}, rnd);
 			}
-			pos0 = data.pos;
+			pos0 = iap.pos;
 		}
 		break;
 	case "Target1"_h:
 		if (size == sizeof(IDAndPos))
 		{
-			auto& data = *(IDAndPos*)_data;
-			if (auto it = objects.find(data.id); it != objects.end())
+			auto& iap = *(IDAndPos*)data;
+			if (auto it = objects.find(iap.id); it != objects.end())
 			{
 				auto character = it->second->entity->get_component_t<cCharacter>();
 				target1.set(character);
@@ -121,7 +121,7 @@ void LinkEffect::send_message(uint hash, void* _data, uint size)
 						pos1 = node->pos;
 				}, rnd);
 			}
-			pos1 = data.pos;
+			pos1 = iap.pos;
 		}
 		break;
 	}

@@ -131,6 +131,7 @@ struct CommandList
 		cNearestCharacter,
 		cGetFaction,
 		cGetCharacterIDAndPos,
+		cGetCharacterFromIDAndPos,
 		cRestoreHP,
 		cRestoreMP,
 		cTakeDamage,
