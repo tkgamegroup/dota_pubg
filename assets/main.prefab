@@ -21,11 +21,17 @@
 		</item>
 		<item file_id="82f4ac9944dcaea2d43185a721b76f02" name="renderer_settings">
 			<components>
-				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" post_shading_code_file1="shaders\post_shading.glsl" />
+				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" />
 			</components>
 		</item>
 		<item filename="terrain\main.prefab">
 			<modifications />
+		</item>
+		<item file_id="a6021fff447ea6eeafb6dd9564ff8fb3" name="Entity 0">
+			<components>
+				<item type_name="flame::cNode" pos="10.1947,1.05808,13.5541" scl="19.366,0.116078,26.0488" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\water.fmat" />
+			</components>
 		</item>
 	</children>
 </prefab>
