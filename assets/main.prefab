@@ -24,14 +24,16 @@
 				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" />
 			</components>
 		</item>
-		<item filename="terrain\main.prefab">
-			<modifications />
-		</item>
 		<item file_id="a6021fff447ea6eeafb6dd9564ff8fb3" name="Entity 0">
 			<components>
 				<item type_name="flame::cNode" pos="10.1947,1.05808,13.5541" scl="19.366,0.116078,26.0488" />
-				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\water.fmat" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\mirror.fmat" />
 			</components>
+		</item>
+		<item filename="characters\dragon_knight\main.prefab">
+			<modifications>
+				<item target="e59767104bea37c904d0dc812fe45d8e|flame::cNode|pos" value="6.76794,1.19054,7.42562" />
+			</modifications>
 		</item>
 	</children>
 </prefab>
