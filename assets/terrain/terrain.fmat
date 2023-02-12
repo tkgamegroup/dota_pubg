@@ -3,6 +3,7 @@
 	<shader_defines>
 		<item v="frag:LAYERS=3" />
 		<item v="frag:TRI_PLANAR" />
+		<item v="frag:TEXTURE_VARIANT" />
 	</shader_defines>
 	<textures>
 		<item filename="assets/terrain/rock.jpg" srgb="true" auto_mipmap="true" />
