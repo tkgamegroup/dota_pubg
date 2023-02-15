@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item name="RootNode">
+			<components>
+				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
+				<item type_name="flame::cArmature" armature_name="lava_man.fmod" />
+			</components>
+			<children>
+				<item name="Mesh">
+					<components>
+						<item type_name="flame::cNode" pos="0,127.9,0" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
+						<item type_name="flame::cMesh" mesh_name="lava_man.fmod#mesh0" material_name="lava_man_Material.001.fmat" />
+					</components>
+				</item>
+				<item name="Armature">
+					<components>
+						<item type_name="flame::cNode" pos="0,99.9201,0" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
+					</components>
+					<children>
+						<item name="Bone">
+							<components>
+								<item type_name="flame::cNode" pos="0,-0.0409946,-0.00960988" qut="0.689865,0.723938,8.22384e-08,8.63001e-08" scl="1,1,1" />
+							</components>
+							<children>
+								<item name="Bone.001">
+									<components>
+										<item type_name="flame::cNode" pos="2.22045e-16,0.138536,-2.32831e-09" qut="0.998761,-0.0497722,-1.19062e-07,-5.93331e-09" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="Bone.002">
+											<components>
+												<item type_name="flame::cNode" pos="8.47033e-22,0.111347,0" qut="0.995877,-0.0907096,1.18718e-07,-1.08134e-08" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="Bone.003">
+													<components>
+														<item type_name="flame::cNode" pos="-7.10543e-15,0.260054,0" qut="0.985426,0.170107,7.21052e-15,4.05566e-08" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="Bone.004">
+															<components>
+																<item type_name="flame::cNode" pos="1.06581e-14,0.114125,-1.49012e-08" qut="0.999815,0.0192186,1.7746e-14,4.58207e-09" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="Bone.004_end">
+																	<components>
+																		<item type_name="flame::cNode" pos="0,0.201433,-1.49012e-08" qut="1,-7.45058e-09,0,0" scl="1,1,1" />
+																	</components>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+												<item name="Bone.008">
+													<components>
+														<item type_name="flame::cNode" pos="0.151825,0.264369,-0.00152305" qut="-0.333572,-0.0442988,-0.0939728,0.936983" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="Bone.009">
+															<components>
+																<item type_name="flame::cNode" pos="0,0.292121,-3.72529e-09" qut="0.983109,0.168823,-0.0149989,-0.0690731" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="Bone.010">
+																	<components>
+																		<item type_name="flame::cNode" pos="5.96047e-08,0.274847,0" qut="0.998978,-0.0055451,-0.0237108,-0.0380875" scl="1,1,1" />
+																	</components>
+																	<children>
+																		<item name="Bone.010_end">
+																			<components>
+																				<item type_name="flame::cNode" pos="1.19209e-07,0.170114,-5.96046e-08" qut="1,-1.95156e-18,9.31323e-10,-1.62981e-09" scl="1,1,1" />
+																			</components>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+												<item name="Bone.014">
+													<components>
+														<item type_name="flame::cNode" pos="-0.154179,0.264369,-0.00152311" qut="0.335925,0.0196766,-0.0851804,0.937823" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="Bone.015">
+															<components>
+																<item type_name="flame::cNode" pos="0,0.29212,7.45058e-09" qut="0.962725,0.14737,0.19972,0.107492" scl="1,1,1" />
+															</components>
+															<children>
+																<item name="Bone.016">
+																	<components>
+																		<item type_name="flame::cNode" pos="-5.96047e-08,0.274846,-5.96047e-08" qut="0.998599,-0.0189776,-0.0363178,0.0334853" scl="1,1,1" />
+																	</components>
+																	<children>
+																		<item name="Bone.016_end">
+																			<components>
+																				<item type_name="flame::cNode" pos="0,0.170114,-5.96046e-08" qut="1,0,0,-2.23517e-08" />
+																			</components>
+																		</item>
+																	</children>
+																</item>
+															</children>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="Bone.005">
+									<components>
+										<item type_name="flame::cNode" pos="0.117427,-3.39746e-05,-0.0344282" qut="-0.00761908,0.943088,-0.0118426,0.332245" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="Bone.006">
+											<components>
+												<item type_name="flame::cNode" pos="0,0.467436,7.45058e-09" qut="0.997216,0.00720104,-0.00161718,-0.074197" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="Bone.007">
+													<components>
+														<item type_name="flame::cNode" pos="-3.72529e-08,0.442085,-7.45058e-09" qut="0.771945,-0.501337,-0.0162276,-0.390511" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="Bone.007_end">
+															<components>
+																<item type_name="flame::cNode" pos="0,0.192382,-1.49012e-08" qut="1,-7.45058e-09,7.91624e-09,3.72529e-09" scl="1,1,1" />
+															</components>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+								<item name="Bone.011">
+									<components>
+										<item type_name="flame::cNode" pos="-0.11978,-3.39746e-05,-0.0344282" qut="-0.0133604,0.943024,0.00444942,0.332426" scl="1,1,1" />
+									</components>
+									<children>
+										<item name="Bone.012">
+											<components>
+												<item type_name="flame::cNode" pos="-7.45058e-09,0.467436,-5.58794e-09" qut="0.997215,-0.0709506,0.0020786,0.0228707" scl="1,1,1" />
+											</components>
+											<children>
+												<item name="Bone.013">
+													<components>
+														<item type_name="flame::cNode" pos="2.98023e-08,0.442085,0" qut="0.769106,-0.459868,0.068106,-0.438588" scl="1,1,1" />
+													</components>
+													<children>
+														<item name="Bone.013_end">
+															<components>
+																<item type_name="flame::cNode" pos="0,0.192382,0" qut="1,0,9.31322e-10,7.45058e-09" scl="1,1,1" />
+															</components>
+														</item>
+													</children>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+							</children>
+						</item>
+					</children>
+				</item>
+			</children>
+		</item>
+	</children>
+</prefab>

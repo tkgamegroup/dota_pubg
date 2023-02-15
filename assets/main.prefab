@@ -24,16 +24,23 @@
 				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" />
 			</components>
 		</item>
-		<item file_id="a6021fff447ea6eeafb6dd9564ff8fb3" name="Entity 0">
+		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="Entity 0">
 			<components>
-				<item type_name="flame::cNode" pos="10.1947,1.05808,13.5541" scl="19.366,0.116078,26.0488" />
-				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\mirror.fmat" />
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="standard_plane" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
-		<item filename="characters\dragon_knight\main.prefab">
-			<modifications>
-				<item target="e59767104bea37c904d0dc812fe45d8e|flame::cNode|pos" value="6.76794,1.19054,7.42562" />
-			</modifications>
+		<item file_id="d6b9c85940862650a27066b74321e237" name="Entity 1">
+			<components>
+				<item type_name="flame::cNode" pos="1,0,1.5" scl="2,1,3" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\check.fmat" />
+			</components>
+		</item>
+		<item file_id="59ce09a041bdc8ffdfb177a5ab29549a" name="Entity 0">
+			<components>
+				<item type_name="flame::cNode" pos="2,0,0.5" />
+				<item type_name="flame::cMesh" mesh_name="standard_tri_prism" material_name="flame\materials\check.fmat" />
+			</components>
 		</item>
 	</children>
 </prefab>
