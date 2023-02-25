@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<material color="0.8,0.8,0.8,1" color_map="0">
+	<textures>
+		<item filename="columned-lava-rock-bl\columned-lava-rock_albedo.png" srgb="true" mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" auto_mipmap="true" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+		<item mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" />
+	</textures>
+</material>
