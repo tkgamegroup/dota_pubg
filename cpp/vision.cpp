@@ -38,6 +38,7 @@ void deinit_vision()
 		sRenderer::instance()->release_texture_res(my_vision_map_res_id);
 	if (img_my_vision)
 		delete img_my_vision;
+	img_my_vision = nullptr;
 }
 
 bool get_vision(uint faction, const vec3& coord)

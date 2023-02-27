@@ -36,8 +36,6 @@ target_include_directories(cpp PUBLIC "${GLM_INCLUDE_DIR}")
 target_include_directories(cpp PUBLIC "${IMGUI_DIR}")
 target_include_directories(cpp PUBLIC "${flame_path}/include")
 target_link_libraries(cpp "${flame_path}/bin/debug/imgui.lib")
-target_link_libraries(cpp "${flame_path}/bin/debug/flame_foundation.lib")
-target_link_libraries(cpp "${flame_path}/bin/debug/flame_graphics.lib")
 target_link_libraries(cpp "${flame_path}/bin/debug/flame_universe.lib")
 
 file(GENERATE OUTPUT "$<TARGET_FILE_DIR:cpp>/cpp.typedesc" CONTENT "${CMAKE_CURRENT_SOURCE_DIR}/cpp" TARGET cpp)
