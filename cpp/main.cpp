@@ -11,6 +11,7 @@
 #include "effect.h"
 #include "chest.h"
 #include "creep_ai.h"
+#include "floating_text.h"
 #include "nw_data_harvester.h"
 #include "views/view_equipment.h"
 #include "views/view_ability.h"
@@ -102,71 +103,6 @@ void MainCamera::init(EntityPtr e)
 		node = e->node();
 		camera = e->get_component_t<cCamera>();
 	}
-}
-
-void MainTerrain::init(EntityPtr e)
-{
-	entity = e;
-	if (e)
-	{
-		node = e->node();
-		hf_terrain = e->get_component_t<cTerrain>();
-		mc_terrain = e->get_component_t<cVolume>();
-
-		if (hf_terrain)
-		{
-			extent = hf_terrain->extent;
-
-			if (auto height_map_info_fn = hf_terrain->height_map->filename; !height_map_info_fn.empty())
-			{
-				height_map_info_fn += L".info";
-				std::ifstream file(height_map_info_fn);
-				if (file.good())
-				{
-					LineReader info(file);
-					info.read_block("sites:");
-					unserialize_text(info, &site_positions);
-					file.close();
-				}
-			}
-
-			site_centrality.resize(site_positions.size());
-			for (auto i = 0; i < site_positions.size(); i++)
-			{
-				auto x = abs(site_positions[i].x * 2.f - 1.f);
-				auto z = abs(site_positions[i].z * 2.f - 1.f);
-				site_centrality[i] = std::make_pair(x * z, i);
-			}
-			std::sort(site_centrality.begin(), site_centrality.end(), [](const auto& a, const auto& b) {
-				return a.first < b.first;
-			});
-		}
-		else if (mc_terrain)
-		{
-			extent = mc_terrain->extent;
-		}
-	}
-}
-
-vec3 MainTerrain::get_coord(const vec2& uv)
-{
-	if (hf_terrain)
-		return node->pos + extent * vec3(uv.x, hf_terrain->height_map->linear_sample(uv).r, uv.y);
-	else if (mc_terrain)
-		return node->pos + extent * vec3(uv.x, 1.f - mc_terrain->height_map->linear_sample(uv).r, uv.y);
-	return vec3(0.f);
-}
-
-vec3 MainTerrain::get_coord(const vec3& pos)
-{
-	return get_coord(vec2((pos.x - node->pos.x) / extent.x, (pos.z - node->pos.z) / extent.z));
-}
-
-vec3 MainTerrain::get_coord_by_centrality(int i)
-{
-	if (i < 0)
-		i = (int)site_centrality.size() + i;
-	return get_coord(site_positions[site_centrality[i].second].xz());
 }
 
 void MainPlayer::init(EntityPtr e)
@@ -281,141 +217,6 @@ float illegal_op_str_timer = 0.f;
 
 std::string tooltip;
 
-ItemShortcut::ItemShortcut(ItemInstance* ins) :
-	ins(ins)
-{
-	type = tItem;
-	id = ins->id;
-}
-
-void ItemShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
-{
-	auto& item = Item::get(ins->id);
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::BeginTooltip();
-		ImGui::TextUnformatted(item.name.c_str());
-		ImGui::TextUnformatted(item.description.c_str());
-		ImGui::EndTooltip();
-	}
-	dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
-}
-
-void ItemShortcut::click()
-{
-	main_player.character->use_item(ins);
-}
-
-AbilityShortcut::AbilityShortcut(AbilityInstance* ins) :
-	ins(ins)
-{
-	type = tAbility;
-	id = ins->id;
-}
-
-void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
-{
-	auto& ability = Ability::get(ins->id);
-	if (ImGui::IsItemHovered())
-	{
-		ImGui::BeginTooltip();
-		ImGui::TextUnformatted(ability.name.c_str());
-		ImGui::TextUnformatted(ability.description.c_str());
-		ImGui::EndTooltip();
-	}
-	dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
-
-	if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
-	{
-		dl->PushClipRect(p0, p1);
-		auto c = (p0 + p1) * 0.5f;
-		dl->PathLineTo(c);
-		dl->PathArcTo(c, p1.x - p0.x, ((ins->cd_timer / ins->cd_max) * 2.f - 0.5f) * glm::pi<float>(), -0.5f * glm::pi<float>());
-		dl->PathFillConvex(ImColor(0.f, 0.f, 0.f, 0.5f));
-		dl->AddText(p0 + vec2(8.f), ImColor(1.f, 1.f, 1.f, 1.f), std::format("{:.1f}", ins->cd_timer).c_str());
-		dl->PopClipRect();
-	}
-}
-
-void AbilityShortcut::click()
-{
-	if (ins->cd_timer > 0.f)
-	{
-		illegal_op_str = "Cooldowning.";
-		illegal_op_str_timer = 3.f;
-		return;
-	}
-	auto& ability = Ability::get(ins->id);
-	if (main_player.character->mp < ability.get_mp(ins->lv))
-	{
-		illegal_op_str = "Not Enough MP.";
-		illegal_op_str_timer = 3.f;
-		return;
-	}
-	select_mode = ability.target_type;
-	if (select_mode == TargetNull)
-	{
-		if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-			new CharacterCommandCastAbility(main_player.character, ins);
-		else if (multi_player == MultiPlayerAsClient)
-		{
-			std::ostringstream res;
-			nwCommandCharacterStruct stru;
-			stru.id = main_player.character->object->uid;
-			stru.type = "CastAbility"_h;
-			stru.id2 = ins->id;
-			pack_msg(res, nwCommandCharacter, stru);
-			so_client->send(res.str());
-		}
-	}
-	else
-	{
-		if (ability.target_type & TargetLocation)
-		{
-			select_location_callback = [this](const vec3& location) {
-				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-					new CharacterCommandCastAbilityToLocation(main_player.character, ins, location);
-				else if (multi_player == MultiPlayerAsClient)
-				{
-					std::ostringstream res;
-					nwCommandCharacterStruct stru;
-					stru.id = main_player.character->object->uid;
-					stru.type = "CastAbilityToLocation"_h;
-					stru.id2 = ins->id;
-					stru.t.location = location;
-					pack_msg(res, nwCommandCharacter, stru);
-					so_client->send(res.str());
-				}
-			};
-			select_distance = ability.get_distance(ins->lv);
-			select_range = ability.get_range(ins->lv);
-			select_angle = ability.angle;
-			select_start_radius = ability.start_radius;
-		}
-		if (ability.target_type & TargetEnemy)
-		{
-			select_enemy_callback = [this](cCharacterPtr character) {
-				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-					new CharacterCommandCastAbilityToTarget(main_player.character, ins, character);
-				else if (multi_player == MultiPlayerAsClient)
-				{
-					std::ostringstream res;
-					nwCommandCharacterStruct stru;
-					stru.id = main_player.character->object->uid;
-					stru.type = "CastAbilityToTarget"_h;
-					stru.id2 = ins->id;
-					stru.t.target = character->object->uid;
-					pack_msg(res, nwCommandCharacter, stru);
-					so_client->send(res.str());
-				}
-			};
-			select_distance = ability.get_distance(ins->lv);
-		}
-	}
-}
-
-std::unique_ptr<Shortcut> shortcuts[10];
-
 Tracker<cCharacterPtr> focus_character;
 
 cMain::~cMain()
@@ -428,17 +229,6 @@ void add_location_icon(const vec3& pos)
 {
 	location_tips.emplace_back(30, pos);
 }
-
-struct FloatingTip
-{
-	uint ticks;
-	vec3 pos;
-	std::string text;
-	vec2 size = vec2(0.f);
-	cvec4 color;
-};
-
-static std::vector<FloatingTip> floating_tips;
 
 void toggle_equipment_view()
 {
@@ -625,9 +415,9 @@ void cMain::on_active()
 				}
 			}
 		}
-		break;
+			break;
 		}
-		}, "main"_h);
+	}, "main"_h);
 
 	graphics::gui_set_current();
 	graphics::gui_callbacks.add([this]() {
@@ -1317,10 +1107,10 @@ void cMain::start()
 		shortcuts[i].reset(shortcut);
 	}
 
-	init_vision();
-
 	main_camera.init(entity->find_child("Camera"));
 	main_terrain.init(entity->find_child("terrain"));
+
+	init_vision();
 	 
 	init_effects();
 	init_projectiles();
@@ -1459,6 +1249,7 @@ void cMain::update()
 		dead_chests.clear();
 		dead_characters.clear();
 
+		// auto attack
 		if (main_player.character)
 		{
 			if (main_player.character->command && main_player.character->command->type == "Idle"_h)
@@ -1633,6 +1424,7 @@ void cMain::update()
 		break;
 	}
 
+	// move camera smoothly
 	if (main_camera.node && main_player.node)
 	{
 		static vec3 velocity(0.f);
@@ -1977,15 +1769,6 @@ void teleport(cCharacterPtr character, const vec3& location)
 {
 	character->node->set_pos(location);
 	character->nav_agent->update_pos();
-}
-
-void add_floating_tip(const vec3& pos, const std::string& text, const cvec4& color)
-{
-	auto& t = floating_tips.emplace_back();
-	t.ticks = 30;
-	t.pos = pos;
-	t.text = text;
-	t.color = color;
 }
 
 extern "C" EXPORT void* cpp_info()

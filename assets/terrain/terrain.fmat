@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<material float_values="1,0,0,0" code_file="flame/shaders/default_layered_mat.glsl">
+<material tiling="1" code_file="flame/shaders/default_layered_mat.glsl">
 	<shader_defines>
 		<item v="frag:LAYERS=3" />
 		<item v="frag:TRI_PLANAR" />
