@@ -1,5 +1,9 @@
 #pragma once
 
+#include <flame/foundation/foundation.h>
+
+#include "head.h"
+
 struct ImDrawList;
 struct Shortcut
 {
@@ -43,3 +47,5 @@ struct AbilityShortcut : Shortcut
 };
 
 extern std::unique_ptr<Shortcut> shortcuts[10];
+
+void init_shortcuts();

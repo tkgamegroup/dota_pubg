@@ -1,7 +1,9 @@
 #pragma once
 
-#include "main.h"
-#include "command.h"
+#include <flame/universe/component.h>
+
+#include "../head.h"
+#include "../command.h"
 
 // Reflect ctor
 struct cSectorCollider : Component

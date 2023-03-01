@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../main.h"
-
 #include <flame/graphics/gui.h>
 
 struct ViewInventory : graphics::GuiView

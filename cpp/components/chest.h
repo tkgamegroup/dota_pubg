@@ -1,6 +1,8 @@
 #pragma once
 
-#include "main.h"
+#include <flame/universe/component.h>
+
+#include "../head.h"
 
 extern std::vector<cChestPtr> chests;
 extern std::vector<cChestPtr> dead_chests;

@@ -43,6 +43,23 @@ enum DamageType
 	MagicDamage
 };
 
+// Reflect
+enum CharacterState
+{
+	CharacterStateNormal = 0,
+	CharacterStateStun = 1 << 0,
+	CharacterStateRoot = 1 << 1,
+	CharacterStateSilence = 1 << 2
+};
+
+enum CharacterMessage
+{
+	CharacterLevelUp,
+	CharacterGainItem,
+	CharacterGainAbility,
+	CharacterAbilityLevelUp,
+};
+
 struct IDAndPos
 {
 	uint id;

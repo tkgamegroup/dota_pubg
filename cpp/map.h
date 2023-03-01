@@ -1,5 +1,9 @@
 #pragma once
 
+#include <flame/universe/universe.h>
+
+#include "head.h"
+
 struct MainTerrain
 {
 	EntityPtr entity = nullptr;
@@ -17,3 +21,5 @@ struct MainTerrain
 	vec3 get_coord_by_centrality(int i);
 };
 extern MainTerrain main_terrain;
+
+void init_map();

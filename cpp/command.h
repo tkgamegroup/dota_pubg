@@ -1,8 +1,8 @@
 #pragma once
 
-#include "main.h"
-
 #include <flame/foundation/typeinfo.h>
+
+#include "head.h"
 
 struct Parameter
 {

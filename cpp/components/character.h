@@ -158,23 +158,6 @@ struct CharacterPreset
 
 extern std::vector<CharacterPreset> character_presets;
 
-// Reflect
-enum CharacterState
-{
-	CharacterStateNormal = 0,
-	CharacterStateStun = 1 << 0,
-	CharacterStateRoot = 1 << 1,
-	CharacterStateSilence = 1 << 2
-};
-
-enum CharacterMessage
-{
-	CharacterLevelUp,
-	CharacterGainItem,
-	CharacterGainAbility,
-	CharacterAbilityLevelUp,
-};
-
 extern std::vector<cCharacterPtr> characters;
 extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 extern std::vector<cCharacterPtr> dead_characters;
