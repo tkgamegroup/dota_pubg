@@ -1,25 +1,12 @@
 #pragma once
 
-#include <flame/universe/universe.h>
-
 #include "head.h"
 
-struct MainTerrain
-{
-	EntityPtr entity = nullptr;
-	cNodePtr node = nullptr;
-	cTerrainPtr hf_terrain = nullptr; // height field terrain
-	cVolumePtr mc_terrain = nullptr; // marching cubes terrain
-	vec3 extent;
-
-	std::vector<vec3> site_positions;
-	std::vector<std::pair<float, int>> site_centrality;
-
-	void init(EntityPtr e);
-	vec3 get_coord(const vec2& uv);
-	vec3 get_coord(const vec3& pos);
-	vec3 get_coord_by_centrality(int i);
-};
-extern MainTerrain main_terrain;
-
-void init_map();
+void init_map(EntityPtr e);
+vec3 get_map_coord(const vec2& uv);
+vec3 get_map_coord(const vec3& pos);
+vec3 get_coord_by_centrality(int i);
+void init_vision();
+void deinit_vision();
+bool get_vision(uint faction, const vec3& coord);
+void update_vision();

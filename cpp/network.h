@@ -1,18 +1,11 @@
 #pragma once
 
-#include "main.h"
-
 #include <flame/foundation/network.h>
 #define FLAME_NO_XML
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
 
-enum MultiPlayerType
-{
-	SinglePlayer,
-	MultiPlayerAsHost,
-	MultiPlayerAsClient
-};
+#include "head.h"
 
 enum nwMessage
 {
@@ -80,8 +73,24 @@ struct nwCommandCharacterStruct
 	}t;
 };
 
+// Reflect ctor
+struct cNWDataHarvester : Component
+{
+	std::vector<std::unordered_map<uint/*var hash*/, std::pair<uint, uint>/*the current and reset faction flags (is this var needs to sync to those factions)*/>> targets;
+
+	void add_target(uint comp, uint var, uint flags = 0xffffffff);
+
+	void on_init() override;
+
+	struct Create
+	{
+		virtual cNWDataHarvesterPtr operator()(EntityPtr) = 0;
+	};
+	// Reflect static
+	EXPORT static Create& create;
+};
+
 extern std::mutex nw_mtx;
-extern MultiPlayerType multi_player;
 extern network::ClientPtr so_client;
 extern network::ServerPtr so_server;
 extern std::map<uint, std::vector<void*>> nw_players;

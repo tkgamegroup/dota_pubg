@@ -1,14 +1,14 @@
-#include "command.h"
-#include "object.h"
-#include "character.h"
-#include "effect.h"
-#include "collider.h"
-
 #define FLAME_NO_XML
 #define FLAME_NO_JSON
 #include <flame/foundation/typeinfo_serialize.h>
-#include <flame/universe/components/node.h>
 #include <flame/universe/components/nav_agent.h>
+
+#include "command.h"
+#include "game.h"
+#include "entities/object.h"
+#include "entities/character.h"
+#include "entities/effect.h"
+#include "entities/collider.h"
 
 Parameter::Parameter(const std::string& str)
 {

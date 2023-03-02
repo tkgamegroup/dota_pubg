@@ -28,6 +28,7 @@ endforeach()
 
 file(GLOB_RECURSE source_files "cpp/*.h*" "cpp/*.c*" "assets/*.ini")
 add_library(cpp SHARED ${source_files})
+assign_source_group("${CMAKE_CURRENT_SOURCE_DIR}" "" ${source_files})
 target_compile_definitions(cpp PUBLIC USE_IMGUI)
 target_compile_definitions(cpp PUBLIC "IMPORT=__declspec(dllimport)")
 target_compile_definitions(cpp PUBLIC "EXPORT=__declspec(dllexport)")

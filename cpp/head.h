@@ -1,11 +1,12 @@
 #pragma once
 
-#include <flame/math.h>
+#include <flame/universe/entity.h>
+#include <flame/universe/components/node.h>
 
 using namespace flame;
 
 FLAME_TYPE(cLauncher)
-FLAME_TYPE(cMain)
+FLAME_TYPE(cGame)
 FLAME_TYPE(cObject)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cProjectile)
@@ -14,6 +15,10 @@ FLAME_TYPE(cSectorCollider)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cCreepAI)
 FLAME_TYPE(cNWDataHarvester)
+
+struct AbilityInstance;
+struct ItemInstance;
+struct BuffInstance;
 
 const auto CharacterTag = 1 << 1;
 
@@ -60,6 +65,13 @@ enum CharacterMessage
 	CharacterAbilityLevelUp,
 };
 
+enum MultiPlayerType
+{
+	SinglePlayer,
+	MultiPlayerAsHost,
+	MultiPlayerAsClient
+};
+
 struct IDAndPos
 {
 	uint id;
@@ -71,3 +83,41 @@ struct ObjAndPosXZ
 	void* obj;
 	vec2 pos_xz;
 };
+
+template<typename T>
+struct Tracker
+{
+	uint hash;
+	T obj = nullptr;
+
+	Tracker()
+	{
+		hash = rand();
+	}
+
+	~Tracker()
+	{
+		if (obj)
+			obj->entity->message_listeners.remove(hash);
+	}
+
+	void set(T oth)
+	{
+		if (obj)
+			obj->entity->message_listeners.remove((uint)this);
+		obj = oth;
+		if (oth)
+		{
+			oth->entity->message_listeners.add([this](uint h, void*, void*) {
+				if (h == "destroyed"_h)
+					obj = nullptr;
+				}, hash);
+		}
+	}
+};
+
+extern float gtime;
+extern bool in_editor;
+extern MultiPlayerType multi_player;
+
+bool parse_literal(const std::string& str, int& id);

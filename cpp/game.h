@@ -1,7 +1,5 @@
 #pragma once
 
-#include <flame/universe/universe.h>
-
 #include "head.h"
 
 extern EntityPtr root;
@@ -30,10 +28,6 @@ struct MainPlayer
 };
 extern MainPlayer main_player;
 
-extern float gtime;
-extern bool in_editor;
-
-bool parse_literal(const std::string& str, int& id);
 void enable_game(bool v);
 EntityPtr get_prefab(const std::filesystem::path& path);
 void add_player(vec3& pos, uint& faction, uint& preset_id);
@@ -44,3 +38,42 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id = 0);
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
 void teleport(cCharacterPtr character, const vec3& location);
+
+// Reflect ctor
+struct cGame : Component
+{
+	// Reflect requires
+	cNodePtr node;
+
+	// Reflect
+	float camera_length = 15.f;
+	// Reflect
+	float camera_angle = 45.f;
+
+	~cGame();
+
+	void start() override;
+	void update() override;
+
+	struct Create
+	{
+		virtual cGamePtr operator()(EntityPtr) = 0;
+	};
+	// Reflect static
+	EXPORT static Create& create;
+};
+
+// Reflect ctor
+struct cLauncher : Component
+{
+	~cLauncher();
+
+	void start() override;
+
+	struct Create
+	{
+		virtual cLauncherPtr operator()(EntityPtr) = 0;
+	};
+	// Reflect static
+	EXPORT static Create& create;
+};

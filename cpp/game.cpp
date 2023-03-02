@@ -1,16 +1,23 @@
-#include "game.h"
-#include "buff.h"
-#include "item.h"
-#include "ability.h"
-#include "components/effect.h"
-#include "components/projectile.h"
-
-#define FLAME_NO_XML
-#define FLAME_NO_JSON
-#include <flame/foundation/typeinfo_serialize.h>
-#include <flame/universe/entity.h>
+#include <flame/graphics/gui.h>
 #include <flame/universe/world.h>
+#include <flame/universe/octree.h>
+#include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
+
+#include "game.h"
+#include "map.h"
+#include "command.h"
+#include "network.h"
+#include "entities/ability.h"
+#include "entities/buff.h"
+#include "entities/item.h"
+#include "entities/object.h"
+#include "entities/effect.h"
+#include "entities/projectile.h"
+#include "entities/character.h"
+#include "entities/chest.h"
+#include "entities/collider.h"
+#include "entities/ai.h"
 
 bool parse_literal(const std::string& str, int& id)
 {
@@ -83,10 +90,10 @@ EntityPtr get_prefab(const std::filesystem::path& _path)
 void add_player(vec3& pos, uint& faction, uint& preset_id)
 {
 	static uint idx = 0;
-	if (!main_terrain.site_centrality.empty())
+	/*if (!main_terrain.site_centrality.empty())
 		pos = main_terrain.get_coord_by_centrality(-idx - 1);
 	else
-		pos = main_terrain.get_coord(vec2(0.5f));
+		*/pos = get_map_coord(vec2(0.5f));
 	faction = 1 << (log2i((uint)FactionParty1) + idx);
 	preset_id = CharacterPreset::find("Dragon Knight");
 	idx++;
@@ -206,7 +213,7 @@ cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float du
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
 	auto e = get_prefab(L"assets\\models\\chest.prefab")->copy();
-	e->node()->set_pos(main_terrain.get_coord(pos));
+	e->node()->set_pos(get_map_coord(pos));
 	root->add_child(e);
 	auto object = e->get_component_t<cObject>();
 	object->init(4000, id);
@@ -216,4 +223,95 @@ cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 	chest->item_num = item_num;
 
 	return chest;
+}
+
+void teleport(cCharacterPtr character, const vec3& location)
+{
+	character->node->set_pos(location);
+	character->nav_agent->update_pos();
+}
+
+struct cGameCreate : cGame::Create
+{
+	cGamePtr operator()(EntityPtr e) override
+	{
+		if (e == INVALID_POINTER)
+			return nullptr;
+		return new cGame;
+	}
+}cGame_create;
+cGame::Create& cGame::create = cGame_create;
+
+cLauncher::~cLauncher()
+{
+	graphics::gui_callbacks.remove((uint)this);
+}
+
+void enter_scene(EntityPtr root)
+{
+	add_event([root]() {
+		graphics::gui_set_clear(false, vec4(0.f));
+		root->remove_component<cLauncher>();
+		root->load(L"assets\\main.prefab");
+		return false;
+		});
+}
+
+void cLauncher::start()
+{
+	graphics::gui_set_current();
+	graphics::gui_callbacks.add([this]() {
+		if (ImGui::Button("Single Player"))
+		{
+			enter_scene(entity);
+		}
+		if (ImGui::Button("Create Local Server"))
+		{
+			start_server();
+			enter_scene(entity);
+		}
+		if (ImGui::Button("Join Local Server"))
+		{
+			join_server();
+			if (so_client)
+			{
+				multi_player = MultiPlayerAsClient;
+				enter_scene(entity);
+			}
+		}
+		}, (uint)this);
+}
+
+struct cLauncherCreate : cLauncher::Create
+{
+	cLauncherPtr operator()(EntityPtr e) override
+	{
+		if (e == INVALID_POINTER)
+			return nullptr;
+		return new cLauncher;
+	}
+}cLauncher_create;
+cLauncher::Create& cLauncher::create = cLauncher_create;
+
+extern "C" EXPORT void* cpp_info()
+{
+	auto uinfo = universe_info(); // references universe module explicitly
+	cLauncher::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cGame::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cObject::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cProjectile::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cEffect::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cSectorCollider::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cChest::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	cNWDataHarvester::create((EntityPtr)INVALID_POINTER); // references create function explicitly
+	return nullptr;
+}
+
+extern "C" EXPORT void set_editor_info(Entity * *p_selecting_entity, bool* p_control)
+{
+	in_editor = true;
+	//editor_p_selecting_entity = p_selecting_entity;
+	//editor_p_control = p_control;
 }
