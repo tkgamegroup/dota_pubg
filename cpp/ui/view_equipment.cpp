@@ -1,8 +1,10 @@
 #include <flame/graphics/image.h>
 
+#include "ui.h"
 #include "view_equipment.h"
-#include "../character.h"
-#include "../buff.h"
+#include "../game.h"
+#include "../entities/character.h"
+#include "../entities/buff.h"
 
 ViewEquipment view_equipment;
 

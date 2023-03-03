@@ -1,7 +1,8 @@
+#include "ui.h"
 #include "view_inventory.h"
-#include "../character.h"
-#include "../item.h"
-#include "../network.h"
+#include "../game.h"
+#include "../entities/character.h"
+#include "../entities/item.h"
 
 ViewInventory view_inventory;
 

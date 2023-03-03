@@ -1,4 +1,9 @@
+#include "ui.h"
 #include "shortcut.h"
+#include "../game.h"
+#include "../entities/item.h"
+#include "../entities/ability.h"
+#include "../entities/character.h"
 
 ItemShortcut::ItemShortcut(ItemInstance* ins) :
 	ins(ins)
@@ -58,79 +63,79 @@ void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 
 void AbilityShortcut::click()
 {
-	if (ins->cd_timer > 0.f)
-	{
-		illegal_op_str = "Cooldowning.";
-		illegal_op_str_timer = 3.f;
-		return;
-	}
-	auto& ability = Ability::get(ins->id);
-	if (main_player.character->mp < ability.get_mp(ins->lv))
-	{
-		illegal_op_str = "Not Enough MP.";
-		illegal_op_str_timer = 3.f;
-		return;
-	}
-	select_mode = ability.target_type;
-	if (select_mode == TargetNull)
-	{
-		if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-			new CharacterCommandCastAbility(main_player.character, ins);
-		else if (multi_player == MultiPlayerAsClient)
-		{
-			std::ostringstream res;
-			nwCommandCharacterStruct stru;
-			stru.id = main_player.character->object->uid;
-			stru.type = "CastAbility"_h;
-			stru.id2 = ins->id;
-			pack_msg(res, nwCommandCharacter, stru);
-			so_client->send(res.str());
-		}
-	}
-	else
-	{
-		if (ability.target_type & TargetLocation)
-		{
-			select_location_callback = [this](const vec3& location) {
-				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-					new CharacterCommandCastAbilityToLocation(main_player.character, ins, location);
-				else if (multi_player == MultiPlayerAsClient)
-				{
-					std::ostringstream res;
-					nwCommandCharacterStruct stru;
-					stru.id = main_player.character->object->uid;
-					stru.type = "CastAbilityToLocation"_h;
-					stru.id2 = ins->id;
-					stru.t.location = location;
-					pack_msg(res, nwCommandCharacter, stru);
-					so_client->send(res.str());
-				}
-			};
-			select_distance = ability.get_distance(ins->lv);
-			select_range = ability.get_range(ins->lv);
-			select_angle = ability.angle;
-			select_start_radius = ability.start_radius;
-		}
-		if (ability.target_type & TargetEnemy)
-		{
-			select_enemy_callback = [this](cCharacterPtr character) {
-				if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-					new CharacterCommandCastAbilityToTarget(main_player.character, ins, character);
-				else if (multi_player == MultiPlayerAsClient)
-				{
-					std::ostringstream res;
-					nwCommandCharacterStruct stru;
-					stru.id = main_player.character->object->uid;
-					stru.type = "CastAbilityToTarget"_h;
-					stru.id2 = ins->id;
-					stru.t.target = character->object->uid;
-					pack_msg(res, nwCommandCharacter, stru);
-					so_client->send(res.str());
-				}
-			};
-			select_distance = ability.get_distance(ins->lv);
-		}
-	}
+	//if (ins->cd_timer > 0.f)
+	//{
+	//	illegal_op_str = "Cooldowning.";
+	//	illegal_op_str_timer = 3.f;
+	//	return;
+	//}
+	//auto& ability = Ability::get(ins->id);
+	//if (main_player.character->mp < ability.get_mp(ins->lv))
+	//{
+	//	illegal_op_str = "Not Enough MP.";
+	//	illegal_op_str_timer = 3.f;
+	//	return;
+	//}
+	//select_mode = ability.target_type;
+	//if (select_mode == TargetNull)
+	//{
+	//	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	//		new CharacterCommandCastAbility(main_player.character, ins);
+	//	else if (multi_player == MultiPlayerAsClient)
+	//	{
+	//		std::ostringstream res;
+	//		nwCommandCharacterStruct stru;
+	//		stru.id = main_player.character->object->uid;
+	//		stru.type = "CastAbility"_h;
+	//		stru.id2 = ins->id;
+	//		pack_msg(res, nwCommandCharacter, stru);
+	//		so_client->send(res.str());
+	//	}
+	//}
+	//else
+	//{
+	//	if (ability.target_type & TargetLocation)
+	//	{
+	//		select_location_callback = [this](const vec3& location) {
+	//			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	//				new CharacterCommandCastAbilityToLocation(main_player.character, ins, location);
+	//			else if (multi_player == MultiPlayerAsClient)
+	//			{
+	//				std::ostringstream res;
+	//				nwCommandCharacterStruct stru;
+	//				stru.id = main_player.character->object->uid;
+	//				stru.type = "CastAbilityToLocation"_h;
+	//				stru.id2 = ins->id;
+	//				stru.t.location = location;
+	//				pack_msg(res, nwCommandCharacter, stru);
+	//				so_client->send(res.str());
+	//			}
+	//		};
+	//		select_distance = ability.get_distance(ins->lv);
+	//		select_range = ability.get_range(ins->lv);
+	//		select_angle = ability.angle;
+	//		select_start_radius = ability.start_radius;
+	//	}
+	//	if (ability.target_type & TargetEnemy)
+	//	{
+	//		select_enemy_callback = [this](cCharacterPtr character) {
+	//			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+	//				new CharacterCommandCastAbilityToTarget(main_player.character, ins, character);
+	//			else if (multi_player == MultiPlayerAsClient)
+	//			{
+	//				std::ostringstream res;
+	//				nwCommandCharacterStruct stru;
+	//				stru.id = main_player.character->object->uid;
+	//				stru.type = "CastAbilityToTarget"_h;
+	//				stru.id2 = ins->id;
+	//				stru.t.target = character->object->uid;
+	//				pack_msg(res, nwCommandCharacter, stru);
+	//				so_client->send(res.str());
+	//			}
+	//		};
+	//		select_distance = ability.get_distance(ins->lv);
+	//	}
+	//}
 }
 
 std::unique_ptr<Shortcut> shortcuts[10];

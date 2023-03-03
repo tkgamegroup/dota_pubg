@@ -11,6 +11,7 @@
 
 #include "../game.h"
 #include "../map.h"
+#include "../ui/floating_text.h"
 #include "character.h"
 #include "object.h"
 #include "item.h"
@@ -714,7 +715,7 @@ void cCharacter::inflict_damage(cCharacterPtr target, DamageType type, uint valu
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
 		if (target == main_player.character || this == main_player.character)
-			add_floating_tip(target->node->pos + vec3(0.f, 0.8f, 0.f), str(value), cvec4(255));
+			add_floating_text(target->node->pos + vec3(0.f, 0.8f, 0.f), str(value), cvec4(255));
 	}
 }
 

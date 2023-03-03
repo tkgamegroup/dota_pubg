@@ -2,8 +2,8 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavScene" generate_delay_frame="1" />
-		<item type_name="cMain" camera_length="20" camera_angle="60" />
+		<item type_name="flame::cNavScene" generate_delay_frames="1" />
+		<item type_name="cGame" camera_length="20" camera_angle="60" />
 	</components>
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">

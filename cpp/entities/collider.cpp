@@ -2,6 +2,7 @@
 #include <flame/universe/draw_data.h>
 #include <flame/universe/components/nav_agent.h>
 
+#include "../game.h"
 #include "collider.h"
 #include "character.h"
 

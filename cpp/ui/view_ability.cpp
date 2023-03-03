@@ -1,9 +1,10 @@
-#include <flame/graphics/image.h>
 #include <flame/graphics/extension.h>
 
+#include "ui.h"
 #include "view_ability.h"
-#include "../ability.h"
-#include "../character.h"
+#include "../game.h"
+#include "../entities/character.h"
+#include "../entities/ability.h"
 
 ViewAbility view_ability;
 

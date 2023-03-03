@@ -3,11 +3,16 @@
 #include <flame/foundation/typeinfo_serialize.h>
 #include <flame/graphics/buffer.h>
 #include <flame/graphics/image.h>
+#include <flame/graphics/extension.h>
+#include <flame/universe/octree.h>
 #include <flame/universe/components/terrain.h>
 #include <flame/universe/components/volume.h>
 #include <flame/universe/systems/renderer.h>
+#include <flame/universe/systems/scene.h>
 
+#include "game.h"
 #include "map.h"
+#include "entities/object.h"
 #include "entities/character.h"
 
 cNodePtr map_node = nullptr;
