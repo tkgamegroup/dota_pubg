@@ -20,7 +20,7 @@ struct AbilityInstance;
 struct ItemInstance;
 struct BuffInstance;
 
-const auto CharacterTag = 1 << 1;
+const auto CharacterTag = TagUser;
 
 // Reflect
 enum Faction

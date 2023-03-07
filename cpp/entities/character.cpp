@@ -482,7 +482,7 @@ void cCharacter::on_init()
 
 void cCharacter::start()
 {
-	entity->tag |= CharacterTag;
+	entity->tag = entity->tag | CharacterTag;
 
 	auto e = entity;
 	while (e)

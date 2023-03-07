@@ -24,28 +24,40 @@
 				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" />
 			</components>
 		</item>
-		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="Entity 0">
+		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="Entity 0" tag="General|MarkNavMesh">
 			<components>
 				<item type_name="flame::cNode" qut="0,0,0,0" scl="5,1,5" />
 				<item type_name="flame::cMesh" mesh_name="standard_plane" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
-		<item file_id="d6b9c85940862650a27066b74321e237" name="Entity 1">
+		<item file_id="d6b9c85940862650a27066b74321e237" name="Entity 1" tag="General|MarkNavMesh">
 			<components>
 				<item type_name="flame::cNode" pos="4,0,3.5" scl="8,1,8" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
-		<item file_id="d748bec54dea38c4f56d6abbbd920c1a" name="Entity 0">
+		<item file_id="d748bec54dea38c4f56d6abbbd920c1a" name="Entity 0" tag="General|MarkNavMesh">
 			<components>
-				<item type_name="flame::cNode" pos="8,0,6.5" scl="1,1,2" />
+				<item type_name="flame::cNode" pos="8,0,6" scl="1.5,1,3" />
 				<item type_name="flame::cMesh" mesh_name="standard_tri_prism" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
-		<item file_id="ec0d23b14ab29fb22a00eea74f1eee8d" name="Entity 1">
+		<item file_id="ec0d23b14ab29fb22a00eea74f1eee8d" name="main_player">
 			<components>
 				<item type_name="flame::cNode" pos="1.5,1.5,1.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="flame\materials\check.fmat" />
+			</components>
+		</item>
+		<item file_id="b8bfb36f4c514d98f5ee368a0c865304" name="Entity 1" tag="General|MarkNavMesh">
+			<components>
+				<item type_name="flame::cNode" pos="46,0,46" qut="0.000244096,0,1,0" scl="8,1,8" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="flame\materials\check.fmat" />
+			</components>
+		</item>
+		<item file_id="fd548973411141708afb7984fc097d94" name="Entity 0" tag="General|MarkNavMesh">
+			<components>
+				<item type_name="flame::cNode" pos="41.9998,0,43.5" qut="0.000244096,0,1,0" scl="1.5,1,3" />
+				<item type_name="flame::cMesh" mesh_name="standard_tri_prism" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
 	</children>
