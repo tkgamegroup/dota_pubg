@@ -349,7 +349,8 @@ cGame::~cGame()
 
 void cGame::start()
 {
-
+	root = entity;
+	main_player.init(root->find_child("main_player"));
 }
 
 void cGame::update()

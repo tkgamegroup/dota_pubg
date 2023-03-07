@@ -46,11 +46,8 @@ void update_control()
 	if (tar_ext.x <= 0.f || tar_ext.y <= 0.f)
 		return;
 
-	if (graphics::gui_want_mouse())
-		return;
-
 	auto input = sInput::instance();
-	auto hovering_node = all(lessThan(input->mpos, tar_ext)) ? sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
+	auto hovering_node = (all(greaterThanEqual(input->mpos, vec2(0.f))) && all(lessThan(input->mpos, tar_ext))) ? sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
 		if (draw_data.categories & CateMesh)
 		{
 			if (auto character = n->entity->get_component_t<cCharacter>(); character)
@@ -76,6 +73,14 @@ void update_control()
 						if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
 							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 					}
+				}
+			}
+			if (n->entity->tag & TagMarkNavMesh)
+			{
+				if (auto mesh = n->entity->get_component_t<cMesh>(); mesh)
+				{
+					if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+						draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 				}
 			}
 		}
@@ -126,7 +131,7 @@ void update_control()
 			hovering_chest = chest;
 			//tooltip = Item::get(hovering_chest->item_id).name;
 		}
-		if (hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
+		if ((hovering_node->entity->tag & TagMarkNavMesh) || hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
 		{
 			hovering_terrain = true;
 

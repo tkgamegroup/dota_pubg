@@ -46,6 +46,10 @@
 			<components>
 				<item type_name="flame::cNode" pos="1.5,1.5,1.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="flame\materials\check.fmat" />
+				<item type_name="flame::cNavAgent" separation_group="0" />
+				<item type_name="flame::cAudioSource" />
+				<item type_name="cObject" />
+				<item type_name="cCharacter" />
 			</components>
 		</item>
 		<item file_id="b8bfb36f4c514d98f5ee368a0c865304" name="Entity 1" tag="General|MarkNavMesh">
