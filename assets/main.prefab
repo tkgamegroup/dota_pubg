@@ -42,16 +42,6 @@
 				<item type_name="flame::cMesh" mesh_name="standard_tri_prism" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
-		<item file_id="ec0d23b14ab29fb22a00eea74f1eee8d" name="main_player">
-			<components>
-				<item type_name="flame::cNode" pos="1.5,1.5,1.5" />
-				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="flame\materials\check.fmat" />
-				<item type_name="flame::cNavAgent" separation_group="0" />
-				<item type_name="flame::cAudioSource" />
-				<item type_name="cObject" />
-				<item type_name="cCharacter" />
-			</components>
-		</item>
 		<item file_id="b8bfb36f4c514d98f5ee368a0c865304" name="Entity 1" tag="General|MarkNavMesh">
 			<components>
 				<item type_name="flame::cNode" pos="46,0,46" qut="0.000244096,0,1,0" scl="8,1,8" />
@@ -63,6 +53,13 @@
 				<item type_name="flame::cNode" pos="41.9998,0,43.5" qut="0.000244096,0,1,0" scl="1.5,1,3" />
 				<item type_name="flame::cMesh" mesh_name="standard_tri_prism" material_name="flame\materials\check.fmat" />
 			</components>
+		</item>
+		<item filename="characters\test\0.prefab">
+			<modifications>
+				<item target="3f4a114348074a5f09ebe29084a57689|flame::cNode|pos" value="0,100,-3.05176e-05" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="3,1,3" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
+			</modifications>
 		</item>
 	</children>
 </prefab>

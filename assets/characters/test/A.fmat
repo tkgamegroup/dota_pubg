@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<material color="1,0,0,1" color_map="0">
+	<code_defines>
+		<item v="frag:COLOR_MAP=0" />
+		<item v="frag:TINT_COLOR" />
+	</code_defines>
+	<textures>
+		<item filename="test.jpg" srgb="true" mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" auto_mipmap="true" />
+	</textures>
+</material>
