@@ -117,7 +117,6 @@ struct Tracker
 };
 
 extern float gtime;
-extern bool in_editor;
 extern MultiPlayerType multi_player;
 
 bool parse_literal(const std::string& str, int& id);

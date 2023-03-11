@@ -264,9 +264,11 @@ struct cCharacter : Component
 	Listeners<void(CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3)> message_listeners;
 
 	~cCharacter();
+
 	void on_init() override;
 	void start() override;
 	void update() override;
+
 	void die();
 
 	void inflict_damage(cCharacterPtr target, DamageType type, uint value);

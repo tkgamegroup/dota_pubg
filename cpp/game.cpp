@@ -112,7 +112,6 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainPlayer main_player;
 
-bool in_editor = false;
 Entity** editor_p_selecting_entity = nullptr;
 bool* editor_p_control = nullptr;
 
@@ -423,11 +422,4 @@ extern "C" EXPORT void* cpp_info()
 	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	cNWDataHarvester::create((EntityPtr)INVALID_POINTER); // references create function explicitly
 	return nullptr;
-}
-
-extern "C" EXPORT void set_editor_info(Entity * *p_selecting_entity, bool* p_control)
-{
-	in_editor = true;
-	//editor_p_selecting_entity = p_selecting_entity;
-	//editor_p_control = p_control;
 }
