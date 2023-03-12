@@ -470,13 +470,13 @@ void cCharacter::on_init()
 {
 	nav_agent->separation_group = faction;
 
-	node->measurers.add([this](AABB* ret) {
-		if (!nav_agent)
-			return false;
-		auto radius = nav_agent->radius;
-		auto height = nav_agent->height;
-		*ret = AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform));
-		return true;
+	node->measurers.add([this](AABB& b) {
+		if (nav_agent)
+		{
+			auto radius = nav_agent->radius;
+			auto height = nav_agent->height;
+			b.expand(AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform)));
+		}
 	}, "character"_h);
 }
 
