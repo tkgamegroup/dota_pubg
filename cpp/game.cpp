@@ -14,6 +14,7 @@
 #include "entities/object.h"
 #include "entities/effect.h"
 #include "entities/projectile.h"
+#include "entities/spawner.h"
 #include "entities/character.h"
 #include "entities/chest.h"
 #include "entities/collider.h"
@@ -185,6 +186,23 @@ EntityPtr get_prefab(const std::filesystem::path& _path)
 	return it->second;
 }
 
+static vec3 get_avaliable_pos(const vec3& pos, float radius, float max_distance, uint times = 20)
+{
+	auto ret = pos; auto scene = sScene::instance();
+	while (times > 0)
+	{
+		bool ok = true;
+		ok = scene->navmesh_nearest_point(ret, vec3(2.f, 4.f, 2.f), ret);
+		if (ok)
+			ok = scene->navmesh_check_agents_and_obstacles(ret, radius);
+		if (ok)
+			break;
+		ret.xz = pos.xz() + circularRand(max_distance);
+		times--;
+	}
+	return ret;
+}
+
 void add_player(vec3& pos, uint& faction, uint& preset_id)
 {
 	static uint idx = 0;
@@ -228,14 +246,17 @@ std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float 
 	return ret;
 }
 
-cCharacterPtr add_character(uint preset_id, const vec3& pos, uint faction, uint id)
+cCharacterPtr add_character(uint preset_id, const vec3& _pos, uint faction, uint id)
 {
 	auto& preset = CharacterPreset::get(preset_id);
 	auto e = get_prefab(preset.path)->copy();
-	e->node()->set_pos(pos);
+	auto node = e->node();
+	auto nav_agent = e->get_component_t<cNavAgent>();
 	auto object = e->get_component_t<cObject>();
-	object->init(1000 + preset_id, id);
 	auto character = e->get_component_t<cCharacter>();
+	auto pos = get_avaliable_pos(_pos, nav_agent->radius, 4.f, 20);
+	node->set_pos(pos);
+	object->init(1000 + preset_id, id);
 	characters.push_back(character);
 	character->preset = &preset;
 	character->set_faction(faction);
@@ -350,6 +371,8 @@ void cGame::start()
 {
 	root = entity;
 	main_player.init(root->find_child("main_player"));
+
+	init_characters();
 }
 
 void cGame::update()
@@ -407,19 +430,3 @@ struct cLauncherCreate : cLauncher::Create
 	}
 }cLauncher_create;
 cLauncher::Create& cLauncher::create = cLauncher_create;
-
-extern "C" EXPORT void* cpp_info()
-{
-	auto uinfo = universe_info(); // references universe module explicitly
-	cLauncher::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cGame::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cObject::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cCharacter::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cProjectile::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cEffect::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cSectorCollider::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cChest::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cCreepAI::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	cNWDataHarvester::create((EntityPtr)INVALID_POINTER); // references create function explicitly
-	return nullptr;
-}
