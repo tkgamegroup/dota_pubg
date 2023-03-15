@@ -3,8 +3,6 @@
 #include "buff.h"
 #include "character.h"
 
-std::vector<Buff> buffs;
-
 void init_buffs()
 {
 	for (auto& section : parse_ini_file(Path::get(L"assets\\buffs.ini")).sections)
@@ -54,19 +52,4 @@ void init_buffs()
 			}
 		}
 	}
-}
-
-int Buff::find(const std::string& name)
-{
-	for (auto i = 0; i < buffs.size(); i++)
-	{
-		if (buffs[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const Buff& Buff::get(uint id)
-{
-	return buffs[id];
 }

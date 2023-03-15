@@ -57,29 +57,29 @@ void cCreepAI::update()
 			case "AttackTarget"_h:
 				if (linearRand(0U, 600U) < 10)
 				{
-					for (auto& ins : character->abilities)
-					{
-						if (ins->cd_timer <= 0.f)
-						{
-							if (auto& ability = Ability::get(ins->id); character->mp >= ability.get_mp(ins->lv))
-							{
-								//if (!ability.cast_check || ability.cast_check(ins.get(), character))
-								{
-									if (ability.target_type == TargetNull && ability.active)
-									{
-										new CharacterCommandCastAbility(character, ins.get());
-										break;
-									}
-									if (ability.target_type == TargetEnemy && ability.active)
-									{
-										new CharacterCommandCastAbilityToTarget(character, ins.get(),
-											((CharacterCommandAttackTarget*)character->command.get())->target.obj);
-										break;
-									}
-								}
-							}
-						}
-					}
+					//for (auto& ins : character->abilities)
+					//{
+					//	if (ins->cd_timer <= 0.f)
+					//	{
+					//		if (auto& ability = Ability::get(ins->id); character->mp >= ability.get_mp(ins->lv))
+					//		{
+					//			if (!ability.cast_check || ability.cast_check(ins.get(), character))
+					//			{
+					//				if (ability.target_type == TargetNull && ability.active)
+					//				{
+					//					new CharacterCommandCastAbility(character, ins.get());
+					//					break;
+					//				}
+					//				if (ability.target_type == TargetEnemy && ability.active)
+					//				{
+					//					new CharacterCommandCastAbilityToTarget(character, ins.get(),
+					//						((CharacterCommandAttackTarget*)character->command.get())->target.obj);
+					//					break;
+					//				}
+					//			}
+					//		}
+					//	}
+					//}
 				}
 				else
 					attack_closest();

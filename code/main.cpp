@@ -692,39 +692,6 @@
 //			}
 //		}
 //
-//		removing_dead_effects = true;
-//		for (auto o : dead_effects)
-//			o->entity->remove_from_parent();
-//		removing_dead_effects = false;
-//
-//		removing_dead_projectiles = true;
-//		for (auto o : dead_projectiles)
-//			o->entity->remove_from_parent();
-//		removing_dead_projectiles = false;
-//
-//		removing_dead_chests = true;
-//		for (auto o : dead_chests)
-//		{
-//			if (hovering_chest == o)
-//				hovering_chest = nullptr;
-//			o->entity->remove_from_parent();
-//		}
-//		removing_dead_chests = false;
-//
-//		removing_dead_characters = true;
-//		for (auto o : dead_characters)
-//		{
-//			if (hovering_character == o)
-//				hovering_character = nullptr;
-//			o->entity->remove_from_parent();
-//		}
-//		removing_dead_characters = false;
-//
-//		dead_effects.clear();
-//		dead_projectiles.clear();
-//		dead_chests.clear();
-//		dead_characters.clear();
-//
 //		// auto attack
 //		if (main_player.character)
 //		{

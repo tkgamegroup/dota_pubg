@@ -5,9 +5,6 @@
 #include "object.h"
 #include "character.h"
 
-std::vector<EffectPreset> effect_presets;
-static EffectPreset dummy_preset;
-
 void init_effects()
 {
 	for (auto& section : parse_ini_file(Path::get(L"assets\\effects.ini")).sections)
@@ -28,21 +25,6 @@ void init_effects()
 			}
 		}
 	}
-}
-
-int EffectPreset::find(const std::string& name)
-{
-	for (auto i = 0; i < effect_presets.size(); i++)
-	{
-		if (effect_presets[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const EffectPreset& EffectPreset::get(uint id)
-{
-	return effect_presets[id];
 }
 
 std::vector<cEffectPtr> effects;
@@ -164,12 +146,9 @@ void cEffect::start()
 
 	timer = duration;
 
-	if (!preset)
-		preset = &dummy_preset;
-
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
-	if (!preset->sound_path.empty())
-		audio_buffer_names.emplace_back(preset->sound_path, "start");
+	if (!sound_path.empty())
+		audio_buffer_names.emplace_back(sound_path, "start");
 	audio_source->set_buffer_names(audio_buffer_names);
 	audio_source->play("start"_h);
 }

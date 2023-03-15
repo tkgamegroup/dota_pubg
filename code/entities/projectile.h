@@ -2,18 +2,6 @@
 
 #include "../head.h"
 
-struct ProjectilePreset
-{
-	uint					id;
-	std::string				name;
-	std::filesystem::path	path;
-
-	static int find(const std::string& name);
-	static const ProjectilePreset& get(uint id);
-};
-
-extern std::vector<ProjectilePreset> projectile_presets;
-
 extern std::vector<cProjectilePtr> projectiles;
 extern std::vector<cProjectilePtr> dead_projectiles;
 extern bool removing_dead_projectiles;

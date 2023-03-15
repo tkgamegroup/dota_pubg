@@ -69,9 +69,9 @@ struct CharacterCommandPickUp : CharacterCommand
 
 struct CharacterCommandCastAbility : CharacterCommand
 {
-	AbilityInstance* ins;
+	cAbilityPtr ability;
 
-	CharacterCommandCastAbility(cCharacterPtr character, AbilityInstance* ins);
+	CharacterCommandCastAbility(cCharacterPtr character, cAbilityPtr ability);
 
 	void update() override;
 };
@@ -79,9 +79,9 @@ struct CharacterCommandCastAbility : CharacterCommand
 struct CharacterCommandCastAbilityToLocation : CharacterCommand
 {
 	vec3 location;
-	AbilityInstance* ins;
+	cAbilityPtr ability;
 
-	CharacterCommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location);
+	CharacterCommandCastAbilityToLocation(cCharacterPtr character, cAbilityPtr ability, const vec3& _location);
 
 	void update() override;
 };
@@ -89,9 +89,9 @@ struct CharacterCommandCastAbilityToLocation : CharacterCommand
 struct CharacterCommandCastAbilityToTarget : CharacterCommand
 {
 	Tracker<cCharacterPtr> target;
-	AbilityInstance* ins;
+	cAbilityPtr ability;
 
-	CharacterCommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target);
+	CharacterCommandCastAbilityToTarget(cCharacterPtr character, cAbilityPtr ability, cCharacterPtr _target);
 
 	void update() override;
 };
@@ -104,14 +104,14 @@ enum Action
 	ActionCast
 };
 
-struct CharacterPreset
-{
-	struct AbilityInfo
-	{
-		uint id;
-		uint lv;
-	};
+extern std::vector<cCharacterPtr> characters;
+extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
+extern std::vector<cCharacterPtr> dead_characters;
+extern bool removing_dead_characters;
 
+// Reflect ctor
+struct cCharacter : Component
+{
 	struct DropItem
 	{
 		uint id;
@@ -120,52 +120,6 @@ struct CharacterPreset
 		uint num_max;
 	};
 
-	uint						id;
-	std::string					name;
-	std::filesystem::path		path;
-
-	uint						exp_base = 0;
-	uint						hp = 100;
-	uint						mp = 100;
-	uint						atk = 0;
-	float						atk_distance = 1.5f;
-	float						atk_interval = 2.f;
-	float						atk_time = 1.5f;
-	float						atk_point = 1.f;
-	int							atk_projectile_preset = -1;
-	float						cast_time = 1.f;
-	float						cast_point = 1.f;
-	uint						phy_def = 0;
-	uint						mag_def = 0;
-	uint						hp_reg = 0;
-	uint						mp_reg = 0;
-	uint						mov_sp = 100;
-	uint						atk_sp = 100;
-
-	std::vector<AbilityInfo>	abilities;
-	std::vector<uint>			talents;
-	std::vector<DropItem>		drop_items;
-
-	std::filesystem::path		move_sound_path;
-	std::filesystem::path		attack_precast_sound_path;
-	std::filesystem::path		attack_hit_sound_path;
-
-	static int find(const std::string& name);
-	static const CharacterPreset& get(uint id);
-};
-
-extern std::vector<CharacterPreset> character_presets;
-
-extern std::vector<cCharacterPtr> characters;
-extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
-extern std::vector<cCharacterPtr> dead_characters;
-extern bool removing_dead_characters;
-
-void init_characters();
-
-// Reflect ctor
-struct cCharacter : Component
-{
 	// Reflect requires
 	cNodePtr node;
 	// Reflect requires
@@ -176,8 +130,6 @@ struct cCharacter : Component
 	cObjectPtr object;
 
 	cArmaturePtr armature = nullptr;
-
-	const CharacterPreset* preset = nullptr;
 
 	// Reflect
 	uint faction = 0;
@@ -212,11 +164,28 @@ struct cCharacter : Component
 	void set_mp_max(uint v);
 
 	// Reflect
+	uint exp_base = 0;
+	// Reflect
 	uchar atk_type = PhysicalDamage;
 	void set_atk_type(uchar v);
 	// Reflect
 	uint atk = 10;
 	void set_atk(uint v);
+	// Reflect
+	float atk_distance = 1.5f;
+	// Reflect
+	float atk_interval = 2.f;
+	// Reflect
+	float atk_time = 1.5f;
+	// Reflect
+	float atk_point = 1.f;
+	// Reflect
+	std::filesystem::path atk_projectile;
+	uint atk_projectile_id = 0;
+	// Reflect
+	float cast_time = 1.f;
+	// Reflect
+	float cast_point = 1.f;
 	// Reflect
 	uint phy_def = 0;
 	void set_phy_def(uint v);
@@ -236,15 +205,21 @@ struct cCharacter : Component
 	uint atk_sp = 0;
 	void set_atk_sp(uint v);
 
+	std::vector<DropItem>		drop_items;
+
+	std::filesystem::path		move_sound_path;
+	std::filesystem::path		attack_precast_sound_path;
+	std::filesystem::path		attack_hit_sound_path;
+
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 20;
 
-	std::vector<CommandList>						attack_effects;
-	std::vector<std::unique_ptr<ItemInstance>>		inventory;
-	std::vector<std::unique_ptr<AbilityInstance>>	abilities;
-	std::vector<uint>								talents;
-	std::vector<std::unique_ptr<BuffInstance>>		buffs;
-	std::map<uint, std::pair<float, uint>>			markers;
+	std::vector<CommandList>				attack_effects;
+	//std::vector<cItemPtr>					inventory;
+	//std::vector<cAbilityPtr>				abilities;
+	//std::vector<cTalentPtr>				talents;
+	//std::vector<cBuffPtr>					buffs;
+	std::map<uint, std::pair<float, uint>>	markers;
 	uint ability_points = 0;
 
 	bool dead = false;
@@ -279,14 +254,14 @@ struct cCharacter : Component
 	bool gain_item(uint id, uint num);
 	bool gain_ability(uint id, uint lv = 0);
 	bool gain_talent(uint id);
-	void use_item(ItemInstance* ins);
-	void cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
+	void use_item(cItemPtr item);
+	void cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target);
 	void add_buff(uint id, float time, uint lv = 1, bool replace = false);
 	bool add_marker(uint hash, float time);
 
 	bool process_approach(const vec3& target, float dist = 0.f, float ang = 0.f);
 	void process_attack_target(cCharacterPtr target, bool chase_target = true);
-	void process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target);
+	void process_cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target);
 
 	struct Create
 	{

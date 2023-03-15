@@ -132,31 +132,31 @@ bool parse_literal(const std::string& str, int& id)
 		id = state;
 		return true;
 	}
-	else if (SUS::match_head_tail(str, "\"", "\"b"))
-	{
-		id = Buff::find(str.substr(1, str.size() - 3));
-		return true;
-	}
-	else if (SUS::match_head_tail(str, "\"", "\"i"))
-	{
-		id = Item::find(str.substr(1, str.size() - 3));
-		return true;
-	}
-	else if (SUS::match_head_tail(str, "\"", "\"a"))
-	{
-		id = Ability::find(str.substr(1, str.size() - 3));
-		return true;
-	}
-	else if (SUS::match_head_tail(str, "\"", "\"t"))
-	{
-		id = Talent::find(str.substr(1, str.size() - 3));
-		return true;
-	}
-	else if (SUS::match_head_tail(str, "\"", "\"ef"))
-	{
-		id = EffectPreset::find(str.substr(1, str.size() - 4));
-		return true;
-	}
+	//else if (SUS::match_head_tail(str, "\"", "\"b"))
+	//{
+	//	id = Buff::find(str.substr(1, str.size() - 3));
+	//	return true;
+	//}
+	//else if (SUS::match_head_tail(str, "\"", "\"i"))
+	//{
+	//	id = Item::find(str.substr(1, str.size() - 3));
+	//	return true;
+	//}
+	//else if (SUS::match_head_tail(str, "\"", "\"a"))
+	//{
+	//	id = Ability::find(str.substr(1, str.size() - 3));
+	//	return true;
+	//}
+	//else if (SUS::match_head_tail(str, "\"", "\"t"))
+	//{
+	//	id = Talent::find(str.substr(1, str.size() - 3));
+	//	return true;
+	//}
+	//else if (SUS::match_head_tail(str, "\"", "\"ef"))
+	//{
+	//	id = EffectPreset::find(str.substr(1, str.size() - 4));
+	//	return true;
+	//}
 	else if (SUS::match_head_tail(str, "\"", "\"pt"))
 	{
 		id = ProjectilePreset::find(str.substr(1, str.size() - 4));
@@ -211,7 +211,7 @@ void add_player(vec3& pos, uint& faction, uint& preset_id)
 	else
 		*/pos = get_map_coord(vec2(0.5f));
 	faction = 1 << (log2i((uint)FactionParty1) + idx);
-	preset_id = CharacterPreset::find("Dragon Knight");
+	//preset_id = CharacterPreset::find("Dragon Knight");
 	idx++;
 }
 
@@ -371,12 +371,43 @@ void cGame::start()
 {
 	root = entity;
 	main_player.init(root->find_child("main_player"));
-
-	init_characters();
 }
 
 void cGame::update()
 {
+	removing_dead_effects = true;
+	for (auto o : dead_effects)
+		o->entity->remove_from_parent();
+	removing_dead_effects = false;
+
+	removing_dead_projectiles = true;
+	for (auto o : dead_projectiles)
+		o->entity->remove_from_parent();
+	removing_dead_projectiles = false;
+
+	removing_dead_chests = true;
+	for (auto o : dead_chests)
+	{
+		if (hovering_chest == o)
+			hovering_chest = nullptr;
+		o->entity->remove_from_parent();
+	}
+	removing_dead_chests = false;
+
+	removing_dead_characters = true;
+	for (auto o : dead_characters)
+	{
+		if (hovering_character == o)
+			hovering_character = nullptr;
+		o->entity->remove_from_parent();
+	}
+	removing_dead_characters = false;
+
+	dead_effects.clear();
+	dead_projectiles.clear();
+	dead_chests.clear();
+	dead_characters.clear();
+
 	update_control();
 }
 

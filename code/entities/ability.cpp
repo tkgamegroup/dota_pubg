@@ -11,7 +11,6 @@
 #include <flame/graphics/gui.h>
 #include <flame/universe/components/nav_agent.h>
 
-std::vector<Ability> abilities;
 std::vector<Talent> talents;
 
 void init_abilities()
@@ -109,34 +108,4 @@ void init_abilities()
 			}
 		}
 	}
-}
-
-int Ability::find(const std::string& name)
-{
-	for (auto i = 0; i < abilities.size(); i++)
-	{
-		if (abilities[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const Ability& Ability::get(uint id)
-{
-	return abilities[id];
-}
-
-int Talent::find(const std::string& name)
-{
-	for (auto i = 0; i < talents.size(); i++)
-	{
-		if (talents[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const Talent& Talent::get(uint id)
-{
-	return talents[id];
 }

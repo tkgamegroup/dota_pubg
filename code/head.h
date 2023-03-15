@@ -7,6 +7,10 @@ using namespace flame;
 
 FLAME_TYPE(cLauncher)
 FLAME_TYPE(cGame)
+FLAME_TYPE(cItem)
+FLAME_TYPE(cAbility)
+FLAME_TYPE(cTalent)
+FLAME_TYPE(cBuff)
 FLAME_TYPE(cObject)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cProjectile)
@@ -15,10 +19,6 @@ FLAME_TYPE(cSectorCollider)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cCreepAI)
 FLAME_TYPE(cNWDataHarvester)
-
-struct AbilityInstance;
-struct ItemInstance;
-struct BuffInstance;
 
 const auto CharacterTag = TagUser;
 

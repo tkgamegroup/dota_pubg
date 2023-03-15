@@ -3,17 +3,8 @@
 #include "../head.h"
 #include "../command.h"
 
-struct BuffInstance
-{
-	uint id;
-	uint lv = 0;
-	float timer;
-	float t0;
-	float interval;
-	float duration;
-};
-
-struct Buff
+// Reflect ctor
+struct cBuff : Component
 {
 	uint					id;
 	std::string				name;
@@ -21,20 +12,16 @@ struct Buff
 	uvec2					icon_tile_coord = uvec2(0);
 	graphics::ImagePtr		icon_image = nullptr;
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
-
-	float					interval;
-
 	std::string				description;
 
+	uint lv = 0;
+	float timer;
+	float t0;
+	float interval;
+	float duration;
+
 	ParameterNames			parameter_names;
-	ParameterPack				parameters;
+	ParameterPack			parameters;
 	CommandList				passive;
 	CommandList				continuous;
-
-	static int find(const std::string& name);
-	static const Buff& get(uint id);
 };
-
-extern std::vector<Buff> buffs;
-
-void init_buffs();

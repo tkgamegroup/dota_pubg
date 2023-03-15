@@ -79,7 +79,7 @@ void CharacterCommandAttackLocation::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = find_characters(~character->faction, character->node->pos, max(character->preset->atk_distance, 5.f));
+			auto enemies = find_characters(~character->faction, character->node->pos, max(character->atk_distance, 5.f));
 			if (!enemies.empty())
 				target.set(enemies.front());
 
@@ -107,7 +107,7 @@ void CharacterCommandHold::update()
 	{
 		if (character->search_timer <= 0.f)
 		{
-			auto enemies = find_characters(~character->faction, character->node->pos, max(character->preset->atk_distance, 1.5f));
+			auto enemies = find_characters(~character->faction, character->node->pos, max(character->atk_distance, 1.5f));
 			if (!enemies.empty())
 				target.set(enemies.front());
 
@@ -144,32 +144,32 @@ void CharacterCommandPickUp::update()
 	}
 }
 
-CharacterCommandCastAbility::CharacterCommandCastAbility(cCharacterPtr character, AbilityInstance* ins) :
+CharacterCommandCastAbility::CharacterCommandCastAbility(cCharacterPtr character, cAbilityPtr ability) :
 	CharacterCommand("CastAbility"_h, character),
-	ins(ins)
+	ability(ability)
 {
 }
 
 void CharacterCommandCastAbility::update()
 {
-	character->process_cast_ability(ins, vec3(0.f), nullptr);
+	character->process_cast_ability(ability, vec3(0.f), nullptr);
 }
 
-CharacterCommandCastAbilityToLocation::CharacterCommandCastAbilityToLocation(cCharacterPtr character, AbilityInstance* ins, const vec3& _location) :
+CharacterCommandCastAbilityToLocation::CharacterCommandCastAbilityToLocation(cCharacterPtr character, cAbilityPtr ability, const vec3& _location) :
 	CharacterCommand("CastAbilityToLocation"_h, character),
-	ins(ins)
+	ability(ability)
 {
 	location = _location;
 }
 
 void CharacterCommandCastAbilityToLocation::update()
 {
-	character->process_cast_ability(ins, location, nullptr);
+	character->process_cast_ability(ability, location, nullptr);
 }
 
-CharacterCommandCastAbilityToTarget::CharacterCommandCastAbilityToTarget(cCharacterPtr character, AbilityInstance* ins, cCharacterPtr _target) :
+CharacterCommandCastAbilityToTarget::CharacterCommandCastAbilityToTarget(cCharacterPtr character, cAbilityPtr ability, cCharacterPtr _target) :
 	CharacterCommand("CastAbilityToTarget"_h, character),
-	ins(ins)
+	ability(ability)
 {
 	target.set(_target);
 }
@@ -179,139 +179,7 @@ void CharacterCommandCastAbilityToTarget::update()
 	if (!target.obj)
 		new CharacterCommandIdle(character);
 	else
-		character->process_cast_ability(ins, vec3(0.f), target.obj);
-}
-
-std::vector<CharacterPreset> character_presets;
-static CharacterPreset dummy_preset;
-
-void init_characters()
-{
-	for (auto& section : parse_ini_file(Path::get(L"assets\\characters.ini")).sections)
-	{
-		auto& preset = character_presets.emplace_back();
-		preset.id = character_presets.size() - 1;
-		preset.name = section.name;
-		for (auto& e : section.entries)
-		{
-			switch (e.key_hash)
-			{
-			case "path"_h:
-				preset.path = e.values[0];
-				break;
-			case "exp_base"_h:
-				preset.exp_base = s2t<uint>(e.values[0]);
-				break;
-			case "hp"_h:
-				preset.hp = s2t<uint>(e.values[0]);
-				break;
-			case "mp"_h:
-				preset.mp = s2t<uint>(e.values[0]);
-				break;
-			case "atk"_h:
-				preset.atk = s2t<uint>(e.values[0]);
-				break;
-			case "atk_distance"_h:
-				preset.atk_distance = s2t<uint>(e.values[0]);
-				break;
-			case "atk_interval"_h:
-				preset.atk_interval = s2t<float>(e.values[0]);
-				break;
-			case "atk_time"_h:
-				preset.atk_time = s2t<float>(e.values[0]);
-				break;
-			case "atk_point"_h:
-				preset.atk_point = s2t<float>(e.values[0]);
-				break;
-			case "atk_projectile_preset"_h:
-				preset.atk_projectile_preset = s2t<int>(e.values[0]);
-				break;
-			case "cast_time"_h:
-				preset.cast_time = s2t<float>(e.values[0]);
-				break;
-			case "cast_point"_h:
-				preset.cast_point = s2t<float>(e.values[0]);
-				break;
-			case "phy_def"_h:
-				preset.phy_def = s2t<uint>(e.values[0]);
-				break;
-			case "mag_def"_h:
-				preset.mag_def = s2t<uint>(e.values[0]);
-				break;
-			case "hp_reg"_h:
-				preset.hp_reg = s2t<uint>(e.values[0]);
-				break;
-			case "mp_reg"_h:
-				preset.mp_reg = s2t<uint>(e.values[0]);
-				break;
-			case "mov_sp"_h:
-				preset.mov_sp = s2t<uint>(e.values[0]);
-				break;
-			case "atk_sp"_h:
-				preset.atk_sp = s2t<uint>(e.values[0]);
-				break;
-			case "abilities"_h:
-				for (auto& t : e.values)
-				{
-					auto sp = SUS::split(t, ',');
-					auto& name = sp[0];
-					if (name.size() > 2 && name.front() == '\"' && name.back() == '\"')
-						name = std::string(name.begin() + 1, name.end() - 1);
-					if (auto id = Ability::find(name); id != -1)
-						preset.abilities.emplace_back(id, s2t<uint>(sp[1]));
-					else
-						printf("cannot find ability: %s\n", name.c_str());
-				}
-				break;
-			case "talents"_h:
-				for (auto& t : e.values)
-				{
-					if (auto id = Talent::find(t); id != -1)
-						preset.talents.push_back(id);
-					else
-						printf("cannot find talent: %s\n", t.c_str());
-				}
-				break;
-			case "drop_items"_h:
-				for (auto& t : e.values)
-				{
-					auto sp = SUS::split(t, ',');
-					auto& name = sp[0];
-					if (name.size() > 2 && name.front() == '\"' && name.back() == '\"')
-						name = std::string(name.begin() + 1, name.end() - 1);
-					if (auto id = Item::find(name); id != -1)
-						preset.drop_items.emplace_back(id, s2t<uint>(sp[1]), s2t<uint>(sp[2]), s2t<uint>(sp[3]));
-					else
-						printf("cannot find item: %s\n", name.c_str());
-				}
-				break;
-			case "move_sound_path"_h:
-				preset.move_sound_path = e.values[0];
-				break;
-			case "attack_precast_sound_path"_h:
-				preset.attack_precast_sound_path = e.values[0];
-				break;
-			case "attack_hit_sound_path"_h:
-				preset.attack_hit_sound_path = e.values[0];
-				break;
-			}
-		}
-	}
-}
-
-int CharacterPreset::find(const std::string& name)
-{
-	for (auto i = 0; i < character_presets.size(); i++)
-	{
-		if (character_presets[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const CharacterPreset& CharacterPreset::get(uint id)
-{
-	return character_presets[id];
+		character->process_cast_ability(ability, vec3(0.f), target.obj);
 }
 
 std::vector<cCharacterPtr> characters;
@@ -494,29 +362,15 @@ void cCharacter::start()
 		e = e->children[0].get();
 	}
 
-	if (!preset)
-		preset = &dummy_preset;
-	auto ppath = preset->path.parent_path();
-
 	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
 	audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
-	if (!preset->move_sound_path.empty() && std::filesystem::exists(preset->move_sound_path))
-		audio_buffer_names.emplace_back(preset->move_sound_path, "move");
-	if (!preset->attack_precast_sound_path.empty() && std::filesystem::exists(preset->attack_precast_sound_path))
-		audio_buffer_names.emplace_back(preset->attack_precast_sound_path, "attack_precast");
-	if (!preset->attack_hit_sound_path.empty() && std::filesystem::exists(preset->attack_hit_sound_path))
-		audio_buffer_names.emplace_back(preset->attack_hit_sound_path, "attack_hit");
+	if (!move_sound_path.empty() && std::filesystem::exists(move_sound_path))
+		audio_buffer_names.emplace_back(move_sound_path, "move");
+	if (!attack_precast_sound_path.empty() && std::filesystem::exists(attack_precast_sound_path))
+		audio_buffer_names.emplace_back(attack_precast_sound_path, "attack_precast");
+	if (!attack_hit_sound_path.empty() && std::filesystem::exists(attack_hit_sound_path))
+		audio_buffer_names.emplace_back(attack_hit_sound_path, "attack_hit");
 	audio_source->set_buffer_names(audio_buffer_names);
-
-	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-	{
-		for (auto& i : preset->abilities)
-			gain_ability(i.id, i.lv);
-		for (auto i : preset->talents)
-			gain_talent(i);
-	}
-
-	inventory.resize(16);
 
 	if (!command)
 		new CharacterCommandIdle(this);
@@ -532,41 +386,39 @@ void cCharacter::update()
 		if (stats_dirty)
 		{
 			if (exp_max == 0)
-				exp_max = preset->exp_base;
+				exp_max = exp_base;
 
 			state = CharacterStateNormal;
 
 			auto old_hp_max = hp_max;
 			auto old_mp_max = mp_max;
-			hp_max = preset->hp;
-			mp_max = preset->hp;
+			hp_max = hp;
+			mp_max = hp;
 
 			atk_type = PhysicalDamage;
-			atk = preset->atk;
+			atk = atk;
 
-			phy_def = preset->phy_def;
-			mag_def = preset->mag_def;
-			hp_reg = preset->hp_reg;
-			mp_reg = preset->mp_reg;
-			mov_sp = preset->mov_sp;
-			atk_sp = preset->atk_sp;
+			phy_def = phy_def;
+			mag_def = mag_def;
+			hp_reg = hp_reg;
+			mp_reg = mp_reg;
+			mov_sp = mov_sp;
+			atk_sp = atk_sp;
 
 			attack_effects.clear();
-			for (auto& ins : abilities)
-			{
-				if (ins && ins->lv > 0)
-				{
-					auto& ability = Ability::get(ins->id);
-					if (!ability.passive.cmds.empty())
-						CommandListExecuteThread(ability.passive, this, nullptr, vec3(0.f), ability.parameters, ins->lv).execute();
-				}
-			}
-			for (auto& ins : buffs)
-			{
-				auto& buff = Buff::get(ins->id);
-				if (!buff.passive.cmds.empty())
-					CommandListExecuteThread(buff.passive, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
-			}
+			//for (auto ability : abilities)
+			//{
+			//	if (ability && ability->lv > 0)
+			//	{
+			//		if (!ability->passive.cmds.empty())
+			//			CommandListExecuteThread(ability->passive, this, nullptr, vec3(0.f), ability->parameters, ability->lv).execute();
+			//	}
+			//}
+			//for (auto buff : buffs)
+			//{
+			//	if (!buff->passive.cmds.empty())
+			//		CommandListExecuteThread(buff->passive, this, nullptr, vec3(0.f), buff->parameters, buff->lv).execute();
+			//}
 
 			if (hp_max != old_hp_max)
 			{
@@ -596,35 +448,35 @@ void cCharacter::update()
 		if (attack_interval_timer > 0)
 			attack_interval_timer -= delta_time;
 
-		for (auto& ins : abilities)
-		{
-			if (ins && ins->cd_timer > 0.f)
-				ins->cd_timer -= delta_time;
-		}
-		for (auto it = buffs.begin(); it != buffs.end();)
-		{
-			auto& ins = *it;
-			auto& buff = Buff::get(ins->id);
+		//for (auto& ins : abilities)
+		//{
+		//	if (ins && ins->cd_timer > 0.f)
+		//		ins->cd_timer -= delta_time;
+		//}
+		//for (auto it = buffs.begin(); it != buffs.end();)
+		//{
+		//	auto& ins = *it;
+		//	auto& buff = Buff::get(ins->id);
 
-			if (ins->t0 - ins->timer > ins->duration)
-			{
-				if (!buff.continuous.cmds.empty())
-					CommandListExecuteThread(buff.continuous, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
-				ins->t0 = ins->timer;
-			}
+		//	if (ins->t0 - ins->timer > ins->duration)
+		//	{
+		//		if (!buff.continuous.cmds.empty())
+		//			CommandListExecuteThread(buff.continuous, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
+		//		ins->t0 = ins->timer;
+		//	}
 
-			if (ins->timer > 0)
-			{
-				ins->timer -= delta_time;
-				if (ins->timer <= 0)
-				{
-					it = buffs.erase(it);
-					stats_dirty = true;
-					continue;
-				}
-			}
-			it++;
-		}
+		//	if (ins->timer > 0)
+		//	{
+		//		ins->timer -= delta_time;
+		//		if (ins->timer <= 0)
+		//		{
+		//			it = buffs.erase(it);
+		//			stats_dirty = true;
+		//			continue;
+		//		}
+		//	}
+		//	it++;
+		//}
 		for (auto it = markers.begin(); it != markers.end();)
 		{
 			if (it->second.first > 0.f)
@@ -678,10 +530,10 @@ void cCharacter::die()
 
 	set_hp(0);
 
-	if (!preset->drop_items.empty())
+	if (!drop_items.empty())
 	{
 		std::vector<std::pair<uint, uint>> drops;
-		for (auto& d : preset->drop_items)
+		for (auto& d : drop_items)
 		{
 			if (linearRand(0U, 100U) < d.probability)
 				drops.emplace_back(d.id, linearRand(d.num_min, d.num_max));
@@ -762,137 +614,137 @@ void cCharacter::gain_exp(uint v)
 
 bool cCharacter::gain_item(uint id, uint num)
 {
-	for (auto i = 0; i < inventory.size(); i++)
-	{
-		auto& ins = inventory[i];
-		if (!ins)
-		{
-			ins.reset(new ItemInstance);
-			ins->id = id;
-			ins->num = num;
-			stats_dirty = true;
+	//for (auto i = 0; i < inventory.size(); i++)
+	//{
+	//	auto& ins = inventory[i];
+	//	if (!ins)
+	//	{
+	//		ins.reset(new ItemInstance);
+	//		ins->id = id;
+	//		ins->num = num;
+	//		stats_dirty = true;
 
-			for (auto& cb : main_player.character->message_listeners.list)
-				cb.first(CharacterGainItem, { .u = id }, { .u = num }, { .i = i }, {});
+	//		for (auto& cb : main_player.character->message_listeners.list)
+	//			cb.first(CharacterGainItem, { .u = id }, { .u = num }, { .i = i }, {});
 
-			return true;
-		}
-	}
+	//		return true;
+	//	}
+	//}
 
 	return false;
 }
 
 bool cCharacter::gain_ability(uint id, uint lv)
 {
-	for (auto& ins : abilities)
-	{
-		if (ins->id == id)
-			return false;
-	}
+	//for (auto& ins : abilities)
+	//{
+	//	if (ins->id == id)
+	//		return false;
+	//}
 
-	auto ins = new AbilityInstance;
-	ins->id = id;
-	ins->lv = lv;
-	abilities.emplace_back(ins);
-	stats_dirty = true;
+	//auto ins = new AbilityInstance;
+	//ins->id = id;
+	//ins->lv = lv;
+	//abilities.emplace_back(ins);
+	//stats_dirty = true;
 
-	for (auto& cb : main_player.character->message_listeners.list)
-		cb.first(CharacterGainAbility, { .u = id }, { .u = lv }, { .i = (int)abilities.size() - 1 }, {});
+	//for (auto& cb : main_player.character->message_listeners.list)
+	//	cb.first(CharacterGainAbility, { .u = id }, { .u = lv }, { .i = (int)abilities.size() - 1 }, {});
 
 	return true;
 }
 
 bool cCharacter::gain_talent(uint id)
 {
-	for (auto tid : talents)
-	{
-		if (tid == id)
-			return false;
-	}
+	//for (auto tid : talents)
+	//{
+	//	if (tid == id)
+	//		return false;
+	//}
 
-	talents.push_back(id);
-	auto& talent = Talent::get(id);
-	for (auto& layer : talent.ablilities_list)
-	{
-		for (auto id : layer)
-			gain_ability(id, 0);
-	}
+	//talents.push_back(id);
+	//auto& talent = Talent::get(id);
+	//for (auto& layer : talent.ablilities_list)
+	//{
+	//	for (auto id : layer)
+	//		gain_ability(id, 0);
+	//}
 	return true;
 }
 
-void cCharacter::use_item(ItemInstance* ins)
+void cCharacter::use_item(cItemPtr item)
 {
-	auto& item = Item::get(ins->id);
-	if (item.active)
-		return;
-	if (item.type == ItemConsumable)
-	{
-		if (ins->num == 0)
-			return;
-		ins->num--;
-		if (ins->num == 0)
-		{
-			for (auto i = 0; i < inventory.size(); i++)
-			{
-				if (inventory[i].get() == ins)
-				{
-					inventory[i].reset(nullptr);
-					break;
-				}
-			}
-		}
-	}
+	//auto& item = Item::get(ins->id);
+	//if (item.active)
+	//	return;
+	//if (item.type == ItemConsumable)
+	//{
+	//	if (ins->num == 0)
+	//		return;
+	//	ins->num--;
+	//	if (ins->num == 0)
+	//	{
+	//		for (auto i = 0; i < inventory.size(); i++)
+	//		{
+	//			if (inventory[i].get() == ins)
+	//			{
+	//				inventory[i].reset(nullptr);
+	//				break;
+	//			}
+	//		}
+	//	}
+	//}
 
-	if (!item.active.cmds.empty())
-		cl_threads.emplace_back(item.active, this, nullptr, vec3(0.f), item.parameters, 0);
+	//if (!item.active.cmds.empty())
+	//	cl_threads.emplace_back(item.active, this, nullptr, vec3(0.f), item.parameters, 0);
 }
 
-void cCharacter::cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
+void cCharacter::cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target)
 {
-	if (ins->cd_timer > 0.f)
-		return;
+	//if (ins->cd_timer > 0.f)
+	//	return;
 
-	auto& ability = Ability::get(ins->id);
-	auto ability_mp = ability.get_mp(ins->lv);
-	auto ability_cd = ability.get_cd(ins->lv);
-	if (mp < ability_mp)
-		return;
+	//auto& ability = Ability::get(ins->id);
+	//auto ability_mp = ability.get_mp(ins->lv);
+	//auto ability_cd = ability.get_cd(ins->lv);
+	//if (mp < ability_mp)
+	//	return;
 
-	ins->cd_max = ability_cd;
-	ins->cd_timer = ins->cd_max;
-	set_mp(mp - ability_mp);
+	//ins->cd_max = ability_cd;
+	//ins->cd_timer = ins->cd_max;
+	//set_mp(mp - ability_mp);
 
-	if (!ability.active.cmds.empty())
-		cl_threads.emplace_back(ability.active, this, target, location, ability.parameters, ins->lv);
+	//if (!ability.active.cmds.empty())
+	//	cl_threads.emplace_back(ability.active, this, target, location, ability.parameters, ins->lv);
 }
 
 void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
 {
-	BuffInstance* ins = nullptr;
-	if (replace)
-	{
-		for (auto& i : buffs)
-		{
-			if (i->id == id)
-			{
-				ins = i.get();
-				break;
-			}
-		}
-	}
-	if (!ins)
-	{
-		ins = new BuffInstance;
-		buffs.emplace_back(ins);
-	}
-	auto& buff = Buff::get(id);
-	ins->id = id;
-	ins->lv = lv;
-	ins->timer = time;
-	ins->t0 = time;
-	ins->interval = buff.interval;
-	ins->duration = time;
-	stats_dirty = true;
+	//BuffInstance* ins = nullptr;
+	//if (replace)
+	//{
+	//	for (auto& i : buffs)
+	//	{
+	//		if (i->id == id)
+	//		{
+	//			ins = i.get();
+	//			break;
+	//		}
+	//	}
+	//}
+	//if (!ins)
+	//{
+	//	ins = new BuffInstance;
+	//	buffs.emplace_back(ins);
+	//}
+	//auto& buff = Buff::get(id);
+	//ins->id = id;
+	//ins->lv = lv;
+	//ins->timer = time;
+	//ins->t0 = time;
+	//ins->interval = buff.interval;
+	//ins->duration = time;
+	//stats_dirty = true;
 }
 
 bool cCharacter::add_marker(uint hash, float time)
@@ -948,7 +800,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			attack_hit_timer -= delta_time;
 			if (attack_hit_timer <= 0.f)
 			{
-				if (distance(p0, p1) <= preset->atk_distance + 3.5f)
+				if (distance(p0, p1) <= atk_distance + 3.5f)
 				{
 					auto attack = [this](cCharacterPtr target) {
 						auto damage = atk;
@@ -971,9 +823,9 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 
 						audio_source->play("attack_hit"_h);
 					};
-					if (preset->atk_projectile_preset != -1)
+					if (atk_projectile_id)
 					{
-						add_projectile(preset->atk_projectile_preset,
+						add_projectile(atk_projectile_id,
 							p0 + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
 							[&](const vec3&, cCharacterPtr t) {
 								if (t)
@@ -984,7 +836,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 						attack(target);
 				}
 
-				attack_interval_timer = (preset->atk_interval - preset->atk_point) / attack_speed;
+				attack_interval_timer = (atk_interval - atk_point) / attack_speed;
 			}
 		}
 
@@ -999,13 +851,13 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 	{
 		auto approached = false;
 		if (chase_target)
-			approached = process_approach(p1, preset->atk_distance, 60.f);
+			approached = process_approach(p1, atk_distance, 60.f);
 		else
 		{
 			nav_agent->set_target(p1);
 			nav_agent->set_speed_scale(0.f);
 
-			approached = nav_agent->dist < preset->atk_distance && abs(nav_agent->ang_diff) < 60.f;
+			approached = nav_agent->dist < atk_distance && abs(nav_agent->ang_diff) < 60.f;
 			action = ActionNone;
 		}
 		if (attack_interval_timer <= 0.f)
@@ -1013,8 +865,8 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			if (approached)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f); 
-				attack_hit_timer = preset->atk_point / attack_speed;
-				attack_timer = preset->atk_time / attack_speed;
+				attack_hit_timer = atk_point / attack_speed;
+				attack_timer = atk_time / attack_speed;
 				action = ActionAttack;
 
 				audio_source->play("attack_precast"_h);
@@ -1031,52 +883,52 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 	}
 }
 
-void cCharacter::process_cast_ability(AbilityInstance* ins, const vec3& location, cCharacterPtr target)
+void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target)
 {
-	if (state & CharacterStateStun)
-	{
-		cast_timer = -1.f;
-		nav_agent->stop();
-		action = ActionNone;
-		return;
-	}
+	//if (state & CharacterStateStun)
+	//{
+	//	cast_timer = -1.f;
+	//	nav_agent->stop();
+	//	action = ActionNone;
+	//	return;
+	//}
 
-	auto& ability = Ability::get(ins->id);
-	auto pos = target ? target->node->pos : location;
+	//auto& ability = Ability::get(ins->id);
+	//auto pos = target ? target->node->pos : location;
 
-	auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.get_distance(ins->lv), 15.f);
-	if (cast_timer > 0.f)
-	{
-		cast_timer -= delta_time;
-		if (cast_timer <= 0.f)
-		{
-			cast_ability(ins, pos, target);
-			nav_agent->stop();
-			new CharacterCommandIdle(this);
-		}
-		else
-		{
-			action = ActionCast;
-			nav_agent->set_speed_scale(0.f);
-		}
-	}
-	else
-	{
-		if (approached)
-		{
-			if (ability.cast_time == 0.f)
-			{
-				cast_ability(ins, pos, target);
-				nav_agent->stop();
-				new CharacterCommandIdle(this);
-			}
-			else
-			{
-				cast_speed = preset->cast_time / ability.cast_time;
-				cast_timer = preset->cast_point / cast_speed;
-			}
-		}
-	}
+	//auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.get_distance(ins->lv), 15.f);
+	//if (cast_timer > 0.f)
+	//{
+	//	cast_timer -= delta_time;
+	//	if (cast_timer <= 0.f)
+	//	{
+	//		cast_ability(ins, pos, target);
+	//		nav_agent->stop();
+	//		new CharacterCommandIdle(this);
+	//	}
+	//	else
+	//	{
+	//		action = ActionCast;
+	//		nav_agent->set_speed_scale(0.f);
+	//	}
+	//}
+	//else
+	//{
+	//	if (approached)
+	//	{
+	//		if (ability.cast_time == 0.f)
+	//		{
+	//			cast_ability(ins, pos, target);
+	//			nav_agent->stop();
+	//			new CharacterCommandIdle(this);
+	//		}
+	//		else
+	//		{
+	//			cast_speed = cast_time / ability.cast_time;
+	//			cast_timer = cast_point / cast_speed;
+	//		}
+	//	}
+	//}
 }
 
 struct cCharacterCreate : cCharacter::Create

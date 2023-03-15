@@ -2,20 +2,6 @@
 
 #include "../head.h"
 
-struct EffectPreset
-{
-	uint					id;
-	std::string				name;
-	std::filesystem::path	path;
-
-	std::filesystem::path	sound_path;
-
-	static int find(const std::string& name);
-	static const EffectPreset& get(uint id);
-};
-
-extern std::vector<EffectPreset> effect_presets;
-
 extern std::vector<cEffectPtr> effects;
 extern std::vector<cEffectPtr> dead_effects;
 extern bool removing_dead_effects;
@@ -61,7 +47,7 @@ struct cEffect : Component
 	// Reflect
 	void set_type(uint t);
 
-	const EffectPreset* preset = nullptr;
+	std::filesystem::path	sound_path;
 
 	float duration = 0.f;
 	float timer = 0.f;

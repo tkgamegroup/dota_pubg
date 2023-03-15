@@ -2,6 +2,11 @@
 
 #include "head.h"
 
+extern vec3				hovering_pos;
+extern cCharacterPtr	hovering_character;
+extern cChestPtr		hovering_chest;
+extern bool				hovering_terrain;
+
 void update_control();
 void command_character_idle(cCharacterPtr character);
 void command_character_hold(cCharacterPtr character);

@@ -5,42 +5,6 @@
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
-std::vector<ProjectilePreset> projectile_presets;
-
-void init_projectiles()
-{
-	for (auto& section : parse_ini_file(Path::get(L"assets\\projectiles.ini")).sections)
-	{
-		auto& preset = projectile_presets.emplace_back();
-		preset.id = projectile_presets.size() - 1;
-		preset.name = section.name;
-		for (auto& e : section.entries)
-		{
-			switch (e.key_hash)
-			{
-			case "path"_h:
-				preset.path = e.values[0];
-				break;
-			}
-		}
-	}
-}
-
-int ProjectilePreset::find(const std::string& name)
-{
-	for (auto i = 0; i < projectile_presets.size(); i++)
-	{
-		if (projectile_presets[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const ProjectilePreset& ProjectilePreset::get(uint id)
-{
-	return projectile_presets[id];
-}
-
 std::vector<cProjectilePtr> projectiles;
 std::vector<cProjectilePtr> dead_projectiles;
 bool removing_dead_projectiles = false;

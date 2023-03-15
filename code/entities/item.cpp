@@ -4,8 +4,6 @@
 #include "item.h"
 #include "character.h"
 
-std::vector<Item> items;
-
 void init_items()
 {
 	for (auto& section : parse_ini_file(Path::get(L"assets\\items.ini")).sections)
@@ -55,19 +53,4 @@ void init_items()
 			}
 		}
 	}
-}
-
-int Item::find(const std::string& name)
-{
-	for (auto i = 0; i < items.size(); i++)
-	{
-		if (items[i].name == name)
-			return i;
-	}
-	return -1;
-}
-
-const Item& Item::get(uint id)
-{
-	return items[id];
 }

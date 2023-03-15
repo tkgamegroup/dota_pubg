@@ -9,13 +9,8 @@ enum ItemType
 	ItemConsumable
 };
 
-struct ItemInstance
-{
-	uint id;
-	uint num = 1;
-};
-
-struct Item
+// Reflect ctor
+struct cItem : Component
 {
 	uint					id;
 	std::string				name;
@@ -23,20 +18,13 @@ struct Item
 	uvec2					icon_tile_coord = uvec2(0);
 	graphics::ImagePtr		icon_image = nullptr;
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
+	std::string				description;
 
 	ItemType				type = ItemItem;
-
-	std::string				description;
+	uint					num = 1;
 
 	ParameterNames			parameter_names;
 	ParameterPack			parameters;
 	CommandList				active;
 	CommandList				passive;
-
-	static int find(const std::string& name);
-	static const Item& get(uint id);
 };
-
-extern std::vector<Item> items;
-
-void init_items();

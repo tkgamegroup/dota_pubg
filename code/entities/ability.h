@@ -3,17 +3,9 @@
 #include "../head.h"
 #include "../command.h"
 
-struct AbilityInstance
+// Reflect ctor
+struct cAbility : Component
 {
-	uint id;
-	uint lv = 0;
-	float cd_max = 0.f;
-	float cd_timer = 0.f;
-};
-
-struct Ability
-{
-	uint					id;
 	std::string				name;
 	std::filesystem::path	icon_name;
 	uvec2					icon_tile_coord = uvec2(0);
@@ -31,6 +23,10 @@ struct Ability
 	std::vector<float>		range;
 	float					angle = 0.f;
 	float					start_radius = 0.f;
+
+	uint lv = 0;
+	float cd_max = 0.f;
+	float cd_timer = 0.f;
 
 	inline uint get_mp(uint lv) const
 	{
@@ -65,21 +61,16 @@ struct Ability
 	CommandList				active;
 	CommandList				passive;
 
-	static int find(const std::string& name);
-	static const Ability& get(uint id);
+	struct Create
+	{
+		virtual cAbilityPtr operator()(EntityPtr) = 0;
+	};
+	// Reflect static
+	EXPORT static Create& create;
 };
 
 struct Talent
 {
-	uint							id;
 	std::string						name;
-	std::vector<std::vector<uint>>	ablilities_list; // layers of ability ids
-
-	static int find(const std::string& name);
-	static const Talent& get(uint id);
+	std::vector<std::vector<uint>>	ablilities_list; // layers of ability hashes
 };
-
-extern std::vector<Ability> abilities;
-extern std::vector<Talent> talents;
-
-void init_abilities();
