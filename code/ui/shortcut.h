@@ -20,24 +20,22 @@ struct Shortcut
 	virtual void click() {}
 };
 
-struct ItemInstance;
 struct ItemShortcut : Shortcut
 {
-	ItemInstance* ins;
+	cItemPtr item;
 
-	ItemShortcut(ItemInstance* ins);
+	ItemShortcut(cItemPtr item);
 
 	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override;
 
 	void click() override;
 };
 
-struct AbilityInstance;
 struct AbilityShortcut : Shortcut
 {
-	AbilityInstance* ins;
+	cAbilityPtr ability;
 
-	AbilityShortcut(AbilityInstance* ins);
+	AbilityShortcut(cAbilityPtr ability);
 
 	void draw(ImDrawList* dl, const vec2& p0, const vec2& p1) override;
 

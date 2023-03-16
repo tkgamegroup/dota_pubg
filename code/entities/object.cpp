@@ -24,12 +24,12 @@ void cObject::set_visible_flags(uint v)
 
 void cObject::init(uint _preset_id, uint _uid)
 {
-	preset_id = _preset_id;
+	prefab_id = _preset_id;
 	uid = _uid ? _uid : g_uid++;
 	objects[uid] = this;
 
 	if (multi_player == MultiPlayerAsHost)
-		new_objects.emplace_back(preset_id, uid);
+		new_objects.emplace_back(prefab_id, uid);
 }
 
 struct cObjectCreate : cObject::Create

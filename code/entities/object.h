@@ -14,9 +14,9 @@ struct cObject : Component
 	// Reflect
 	void set_visible_flags(uint v);
 
-	uint preset_id = 0;
+	uint prefab_id = 0;
 	uint uid = 0;
-	void init(uint preset_id, uint uid);
+	void init(uint prefab_id, uint uid);
 
 	~cObject();
 

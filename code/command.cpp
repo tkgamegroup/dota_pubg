@@ -666,22 +666,22 @@ void CommandListExecuteThread::execute()
 		next_i = end_i + 1;
 	}
 		break;
-	case CommandList::cAddEffect:
-		if (parameters.size() == 2)
-		{
-			auto ret = add_effect(parameters[0].to_i(), character->node->pos, vec3(0.f), parameters[1].to_f());
-			if (std::get<2>(cmd) != CommandList::vNull)
-				variable_as.operator()<voidptr>(std::get<2>(cmd)) = ret;
-		}
-		break;
-	case CommandList::cAddEffectFaceTarget:
-		if (parameters.size() == 2)
-		{
-			auto ret = add_effect(parameters[0].to_i(), character->node->pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character->node->pos, target_pos), 0.f, 0.f), parameters[1].to_f());
-			if (std::get<2>(cmd) != CommandList::vNull)
-				variable_as.operator()<voidptr>(std::get<2>(cmd)) = ret;
-		}
-		break;
+	//case CommandList::cAddEffect:
+	//	if (parameters.size() == 2)
+	//	{
+	//		auto ret = add_effect(parameters[0].to_i(), character->node->pos, vec3(0.f), parameters[1].to_f());
+	//		if (std::get<2>(cmd) != CommandList::vNull)
+	//			variable_as.operator()<voidptr>(std::get<2>(cmd)) = ret;
+	//	}
+	//	break;
+	//case CommandList::cAddEffectFaceTarget:
+	//	if (parameters.size() == 2)
+	//	{
+	//		auto ret = add_effect(parameters[0].to_i(), character->node->pos + vec3(0.f, character->nav_agent->height * 0.5f, 0.f), vec3(angle_xz(character->node->pos, target_pos), 0.f, 0.f), parameters[1].to_f());
+	//		if (std::get<2>(cmd) != CommandList::vNull)
+	//			variable_as.operator()<voidptr>(std::get<2>(cmd)) = ret;
+	//	}
+	//	break;
 	}
 
 	if (next_i > frame.end_i)

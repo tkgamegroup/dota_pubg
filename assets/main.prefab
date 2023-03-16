@@ -61,5 +61,12 @@
 				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
 			</modifications>
 		</item>
+		<item file_id="4030f825973cd191d6225944041627a1" name="Entity 1">
+			<components>
+				<item type_name="flame::cNode" pos="1.5,1,1.5" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
+				<item type_name="cSpawner" prefab_path="characters\test\A.prefab" />
+			</components>
+		</item>
 	</children>
 </prefab>

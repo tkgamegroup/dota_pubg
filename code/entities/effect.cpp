@@ -7,24 +7,24 @@
 
 void init_effects()
 {
-	for (auto& section : parse_ini_file(Path::get(L"assets\\effects.ini")).sections)
-	{
-		auto& preset = effect_presets.emplace_back();
-		preset.id = effect_presets.size() - 1;
-		preset.name = section.name;
-		for (auto& e : section.entries)
-		{
-			switch (e.key_hash)
-			{
-			case "path"_h:
-				preset.path = e.values[0];
-				break;
-			case "sound_path"_h:
-				preset.sound_path = e.values[0];
-				break;
-			}
-		}
-	}
+	//for (auto& section : parse_ini_file(Path::get(L"assets\\effects.ini")).sections)
+	//{
+	//	auto& preset = effect_presets.emplace_back();
+	//	preset.id = effect_presets.size() - 1;
+	//	preset.name = section.name;
+	//	for (auto& e : section.entries)
+	//	{
+	//		switch (e.key_hash)
+	//		{
+	//		case "path"_h:
+	//			preset.path = e.values[0];
+	//			break;
+	//		case "sound_path"_h:
+	//			preset.sound_path = e.values[0];
+	//			break;
+	//		}
+	//	}
+	//}
 }
 
 std::vector<cEffectPtr> effects;

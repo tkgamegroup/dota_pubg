@@ -42,7 +42,7 @@ target_link_libraries(cpp "${flame_path}/bin/debug/flame_audio.lib")
 target_link_libraries(cpp "${flame_path}/bin/debug/flame_graphics.lib")
 target_link_libraries(cpp "${flame_path}/bin/debug/flame_universe.lib")
 
-file(GENERATE OUTPUT "$<TARGET_FILE_DIR:cpp>/cpp.typedesc" CONTENT "${CMAKE_CURRENT_SOURCE_DIR}/cpp" TARGET cpp)
+file(GENERATE OUTPUT "$<TARGET_FILE_DIR:cpp>/cpp.typedesc" CONTENT "${CMAKE_CURRENT_SOURCE_DIR}/code" TARGET cpp)
 add_custom_command(TARGET cpp POST_BUILD COMMAND "${flame_path}/bin/debug/typeinfogen.exe" $<TARGET_FILE:cpp>)
 
 file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}" current_path)

@@ -11,9 +11,11 @@ struct cSpawner : Component
 	cNodePtr node;
 
 	// Reflect
-	uint preset_id = 0;
+	std::filesystem::path prefab_path;
 	// Reflect
 	uint faction = FactionCreep;
+	// Reflect
+	float spawn_delay = 3.f;
 	// Reflect
 	float spawn_interval = 30.f;
 	// Reflect
@@ -21,6 +23,7 @@ struct cSpawner : Component
 
 	float spawn_timer = 0.f;
 
+	void start() override;
 	void update() override;
 
 	struct Create

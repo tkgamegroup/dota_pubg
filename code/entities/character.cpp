@@ -823,9 +823,9 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 
 						audio_source->play("attack_hit"_h);
 					};
-					if (atk_projectile_id)
+					if (!atk_projectile.empty())
 					{
-						add_projectile(atk_projectile_id,
+						add_projectile(atk_projectile,
 							p0 + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
 							[&](const vec3&, cCharacterPtr t) {
 								if (t)

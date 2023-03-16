@@ -26,7 +26,7 @@ struct nwAddObjectsStruct
 {
 	struct Item
 	{
-		uint preset_id;
+		uint prefab_id;
 		uint id;
 	};
 

@@ -3,6 +3,11 @@
 #include "../game.h"
 #include "spawner.h"
 
+void cSpawner::start()
+{
+	spawn_timer = spawn_delay;
+}
+
 void cSpawner::update()
 {
 	if (spawn_timer > 0.f)
@@ -10,7 +15,7 @@ void cSpawner::update()
 	else
 	{
 		for (auto i = 0; i < spawn_number; i++)
-			add_character(preset_id, node->pos, faction);
+			add_character(prefab_path, node->pos, faction);
 
 		spawn_timer = spawn_interval;
 	}

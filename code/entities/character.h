@@ -181,7 +181,6 @@ struct cCharacter : Component
 	float atk_point = 1.f;
 	// Reflect
 	std::filesystem::path atk_projectile;
-	uint atk_projectile_id = 0;
 	// Reflect
 	float cast_time = 1.f;
 	// Reflect

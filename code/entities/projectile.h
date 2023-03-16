@@ -14,8 +14,6 @@ struct cProjectile : Component
 	// Reflect auto_requires
 	cObjectPtr object;
 
-	const ProjectilePreset* preset = nullptr;
-
 	float speed = 0.1f;
 
 	bool					use_target = true;

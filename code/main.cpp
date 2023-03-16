@@ -54,7 +54,7 @@
 //
 //struct MonsterSpawnningRule
 //{
-//	uint preset_id;
+//	uint prefab_id;
 //	float delay;
 //	float number_function_factor_a;
 //	float number_function_factor_b;
@@ -68,11 +68,11 @@
 //{
 //	for (auto& section : parse_ini_file(Path::get(L"assets\\monster_spawnnings.ini")).sections)
 //	{
-//		auto preset_id = CharacterPreset::find(section.name);
-//		if (preset_id != -1)
+//		auto prefab_id = CharacterPreset::find(section.name);
+//		if (prefab_id != -1)
 //		{
 //			auto& rule = monster_spawnning_rules.emplace_back();
-//			rule.preset_id = preset_id;
+//			rule.prefab_id = prefab_id;
 //			for (auto& e : section.entries)
 //			{
 //				switch (e.key_hash)
@@ -781,21 +781,21 @@
 //					}, &stru);
 //					for (auto& item : stru.items)
 //					{
-//						if (item.preset_id < 2000)
+//						if (item.prefab_id < 2000)
 //						{
-//							auto character = add_character(item.preset_id - 1000, vec3(0.f, -1000.f, 0.f), 0, item.id);
+//							auto character = add_character(item.prefab_id - 1000, vec3(0.f, -1000.f, 0.f), 0, item.id);
 //							character->entity->children[0]->set_enable(false); 
 //							if (item.id == main_player.character_id)
 //								main_player.init(character->entity);
 //						}
-//						else if (item.preset_id < 3000)
+//						else if (item.prefab_id < 3000)
 //						{
-//							auto projectle = add_projectile(item.preset_id - 2000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
+//							auto projectle = add_projectile(item.prefab_id - 2000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
 //							projectle->entity->children[0]->set_enable(false);
 //						}
-//						else if (item.preset_id < 4000)
+//						else if (item.prefab_id < 4000)
 //						{
-//							auto projectle = add_projectile(item.preset_id - 3000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
+//							auto projectle = add_projectile(item.prefab_id - 3000, vec3(0.f, -1000.f, 0.f), nullptr, 0.f, nullptr, item.id);
 //							projectle->entity->children[0]->set_enable(false);
 //						}
 //						else
@@ -906,7 +906,7 @@
 //								auto path = sScene::instance()->query_navmesh_path(pos, main_player.node->pos, 0);
 //								if (path.size() >= 2 && distance(path.back(), main_player.node->pos) < 0.3f)
 //								{
-//									auto character = add_character(rule.preset_id, pos, FactionCreep);
+//									auto character = add_character(rule.prefab_id, pos, FactionCreep);
 //									character->add_buff(Buff::find("Cursed"), -1.f, uint(gtime / 60.f) + 1);
 //									new CharacterCommandAttackTarget(character, main_player.character);
 //
@@ -928,9 +928,9 @@
 //			{
 //				vec3 pos;
 //				uint faction;
-//				uint preset_id;
-//				add_player(pos, faction, preset_id);
-//				auto character = add_character(preset_id, pos, faction);
+//				uint prefab_id;
+//				add_player(pos, faction, prefab_id);
+//				auto character = add_character(prefab_id, pos, faction);
 //
 //				nw_players[faction].push_back(so_id);
 //
@@ -945,7 +945,7 @@
 //				for (auto& pair : objects)
 //				{
 //					auto& item = stru.items.emplace_back();
-//					item.preset_id = pair.second->preset_id;
+//					item.prefab_id = pair.second->prefab_id;
 //					item.id = pair.second->uid;
 //				}
 //				pack_msg(res, nwAddObjects, stru);
@@ -960,7 +960,7 @@
 //				for (auto& o : new_objects)
 //				{
 //					auto& item = stru.items.emplace_back();
-//					item.preset_id = o.first;
+//					item.prefab_id = o.first;
 //					item.id = o.second;
 //				}
 //				pack_msg(res, nwAddObjects, stru);

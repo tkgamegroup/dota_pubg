@@ -5,58 +5,56 @@
 #include "../entities/ability.h"
 #include "../entities/character.h"
 
-ItemShortcut::ItemShortcut(ItemInstance* ins) :
-	ins(ins)
+ItemShortcut::ItemShortcut(cItemPtr item) :
+	item(item)
 {
 	type = tItem;
-	id = ins->id;
+	//id = ins->id;
 }
 
 void ItemShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 {
-	auto& item = Item::get(ins->id);
 	if (ImGui::IsItemHovered())
 	{
 		ImGui::BeginTooltip();
-		ImGui::TextUnformatted(item.name.c_str());
-		ImGui::TextUnformatted(item.description.c_str());
+		ImGui::TextUnformatted(item->name.c_str());
+		ImGui::TextUnformatted(item->description.c_str());
 		ImGui::EndTooltip();
 	}
-	dl->AddImage(item.icon_image, p0, p1, item.icon_uvs.xy(), item.icon_uvs.zw());
+	dl->AddImage(item->icon_image, p0, p1, item->icon_uvs.xy(), item->icon_uvs.zw());
 }
 
 void ItemShortcut::click()
 {
-	main_player.character->use_item(ins);
+	main_player.character->use_item(item);
 }
 
-AbilityShortcut::AbilityShortcut(AbilityInstance* ins) :
-	ins(ins)
+AbilityShortcut::AbilityShortcut(cAbilityPtr ability) :
+	ability(ability)
 {
 	type = tAbility;
-	id = ins->id;
+	//id = ins->id;
 }
 
 void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 {
-	auto& ability = Ability::get(ins->id);
 	if (ImGui::IsItemHovered())
 	{
 		ImGui::BeginTooltip();
-		ImGui::TextUnformatted(ability.name.c_str());
-		ImGui::TextUnformatted(ability.description.c_str());
+		ImGui::TextUnformatted(ability->name.c_str());
+		ImGui::TextUnformatted(ability->description.c_str());
 		ImGui::EndTooltip();
 	}
-	dl->AddImage(ability.icon_image, p0, p1, ability.icon_uvs.xy(), ability.icon_uvs.zw());
+	dl->AddImage(ability->icon_image, p0, p1, ability->icon_uvs.xy(), ability->icon_uvs.zw());
 
-	if (ins->cd_max > 0.f && ins->cd_timer > 0.f)
+	if (ability->cd_max > 0.f && ability->cd_timer > 0.f)
 	{
 		dl->PushClipRect(p0, p1);
 		auto c = (p0 + p1) * 0.5f;
 		dl->PathLineTo(c);
-		dl->PathArcTo(c, p1.x - p0.x, ((ins->cd_timer / ins->cd_max) * 2.f - 0.5f) * glm::pi<float>(), -0.5f * glm::pi<float>());
+		dl->PathArcTo(c, p1.x - p0.x, ((ability->cd_timer / ability->cd_max) * 2.f - 0.5f) * glm::pi<float>(), -0.5f * glm::pi<float>());
 		dl->PathFillConvex(ImColor(0.f, 0.f, 0.f, 0.5f));
-		dl->AddText(p0 + vec2(8.f), ImColor(1.f, 1.f, 1.f, 1.f), std::format("{:.1f}", ins->cd_timer).c_str());
+		dl->AddText(p0 + vec2(8.f), ImColor(1.f, 1.f, 1.f, 1.f), std::format("{:.1f}", ability->cd_timer).c_str());
 		dl->PopClipRect();
 	}
 }

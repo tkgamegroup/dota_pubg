@@ -157,24 +157,24 @@ bool parse_literal(const std::string& str, int& id)
 	//	id = EffectPreset::find(str.substr(1, str.size() - 4));
 	//	return true;
 	//}
-	else if (SUS::match_head_tail(str, "\"", "\"pt"))
-	{
-		id = ProjectilePreset::find(str.substr(1, str.size() - 4));
-		return true;
-	}
+	//else if (SUS::match_head_tail(str, "\"", "\"pt"))
+	//{
+	//	id = ProjectilePreset::find(str.substr(1, str.size() - 4));
+	//	return true;
+	//}
 	return false;
 }
 
 void enable_game(bool v)
 {
-	root->world->update_components = v;
+	World::instance()->update_components = v;
 	sScene::instance()->enable = v;
 }
 
-static std::map<std::filesystem::path, EntityPtr> prefabs;
-
 EntityPtr get_prefab(const std::filesystem::path& _path)
 {
+	static std::map<std::filesystem::path, EntityPtr> prefabs;
+
 	auto path = Path::get(_path);
 	auto it = prefabs.find(path);
 	if (it == prefabs.end())
@@ -183,6 +183,25 @@ EntityPtr get_prefab(const std::filesystem::path& _path)
 		e->load(path);
 		it = prefabs.emplace(path, e).first;
 	}
+	return it->second;
+}
+
+std::filesystem::path get_prefab_path(uint prefab_id)
+{
+	static std::map<uint, std::filesystem::path> paths;
+
+	static bool first = true;
+	if (first)
+	{
+		for (auto& entry : std::filesystem::recursive_directory_iterator(Path::get("assets")))
+		{
+
+		}
+	}
+
+	auto it = paths.find(prefab_id);
+	if (it == paths.end())
+		return L"";
 	return it->second;
 }
 
@@ -200,10 +219,12 @@ static vec3 get_avaliable_pos(const vec3& pos, float radius, float max_distance,
 		ret.xz = pos.xz() + circularRand(max_distance);
 		times--;
 	}
+	if (times == 0)
+		ret = vec3(10000.f);
 	return ret;
 }
 
-void add_player(vec3& pos, uint& faction, uint& preset_id)
+void add_player(vec3& pos, uint& faction, uint& prefab_id)
 {
 	static uint idx = 0;
 	/*if (!main_terrain.site_centrality.empty())
@@ -211,7 +232,7 @@ void add_player(vec3& pos, uint& faction, uint& preset_id)
 	else
 		*/pos = get_map_coord(vec2(0.5f));
 	faction = 1 << (log2i((uint)FactionParty1) + idx);
-	//preset_id = CharacterPreset::find("Dragon Knight");
+	//prefab_id = CharacterPreset::find("Dragon Knight");
 	idx++;
 }
 
@@ -246,19 +267,21 @@ std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float 
 	return ret;
 }
 
-cCharacterPtr add_character(uint preset_id, const vec3& _pos, uint faction, uint id)
+cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& _pos, uint faction, uint id)
 {
-	auto& preset = CharacterPreset::get(preset_id);
-	auto e = get_prefab(preset.path)->copy();
+	auto e = get_prefab(prefab_path);
+	auto radius = e->get_component_t<cNavAgent>()->radius;
+	auto pos = get_avaliable_pos(_pos, radius, 4.f, 20);
+	if (pos.x >= 10000.f)
+		return nullptr;
+	e = e->copy();
+
 	auto node = e->node();
-	auto nav_agent = e->get_component_t<cNavAgent>();
 	auto object = e->get_component_t<cObject>();
 	auto character = e->get_component_t<cCharacter>();
-	auto pos = get_avaliable_pos(_pos, nav_agent->radius, 4.f, 20);
 	node->set_pos(pos);
-	object->init(1000 + preset_id, id);
+	//object->init(1000 + prefab_id, id);
 	characters.push_back(character);
-	character->preset = &preset;
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
 	{
@@ -274,16 +297,14 @@ cCharacterPtr add_character(uint preset_id, const vec3& _pos, uint faction, uint
 	return character;
 }
 
-cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
+cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
 {
-	auto& preset = ProjectilePreset::get(preset_id);
-	auto e = get_prefab(preset.path)->copy();
+	auto e = get_prefab(prefab_path)->copy();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
-	object->init(2000 + preset_id, id);
+	//object->init(2000 + prefab_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectiles.push_back(projectile);
-	projectile->preset = &preset;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	projectile->on_end = on_end;
@@ -292,16 +313,14 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, cCharacterPtr tar
 	return projectile;
 }
 
-cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
+cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
 {
-	auto& preset = ProjectilePreset::get(preset_id);
-	auto e = get_prefab(preset.path)->copy();
+	auto e = get_prefab(prefab_path)->copy();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
-	object->init(2000 + preset_id, id);
+	//object->init(2000 + prefab_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectiles.push_back(projectile);
-	projectile->preset = &preset;
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
@@ -311,18 +330,16 @@ cProjectilePtr add_projectile(uint preset_id, const vec3& pos, const vec3& locat
 	return projectile;
 }
 
-cEffectPtr add_effect(uint preset_id, const vec3& pos, const vec3& eul, float duration, uint id)
+cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& eul, float duration, uint id)
 {
-	auto& preset = EffectPreset::get(preset_id);
-	auto e = get_prefab(preset.path)->copy();
+	auto e = get_prefab(prefab_path)->copy();
 	auto node = e->node();
 	node->set_pos(pos);
 	node->set_eul(eul);
 	auto object = e->get_component_t<cObject>();
-	object->init(3000 + preset_id, id);
+	//object->init(3000 + prefab_id, id);
 	auto effect = e->get_component_t<cEffect>();
 	effects.push_back(effect);
-	effect->preset = &preset;
 	effect->duration = duration;
 	root->add_child(e);
 
@@ -461,3 +478,9 @@ struct cLauncherCreate : cLauncher::Create
 	}
 }cLauncher_create;
 cLauncher::Create& cLauncher::create = cLauncher_create;
+
+void* cpp_info()
+{
+	cGame::create((EntityPtr)INVALID_POINTER);
+	return nullptr;
+}
