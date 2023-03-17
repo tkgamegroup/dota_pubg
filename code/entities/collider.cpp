@@ -67,7 +67,7 @@ void cSectorCollider::update()
 
 	if (t >= collide_time.x && t <= collide_time.y)
 	{
-		auto pos = c + node->g_pos;
+		auto pos = c + node->global_pos();
 		for (auto& character : find_characters(faction, pos, r1, r0, central_angle, direction_angle))
 		{
 			static ParameterPack parameters;

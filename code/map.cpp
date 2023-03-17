@@ -311,7 +311,7 @@ void update_vision()
 						for (auto n : objs)
 						{
 							if (n->entity->name == "blocker")
-								blockers.emplace_back(n->g_pos.xz(), n->g_scl.x * 0.5f);
+								blockers.emplace_back(n->global_pos().xz(), n->global_scl().x * 0.5f);
 						}
 
 						for (auto y = int(coord.y - range); y <= coord.y + range; y++)
