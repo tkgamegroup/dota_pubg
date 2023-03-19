@@ -326,7 +326,6 @@
 //		ImGui::End();
 //
 //		auto show_buffs = [](ImDrawList* dl, cCharacterPtr character) {
-//
 //			for (auto i = 0; i < character->buffs.size(); i++)
 //			{
 //				if (i > 0) ImGui::SameLine();
@@ -431,27 +430,6 @@
 //			action_bar(dl, bar_width, 4.f, focus_character.obj);
 //
 //			ImGui::End();
-//		}
-//
-//		if (main_player.character && main_camera.camera)
-//		{
-//			for (auto character : characters)
-//			{
-//				//if (character->object->visible_flags & main_player.faction)
-//				{
-//					auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
-//					if (p.x > 0.f && p.y > 0.f)
-//					{
-//						p += sInput::instance()->offset;
-//						auto dl = ImGui::GetBackgroundDrawList();
-//						const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
-//						const auto bar_height = 5.f;
-//						p.x -= bar_width * 0.5f;
-//						dl->AddRectFilled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height),
-//							character->faction == main_player.faction ? ImColor(0.f, 1.f, 0.f) : ImColor(1.f, 0.f, 0.f));
-//					}
-//				}
-//			}
 //		}
 //
 //		if (!tooltip.empty())

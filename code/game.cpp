@@ -1,6 +1,7 @@
 #include <flame/graphics/gui.h>
 #include <flame/universe/world.h>
 #include <flame/universe/octree.h>
+#include <flame/universe/components/camera.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/systems/scene.h>
 
@@ -8,6 +9,7 @@
 #include "map.h"
 #include "control.h"
 #include "network.h"
+#include "ui/ui.h"
 #include "entities/ability.h"
 #include "entities/buff.h"
 #include "entities/item.h"
@@ -261,9 +263,24 @@ std::vector<cCharacterPtr> find_characters(FactionFlags faction, const vec3& pos
 	}
 	std::sort(distance_list.begin(), distance_list.end(), [](const auto& a, const auto& b) {
 		return a.first < b.first;
-		});
+	});
 	for (auto i = 0; i < ret.size(); i++)
 		ret[i] = distance_list[i].second;
+	return ret;
+}
+
+std::vector<cCharacterPtr> find_characters_within_camera()
+{
+	std::vector<cCharacterPtr> ret;
+
+	std::vector<cNodePtr> objs;
+	sScene::instance()->octree->get_within_frustum(main_camera.camera->frustum, objs, CharacterTag);
+	for (auto obj : objs)
+	{
+		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr)
+			ret.push_back(chr);
+	}
+
 	return ret;
 }
 
@@ -382,12 +399,15 @@ cGame::Create& cGame::create = cGame_create;
 cGame::~cGame()
 {
 	prefabs.clear();
+	deinit_ui();
 }
 
 void cGame::start()
 {
 	root = entity;
 	main_player.init(root->find_child("main_player"));
+	main_camera.init(root->find_child("main_camera"));
+	init_ui();
 }
 
 void cGame::update()
@@ -427,6 +447,8 @@ void cGame::update()
 
 	if (enable_control)
 		update_control();
+	if (enable_ui)
+		update_ui();
 }
 
 cLauncher::~cLauncher()

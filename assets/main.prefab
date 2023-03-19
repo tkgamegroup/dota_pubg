@@ -6,7 +6,7 @@
 		<item type_name="cGame" camera_length="20" camera_angle="60" />
 	</components>
 	<children>
-		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="Camera">
+		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="main_camera">
 			<components>
 				<item type_name="flame::cNode" pos="0,10,10" qut="0.92388,-0.382683,0,0" />
 				<item type_name="flame::cCamera" />
