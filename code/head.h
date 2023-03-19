@@ -23,14 +23,18 @@ FLAME_TYPE(cNWDataHarvester)
 const auto CharacterTag = TagUser;
 
 // Reflect
-enum Faction
+enum FactionFlags
 {
+	FactionNone = 0,
 	FactionCreep = 1 << 0,
 	FactionParty1 = 1 << 1,
 	FactionParty2 = 1 << 2,
 	FactionParty3 = 1 << 3,
 	FactionParty4 = 1 << 4
 };
+
+inline FactionFlags operator| (FactionFlags a, FactionFlags b) { return (FactionFlags)((int)a | (int)b); }
+inline FactionFlags operator~ (FactionFlags v) { return (FactionFlags)(~(int)v); }
 
 // Reflect
 enum TargetType
@@ -70,6 +74,13 @@ enum MultiPlayerType
 	SinglePlayer,
 	MultiPlayerAsHost,
 	MultiPlayerAsClient
+};
+
+// Reflect
+enum CreepType
+{
+	CreepCamp,
+	CreepLane
 };
 
 struct IDAndPos

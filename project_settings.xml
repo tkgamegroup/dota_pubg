@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project_settings>
+<project_settings build_after_open="true">
 	<favorites>
 		<item v="assets\main.prefab" />
 	</favorites>

@@ -1,6 +1,8 @@
 #include <flame/universe/systems/scene.h>
 
 #include "../game.h"
+#include "character.h"
+#include "ai.h"
 #include "spawner.h"
 
 void cSpawner::start()
@@ -15,7 +17,18 @@ void cSpawner::update()
 	else
 	{
 		for (auto i = 0; i < spawn_number; i++)
-			add_character(prefab_path, node->pos, faction);
+		{
+			auto character = add_character(prefab_path, node->pos, faction);
+			if (character)
+			{
+				auto ai = character->entity->get_component_t<cCreepAI>();
+				if (ai)
+				{
+					ai->type = creep_type;
+					ai->target_pos = creep_target_pos;
+				}
+			}
+		}
 
 		spawn_timer = spawn_interval;
 	}

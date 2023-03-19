@@ -187,7 +187,7 @@ std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 std::vector<cCharacterPtr> dead_characters;
 bool removing_dead_characters = false;
 
-void cCharacter::set_faction(uint _faction)
+void cCharacter::set_faction(FactionFlags _faction)
 {
 	if (faction == _faction)
 		return;
@@ -257,7 +257,7 @@ void cCharacter::set_mp_max(uint v)
 	data_changed("mp_max"_h);
 }
 
-void cCharacter::set_atk_type(uchar v)
+void cCharacter::set_atk_type(DamageType v)
 {
 	if (atk_type == v)
 		return;
@@ -372,6 +372,17 @@ void cCharacter::start()
 		audio_buffer_names.emplace_back(attack_hit_sound_path, "attack_hit");
 	audio_source->set_buffer_names(audio_buffer_names);
 
+	init_stats.hp_max = hp_max;
+	init_stats.mp_max = mp_max;
+	init_stats.atk_type = atk_type;
+	init_stats.atk = atk;
+	init_stats.phy_def = phy_def;
+	init_stats.mag_def = mag_def;
+	init_stats.hp_reg = hp_reg;
+	init_stats.mp_reg = mp_reg;
+	init_stats.mov_sp = mov_sp;
+	init_stats.atk_sp = atk_sp;
+
 	if (!command)
 		new CharacterCommandIdle(this);
 }
@@ -392,18 +403,18 @@ void cCharacter::update()
 
 			auto old_hp_max = hp_max;
 			auto old_mp_max = mp_max;
-			hp_max = hp;
-			mp_max = hp;
+			hp_max = init_stats.hp_max;
+			mp_max = init_stats.mp_max;
 
-			atk_type = PhysicalDamage;
-			atk = atk;
+			atk_type = init_stats.atk_type;
+			atk = init_stats.atk;
 
-			phy_def = phy_def;
-			mag_def = mag_def;
-			hp_reg = hp_reg;
-			mp_reg = mp_reg;
-			mov_sp = mov_sp;
-			atk_sp = atk_sp;
+			phy_def = init_stats.phy_def;
+			mag_def = init_stats.mag_def;
+			hp_reg = init_stats.hp_reg;
+			mp_reg = init_stats.mp_reg;
+			mov_sp = init_stats.mov_sp;
+			atk_sp = init_stats.atk_sp;
 
 			attack_effects.clear();
 			//for (auto ability : abilities)

@@ -467,56 +467,56 @@ void CommandListExecuteThread::execute()
 			}
 		}
 		break;
-	case CommandList::cGetNearbyCharacters:
-		if (parameters.size() >= 2 && parameters.size() <= 4)
-		{
-			auto character_pos = character->node->pos;
-			auto faction = parameters[0].to_i();
-			auto search_range = parameters[1].to_f();
-			auto start_radius = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
-			auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
-			auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
-			auto characters = find_characters(faction, character_pos, search_range, start_radius, central_angle, direction_angle);
+	//case CommandList::cGetNearbyCharacters:
+	//	if (parameters.size() >= 2 && parameters.size() <= 4)
+	//	{
+	//		auto character_pos = character->node->pos;
+	//		auto faction = parameters[0].to_i();
+	//		auto search_range = parameters[1].to_f();
+	//		auto start_radius = parameters.size() >= 3 ? parameters[2].to_f() : 0.f;
+	//		auto central_angle = parameters.size() >= 4 ? parameters[3].to_f() : 0.f;
+	//		auto direction_angle = central_angle > 0.f ? angle_xz(character_pos, target_pos) : 0.f;
+	//		auto characters = find_characters(faction, character_pos, search_range, start_radius, central_angle, direction_angle);
 
-			if (std::get<2>(cmd) != CommandList::vNull)
-			{
-				auto vec = variable_as.operator()<std::vector<lVariant>>(std::get<2>(cmd));
-				vec.resize(characters.size());
-				for (auto i = 0; i < vec.size(); i++)
-					vec[i].p = characters[i];
-			}
-		}
-		break;
-	case CommandList::cNearestCharacter:
-		if (parameters.size() >= 3 && parameters.size() <= 5)
-		{
-			auto& oap = variable_as.operator()<ObjAndPosXZ>(parameters[0].to_i());
-			auto character = (cCharacterPtr)oap.obj;
-			auto faction = variable_as.operator()<uint>(parameters[1].to_i());
-			auto res = find_characters(faction, character ? character->node->pos : vec3(oap.pos_xz, 0.f).xzy(), parameters[2].to_f());
-			cCharacterPtr ret = nullptr;
-			auto marker = 0U; auto marker_time = 0.f;
-			if (parameters.size() == 5)
-			{
-				marker = variable_as.operator()<uint>(parameters[3].to_i());
-				marker_time = parameters[4].to_f();
-			}
-			for (auto c : res)
-			{
-				if (c != character)
-				{
-					if (marker && c->add_marker(marker, marker_time))
-					{
-						ret = c;
-						break;
-					}
-				}
-			}
+	//		if (std::get<2>(cmd) != CommandList::vNull)
+	//		{
+	//			auto vec = variable_as.operator()<std::vector<lVariant>>(std::get<2>(cmd));
+	//			vec.resize(characters.size());
+	//			for (auto i = 0; i < vec.size(); i++)
+	//				vec[i].p = characters[i];
+	//		}
+	//	}
+	//	break;
+	//case CommandList::cNearestCharacter:
+	//	if (parameters.size() >= 3 && parameters.size() <= 5)
+	//	{
+	//		auto& oap = variable_as.operator()<ObjAndPosXZ>(parameters[0].to_i());
+	//		auto character = (cCharacterPtr)oap.obj;
+	//		auto faction = variable_as.operator()<uint>(parameters[1].to_i());
+	//		auto res = find_characters(faction, character ? character->node->pos : vec3(oap.pos_xz, 0.f).xzy(), parameters[2].to_f());
+	//		cCharacterPtr ret = nullptr;
+	//		auto marker = 0U; auto marker_time = 0.f;
+	//		if (parameters.size() == 5)
+	//		{
+	//			marker = variable_as.operator()<uint>(parameters[3].to_i());
+	//			marker_time = parameters[4].to_f();
+	//		}
+	//		for (auto c : res)
+	//		{
+	//			if (c != character)
+	//			{
+	//				if (marker && c->add_marker(marker, marker_time))
+	//				{
+	//					ret = c;
+	//					break;
+	//				}
+	//			}
+	//		}
 
-			if (std::get<2>(cmd) != CommandList::vNull)
-				variable_as.operator()<cCharacterPtr>(std::get<2>(cmd)) = ret;
-		}
-		break;
+	//		if (std::get<2>(cmd) != CommandList::vNull)
+	//			variable_as.operator()<cCharacterPtr>(std::get<2>(cmd)) = ret;
+	//	}
+	//	break;
 	case CommandList::cWait:
 		if (parameters.size() == 1)
 			wait_timer = parameters[0].to_f();

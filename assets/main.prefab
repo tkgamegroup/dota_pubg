@@ -59,13 +59,23 @@
 				<item target="3f4a114348074a5f09ebe29084a57689|flame::cNode|pos" value="0,100,-3.05176e-05" />
 				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="3,1,3" />
 				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|cCharacter|faction" value="Party1" />
 			</modifications>
 		</item>
 		<item file_id="4030f825973cd191d6225944041627a1" name="Entity 1">
 			<components>
 				<item type_name="flame::cNode" pos="1.5,1,1.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
-				<item type_name="cSpawner" prefab_path="characters\test\A.prefab" />
+				<item type_name="flame::cNavObstacle" radius="0.7" />
+				<item type_name="cSpawner" prefab_path="characters\test\A.prefab" faction="Party1" creep_type="Lane" creep_target_pos="47,1,47" />
+			</components>
+		</item>
+		<item file_id="43ced12d98a5419315d2e79f8e8e1a89" name="Entity 1">
+			<components>
+				<item type_name="flame::cNode" pos="48.5,1,48" />
+				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
+				<item type_name="flame::cNavObstacle" radius="0.7" />
+				<item type_name="cSpawner" prefab_path="characters\test\B.prefab" faction="Party2" creep_type="Lane" creep_target_pos="1,1,1" />
 			</components>
 		</item>
 	</children>

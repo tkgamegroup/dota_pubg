@@ -13,13 +13,17 @@ struct cSpawner : Component
 	// Reflect
 	std::filesystem::path prefab_path;
 	// Reflect
-	uint faction = FactionCreep;
+	FactionFlags faction = FactionCreep;
 	// Reflect
 	float spawn_delay = 3.f;
 	// Reflect
 	float spawn_interval = 30.f;
 	// Reflect
 	uint spawn_number = 4;
+	// Reflect
+	CreepType creep_type = CreepCamp;
+	// Reflect
+	vec3 creep_target_pos = vec3(0.f);
 
 	float spawn_timer = 0.f;
 

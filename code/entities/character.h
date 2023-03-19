@@ -109,6 +109,20 @@ extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 extern std::vector<cCharacterPtr> dead_characters;
 extern bool removing_dead_characters;
 
+struct InitStats
+{
+	uint hp_max;
+	uint mp_max;
+	DamageType atk_type;
+	uint atk;
+	uint phy_def;
+	uint mag_def;
+	uint hp_reg;
+	uint mp_reg;
+	uint mov_sp;
+	uint atk_sp;
+};
+
 // Reflect ctor
 struct cCharacter : Component
 {
@@ -132,11 +146,9 @@ struct cCharacter : Component
 	cArmaturePtr armature = nullptr;
 
 	// Reflect
-	uint faction = 0;
+	FactionFlags faction = FactionCreep;
 	// Reflect
-	void set_faction(uint _faction);
-	// Reflect
-	uint ai_id = 0;
+	void set_faction(FactionFlags _faction);
 
 	// Reflect
 	uint lv = 1;
@@ -150,24 +162,24 @@ struct cCharacter : Component
 	CharacterState state = CharacterStateNormal;
 
 	// Reflect
-	uint hp = 1;
+	uint hp = 100;
 	void set_hp(uint v);
 	// Reflect
-	uint hp_max = 1;
+	uint hp_max = 100;
 	void set_hp_max(uint v);
 
 	// Reflect
-	uint mp = 1;
+	uint mp = 100;
 	void set_mp(uint v);
 	// Reflect
-	uint mp_max = 1;
+	uint mp_max = 100;
 	void set_mp_max(uint v);
 
 	// Reflect
 	uint exp_base = 0;
 	// Reflect
-	uchar atk_type = PhysicalDamage;
-	void set_atk_type(uchar v);
+	DamageType atk_type = PhysicalDamage;
+	void set_atk_type(DamageType v);
 	// Reflect
 	uint atk = 10;
 	void set_atk(uint v);
@@ -198,10 +210,10 @@ struct cCharacter : Component
 	uint mp_reg = 0;
 	void set_mp_reg(uint v);
 	// Reflect
-	uint mov_sp = 0;
+	uint mov_sp = 100;
 	void set_mov_sp(uint v);
 	// Reflect
-	uint atk_sp = 0;
+	uint atk_sp = 100;
 	void set_atk_sp(uint v);
 
 	std::vector<DropItem>		drop_items;
@@ -223,6 +235,7 @@ struct cCharacter : Component
 
 	bool dead = false;
 	bool stats_dirty = true;
+	InitStats init_stats;
 	std::unique_ptr<CharacterCommand> command;
 	Action action = ActionNone;
 	float move_speed = 1.f;

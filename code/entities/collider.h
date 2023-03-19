@@ -22,7 +22,7 @@ struct cSectorCollider : Component
 	// Reflect
 	float speed = 0.f;
 	// Reflect
-	uint faction = 0;
+	FactionFlags faction = FactionNone;
 	// Reflect
 	vec2 collide_time = vec2(0.f, 1.f);
 

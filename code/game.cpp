@@ -171,10 +171,10 @@ void enable_game(bool v)
 	sScene::instance()->enable = v;
 }
 
+static std::map<std::filesystem::path, EntityPtr> prefabs;
+
 EntityPtr get_prefab(const std::filesystem::path& _path)
 {
-	static std::map<std::filesystem::path, EntityPtr> prefabs;
-
 	auto path = Path::get(_path);
 	auto it = prefabs.find(path);
 	if (it == prefabs.end())
@@ -236,7 +236,7 @@ void add_player(vec3& pos, uint& faction, uint& prefab_id)
 	idx++;
 }
 
-std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float r1, float r0, float central_angle, float direction_angle)
+std::vector<cCharacterPtr> find_characters(FactionFlags faction, const vec3& pos, float r1, float r0, float central_angle, float direction_angle)
 {
 	std::vector<cCharacterPtr> ret;
 
@@ -267,7 +267,7 @@ std::vector<cCharacterPtr> find_characters(uint faction, const vec3& pos, float 
 	return ret;
 }
 
-cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& _pos, uint faction, uint id)
+cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& _pos, FactionFlags faction, uint id)
 {
 	auto e = get_prefab(prefab_path);
 	auto radius = e->get_component_t<cNavAgent>()->radius;
@@ -381,7 +381,7 @@ cGame::Create& cGame::create = cGame_create;
 
 cGame::~cGame()
 {
-
+	prefabs.clear();
 }
 
 void cGame::start()
@@ -425,7 +425,8 @@ void cGame::update()
 	dead_chests.clear();
 	dead_characters.clear();
 
-	update_control();
+	if (enable_control)
+		update_control();
 }
 
 cLauncher::~cLauncher()
