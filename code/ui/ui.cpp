@@ -19,6 +19,7 @@ void init_ui()
 			canvas = graphics::Canvas::create(renderer->window);
 		else
 			canvas = graphics::Canvas::create(renderer->window, renderer->iv_tars);
+		canvas->clear_framebuffer = false;
 	}
 }
 
@@ -34,10 +35,10 @@ void update_ui()
 	{
 		for (auto& character : find_characters_within_camera())
 		{
-			auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->nav_agent->height + 0.2f, 0.f));
+			auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->get_height() + 0.2f, 0.f));
 			if (p.x > 0.f && p.y > 0.f)
 			{
-				const auto bar_width = 80.f * (character->nav_agent->radius / 0.6f);
+				const auto bar_width = 80.f * (character->get_radius() / 0.6f);
 				const auto bar_height = 5.f;
 				p.x -= bar_width * 0.5f;
 				canvas->add_rect_filled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height), cvec4(0, 255, 0, 255));

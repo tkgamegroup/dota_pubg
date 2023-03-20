@@ -4,6 +4,7 @@
 #include <flame/universe/components/camera.h>
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/components/nav_obstacle.h>
 #include <flame/universe/components/audio_source.h>
 #include <flame/universe/systems/scene.h>
 #include <flame/universe/systems/input.h>
@@ -48,7 +49,8 @@ void CharacterCommandMoveTo::update()
 {
 	if (character->process_approach(location))
 	{
-		character->nav_agent->stop();
+		if (character->nav_agent)
+			character->nav_agent->stop();
 		new CharacterCommandIdle(character);
 	}
 }
@@ -138,7 +140,8 @@ void CharacterCommandPickUp::update()
 			if (character->gain_item(target.obj->item_id, target.obj->item_num))
 				target.obj->die();
 
-			character->nav_agent->stop();
+			if (character->nav_agent)
+				character->nav_agent->stop();
 			new CharacterCommandIdle(character);
 		}
 	}
@@ -186,6 +189,24 @@ std::vector<cCharacterPtr> characters;
 std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 std::vector<cCharacterPtr> dead_characters;
 bool removing_dead_characters = false;
+
+float cCharacter::get_radius()
+{
+	if (nav_agent)
+		return nav_agent->radius;
+	if (nav_obstacle)
+		return nav_obstacle->radius;
+	return 0.f;
+}
+
+float cCharacter::get_height()
+{
+	if (nav_agent)
+		return nav_agent->height;
+	if (nav_obstacle)
+		return nav_obstacle->height;
+	return 0.f;
+}
 
 void cCharacter::set_faction(FactionFlags _faction)
 {
@@ -336,21 +357,11 @@ cCharacter::~cCharacter()
 
 void cCharacter::on_init()
 {
-	nav_agent->separation_group = faction;
-
-	node->measurers.add([this](AABB& b) {
-		if (nav_agent)
-		{
-			auto radius = nav_agent->radius;
-			auto height = nav_agent->height;
-			b.expand(AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform)));
-		}
-	}, "character"_h);
-}
-
-void cCharacter::start()
-{
-	entity->tag = entity->tag | CharacterTag;
+	nav_agent = entity->get_component_t<cNavAgent>();
+	if (nav_agent)
+		nav_agent->separation_group = faction;
+	nav_obstacle = entity->get_component_t<cNavObstacle>();
+	audio_source = entity->get_component_t<cAudioSource>();
 
 	auto e = entity;
 	while (e)
@@ -362,15 +373,30 @@ void cCharacter::start()
 		e = e->children[0].get();
 	}
 
-	std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
-	audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
-	if (!move_sound_path.empty() && std::filesystem::exists(move_sound_path))
-		audio_buffer_names.emplace_back(move_sound_path, "move");
-	if (!attack_precast_sound_path.empty() && std::filesystem::exists(attack_precast_sound_path))
-		audio_buffer_names.emplace_back(attack_precast_sound_path, "attack_precast");
-	if (!attack_hit_sound_path.empty() && std::filesystem::exists(attack_hit_sound_path))
-		audio_buffer_names.emplace_back(attack_hit_sound_path, "attack_hit");
-	audio_source->set_buffer_names(audio_buffer_names);
+	node->measurers.add([this](AABB& b) {
+		auto radius = get_radius();
+		auto height = get_height();
+		if (radius > 0.f && height > 0.f)
+			b.expand(AABB(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)).get_points(node->transform)));
+	}, "character"_h);
+}
+
+void cCharacter::start()
+{
+	entity->tag = entity->tag | CharacterTag;
+
+	if (audio_source)
+	{
+		std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
+		audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
+		if (!move_sound_path.empty() && std::filesystem::exists(move_sound_path))
+			audio_buffer_names.emplace_back(move_sound_path, "move");
+		if (!attack_precast_sound_path.empty() && std::filesystem::exists(attack_precast_sound_path))
+			audio_buffer_names.emplace_back(attack_precast_sound_path, "attack_precast");
+		if (!attack_hit_sound_path.empty() && std::filesystem::exists(attack_hit_sound_path))
+			audio_buffer_names.emplace_back(attack_hit_sound_path, "attack_hit");
+		audio_source->set_buffer_names(audio_buffer_names);
+	}
 
 	init_stats.hp_max = hp_max;
 	init_stats.mp_max = mp_max;
@@ -773,19 +799,28 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 {
 	if (state & CharacterStateStun)
 	{
-		nav_agent->stop();
+		if (nav_agent)
+			nav_agent->stop();
 		action = ActionNone;
 		return false;
 	}
+	if (nav_agent)
+	{
+		move_speed = max(0.1f, mov_sp / 100.f);
+		nav_agent->set_target(target);
+		nav_agent->set_speed_scale(move_speed);
 
-	move_speed = max(0.1f, mov_sp / 100.f);
-	nav_agent->set_target(target);
-	nav_agent->set_speed_scale(move_speed);
-
-	if ((nav_agent->reached_pos == target || nav_agent->dist < dist) && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
-		return true;
-	audio_source->play("move"_h);
-	action = ActionMove;
+		if ((nav_agent->reached_pos == target || nav_agent->dist < dist) && (ang <= 0.f || abs(nav_agent->ang_diff) < ang))
+			return true;
+		if (audio_source)
+			audio_source->play("move"_h);
+		action = ActionMove;
+	}
+	else
+	{
+		move_speed = 0.f;
+		action = ActionNone;
+	}
 	return false;
 }
 
@@ -793,7 +828,8 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 {
 	if (state & CharacterStateStun)
 	{
-		nav_agent->stop();
+		if (nav_agent)
+			nav_agent->stop();
 		action = ActionNone;
 		return;
 	}
@@ -803,8 +839,11 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 
 	if (action == ActionAttack)
 	{
-		nav_agent->set_speed_scale(0.f);
-		nav_agent->set_target(p1);
+		if (nav_agent)
+		{
+			nav_agent->set_speed_scale(0.f);
+			nav_agent->set_target(p1);
+		}
 
 		if (attack_hit_timer > 0.f)
 		{
@@ -832,12 +871,18 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 								cl_threads.emplace_back(ef, this, target, vec3(0.f), parameters, 0);
 						}
 
-						audio_source->play("attack_hit"_h);
+						if (audio_source)
+							audio_source->play("attack_hit"_h);
 					};
 					if (!atk_projectile.empty())
 					{
+						auto height = 0.f;
+						if (nav_agent)
+							height = nav_agent->height;
+						else if (nav_obstacle)
+							height = nav_obstacle->height;
 						add_projectile(atk_projectile,
-							p0 + vec3(0.f, nav_agent->height * 0.5f, 0.f), target, 6.f,
+							p0 + vec3(0.f, height * 0.9f, 0.f), target, 6.f,
 							[&](const vec3&, cCharacterPtr t) {
 								if (t)
 									attack(t);
@@ -861,14 +906,19 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 	else
 	{
 		auto approached = false;
-		if (chase_target)
+		if (chase_target && nav_agent)
 			approached = process_approach(p1, atk_distance, 60.f);
 		else
 		{
-			nav_agent->set_target(p1);
-			nav_agent->set_speed_scale(0.f);
+			if (nav_agent)
+			{
+				nav_agent->set_target(p1);
+				nav_agent->set_speed_scale(0.f);
 
-			approached = nav_agent->dist < atk_distance && abs(nav_agent->ang_diff) < 60.f;
+				approached = nav_agent->dist < atk_distance && abs(nav_agent->ang_diff) < 60.f;
+			}
+			else
+				approached = distance(p0, p1) < atk_distance;
 			action = ActionNone;
 		}
 		if (attack_interval_timer <= 0.f)
@@ -880,7 +930,8 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 				attack_timer = atk_time / attack_speed;
 				action = ActionAttack;
 
-				audio_source->play("attack_precast"_h);
+				if (audio_source)
+					audio_source->play("attack_precast"_h);
 			}
 		}
 		else

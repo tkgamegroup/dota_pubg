@@ -136,14 +136,16 @@ struct cCharacter : Component
 
 	// Reflect requires
 	cNodePtr node;
-	// Reflect requires
-	cNavAgentPtr nav_agent;
-	// Reflect requires
-	cAudioSourcePtr audio_source;
 	// Reflect auto_requires
 	cObjectPtr object;
 
+	cNavAgentPtr nav_agent = nullptr;
+	cNavObstaclePtr nav_obstacle = nullptr;
 	cArmaturePtr armature = nullptr;
+	cAudioSourcePtr audio_source = nullptr;
+
+	float get_radius();
+	float get_height();
 
 	// Reflect
 	FactionFlags faction = FactionCreep;
