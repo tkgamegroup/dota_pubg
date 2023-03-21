@@ -26,23 +26,29 @@ void init_ui()
 void deinit_ui()
 {
 	if (canvas)
+	{
 		delete canvas;
+		canvas = nullptr;
+	}
 }
 
 void update_ui()
 {
 	if (main_camera.camera)
 	{
+		auto camera_x = main_camera.node->x_axis();
 		for (auto& character : find_characters_within_camera())
 		{
-			auto p = main_camera.camera->world_to_screen(character->node->pos + vec3(0.f, character->get_height() + 0.2f, 0.f));
-			if (p.x > 0.f && p.y > 0.f)
-			{
-				const auto bar_width = 80.f * (character->get_radius() / 0.6f);
-				const auto bar_height = 5.f;
-				p.x -= bar_width * 0.5f;
-				canvas->add_rect_filled(p, p + vec2((float)character->hp / (float)character->hp_max * bar_width, bar_height), cvec4(0, 255, 0, 255));
-			}
+			auto radius = character->get_radius();
+			auto height = character->get_height();
+			auto pos = character->node->pos;
+			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.1f, 0.f) - camera_x * radius);
+			auto p1 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.1f, 0.f) + camera_x * radius);
+			auto p2 = main_camera.camera->world_to_screen(pos + vec3(0.f, height, 0.f) + camera_x * radius);
+			auto w = p1.x - p0.x;
+			auto h = p2.y - p0.y;
+			if (w > 0.f && h > 0.f)
+				canvas->add_rect_filled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * w, h), cvec4(80, 160, 85, 255));
 		}
 	}
 }

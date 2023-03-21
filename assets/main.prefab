@@ -67,7 +67,7 @@
 				<item type_name="flame::cNode" pos="1.5,1,1.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="flame::cNavObstacle" radius="0.7" />
-				<item type_name="cSpawner" enable="false" prefab_path="characters\test\A.prefab" faction="Party1" creep_type="Lane" creep_target_pos="47,1,47" />
+				<item type_name="cSpawner" enable="false" prefab_path="characters\test\A.prefab" faction="Party1" unit_type="LaneCreep" unit_target_pos="47,1,47" />
 			</components>
 		</item>
 		<item file_id="43ced12d98a5419315d2e79f8e8e1a89" name="Entity 1">
@@ -75,7 +75,7 @@
 				<item type_name="flame::cNode" pos="48.5,1,48" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="flame::cNavObstacle" radius="0.7" />
-				<item type_name="cSpawner" prefab_path="characters\test\B.prefab" faction="Party2" creep_type="Lane" creep_target_pos="1,1,1" />
+				<item type_name="cSpawner" prefab_path="characters\test\B.prefab" faction="Party2" unit_type="LaneCreep" unit_target_pos="1,1,1" />
 			</components>
 		</item>
 		<item file_id="4aee062e6c4f09511be57e034fe5f390" name="DefenseTower">
@@ -84,7 +84,8 @@
 				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
 				<item type_name="flame::cNavObstacle" height="5" />
 				<item type_name="cObject" />
-				<item type_name="cCharacter" faction="Party1" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0" phy_def="100" mov_sp="0" />
+				<item type_name="cCharacter" faction="Party1" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
+				<item type_name="cAI" type="DefenseTower" />
 			</components>
 		</item>
 	</children>

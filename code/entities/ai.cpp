@@ -4,12 +4,12 @@
 #include "ability.h"
 #include "character.h"
 
-void cCreepAI::start()
+void cAI::start()
 {
 	start_pos = character->node->pos;
 }
 
-void cCreepAI::update()
+void cAI::update()
 {
 	if (multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
 		return;
@@ -34,7 +34,7 @@ void cCreepAI::update()
 
 	switch (type)
 	{
-	case CreepCamp:
+	case UnitCampCreep:
 		if (distance(character->node->pos, start_pos) < 10.f)
 			aggro_timer = 5.f;
 		if (aggro_timer > 0.f)
@@ -97,7 +97,7 @@ void cCreepAI::update()
 			break;
 		}
 		break;
-	case CreepLane:
+	case UnitLaneCreep:
 		switch (character->command->type)
 		{
 		case "Idle"_h:
@@ -112,17 +112,20 @@ void cCreepAI::update()
 			break;
 		}
 		break;
+	case UnitDefenseTower:
+		attack_closest();
+		break;
 	}
 }
 
-struct cCreepAICreate : cCreepAI::Create
+struct cAICreate : cAI::Create
 {
-	cCreepAIPtr operator()(EntityPtr e) override
+	cAIPtr operator()(EntityPtr e) override
 	{
 		if (e == INVALID_POINTER)
 			return nullptr;
-		return new cCreepAI;
+		return new cAI;
 	}
-}cCreepAI_create;
-cCreepAI::Create& cCreepAI::create = cCreepAI_create;
+}cAI_create;
+cAI::Create& cAI::create = cAI_create;
 

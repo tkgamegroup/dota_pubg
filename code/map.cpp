@@ -74,6 +74,8 @@ vec3 get_map_coord(const vec2& uv)
 
 vec3 get_map_coord(const vec3& pos)
 {
+	if (!map_node)
+		return pos;
 	return get_map_coord(vec2((pos.x - map_node->pos.x) / map_extent.x, (pos.z - map_node->pos.z) / map_extent.z));
 }
 

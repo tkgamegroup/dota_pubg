@@ -21,11 +21,11 @@ void cSpawner::update()
 			auto character = add_character(prefab_path, node->pos, faction);
 			if (character)
 			{
-				auto ai = character->entity->get_component_t<cCreepAI>();
+				auto ai = character->entity->get_component_t<cAI>();
 				if (ai)
 				{
-					ai->type = creep_type;
-					ai->target_pos = creep_target_pos;
+					ai->type = unit_type;
+					ai->target_pos = unit_target_pos;
 				}
 			}
 		}

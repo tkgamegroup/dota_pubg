@@ -3,12 +3,13 @@
 #include "../head.h"
 
 // Reflect ctor
-struct cCreepAI : Component
+struct cAI : Component
 {
 	// Reflect requires
 	cCharacterPtr character;
 
-	CreepType type = CreepCamp;
+	// Reflect
+	UnitType type = UnitCampCreep;
 	vec3 start_pos;
 	vec3 target_pos;
 	float aggro_timer = 0.f;
@@ -19,7 +20,7 @@ struct cCreepAI : Component
 
 	struct Create
 	{
-		virtual cCreepAIPtr operator()(EntityPtr) = 0;
+		virtual cAIPtr operator()(EntityPtr) = 0;
 	};
 	// Reflect static
 	EXPORT static Create& create;

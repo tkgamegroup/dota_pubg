@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<prefab file_id="46707116e932b8f0fcea70265f4a56a1" name="bullet">
+	<components>
+		<item type_name="flame::cNode" scl="0.3,0.3,0.3" />
+		<item type_name="flame::cMesh" mesh_name="standard_sphere" material_name="default" />
+		<item type_name="cObject" />
+		<item type_name="cProjectile" />
+	</components>
+</prefab>

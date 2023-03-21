@@ -637,7 +637,7 @@
 //						//};
 //
 //					//	auto character = add_character(preset_ids[linearRand(0U, (uint)countof(preset_ids) - 1)], coord, FactionCreep);
-//					//	character->entity->add_component<cCreepAI>();
+//					//	character->entity->add_component<cAI>();
 //					//}
 //				}
 //

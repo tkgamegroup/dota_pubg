@@ -294,6 +294,14 @@ void cCharacter::set_atk(uint v)
 	data_changed("atk"_h);
 }
 
+void cCharacter::set_atk_distance(float v)
+{
+	if (atk_distance == v)
+		return;
+	atk_distance = v;
+	data_changed("atk_distance"_h);
+}
+
 void cCharacter::set_phy_def(uint v)
 {
 	if (phy_def == v)
@@ -308,6 +316,22 @@ void cCharacter::set_mag_def(uint v)
 		return;
 	mag_def = v;
 	data_changed("mag_def"_h);
+}
+
+void cCharacter::set_hp_reg(uint v)
+{
+	if (hp_reg == v)
+		return;
+	hp_reg = v;
+	data_changed("hp_reg"_h);
+}
+
+void cCharacter::set_mp_reg(uint v)
+{
+	if (mp_reg == v)
+		return;
+	mp_reg = v;
+	data_changed("mp_reg"_h);
 }
 
 void cCharacter::set_mov_sp(uint v)
@@ -824,6 +848,30 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	return false;
 }
 
+static void attack_proc(cCharacterPtr character, cCharacterPtr target)
+{
+	auto damage = character->atk;
+	character->inflict_damage(target, (DamageType)character->atk_type, damage);
+	{
+		static ParameterPack parameters;
+		{
+			auto& vec = parameters["attack_damage_type"_h];
+			if (vec.empty()) vec.resize(1);
+			vec[0] = (int)character->atk_type;
+		}
+		{
+			auto& vec = parameters["attack_damage"_h];
+			if (vec.empty()) vec.resize(1);
+			vec[0] = damage;
+		}
+		for (auto& ef : character->attack_effects)
+			cl_threads.emplace_back(ef, character, target, vec3(0.f), parameters, 0);
+	}
+
+	if (character->audio_source)
+		character->audio_source->play("attack_hit"_h);
+}
+
 void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 {
 	if (state & CharacterStateStun)
@@ -852,44 +900,18 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			{
 				if (distance(p0, p1) <= atk_distance + 3.5f)
 				{
-					auto attack = [this](cCharacterPtr target) {
-						auto damage = atk;
-						inflict_damage(target, (DamageType)atk_type, damage);
-						{
-							static ParameterPack parameters;
-							{
-								auto& vec = parameters["attack_damage_type"_h];
-								if (vec.empty()) vec.resize(1);
-								vec[0] = (int)atk_type;
-							}
-							{
-								auto& vec = parameters["attack_damage"_h];
-								if (vec.empty()) vec.resize(1);
-								vec[0] = damage;
-							}
-							for (auto& ef : attack_effects)
-								cl_threads.emplace_back(ef, this, target, vec3(0.f), parameters, 0);
-						}
-
-						if (audio_source)
-							audio_source->play("attack_hit"_h);
-					};
 					if (!atk_projectile.empty())
 					{
-						auto height = 0.f;
-						if (nav_agent)
-							height = nav_agent->height;
-						else if (nav_obstacle)
-							height = nav_obstacle->height;
+						auto character = this;
 						add_projectile(atk_projectile,
-							p0 + vec3(0.f, height * 0.9f, 0.f), target, 6.f,
-							[&](const vec3&, cCharacterPtr t) {
-								if (t)
-									attack(t);
+							p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f,
+							[character](const vec3&, cCharacterPtr target) {
+								if (target)
+									attack_proc(character, target);
 							});
 					}
 					else
-						attack(target);
+						attack_proc(this, target);
 				}
 
 				attack_interval_timer = (atk_interval - atk_point) / attack_speed;
@@ -939,7 +961,8 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			if (approached)
 			{
 				action = ActionNone;
-				nav_agent->set_speed_scale(0.f);
+				if (nav_agent)
+					nav_agent->set_speed_scale(0.f);
 			}
 		}
 	}

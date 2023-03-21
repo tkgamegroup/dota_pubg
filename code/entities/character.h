@@ -181,12 +181,16 @@ struct cCharacter : Component
 	uint exp_base = 0;
 	// Reflect
 	DamageType atk_type = PhysicalDamage;
+	// Reflect
 	void set_atk_type(DamageType v);
 	// Reflect
 	uint atk = 10;
+	// Reflect
 	void set_atk(uint v);
 	// Reflect
 	float atk_distance = 1.5f;
+	// Reflect
+	void set_atk_distance(float v);
 	// Reflect
 	float atk_interval = 2.f;
 	// Reflect
@@ -201,21 +205,27 @@ struct cCharacter : Component
 	float cast_point = 1.f;
 	// Reflect
 	uint phy_def = 0;
+	// Reflect
 	void set_phy_def(uint v);
 	// Reflect
 	uint mag_def = 0;
+	// Reflect
 	void set_mag_def(uint v);
 	// Reflect
 	uint hp_reg = 0;
+	// Reflect
 	void set_hp_reg(uint v);
 	// Reflect
 	uint mp_reg = 0;
+	// Reflect
 	void set_mp_reg(uint v);
 	// Reflect
 	uint mov_sp = 100;
+	// Reflect
 	void set_mov_sp(uint v);
 	// Reflect
 	uint atk_sp = 100;
+	// Reflect
 	void set_atk_sp(uint v);
 
 	std::vector<DropItem>		drop_items;

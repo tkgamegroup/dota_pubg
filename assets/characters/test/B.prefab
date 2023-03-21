@@ -6,7 +6,7 @@
 		<item type_name="flame::cAudioSource" />
 		<item type_name="cObject" />
 		<item type_name="cCharacter" />
-		<item type_name="cCreepAI" />
+		<item type_name="cAI" />
 	</components>
 	<children>
 		<item file_id="90657c154f204567f31e29a004aab143" name="RootNode">

@@ -21,9 +21,9 @@ struct cSpawner : Component
 	// Reflect
 	uint spawn_number = 4;
 	// Reflect
-	CreepType creep_type = CreepCamp;
+	UnitType unit_type = UnitCampCreep;
 	// Reflect
-	vec3 creep_target_pos = vec3(0.f);
+	vec3 unit_target_pos = vec3(0.f);
 
 	float spawn_timer = 0.f;
 

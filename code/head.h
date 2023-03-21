@@ -17,7 +17,7 @@ FLAME_TYPE(cProjectile)
 FLAME_TYPE(cEffect)
 FLAME_TYPE(cSectorCollider)
 FLAME_TYPE(cChest)
-FLAME_TYPE(cCreepAI)
+FLAME_TYPE(cAI)
 FLAME_TYPE(cNWDataHarvester)
 
 const auto CharacterTag = TagUser;
@@ -77,10 +77,11 @@ enum MultiPlayerType
 };
 
 // Reflect
-enum CreepType
+enum UnitType
 {
-	CreepCamp,
-	CreepLane
+	UnitCampCreep,
+	UnitLaneCreep,
+	UnitDefenseTower
 };
 
 struct IDAndPos
