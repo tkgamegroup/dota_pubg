@@ -4,6 +4,13 @@
 #include "../command.h"
 
 // Reflect ctor
+struct cCircleCollider : Component
+{
+	// Reflect requires
+	cNodePtr node;
+};
+
+// Reflect ctor
 struct cSectorCollider : Component
 {
 	// Reflect requires

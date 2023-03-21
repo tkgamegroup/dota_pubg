@@ -109,3 +109,14 @@ void init_abilities()
 	//	}
 	//}
 }
+
+struct cAbilityCreate : cAbility::Create
+{
+	cAbilityPtr operator()(EntityPtr e) override
+	{
+		if (e == INVALID_POINTER)
+			return nullptr;
+		return new cAbility;
+	}
+}cAbility_create;
+cAbility::Create& cAbility::create = cAbility_create;
