@@ -8,6 +8,9 @@ struct cCircleCollider : Component
 {
 	// Reflect requires
 	cNodePtr node;
+
+	std::vector<cCharacterPtr> last_collidings;
+	Listeners<void(cCharacterPtr character, bool enter_or_exit)> callbacks;
 };
 
 // Reflect ctor
@@ -31,16 +34,15 @@ struct cSectorCollider : Component
 	// Reflect
 	FactionFlags faction = FactionNone;
 	// Reflect
-	vec2 collide_time = vec2(0.f, 1.f);
+	float collide_delay = 0.f;
 
 	float off = 0.f;
 	float r0, r1;
 	vec3 c;
 	float t;
-	uint rnd;
 
-	CommandList callback;
-	cCharacterPtr host = nullptr;
+	std::vector<cCharacterPtr> last_collidings;
+	Listeners<void(cCharacterPtr character, bool enter_or_exit)> callbacks;
 
 	void on_active() override;
 	void on_inactive() override;

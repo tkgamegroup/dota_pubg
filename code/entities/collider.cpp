@@ -11,7 +11,6 @@ void cSectorCollider::on_active()
 	off = 0.f;
 	r0 = r1 = 0.f;
 	t = 0.f;
-	rnd = rand();
 
 	//if (in_editor)
 	//{
@@ -65,15 +64,39 @@ void cSectorCollider::update()
 	c = dir_xz(direction_angle) * -start_radius;
 	t += delta_time;
 
-	if (t >= collide_time.x && t <= collide_time.y)
+	if (t >= collide_delay)
 	{
 		auto pos = c + node->global_pos();
-		for (auto& character : find_characters(faction, pos, r1, r0, central_angle, direction_angle))
+		auto characters = find_characters(faction, pos, r1, r0, central_angle, direction_angle);
+		for (auto c : characters)
 		{
-			static ParameterPack parameters;
-			if (character->add_marker(rnd, collide_time.y))
-				cl_threads.emplace_back(callback, host, character, vec3(0.f), parameters, 0);
+			auto found = false;
+			for (auto _c : last_collidings)
+			{
+				if (c == _c)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				callbacks.call(c, true);
 		}
+		for (auto c : last_collidings)
+		{
+			auto found = false;
+			for (auto _c : characters)
+			{
+				if (c == _c)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				callbacks.call(c, false);
+		}
+		last_collidings = characters;
 	}
 }
 
