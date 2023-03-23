@@ -20,170 +20,8 @@
 #include "buff.h"
 #include "projectile.h"
 #include "chest.h"
+#include "shop.h"
 
-CharacterCommand::CharacterCommand(uint type, cCharacterPtr character) :
-	type(type),
-	character(character)
-{
-	character->command.reset(this);
-	character->action = ActionNone;
-}
-
-CharacterCommandIdle::CharacterCommandIdle(cCharacterPtr character) :
-	CharacterCommand("Idle"_h, character)
-{
-}
-
-void CharacterCommandIdle::update()
-{
-	character->action = ActionNone;
-}
-
-CharacterCommandMoveTo::CharacterCommandMoveTo(cCharacterPtr character, const vec3& _location) :
-	CharacterCommand("MoveTo"_h, character)
-{
-	location = _location;
-}
-
-void CharacterCommandMoveTo::update()
-{
-	if (character->process_approach(location))
-	{
-		if (character->nav_agent)
-			character->nav_agent->stop();
-		new CharacterCommandIdle(character);
-	}
-}
-
-CharacterCommandAttackTarget::CharacterCommandAttackTarget(cCharacterPtr character, cCharacterPtr _target) :
-	CharacterCommand("AttackTarget"_h, character)
-{
-	target.set(_target);
-}
-
-void CharacterCommandAttackTarget::update()
-{
-	if (!target.obj)
-		new CharacterCommandIdle(character);
-	else
-		character->process_attack_target(target.obj);
-}
-
-CharacterCommandAttackLocation::CharacterCommandAttackLocation(cCharacterPtr character, const vec3& _location) :
-	CharacterCommand("AttackLocation"_h, character)
-{
-	location = _location;
-}
-
-void CharacterCommandAttackLocation::update()
-{
-	if (!target.obj)
-	{
-		if (character->search_timer <= 0.f)
-		{
-			auto enemies = find_characters(~character->faction, character->node->pos, max(character->atk_distance, 5.f));
-			if (!enemies.empty())
-				target.set(enemies.front());
-
-			character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
-		}
-	}
-
-	if (target.obj)
-		character->process_attack_target(target.obj);
-	else
-	{
-		if (character->process_approach(location))
-			character->action = ActionNone;
-	}
-}
-
-CharacterCommandHold::CharacterCommandHold(cCharacterPtr character) :
-	CharacterCommand("Hold"_h, character)
-{
-}
-
-void CharacterCommandHold::update()
-{
-	if (!target.obj)
-	{
-		if (character->search_timer <= 0.f)
-		{
-			auto enemies = find_characters(~character->faction, character->node->pos, max(character->atk_distance, 1.5f));
-			if (!enemies.empty())
-				target.set(enemies.front());
-
-			character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
-		}
-	}
-
-	if (target.obj)
-		character->process_attack_target(target.obj, false);
-	else
-		character->action = ActionNone;
-}
-
-CharacterCommandPickUp::CharacterCommandPickUp(cCharacterPtr character, cChestPtr _target) :
-	CharacterCommand("PickUp"_h, character)
-{
-	target.set(_target);
-}
-
-void CharacterCommandPickUp::update()
-{
-	if (!target.obj)
-		new CharacterCommandIdle(character);
-	else
-	{
-		if (character->process_approach(target.obj->node->pos, 1.5f))
-		{
-			if (character->gain_item(target.obj->item_id, target.obj->item_num))
-				target.obj->die();
-
-			if (character->nav_agent)
-				character->nav_agent->stop();
-			new CharacterCommandIdle(character);
-		}
-	}
-}
-
-CharacterCommandCastAbility::CharacterCommandCastAbility(cCharacterPtr character, cAbilityPtr ability) :
-	CharacterCommand("CastAbility"_h, character),
-	ability(ability)
-{
-}
-
-void CharacterCommandCastAbility::update()
-{
-	character->process_cast_ability(ability, vec3(0.f), nullptr);
-}
-
-CharacterCommandCastAbilityToLocation::CharacterCommandCastAbilityToLocation(cCharacterPtr character, cAbilityPtr ability, const vec3& _location) :
-	CharacterCommand("CastAbilityToLocation"_h, character),
-	ability(ability)
-{
-	location = _location;
-}
-
-void CharacterCommandCastAbilityToLocation::update()
-{
-	character->process_cast_ability(ability, location, nullptr);
-}
-
-CharacterCommandCastAbilityToTarget::CharacterCommandCastAbilityToTarget(cCharacterPtr character, cAbilityPtr ability, cCharacterPtr _target) :
-	CharacterCommand("CastAbilityToTarget"_h, character),
-	ability(ability)
-{
-	target.set(_target);
-}
-
-void CharacterCommandCastAbilityToTarget::update()
-{
-	if (!target.obj)
-		new CharacterCommandIdle(character);
-	else
-		character->process_cast_ability(ability, vec3(0.f), target.obj);
-}
 
 std::vector<cCharacterPtr> characters;
 std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
@@ -206,6 +44,13 @@ float cCharacter::get_height()
 	if (nav_obstacle)
 		return nav_obstacle->height;
 	return 0.f;
+}
+
+vec3 cCharacter::get_pos(float height_factor)
+{
+	auto pos = node->pos;
+	pos.y += get_height() * height_factor;
+	return pos;
 }
 
 void cCharacter::set_faction(FactionFlags _faction)
@@ -432,9 +277,6 @@ void cCharacter::start()
 	init_stats.mp_reg = mp_reg;
 	init_stats.mov_sp = mov_sp;
 	init_stats.atk_sp = atk_sp;
-
-	if (!command)
-		new CharacterCommandIdle(this);
 }
 
 void cCharacter::update()
@@ -552,8 +394,94 @@ void cCharacter::update()
 			it++;
 		}
 
-		if (command)
-			command->update();
+		switch (command)
+		{
+		case CommandIdle:
+			action = ActionNone;
+			break;
+		case CommandMoveTo:
+			if (process_approach(target_location))
+			{
+				if (nav_agent)
+					nav_agent->stop();
+				cmd_idle();
+			}
+			break;
+		case CommandAttackTarget:
+			if (!target.comp)
+				cmd_idle();
+			else
+				process_attack_target(target.get<cCharacterPtr>());
+			break;
+		case CommandAttackLocation:
+			if (!target.comp)
+			{
+				if (search_timer <= 0.f)
+				{
+					auto enemies = find_characters(~faction, node->pos, max(atk_distance, 5.f));
+					if (!enemies.empty())
+						target.set(enemies.front());
+
+					search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+				}
+			}
+
+			if (target.comp)
+				process_attack_target(target.get<cCharacterPtr>());
+			else
+			{
+				if (process_approach(target_location))
+					action = ActionNone;
+			}
+			break;
+		case CommandHold:
+			if (!target.comp)
+			{
+				if (search_timer <= 0.f)
+				{
+					auto enemies = find_characters(~faction, node->pos, max(atk_distance, 1.5f));
+					if (!enemies.empty())
+						target.set(enemies.front());
+
+					search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+				}
+			}
+
+			if (target.comp)
+				process_attack_target(target.get<cCharacterPtr>(), false);
+			else
+				action = ActionNone;
+			break;
+		case CommandPickUp:
+			if (!target.comp)
+				cmd_idle();
+			else
+			{
+				auto chest = target.get<cChestPtr>();
+				if (process_approach(chest->node->pos, 1.5f))
+				{
+					if (gain_item(chest->item_id, chest->item_num))
+						chest->die();
+
+					if (nav_agent)
+						nav_agent->stop();
+					cmd_idle();
+				}
+			}
+			break;
+		case CommandCastAbility:
+			process_cast_ability((cAbilityPtr)target_obj, vec3(0.f), nullptr);
+			break;
+		case CommandCastAbilityToLocation:
+			process_cast_ability((cAbilityPtr)target_obj, target_location, nullptr);
+			break;
+		case CommandCastAbilityToTarget:
+			if (!target.comp)
+				cmd_idle();
+			else
+				process_cast_ability((cAbilityPtr)target_obj, vec3(0.f), target.get<cCharacterPtr>());
+			break;
+		}
 	}
 
 	if (armature)
@@ -1014,6 +942,83 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 	//		}
 	//	}
 	//}
+}
+
+void cCharacter::reset_cmd()
+{
+	command = CommandIdle;
+	action = ActionNone;
+	target.reset();
+}
+
+void cCharacter::cmd_idle()
+{
+	reset_cmd();
+	command = CommandIdle;
+}
+
+void cCharacter::cmd_move_to(const vec3& location)
+{
+	reset_cmd();
+	command = CommandMoveTo;
+	target_location = location;
+}
+
+void cCharacter::cmd_attack_target(cCharacterPtr _target)
+{
+	reset_cmd();
+	command = CommandAttackTarget;
+	target.set(_target);
+}
+
+void cCharacter::cmd_attack_location(const vec3& location)
+{
+	reset_cmd();
+	command = CommandAttackLocation;
+	target_location = location;
+}
+
+void cCharacter::cmd_hold()
+{
+	reset_cmd();
+	command = CommandHold;
+}
+
+void cCharacter::cmd_pick_up(cChestPtr _target)
+{
+	reset_cmd();
+	command = CommandPickUp;
+	target.set(_target);
+}
+
+void cCharacter::cmd_goto_shop(cShopPtr _target)
+{
+	reset_cmd();
+	command = CommandGotoShop;
+	target.set(_target);
+}
+
+void cCharacter::cmd_cast_ability(cAbilityPtr ability)
+{
+	reset_cmd();
+	command = CommandCastAbility;
+	target_obj = ability;
+}
+
+void cCharacter::cmd_cast_ability_to_location(cAbilityPtr ability, const vec3& location)
+{
+	reset_cmd();
+	command = CommandCastAbilityToLocation;
+	target_obj = ability;
+	target_location = location;
+}
+
+void cCharacter::cmd_cast_ability_to_target(cAbilityPtr ability, cCharacterPtr _target)
+{
+	reset_cmd();
+	command = CommandCastAbilityToTarget;
+	target_obj = ability;
+	target.set(_target);
 }
 
 struct cCharacterCreate : cCharacter::Create

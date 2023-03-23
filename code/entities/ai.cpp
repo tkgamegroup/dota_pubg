@@ -23,7 +23,7 @@ void cAI::update()
 				auto enemies = find_characters(~character->faction, character->node->pos, 5.f);
 				if (!enemies.empty())
 				{
-					new CharacterCommandAttackTarget(character, enemies[0]);
+					character->cmd_attack_target(enemies[0]);
 					found = true;
 				}
 				character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
@@ -42,27 +42,27 @@ void cAI::update()
 			aggro_timer -= delta_time;
 			if (aggro_timer <= 0.f)
 			{
-				new CharacterCommandMoveTo(character, start_pos);
+				character->cmd_move_to(start_pos);
 				flee_timer = 3.f;
 			}
 		}
 
 		if (flee_timer > 0.f)
 			flee_timer -= delta_time;
-		switch (character->command->type)
+		switch (character->command)
 		{
-		case "Idle"_h:
+		case cCharacter::CommandIdle:
 			if (flee_timer <= 0.f)
 			{
 				if (!attack_closest() && linearRand(0U, 600U) < 10)
-					new CharacterCommandMoveTo(character, get_map_coord(start_pos + vec3(linearRand(-3.f, +3.f), 0.f, linearRand(-3.f, +3.f))));
+					character->cmd_move_to(get_map_coord(start_pos + vec3(linearRand(-3.f, +3.f), 0.f, linearRand(-3.f, +3.f))));
 			}
 			break;
-		case "MoveTo"_h:
+		case cCharacter::CommandMoveTo:
 			if (flee_timer <= 0.f)
 				attack_closest();
 			break;
-		case "AttackTarget"_h:
+		case cCharacter::CommandAttackTarget:
 			if (flee_timer <= 0.f)
 			{
 				//if (linearRand(0U, 600U) < 10)
@@ -98,16 +98,16 @@ void cAI::update()
 		}
 		break;
 	case UnitLaneCreep:
-		switch (character->command->type)
+		switch (character->command)
 		{
-		case "Idle"_h:
+		case cCharacter::CommandIdle:
 			if (!attack_closest())
-				new CharacterCommandMoveTo(character, target_pos);
+				character->cmd_move_to(target_pos);
 			break;
-		case "MoveTo"_h:
+		case cCharacter::CommandMoveTo:
 			attack_closest();
 			break;
-		case "AttackTarget"_h:
+		case cCharacter::CommandAttackTarget:
 			attack_closest();
 			break;
 		}

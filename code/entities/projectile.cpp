@@ -29,7 +29,7 @@ void cProjectile::update()
 
 	if (use_target)
 	{
-		if (!target.obj)
+		if (!target.comp)
 		{
 			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 			{
@@ -40,7 +40,7 @@ void cProjectile::update()
 			}
 			return;
 		}
-		location = target.obj->node->pos + vec3(0.f, target.obj->nav_agent->height * 0.5f, 0.f);
+		location = target.get<cCharacterPtr>()->get_pos(0.5f);
 	}
 
 	auto sp = speed * delta_time;
@@ -50,7 +50,7 @@ void cProjectile::update()
 		if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 		{
 			if (on_end)
-				on_end(node->pos, target.obj);
+				on_end(node->pos, target.get<cCharacterPtr>());
 
 			die();
 		}

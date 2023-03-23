@@ -16,9 +16,9 @@ struct cProjectile : Component
 
 	float speed = 0.1f;
 
-	bool					use_target = true;
-	vec3					location;
-	Tracker<cCharacterPtr>	target;
+	bool use_target = true;
+	vec3 location;
+	Tracker	target;
 
 	std::function<void(const vec3& l, cCharacterPtr t)> on_end;
 

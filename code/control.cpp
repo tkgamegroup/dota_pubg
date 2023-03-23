@@ -249,7 +249,7 @@ void update_control()
 void command_character_idle(cCharacterPtr character)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		new CharacterCommandIdle(character);
+		character->cmd_idle();
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;
@@ -264,7 +264,7 @@ void command_character_idle(cCharacterPtr character)
 void command_character_hold(cCharacterPtr character)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		new CharacterCommandHold(character);
+		character->cmd_hold();
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;
@@ -279,7 +279,7 @@ void command_character_hold(cCharacterPtr character)
 void command_character_moveto(cCharacterPtr character, const vec3& pos)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		new CharacterCommandMoveTo(character, pos);
+		character->cmd_move_to(pos);
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;
@@ -295,7 +295,7 @@ void command_character_moveto(cCharacterPtr character, const vec3& pos)
 void command_character_attack_target(cCharacterPtr character, cCharacterPtr target)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		new CharacterCommandAttackTarget(character, target);
+		character->cmd_attack_target(target);
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;
@@ -311,7 +311,7 @@ void command_character_attack_target(cCharacterPtr character, cCharacterPtr targ
 void command_character_attack_location(cCharacterPtr character, const vec3& pos)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		new CharacterCommandAttackLocation(character, pos);
+		character->cmd_attack_location(pos);
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;
@@ -327,7 +327,7 @@ void command_character_attack_location(cCharacterPtr character, const vec3& pos)
 void command_character_pickup(cCharacterPtr character, cChestPtr chest)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		new CharacterCommandPickUp(character, chest);
+		character->cmd_pick_up(chest);
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;

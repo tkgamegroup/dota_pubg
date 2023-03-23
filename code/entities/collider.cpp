@@ -6,14 +6,14 @@
 #include "collider.h"
 #include "character.h"
 
-void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector<Tracker<cCharacterPtr>>& last_collidings, const Listeners<void(cCharacterPtr character, bool enter_or_exit)>& callbacks)
+void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector<Tracker>& last_collidings, const Listeners<void(cCharacterPtr character, bool enter_or_exit)>& callbacks)
 {
 	for (auto c : characters)
 	{
 		auto found = false;
 		for (auto& _c : last_collidings)
 		{
-			if (c == _c.obj)
+			if (c == _c.get<cCharacterPtr>())
 			{
 				found = true;
 				break;
@@ -30,7 +30,7 @@ void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector
 		auto found = false;
 		for (auto _c : characters)
 		{
-			if (it->obj == _c)
+			if (it->get<cCharacterPtr>() == _c)
 			{
 				found = true;
 				break;
@@ -38,7 +38,7 @@ void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector
 		}
 		if (!found)
 		{
-			callbacks.call(it->obj, false);
+			callbacks.call(it->get<cCharacterPtr>(), false);
 			it = last_collidings.erase(it);
 		}
 		else

@@ -372,101 +372,101 @@ void CommandListExecuteThread::execute()
 
 	switch (std::get<0>(cmd))
 	{
-	case CommandList::cPrint:
-		printf("Test\n");
-		break;
-	case CommandList::cStore:
-		if (parameters.size() == 2)
-		{
-			void* src_ptr = nullptr;
-			void* dst_ptr = nullptr;
-			parameter_addr(parameters[0], src_ptr, ul);
-			parameter_addr(parameters[1], dst_ptr, ul2);
-			memcpy(dst_ptr, src_ptr, min(ul, ul2));
-		}
-		break;
-	case CommandList::cBitInverse:
-		if (parameters.size() == 1)
-		{
-			auto& v = variable_as.operator()<uint>(parameters[0].to_i());
-			v = ~v;
-		}
-		break;
-	case CommandList::cIfEqual:
-	{
-		auto end_i = next_i;
-		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-			end_i = it->second;
+	//case CommandList::cPrint:
+	//	printf("Test\n");
+	//	break;
+	//case CommandList::cStore:
+	//	if (parameters.size() == 2)
+	//	{
+	//		void* src_ptr = nullptr;
+	//		void* dst_ptr = nullptr;
+	//		parameter_addr(parameters[0], src_ptr, ul);
+	//		parameter_addr(parameters[1], dst_ptr, ul2);
+	//		memcpy(dst_ptr, src_ptr, min(ul, ul2));
+	//	}
+	//	break;
+	//case CommandList::cBitInverse:
+	//	if (parameters.size() == 1)
+	//	{
+	//		auto& v = variable_as.operator()<uint>(parameters[0].to_i());
+	//		v = ~v;
+	//	}
+	//	break;
+	//case CommandList::cIfEqual:
+	//{
+	//	auto end_i = next_i;
+	//	if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+	//		end_i = it->second;
 
-		if (parameters.size() == 2)
-		{
-			void* src_ptr = nullptr;
-			void* dst_ptr = nullptr;
-			parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
-			parameter_addr(parameters[1], dst_ptr, ul);
-			if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) != 0) // jump to the end of the if block
-				next_i = end_i + 1;
-		}
-		else
-			next_i = end_i + 1;
-	}
-		break;
-	case CommandList::cIfNotEqual:
-	{
-		auto end_i = next_i;
-		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-			end_i = it->second;
+	//	if (parameters.size() == 2)
+	//	{
+	//		void* src_ptr = nullptr;
+	//		void* dst_ptr = nullptr;
+	//		parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
+	//		parameter_addr(parameters[1], dst_ptr, ul);
+	//		if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) != 0) // jump to the end of the if block
+	//			next_i = end_i + 1;
+	//	}
+	//	else
+	//		next_i = end_i + 1;
+	//}
+	//	break;
+	//case CommandList::cIfNotEqual:
+	//{
+	//	auto end_i = next_i;
+	//	if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+	//		end_i = it->second;
 
-		if (parameters.size() == 2)
-		{
-			void* src_ptr = nullptr;
-			void* dst_ptr = nullptr;
-			parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
-			parameter_addr(parameters[1], dst_ptr, ul);
-			if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) == 0) // jump to the end of the if block
-				next_i = end_i + 1;
-		}
-		else
-			next_i = end_i + 1;
-	}
-		break;
-	case CommandList::cLoop:
-		if (parameters.size() == 1)
-		{
-			new_frame.x = next_i;
-			if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-			{
-				new_frame.y = it->second;
-				next_i = it->second + 1;
-			}
-			else
-			{
-				new_frame.y = next_i;
-				next_i++;
-			}
-			new_frame.z = parameters[0].to_i();
-		}
-		break;
-	case CommandList::cBreak:
-		next_i = frame.end_i + 1;
-		frame.loop_n = 0;
-		break;
-	case CommandList::cGenerateRnd:
-		if (parameters.size() == 1)
-			variable_as.operator()<uint>(parameters[0].to_i()) = rand();
-		break;
-	case CommandList::cRollDice100:
-		if (parameters.size() == 1)
-		{
-			if (linearRand(0U, 99U) >= parameters[0].to_i()) // jump to the end of the block
-			{
-				if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-					next_i = it->second + 1;
-				else
-					next_i++;
-			}
-		}
-		break;
+	//	if (parameters.size() == 2)
+	//	{
+	//		void* src_ptr = nullptr;
+	//		void* dst_ptr = nullptr;
+	//		parameter_addr(parameters[0], src_ptr, ul); ul2 = ul;
+	//		parameter_addr(parameters[1], dst_ptr, ul);
+	//		if (memcmp(src_ptr, dst_ptr, min(ul, ul2)) == 0) // jump to the end of the if block
+	//			next_i = end_i + 1;
+	//	}
+	//	else
+	//		next_i = end_i + 1;
+	//}
+	//	break;
+	//case CommandList::cLoop:
+	//	if (parameters.size() == 1)
+	//	{
+	//		new_frame.x = next_i;
+	//		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+	//		{
+	//			new_frame.y = it->second;
+	//			next_i = it->second + 1;
+	//		}
+	//		else
+	//		{
+	//			new_frame.y = next_i;
+	//			next_i++;
+	//		}
+	//		new_frame.z = parameters[0].to_i();
+	//	}
+	//	break;
+	//case CommandList::cBreak:
+	//	next_i = frame.end_i + 1;
+	//	frame.loop_n = 0;
+	//	break;
+	//case CommandList::cGenerateRnd:
+	//	if (parameters.size() == 1)
+	//		variable_as.operator()<uint>(parameters[0].to_i()) = rand();
+	//	break;
+	//case CommandList::cRollDice100:
+	//	if (parameters.size() == 1)
+	//	{
+	//		if (linearRand(0U, 99U) >= parameters[0].to_i()) // jump to the end of the block
+	//		{
+	//			if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+	//				next_i = it->second + 1;
+	//			else
+	//				next_i++;
+	//		}
+	//	}
+	//	break;
 	//case CommandList::cGetNearbyCharacters:
 	//	if (parameters.size() >= 2 && parameters.size() <= 4)
 	//	{
@@ -517,155 +517,155 @@ void CommandListExecuteThread::execute()
 	//			variable_as.operator()<cCharacterPtr>(std::get<2>(cmd)) = ret;
 	//	}
 	//	break;
-	case CommandList::cWait:
-		if (parameters.size() == 1)
-			wait_timer = parameters[0].to_f();
-		break;
-	case CommandList::cGetFaction:
-		if (parameters.size() == 2)
-			variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
-		break;
-	case CommandList::cGetCharacterIDAndPos:
-		if (parameters.size() == 2)
-		{
-			auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
-			auto& iap = variable_as.operator()<IDAndPos>(parameters[1].to_i());
-			iap.id = character->object->uid;
-			iap.pos = character->node->pos;
-		}
-		break;
-	case CommandList::cGetCharacterFromIDAndPos:
-		if (parameters.size() == 2)
-		{
-			auto& iap = variable_as.operator()<IDAndPos>(parameters[0].to_i());
-			auto& oap = variable_as.operator()<ObjAndPosXZ>(parameters[1].to_i());
-			if (auto it = objects.find(iap.id); it != objects.end())
-				oap.obj = it->second;
-			else
-				oap.obj = nullptr;
-			oap.pos_xz = iap.pos.xz();
-		}
-		break;
-	case CommandList::cRestoreHP:
-		if (parameters.size() == 1)
-			character->restore_hp(parameters[0].to_i());
-		break;
-	case CommandList::cRestoreMP:
-		if (parameters.size() == 1)
-			character->restore_mp(parameters[0].to_i());
-		break;
-	case CommandList::cTakeDamage:
-		if (parameters.size() == 2)
-			character->take_damage((DamageType)parameters[0].to_i(), parameters[1].vt == Parameter::vPercentage ? character->hp_max * parameters[1].to_f() : parameters[1].to_i());
-		break;
-	case CommandList::cInflictDamage:
-		if (parameters.size() == 4)
-			variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->inflict_damage(variable_as.operator()<cCharacterPtr>(parameters[1].to_i()), (DamageType)parameters[2].to_i(), parameters[3].vt == Parameter::vPercentage ? character->hp_max * parameters[3].to_f() : parameters[3].to_i());
-		break;
-	case CommandList::cLevelUp:
-		character->gain_exp(character->exp_max);
-		break;
-	case CommandList::cIncreaseHPMax:
-		if (parameters.size() == 1)
-		{
-			if (parameters[0].vt == Parameter::vPercentage)
-				character->hp_max *= 1.f + parameters[0].to_f();
-			else
-				character->hp_max += parameters[0].to_i();
-		}
-		break;
-	case CommandList::cIncreaseMPMax:
-		if (parameters.size() == 1)
-		{
-			if (parameters[0].vt == Parameter::vPercentage)
-				character->mp_max *= 1.f + parameters[0].to_f();
-			else
-				character->mp_max += parameters[0].to_i();
-		}
-		break;
-	case CommandList::cIncreaseATK:
-		if (parameters.size() == 1)
-		{
-			if (parameters[0].vt == Parameter::vPercentage)
-				character->atk *= 1.f + parameters[0].to_f();
-			else
-				character->atk += parameters[0].to_i();
-		}
-		break;
-	case CommandList::cIncreasePHYDEF:
-		if (parameters.size() == 1)
-			character->phy_def += parameters[0].to_i();
-		break;
-	case CommandList::cIncreaseMAGDEF:
-		if (parameters.size() == 1)
-			character->mag_def += parameters[0].to_i();
-		break;
-	case CommandList::cIncreaseHPREG:
-		if (parameters.size() == 1)
-			character->hp_reg += parameters[0].to_i();
-		break;
-	case CommandList::cIncreaseMPREG:
-		if (parameters.size() == 1)
-			character->mp_reg += parameters[0].to_i();
-		break;
-	case CommandList::cIncreaseMOVSP:
-		if (parameters.size() == 1)
-			character->mov_sp += parameters[0].to_i();
-		break;
-	case CommandList::cIncreaseATKSP:
-		if (parameters.size() == 1)
-			character->atk_sp += parameters[0].to_i();
-		break;
-	case CommandList::cAddBuff:
-		if (parameters.size() >= 3 && parameters.size() <= 5)
-			variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[1].to_i(), parameters[2].to_f(), parameters.size() >= 4 ? parameters[3].to_i() : 0, parameters.size() >= 5 ? parameters[4].to_i() : false);
-		break;
-	case CommandList::cAddAttackEffect:
-		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-		{
-			add_callback(next_i, it->second, character->attack_effects.emplace_back());
-			next_i = it->second + 1;
-		}
-		else
-		{
-			add_callback(next_i, next_i, character->attack_effects.emplace_back());
-			next_i++;
-		}
-		break;
-	case CommandList::cTeleportToTarget:
-		teleport(character, target_character ? target_character->node->pos : target_pos);
-		break;
-	case CommandList::cSendMessage:
-		if (parameters.size() == 3)
-		{
-			auto comp = variable_as.operator()<ComponentPtr>(parameters[0].to_i());
-			void* ptr = nullptr;
-			variable_addr(parameters[2].to_i(), ptr, ul);
-			comp->send_message(parameters[1].to_u(), ptr, ul);
-		}
-		break;
-	case CommandList::cSetSectorCollideCallback:
-	{
-		auto end_i = next_i;
-		if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
-			end_i = it->second;
+	//case CommandList::cWait:
+	//	if (parameters.size() == 1)
+	//		wait_timer = parameters[0].to_f();
+	//	break;
+	//case CommandList::cGetFaction:
+	//	if (parameters.size() == 2)
+	//		variable_as.operator()<uint>(parameters[1].to_i()) = variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->faction;
+	//	break;
+	//case CommandList::cGetCharacterIDAndPos:
+	//	if (parameters.size() == 2)
+	//	{
+	//		auto character = variable_as.operator()<cCharacterPtr>(parameters[0].to_i());
+	//		auto& iap = variable_as.operator()<IDAndPos>(parameters[1].to_i());
+	//		iap.id = character->object->uid;
+	//		iap.pos = character->node->pos;
+	//	}
+	//	break;
+	//case CommandList::cGetCharacterFromIDAndPos:
+	//	if (parameters.size() == 2)
+	//	{
+	//		auto& iap = variable_as.operator()<IDAndPos>(parameters[0].to_i());
+	//		auto& oap = variable_as.operator()<ObjAndPosXZ>(parameters[1].to_i());
+	//		if (auto it = objects.find(iap.id); it != objects.end())
+	//			oap.obj = it->second;
+	//		else
+	//			oap.obj = nullptr;
+	//		oap.pos_xz = iap.pos.xz();
+	//	}
+	//	break;
+	//case CommandList::cRestoreHP:
+	//	if (parameters.size() == 1)
+	//		character->restore_hp(parameters[0].to_i());
+	//	break;
+	//case CommandList::cRestoreMP:
+	//	if (parameters.size() == 1)
+	//		character->restore_mp(parameters[0].to_i());
+	//	break;
+	//case CommandList::cTakeDamage:
+	//	if (parameters.size() == 2)
+	//		character->take_damage((DamageType)parameters[0].to_i(), parameters[1].vt == Parameter::vPercentage ? character->hp_max * parameters[1].to_f() : parameters[1].to_i());
+	//	break;
+	//case CommandList::cInflictDamage:
+	//	if (parameters.size() == 4)
+	//		variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->inflict_damage(variable_as.operator()<cCharacterPtr>(parameters[1].to_i()), (DamageType)parameters[2].to_i(), parameters[3].vt == Parameter::vPercentage ? character->hp_max * parameters[3].to_f() : parameters[3].to_i());
+	//	break;
+	//case CommandList::cLevelUp:
+	//	character->gain_exp(character->exp_max);
+	//	break;
+	//case CommandList::cIncreaseHPMax:
+	//	if (parameters.size() == 1)
+	//	{
+	//		if (parameters[0].vt == Parameter::vPercentage)
+	//			character->hp_max *= 1.f + parameters[0].to_f();
+	//		else
+	//			character->hp_max += parameters[0].to_i();
+	//	}
+	//	break;
+	//case CommandList::cIncreaseMPMax:
+	//	if (parameters.size() == 1)
+	//	{
+	//		if (parameters[0].vt == Parameter::vPercentage)
+	//			character->mp_max *= 1.f + parameters[0].to_f();
+	//		else
+	//			character->mp_max += parameters[0].to_i();
+	//	}
+	//	break;
+	//case CommandList::cIncreaseATK:
+	//	if (parameters.size() == 1)
+	//	{
+	//		if (parameters[0].vt == Parameter::vPercentage)
+	//			character->atk *= 1.f + parameters[0].to_f();
+	//		else
+	//			character->atk += parameters[0].to_i();
+	//	}
+	//	break;
+	//case CommandList::cIncreasePHYDEF:
+	//	if (parameters.size() == 1)
+	//		character->phy_def += parameters[0].to_i();
+	//	break;
+	//case CommandList::cIncreaseMAGDEF:
+	//	if (parameters.size() == 1)
+	//		character->mag_def += parameters[0].to_i();
+	//	break;
+	//case CommandList::cIncreaseHPREG:
+	//	if (parameters.size() == 1)
+	//		character->hp_reg += parameters[0].to_i();
+	//	break;
+	//case CommandList::cIncreaseMPREG:
+	//	if (parameters.size() == 1)
+	//		character->mp_reg += parameters[0].to_i();
+	//	break;
+	//case CommandList::cIncreaseMOVSP:
+	//	if (parameters.size() == 1)
+	//		character->mov_sp += parameters[0].to_i();
+	//	break;
+	//case CommandList::cIncreaseATKSP:
+	//	if (parameters.size() == 1)
+	//		character->atk_sp += parameters[0].to_i();
+	//	break;
+	//case CommandList::cAddBuff:
+	//	if (parameters.size() >= 3 && parameters.size() <= 5)
+	//		variable_as.operator()<cCharacterPtr>(parameters[0].to_i())->add_buff(parameters[1].to_i(), parameters[2].to_f(), parameters.size() >= 4 ? parameters[3].to_i() : 0, parameters.size() >= 5 ? parameters[4].to_i() : false);
+	//	break;
+	//case CommandList::cAddAttackEffect:
+	//	if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+	//	{
+	//		add_callback(next_i, it->second, character->attack_effects.emplace_back());
+	//		next_i = it->second + 1;
+	//	}
+	//	else
+	//	{
+	//		add_callback(next_i, next_i, character->attack_effects.emplace_back());
+	//		next_i++;
+	//	}
+	//	break;
+	//case CommandList::cTeleportToTarget:
+	//	teleport(character, target_character ? target_character->node->pos : target_pos);
+	//	break;
+	//case CommandList::cSendMessage:
+	//	if (parameters.size() == 3)
+	//	{
+	//		auto comp = variable_as.operator()<ComponentPtr>(parameters[0].to_i());
+	//		void* ptr = nullptr;
+	//		variable_addr(parameters[2].to_i(), ptr, ul);
+	//		comp->send_message(parameters[1].to_u(), ptr, ul);
+	//	}
+	//	break;
+	//case CommandList::cSetSectorCollideCallback:
+	//{
+	//	auto end_i = next_i;
+	//	if (auto it = cl.sub_groups.find(next_i); it != cl.sub_groups.end())
+	//		end_i = it->second;
 
-		if (parameters.size() == 1)
-		{
-			if (auto entity = variable_as.operator()<EntityPtr>(parameters[0].to_i()); entity)
-			{
-				if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
-				{
-					collider->faction = ~character->faction;
-					collider->host = character;
-					add_callback(next_i, end_i, collider->callback);
-				}
-			}
-		}
+	//	if (parameters.size() == 1)
+	//	{
+	//		if (auto entity = variable_as.operator()<EntityPtr>(parameters[0].to_i()); entity)
+	//		{
+	//			if (auto collider = entity->get_component_t<cSectorCollider>(); collider)
+	//			{
+	//				collider->faction = ~character->faction;
+	//				collider->host = character;
+	//				add_callback(next_i, end_i, collider->callback);
+	//			}
+	//		}
+	//	}
 
-		next_i = end_i + 1;
-	}
-		break;
+	//	next_i = end_i + 1;
+	//}
+	//	break;
 	//case CommandList::cAddEffect:
 	//	if (parameters.size() == 2)
 	//	{

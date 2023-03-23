@@ -31,82 +31,82 @@ std::vector<cEffectPtr> effects;
 std::vector<cEffectPtr> dead_effects;
 bool removing_dead_effects = false;
 
-LinkEffect::LinkEffect(cEffectPtr effect) :
-	effect(effect)
-{
-	rnd = rand();
-}
-
-LinkEffect::~LinkEffect()
-{
-	if (target0.obj)
-		target0.obj->node->data_listeners.remove(rnd);
-	if (target1.obj)
-		target1.obj->node->data_listeners.remove(rnd);
-}
-
-void LinkEffect::update()
-{
-	effect->node->set_pos((pos0 + pos1) * 0.5f);
-
-	if (auto ps = effect->particle_system; ps)
-	{
-		auto ptcs = ps->get_particles();
-		int n = ptcs.size();
-		auto ang = radians(angle_xz(pos1 - pos0));
-		auto len = distance(pos0, pos1) / n * 0.5f;
-		auto mat_inv = inverse(ps->node->transform);
-		for (auto i = 0; i < n; i++)
-		{
-			auto& ptc = ptcs[i];
-			ptc.pos = mat_inv * vec4(mix(pos0, pos1, float(i + 1) / float(n + 1)), 1.f);
-			ptc.size.x = len;
-			ptc.rot = ang;
-		}
-		ps->set_particles(ptcs);
-	}
-}
-
-void LinkEffect::send_message(uint hash, void* data, uint size)
-{
-	switch (hash)
-	{
-	case "Target0"_h:
-		if (size == sizeof(IDAndPos))
-		{
-			auto& iap = *(IDAndPos*)data;
-			if (auto it = objects.find(iap.id); it != objects.end())
-			{
-				auto character = it->second->entity->get_component_t<cCharacter>();
-				target0.set(character);
-				auto node = character->node;
-				node->data_listeners.add([this, node](uint hash) {
-					if (hash == "pos"_h)
-						pos0 = node->pos;
-				}, rnd);
-			}
-			pos0 = iap.pos;
-		}
-		break;
-	case "Target1"_h:
-		if (size == sizeof(IDAndPos))
-		{
-			auto& iap = *(IDAndPos*)data;
-			if (auto it = objects.find(iap.id); it != objects.end())
-			{
-				auto character = it->second->entity->get_component_t<cCharacter>();
-				target1.set(character);
-				auto node = character->node;
-				node->data_listeners.add([this, node](uint hash) {
-					if (hash == "pos"_h)
-						pos1 = node->pos;
-				}, rnd);
-			}
-			pos1 = iap.pos;
-		}
-		break;
-	}
-}
+//LinkEffect::LinkEffect(cEffectPtr effect) :
+//	effect(effect)
+//{
+//	rnd = rand();
+//}
+//
+//LinkEffect::~LinkEffect()
+//{
+//	if (target0.obj)
+//		target0.obj->node->data_listeners.remove(rnd);
+//	if (target1.obj)
+//		target1.obj->node->data_listeners.remove(rnd);
+//}
+//
+//void LinkEffect::update()
+//{
+//	effect->node->set_pos((pos0 + pos1) * 0.5f);
+//
+//	if (auto ps = effect->particle_system; ps)
+//	{
+//		auto ptcs = ps->get_particles();
+//		int n = ptcs.size();
+//		auto ang = radians(angle_xz(pos1 - pos0));
+//		auto len = distance(pos0, pos1) / n * 0.5f;
+//		auto mat_inv = inverse(ps->node->transform);
+//		for (auto i = 0; i < n; i++)
+//		{
+//			auto& ptc = ptcs[i];
+//			ptc.pos = mat_inv * vec4(mix(pos0, pos1, float(i + 1) / float(n + 1)), 1.f);
+//			ptc.size.x = len;
+//			ptc.rot = ang;
+//		}
+//		ps->set_particles(ptcs);
+//	}
+//}
+//
+//void LinkEffect::send_message(uint hash, void* data, uint size)
+//{
+//	switch (hash)
+//	{
+//	case "Target0"_h:
+//		if (size == sizeof(IDAndPos))
+//		{
+//			auto& iap = *(IDAndPos*)data;
+//			if (auto it = objects.find(iap.id); it != objects.end())
+//			{
+//				auto character = it->second->entity->get_component_t<cCharacter>();
+//				target0.set(character);
+//				auto node = character->node;
+//				node->data_listeners.add([this, node](uint hash) {
+//					if (hash == "pos"_h)
+//						pos0 = node->pos;
+//				}, rnd);
+//			}
+//			pos0 = iap.pos;
+//		}
+//		break;
+//	case "Target1"_h:
+//		if (size == sizeof(IDAndPos))
+//		{
+//			auto& iap = *(IDAndPos*)data;
+//			if (auto it = objects.find(iap.id); it != objects.end())
+//			{
+//				auto character = it->second->entity->get_component_t<cCharacter>();
+//				target1.set(character);
+//				auto node = character->node;
+//				node->data_listeners.add([this, node](uint hash) {
+//					if (hash == "pos"_h)
+//						pos1 = node->pos;
+//				}, rnd);
+//			}
+//			pos1 = iap.pos;
+//		}
+//		break;
+//	}
+//}
 
 cEffect::~cEffect()
 {
@@ -127,15 +127,15 @@ void cEffect::set_type(uint t)
 		return;
 	type = t;
 
-	switch (type)
-	{
-	case "Normal"_h:
-		special_effect.reset(nullptr);
-		break;
-	case "Link"_h:
-		special_effect.reset(new LinkEffect(this));
-		break;
-	}
+	//switch (type)
+	//{
+	//case "Normal"_h:
+	//	special_effect.reset(nullptr);
+	//	break;
+	//case "Link"_h:
+	//	special_effect.reset(new LinkEffect(this));
+	//	break;
+	//}
 }
 
 void cEffect::start()
@@ -158,8 +158,8 @@ void cEffect::update()
 	if (dead)
 		return;
 
-	if (special_effect)
-		special_effect->update();
+	//if (special_effect)
+	//	special_effect->update();
 
 	if (timer > 0.f)
 	{
@@ -171,8 +171,8 @@ void cEffect::update()
 
 void cEffect::send_message(uint hash, void* data, uint size)
 {
-	if (special_effect)
-		special_effect->send_message(hash, data, size);
+	//if (special_effect)
+	//	special_effect->send_message(hash, data, size);
 }
 
 void cEffect::die()

@@ -3,99 +3,6 @@
 #include "../head.h"
 #include "../command.h"
 
-struct CharacterCommand
-{
-	uint type;
-	cCharacterPtr character;
-
-	CharacterCommand(uint type, cCharacterPtr character);
-	virtual ~CharacterCommand() {}
-
-	virtual void update() = 0;
-};
-
-struct CharacterCommandIdle : CharacterCommand
-{
-	CharacterCommandIdle(cCharacterPtr character);
-
-	void update() override;
-};
-
-struct CharacterCommandMoveTo : CharacterCommand
-{
-	vec3 location;
-
-	CharacterCommandMoveTo(cCharacterPtr character, const vec3& _location);
-
-	void update() override;
-};
-
-struct CharacterCommandAttackTarget : CharacterCommand
-{
-	Tracker<cCharacterPtr> target;
-
-	CharacterCommandAttackTarget(cCharacterPtr character, cCharacterPtr _target);
-
-	void update() override;
-};
-
-struct CharacterCommandAttackLocation : CharacterCommand
-{
-	Tracker<cCharacterPtr> target;
-	vec3 location;
-
-	CharacterCommandAttackLocation(cCharacterPtr character, const vec3& _location);
-
-	void update() override;
-};
-
-struct CharacterCommandHold : CharacterCommand
-{
-	Tracker<cCharacterPtr> target;
-
-	CharacterCommandHold(cCharacterPtr character);
-
-	void update() override;
-};
-
-struct CharacterCommandPickUp : CharacterCommand
-{
-	Tracker<cChestPtr> target;
-
-	CharacterCommandPickUp(cCharacterPtr character, cChestPtr _target);
-
-	void update() override;
-};
-
-struct CharacterCommandCastAbility : CharacterCommand
-{
-	cAbilityPtr ability;
-
-	CharacterCommandCastAbility(cCharacterPtr character, cAbilityPtr ability);
-
-	void update() override;
-};
-
-struct CharacterCommandCastAbilityToLocation : CharacterCommand
-{
-	vec3 location;
-	cAbilityPtr ability;
-
-	CharacterCommandCastAbilityToLocation(cCharacterPtr character, cAbilityPtr ability, const vec3& _location);
-
-	void update() override;
-};
-
-struct CharacterCommandCastAbilityToTarget : CharacterCommand
-{
-	Tracker<cCharacterPtr> target;
-	cAbilityPtr ability;
-
-	CharacterCommandCastAbilityToTarget(cCharacterPtr character, cAbilityPtr ability, cCharacterPtr _target);
-
-	void update() override;
-};
-
 enum Action
 {
 	ActionNone,
@@ -126,6 +33,20 @@ struct InitStats
 // Reflect ctor
 struct cCharacter : Component
 {
+	enum Command
+	{
+		CommandIdle,
+		CommandMoveTo,
+		CommandAttackTarget,
+		CommandAttackLocation,
+		CommandHold,
+		CommandPickUp,
+		CommandGotoShop,
+		CommandCastAbility,
+		CommandCastAbilityToLocation,
+		CommandCastAbilityToTarget
+	};
+
 	struct DropItem
 	{
 		uint id;
@@ -146,6 +67,7 @@ struct cCharacter : Component
 
 	float get_radius();
 	float get_height();
+	vec3 get_pos(float height_factor = 1.f);
 
 	// Reflect
 	FactionFlags faction = FactionCreep;
@@ -161,6 +83,7 @@ struct cCharacter : Component
 	uint exp_max = 0;
 	void set_exp_max(uint v);
 
+	// Reflect
 	CharacterState state = CharacterStateNormal;
 
 	// Reflect
@@ -248,7 +171,10 @@ struct cCharacter : Component
 	bool dead = false;
 	bool stats_dirty = true;
 	InitStats init_stats;
-	std::unique_ptr<CharacterCommand> command;
+	Command command = CommandIdle;
+	Tracker target;
+	vec3 target_location;
+	voidptr target_obj;
 	Action action = ActionNone;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
@@ -286,6 +212,18 @@ struct cCharacter : Component
 	bool process_approach(const vec3& target, float dist = 0.f, float ang = 0.f);
 	void process_attack_target(cCharacterPtr target, bool chase_target = true);
 	void process_cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target);
+
+	void reset_cmd();
+	void cmd_idle();
+	void cmd_move_to(const vec3& location);
+	void cmd_attack_target(cCharacterPtr target);
+	void cmd_attack_location(const vec3& location);
+	void cmd_hold();
+	void cmd_pick_up(cChestPtr target);
+	void cmd_goto_shop(cShopPtr target);
+	void cmd_cast_ability(cAbilityPtr ability);
+	void cmd_cast_ability_to_location(cAbilityPtr ability, const vec3& location);
+	void cmd_cast_ability_to_target(cAbilityPtr ability, cCharacterPtr target);
 
 	struct Create
 	{

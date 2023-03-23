@@ -18,6 +18,7 @@ FLAME_TYPE(cEffect)
 FLAME_TYPE(cCircleCollider)
 FLAME_TYPE(cSectorCollider)
 FLAME_TYPE(cChest)
+FLAME_TYPE(cShop)
 FLAME_TYPE(cAI)
 FLAME_TYPE(cNWDataHarvester)
 
@@ -97,51 +98,74 @@ struct ObjAndPosXZ
 	vec2 pos_xz;
 };
 
-template<typename T>
 struct Tracker
 {
 	uint hash = rand();
-	T obj = nullptr;
+	EntityPtr entity = nullptr;
+	ComponentPtr comp = nullptr;
 
 	Tracker()
 	{
 	}
 
-	Tracker(T t)
+	Tracker(ComponentPtr t)
 	{
 		set(t);
 	}
 
 	~Tracker()
 	{
-		if (obj)
-			obj->entity->message_listeners.remove(hash);
+		reset();
 	}
 
 	Tracker(Tracker&& oth)
 	{
 		std::swap(hash, oth.hash);
-		std::swap(obj, oth.obj);
+		std::swap(entity, oth.entity);
+		std::swap(comp, oth.comp);
 	}
 
 	void operator=(Tracker&& oth)
 	{
 		std::swap(hash, oth.hash);
-		std::swap(obj, oth.obj);
+		std::swap(entity, oth.entity);
+		std::swap(comp, oth.comp);
 	}
 
-	void set(T t)
+	void reset()
 	{
-		if (obj)
-			obj->entity->message_listeners.remove((uint)this);
-		obj = t;
-		if (t)
+		if (entity)
+			entity->message_listeners.remove(hash);
+		entity = nullptr;
+		comp = nullptr;
+	}
+
+	void set(EntityPtr t)
+	{
+		reset();
+		entity = t;
+		if (entity)
 		{
-			t->entity->message_listeners.add([this](uint h, void*, void*) {
+			entity->message_listeners.add([this](uint h, void*, void*) {
 				if (h == "destroyed"_h)
-					obj = nullptr;
-				}, hash);
+				{
+					entity = nullptr;
+					comp = nullptr;
+				}
+			}, hash);
 		}
+	}
+
+	void set(ComponentPtr t)
+	{
+		comp = t;
+		set(comp ? comp->entity : nullptr);
+	}
+
+	template<class T>
+	T get()
+	{
+		return (T)comp;
 	}
 };
 
