@@ -9,8 +9,22 @@ struct cCircleCollider : Component
 	// Reflect requires
 	cNodePtr node;
 
-	std::vector<cCharacterPtr> last_collidings;
+	// Reflect
+	float radius = 5.f;
+	// Reflect
+	FactionFlags faction = FactionNone;
+
+	std::vector<Tracker<cCharacterPtr>> last_collidings;
 	Listeners<void(cCharacterPtr character, bool enter_or_exit)> callbacks;
+
+	void update() override;
+
+	struct Create
+	{
+		virtual cCircleColliderPtr operator()(EntityPtr) = 0;
+	};
+	// Reflect static
+	EXPORT static Create& create;
 };
 
 // Reflect ctor
@@ -41,7 +55,7 @@ struct cSectorCollider : Component
 	vec3 c;
 	float t;
 
-	std::vector<cCharacterPtr> last_collidings;
+	std::vector<Tracker<cCharacterPtr>> last_collidings;
 	Listeners<void(cCharacterPtr character, bool enter_or_exit)> callbacks;
 
 	void on_active() override;

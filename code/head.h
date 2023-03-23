@@ -15,6 +15,7 @@ FLAME_TYPE(cObject)
 FLAME_TYPE(cCharacter)
 FLAME_TYPE(cProjectile)
 FLAME_TYPE(cEffect)
+FLAME_TYPE(cCircleCollider)
 FLAME_TYPE(cSectorCollider)
 FLAME_TYPE(cChest)
 FLAME_TYPE(cAI)
@@ -99,12 +100,16 @@ struct ObjAndPosXZ
 template<typename T>
 struct Tracker
 {
-	uint hash;
+	uint hash = rand();
 	T obj = nullptr;
 
 	Tracker()
 	{
-		hash = rand();
+	}
+
+	Tracker(T t)
+	{
+		set(t);
 	}
 
 	~Tracker()
@@ -113,14 +118,26 @@ struct Tracker
 			obj->entity->message_listeners.remove(hash);
 	}
 
-	void set(T oth)
+	Tracker(Tracker&& oth)
+	{
+		std::swap(hash, oth.hash);
+		std::swap(obj, oth.obj);
+	}
+
+	void operator=(Tracker&& oth)
+	{
+		std::swap(hash, oth.hash);
+		std::swap(obj, oth.obj);
+	}
+
+	void set(T t)
 	{
 		if (obj)
 			obj->entity->message_listeners.remove((uint)this);
-		obj = oth;
-		if (oth)
+		obj = t;
+		if (t)
 		{
-			oth->entity->message_listeners.add([this](uint h, void*, void*) {
+			t->entity->message_listeners.add([this](uint h, void*, void*) {
 				if (h == "destroyed"_h)
 					obj = nullptr;
 				}, hash);

@@ -6,6 +6,63 @@
 #include "collider.h"
 #include "character.h"
 
+void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector<Tracker<cCharacterPtr>>& last_collidings, const Listeners<void(cCharacterPtr character, bool enter_or_exit)>& callbacks)
+{
+	for (auto c : characters)
+	{
+		auto found = false;
+		for (auto& _c : last_collidings)
+		{
+			if (c == _c.obj)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			callbacks.call(c, true);
+			last_collidings.emplace_back(c);
+		}
+	}
+	for (auto it = last_collidings.begin(); it != last_collidings.end();)
+	{
+		auto found = false;
+		for (auto _c : characters)
+		{
+			if (it->obj == _c)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+		{
+			callbacks.call(it->obj, false);
+			it = last_collidings.erase(it);
+		}
+		else
+			it++;
+	}
+}
+
+void cCircleCollider::update()
+{
+	auto characters = find_characters(faction, node->global_pos(), radius);
+	process_colliding(characters, last_collidings, callbacks);
+}
+
+struct cCircleColliderCreate : cCircleCollider::Create
+{
+	cCircleColliderPtr operator()(EntityPtr e) override
+	{
+		if (e == INVALID_POINTER)
+			return nullptr;
+		return new cCircleCollider;
+	}
+}cCircleCollider_create;
+cCircleCollider::Create& cCircleCollider::create = cCircleCollider_create;
+
 void cSectorCollider::on_active()
 {
 	off = 0.f;
@@ -68,35 +125,7 @@ void cSectorCollider::update()
 	{
 		auto pos = c + node->global_pos();
 		auto characters = find_characters(faction, pos, r1, r0, central_angle, direction_angle);
-		for (auto c : characters)
-		{
-			auto found = false;
-			for (auto _c : last_collidings)
-			{
-				if (c == _c)
-				{
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-				callbacks.call(c, true);
-		}
-		for (auto c : last_collidings)
-		{
-			auto found = false;
-			for (auto _c : characters)
-			{
-				if (c == _c)
-				{
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-				callbacks.call(c, false);
-		}
-		last_collidings = characters;
+		process_colliding(characters, last_collidings, callbacks);
 	}
 }
 
