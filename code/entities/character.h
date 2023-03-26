@@ -3,12 +3,26 @@
 #include "../head.h"
 #include "../command.h"
 
-enum Action
+enum CharacterAction
 {
-	ActionNone,
-	ActionMove,
-	ActionAttack,
-	ActionCast
+	CharacterActionNone,
+	CharacterActionMove,
+	CharacterActionAttack,
+	CharacterActionCast
+};
+
+// Reflect
+enum CharacterAttribute
+{
+	CharacterAttributeHpMax,
+	CharacterAttributeMpMax,
+	CharacterAttributeAtk,
+	CharacterAttributePhyDef,
+	CharacterAttributeMagDef,
+	CharacterAttributeHpReg,
+	CharacterAttributeMpReg,
+	CharacterAttributeMovSp,
+	CharacterAttributeAtkSp
 };
 
 extern std::vector<cCharacterPtr> characters;
@@ -175,7 +189,7 @@ struct cCharacter : Component
 	Tracker target;
 	vec3 target_location;
 	voidptr target_obj;
-	Action action = ActionNone;
+	CharacterAction action = CharacterActionNone;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
 	float cast_speed = 1.f;

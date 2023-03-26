@@ -11,6 +11,18 @@
 #include <flame/graphics/gui.h>
 #include <flame/universe/components/nav_agent.h>
 
+// Reflect
+struct EXPORT AbilityFunc_add_attribute : PassiveAbilityFunc
+{
+	// Reflect
+	std::vector<std::pair<CharacterAttribute, uint>> attribute_changes;
+
+	void exec(cAbilityPtr ability, cCharacterPtr character) override
+	{
+
+	}
+};
+
 std::vector<Talent> talents;
 
 void init_abilities()

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<prefab file_id="464d32673799d67b1c03617e89ac40b3" name="Strong Body">
+	<components>
+		<item type_name="cAbility">
+			<active type="" />
+			<passive type="AbilityFunc_add_attribute">
+				<attribute_changes>
+					<item first="HpMax" second="100" />
+				</attribute_changes>
+			</passive>
+		</item>
+	</components>
+</prefab>

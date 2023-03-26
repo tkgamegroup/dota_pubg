@@ -16,7 +16,7 @@ void cAI::update()
 
 	auto attack_closest = [this]() {
 		bool found = false;
-		if (character->action == ActionNone || character->action == ActionMove)
+		if (character->action == CharacterActionNone || character->action == CharacterActionMove)
 		{
 			if (character->search_timer <= 0.f)
 			{

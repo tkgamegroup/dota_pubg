@@ -397,7 +397,7 @@ void cCharacter::update()
 		switch (command)
 		{
 		case CommandIdle:
-			action = ActionNone;
+			action = CharacterActionNone;
 			break;
 		case CommandMoveTo:
 			if (process_approach(target_location))
@@ -431,7 +431,7 @@ void cCharacter::update()
 			else
 			{
 				if (process_approach(target_location))
-					action = ActionNone;
+					action = CharacterActionNone;
 			}
 			break;
 		case CommandHold:
@@ -450,7 +450,7 @@ void cCharacter::update()
 			if (target.comp)
 				process_attack_target(target.get<cCharacterPtr>(), false);
 			else
-				action = ActionNone;
+				action = CharacterActionNone;
 			break;
 		case CommandPickUp:
 			if (!target.comp)
@@ -488,22 +488,22 @@ void cCharacter::update()
 	{
 		switch (action)
 		{
-		case ActionNone:
+		case CharacterActionNone:
 			armature->loop = true;
 			armature->playing_speed = 1.f;
 			armature->play("idle"_h);
 			break;
-		case ActionMove:
+		case CharacterActionMove:
 			armature->loop = true;
 			armature->playing_speed = move_speed;
 			armature->play("run"_h);
 			break;
-		case ActionAttack:
+		case CharacterActionAttack:
 			armature->loop = false;
 			armature->playing_speed = attack_speed;
 			armature->play("attack"_h);
 			break;
-		case ActionCast:
+		case CharacterActionCast:
 			armature->loop = false;
 			armature->playing_speed = cast_speed;
 			armature->play("cast"_h);
@@ -753,7 +753,7 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 	{
 		if (nav_agent)
 			nav_agent->stop();
-		action = ActionNone;
+		action = CharacterActionNone;
 		return false;
 	}
 	if (nav_agent)
@@ -766,12 +766,12 @@ bool cCharacter::process_approach(const vec3& target, float dist, float ang)
 			return true;
 		if (audio_source)
 			audio_source->play("move"_h);
-		action = ActionMove;
+		action = CharacterActionMove;
 	}
 	else
 	{
 		move_speed = 0.f;
-		action = ActionNone;
+		action = CharacterActionNone;
 	}
 	return false;
 }
@@ -806,14 +806,14 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 	{
 		if (nav_agent)
 			nav_agent->stop();
-		action = ActionNone;
+		action = CharacterActionNone;
 		return;
 	}
 
 	auto p0 = node->pos;
 	auto p1 = target->node->pos;
 
-	if (action == ActionAttack)
+	if (action == CharacterActionAttack)
 	{
 		if (nav_agent)
 		{
@@ -850,7 +850,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 		{
 			attack_timer -= delta_time;
 			if (attack_timer <= 0.f)
-				action = ActionNone;
+				action = CharacterActionNone;
 		}
 	}
 	else
@@ -869,7 +869,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			}
 			else
 				approached = distance(p0, p1) < atk_distance;
-			action = ActionNone;
+			action = CharacterActionNone;
 		}
 		if (attack_interval_timer <= 0.f)
 		{
@@ -878,7 +878,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 				attack_speed = max(0.01f, atk_sp / 100.f); 
 				attack_hit_timer = atk_point / attack_speed;
 				attack_timer = atk_time / attack_speed;
-				action = ActionAttack;
+				action = CharacterActionAttack;
 
 				if (audio_source)
 					audio_source->play("attack_precast"_h);
@@ -888,7 +888,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 		{
 			if (approached)
 			{
-				action = ActionNone;
+				action = CharacterActionNone;
 				if (nav_agent)
 					nav_agent->set_speed_scale(0.f);
 			}
@@ -902,7 +902,7 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 	//{
 	//	cast_timer = -1.f;
 	//	nav_agent->stop();
-	//	action = ActionNone;
+	//	action = CharacterActionNone;
 	//	return;
 	//}
 
@@ -921,7 +921,7 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 	//	}
 	//	else
 	//	{
-	//		action = ActionCast;
+	//		action = CharacterActionCast;
 	//		nav_agent->set_speed_scale(0.f);
 	//	}
 	//}
@@ -947,7 +947,7 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 void cCharacter::reset_cmd()
 {
 	command = CommandIdle;
-	action = ActionNone;
+	action = CharacterActionNone;
 	target.reset();
 }
 

@@ -41,7 +41,7 @@ void AbilityShortcut::draw(ImDrawList* dl, const vec2& p0, const vec2& p1)
 	if (ImGui::IsItemHovered())
 	{
 		ImGui::BeginTooltip();
-		ImGui::TextUnformatted(ability->name.c_str());
+		ImGui::TextUnformatted(ability->entity->name.c_str());
 		ImGui::TextUnformatted(ability->description.c_str());
 		ImGui::EndTooltip();
 	}
