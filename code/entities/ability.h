@@ -35,13 +35,13 @@ struct cAbility : Component
 	// Reflect
 	float					channel_time = 0.f;
 	// Reflect
-	std::vector<uint>		mp;
+	uint					mp;
 	// Reflect
-	std::vector<float>		cd;
+	float					cd;
 	// Reflect
-	std::vector<float>		distance;
+	float					distance;
 	// Reflect
-	std::vector<float>		range;
+	float					range;
 	// Reflect
 	float					angle = 0.f;
 	// Reflect
@@ -51,34 +51,6 @@ struct cAbility : Component
 
 	float cd_max = 0.f;
 	float cd_timer = 0.f;
-
-	inline uint get_mp(uint lv) const
-	{
-		if (mp.empty() || lv == 0) return 0;
-		if (mp.size() == 1) return mp[0];
-		return mp[lv - 1];
-	}
-
-	inline float get_cd(uint lv) const
-	{
-		if (cd.empty() || lv == 0) return 0;
-		if (cd.size() == 1) return cd[0];
-		return cd[lv - 1];
-	}
-
-	inline float get_distance(uint lv) const
-	{
-		if (distance.empty() || lv == 0) return 0;
-		if (distance.size() == 1) return distance[0];
-		return distance[lv - 1];
-	}
-
-	inline float get_range(uint lv) const
-	{
-		if (range.empty() || lv == 0) return 0;
-		if (range.size() == 1) return range[0];
-		return range[lv - 1];
-	}
 
 	// Reflect
 	VirtualUdt<ActiveAbilityFunc>	active;

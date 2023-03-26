@@ -277,6 +277,11 @@ void cCharacter::start()
 	init_stats.mp_reg = mp_reg;
 	init_stats.mov_sp = mov_sp;
 	init_stats.atk_sp = atk_sp;
+
+	items_idx = entity->find_child_i("items");
+	abilities_idx = entity->find_child_i("abilities");
+	buffs_idx = entity->find_child_i("buffs");
+	attack_effects_idx = entity->find_child_i("attack_effects");
 }
 
 void cCharacter::update()
@@ -308,7 +313,7 @@ void cCharacter::update()
 			mov_sp = init_stats.mov_sp;
 			atk_sp = init_stats.atk_sp;
 
-			attack_effects.clear();
+			//attack_effects.clear();
 			//for (auto ability : abilities)
 			//{
 			//	if (ability && ability->lv > 0)
@@ -781,19 +786,8 @@ static void attack_proc(cCharacterPtr character, cCharacterPtr target)
 	auto damage = character->atk;
 	character->inflict_damage(target, (DamageType)character->atk_type, damage);
 	{
-		static ParameterPack parameters;
-		{
-			auto& vec = parameters["attack_damage_type"_h];
-			if (vec.empty()) vec.resize(1);
-			vec[0] = (int)character->atk_type;
-		}
-		{
-			auto& vec = parameters["attack_damage"_h];
-			if (vec.empty()) vec.resize(1);
-			vec[0] = damage;
-		}
-		for (auto& ef : character->attack_effects)
-			cl_threads.emplace_back(ef, character, target, vec3(0.f), parameters, 0);
+		//for (auto& ef : character->attack_effects)
+		//	cl_threads.emplace_back(ef, character, target, vec3(0.f), parameters, 0);
 	}
 
 	if (character->audio_source)

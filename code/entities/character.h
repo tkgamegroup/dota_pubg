@@ -174,11 +174,11 @@ struct cCharacter : Component
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 20;
 
-	std::vector<CommandList>				attack_effects;
-	//std::vector<cItemPtr>					inventory;
-	//std::vector<cAbilityPtr>				abilities;
-	//std::vector<cTalentPtr>				talents;
-	//std::vector<cBuffPtr>					buffs;
+	char items_idx = -1;
+	char abilities_idx = -1;
+	//char talents_idx = -1;
+	char buffs_idx = -1;
+	char attack_effects_idx = -1;
 	std::map<uint, std::pair<float, uint>>	markers;
 	uint ability_points = 0;
 
