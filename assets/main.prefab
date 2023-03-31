@@ -24,6 +24,48 @@
 				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" />
 			</components>
 		</item>
+		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
+			<components>
+				<item type_name="flame::cElement" ext="1506,709" align="Fill" />
+			</components>
+			<children>
+				<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
+					<components>
+						<item type_name="flame::cElement" pos="679,669" ext="148,40" background_col="0,0,0,100" align="Bottom" />
+					</components>
+					<children>
+						<item file_id="4f86e3b23a9b82911716bc0eaaddb2b7" name="slot1">
+							<components>
+								<item type_name="flame::cElement" pos="4,4" ext="32,32" />
+								<item type_name="flame::cImage" image_name="icons\question.jpg" />
+								<item type_name="flame::cReceiver" />
+							</components>
+						</item>
+						<item file_id="4f58d8957ff30e5729bcfea82cff4a98" name="slot2">
+							<components>
+								<item type_name="flame::cElement" pos="40,4" ext="32,32" />
+								<item type_name="flame::cImage" image_name="icons\question.jpg" />
+								<item type_name="flame::cReceiver" />
+							</components>
+						</item>
+						<item file_id="45b9b2ab1f6abd4a31f298fe087f90a2" name="slot3">
+							<components>
+								<item type_name="flame::cElement" pos="76,4" ext="32,32" />
+								<item type_name="flame::cImage" image_name="icons\question.jpg" />
+								<item type_name="flame::cReceiver" />
+							</components>
+						</item>
+						<item file_id="4f831be6ca30045c42d490322832dc92" name="slot4">
+							<components>
+								<item type_name="flame::cElement" pos="112,4" ext="32,32" />
+								<item type_name="flame::cImage" image_name="icons\question.jpg" />
+								<item type_name="flame::cReceiver" />
+							</components>
+						</item>
+					</children>
+				</item>
+			</children>
+		</item>
 		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="Entity 0" tag="General|MarkNavMesh">
 			<components>
 				<item type_name="flame::cNode" qut="0,0,0,0" scl="5,1,5" />

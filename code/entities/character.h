@@ -176,6 +176,16 @@ struct cCharacter : Component
 
 	char items_idx = -1;
 	char abilities_idx = -1;
+	inline cAbilityPtr get_ability(int idx)
+	{
+		if (abilities_idx != -1)
+		{
+			auto e = entity->children[abilities_idx].get();
+			if (e->children.size() > idx)
+				return e->children[idx]->get_component_t<cAbility>();
+		}
+		return nullptr;
+	}
 	//char talents_idx = -1;
 	char buffs_idx = -1;
 	char attack_effects_idx = -1;
