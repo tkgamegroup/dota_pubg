@@ -39,7 +39,7 @@ inline FactionFlags operator| (FactionFlags a, FactionFlags b) { return (Faction
 inline FactionFlags operator~ (FactionFlags v) { return (FactionFlags)(~(int)v); }
 
 // Reflect
-enum TargetType
+enum TargetTypeFlags
 {
 	TargetNull = 0,
 	TargetEnemy = 1 << 0,
@@ -55,7 +55,7 @@ enum DamageType
 };
 
 // Reflect
-enum CharacterState
+enum CharacterStateFlags
 {
 	CharacterStateNormal = 0,
 	CharacterStateStun = 1 << 0,

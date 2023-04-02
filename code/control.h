@@ -7,7 +7,7 @@ extern cCharacterPtr	hovering_character;
 extern cChestPtr		hovering_chest;
 extern bool				hovering_terrain;
 
-extern TargetType		select_mode;
+extern TargetTypeFlags	select_mode;
 extern float			select_distance;
 extern float			select_range;
 extern float			select_angle;

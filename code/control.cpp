@@ -23,7 +23,7 @@ cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
 bool			hovering_terrain = false;
 
-TargetType								select_mode = TargetNull;
+TargetTypeFlags							select_mode = TargetNull;
 std::function<void(cCharacterPtr)>		select_enemy_callback;
 std::function<void(const vec3& pos)>	select_location_callback;
 float									select_distance = 0.f;
@@ -320,7 +320,7 @@ void update_control()
 
 		if (input->kpressed(Keyboard_A))
 		{
-			select_mode = TargetType(TargetEnemy | TargetLocation);
+			select_mode = TargetTypeFlags(TargetEnemy | TargetLocation);
 			select_enemy_callback = [](cCharacterPtr character) {
 				command_character_attack_target(main_player.character, character);
 			};

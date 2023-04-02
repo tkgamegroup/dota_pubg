@@ -21,6 +21,12 @@
 				</item>
 			</children>
 		</item>
-		<item file_id="47312eeca9261dbad6e7f5424b98da84" name="abilities" />
+		<item file_id="47312eeca9261dbad6e7f5424b98da84" name="abilities">
+			<children>
+				<item filename="assets\abilities\fire_breath.prefab">
+					<modifications />
+				</item>
+			</children>
+		</item>
 	</children>
 </prefab>

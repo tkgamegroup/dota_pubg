@@ -98,7 +98,7 @@ struct cCharacter : Component
 	void set_exp_max(uint v);
 
 	// Reflect
-	CharacterState state = CharacterStateNormal;
+	CharacterStateFlags state = CharacterStateNormal;
 
 	// Reflect
 	uint hp = 100;

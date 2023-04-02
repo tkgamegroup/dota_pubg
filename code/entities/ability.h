@@ -26,7 +26,7 @@ struct cAbility : Component
 	std::string				description;
 
 	// Reflect
-	TargetType				target_type = TargetNull;
+	TargetTypeFlags			target_type = TargetNull;
 	// Reflect
 	uint					max_lv = 5;
 	// Reflect

@@ -127,13 +127,13 @@ bool parse_literal(const std::string& str, int& id)
 		id = sh(str.substr(1, str.size() - 3).c_str());
 		return true;
 	}
-	else if (SUS::match_head_tail(str, "\"", "\"s"))
-	{
-		CharacterState state;
-		TypeInfo::unserialize_t(str.substr(1, str.size() - 3), state);
-		id = state;
-		return true;
-	}
+	//else if (SUS::match_head_tail(str, "\"", "\"s"))
+	//{
+	//	CharacterState state;
+	//	TypeInfo::unserialize_t(str.substr(1, str.size() - 3), state);
+	//	id = state;
+	//	return true;
+	//}
 	//else if (SUS::match_head_tail(str, "\"", "\"b"))
 	//{
 	//	id = Buff::find(str.substr(1, str.size() - 3));

@@ -695,21 +695,17 @@ void cCharacter::use_item(cItemPtr item)
 
 void cCharacter::cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target)
 {
-	//if (ins->cd_timer > 0.f)
-	//	return;
+	if (ability->cd_timer > 0.f)
+		return;
 
-	//auto& ability = Ability::get(ins->id);
-	//auto ability_mp = ability.get_mp(ins->lv);
-	//auto ability_cd = ability.get_cd(ins->lv);
-	//if (mp < ability_mp)
-	//	return;
+	if (mp < ability->mp)
+		return;
 
-	//ins->cd_max = ability_cd;
-	//ins->cd_timer = ins->cd_max;
-	//set_mp(mp - ability_mp);
+	ability->cd_timer = ability->cd_max = ability->cd_max;
+	set_mp(mp - ability->mp);
 
-	//if (!ability.active.cmds.empty())
-	//	cl_threads.emplace_back(ability.active, this, target, location, ability.parameters, ins->lv);
+	if (ability->active.type)
+		ability->active.value().exec(ability, this, location, target);
 }
 
 void cCharacter::add_buff(uint id, float time, uint lv, bool replace)
@@ -892,50 +888,49 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 
 void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location, cCharacterPtr target)
 {
-	//if (state & CharacterStateStun)
-	//{
-	//	cast_timer = -1.f;
-	//	nav_agent->stop();
-	//	action = CharacterActionNone;
-	//	return;
-	//}
+	if (state & CharacterStateStun)
+	{
+		cast_timer = -1.f;
+		nav_agent->stop();
+		action = CharacterActionNone;
+		return;
+	}
 
-	//auto& ability = Ability::get(ins->id);
-	//auto pos = target ? target->node->pos : location;
+	auto pos = target ? target->node->pos : location;
 
-	//auto approached = ability.target_type == TargetNull ? true : process_approach(pos, ability.get_distance(ins->lv), 15.f);
-	//if (cast_timer > 0.f)
-	//{
-	//	cast_timer -= delta_time;
-	//	if (cast_timer <= 0.f)
-	//	{
-	//		cast_ability(ins, pos, target);
-	//		nav_agent->stop();
-	//		new CharacterCommandIdle(this);
-	//	}
-	//	else
-	//	{
-	//		action = CharacterActionCast;
-	//		nav_agent->set_speed_scale(0.f);
-	//	}
-	//}
-	//else
-	//{
-	//	if (approached)
-	//	{
-	//		if (ability.cast_time == 0.f)
-	//		{
-	//			cast_ability(ins, pos, target);
-	//			nav_agent->stop();
-	//			new CharacterCommandIdle(this);
-	//		}
-	//		else
-	//		{
-	//			cast_speed = cast_time / ability.cast_time;
-	//			cast_timer = cast_point / cast_speed;
-	//		}
-	//	}
-	//}
+	auto approached = ability->target_type == TargetNull ? true : process_approach(pos, ability->distance, 15.f);
+	if (cast_timer > 0.f)
+	{
+		cast_timer -= delta_time;
+		if (cast_timer <= 0.f)
+		{
+			cast_ability(ability, pos, target);
+			nav_agent->stop();
+			cmd_idle();
+		}
+		else
+		{
+			action = CharacterActionCast;
+			nav_agent->set_speed_scale(0.f);
+		}
+	}
+	else
+	{
+		if (approached)
+		{
+			if (ability->cast_time == 0.f)
+			{
+				cast_ability(ability, pos, target);
+				nav_agent->stop();
+				cmd_idle();
+			}
+			else
+			{
+				cast_speed = cast_time / ability->cast_time;
+				cast_timer = cast_point / cast_speed;
+			}
+		}
+	}
 }
 
 void cCharacter::reset_cmd()
