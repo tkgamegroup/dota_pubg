@@ -13,7 +13,7 @@ extern float			select_range;
 extern float			select_angle;
 extern float			select_start_radius;
 
-void init_chontrol();
+void init_control();
 void update_control();
 void command_character_idle(cCharacterPtr character);
 void command_character_hold(cCharacterPtr character);

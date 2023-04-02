@@ -2,7 +2,7 @@
 <prefab file_id="3e84f1d94e681e8d13f72291b3fb7d62">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavAgent" radius="0.5" separation_group="0" />
+		<item type_name="flame::cNavAgent" radius="0.5" />
 		<item type_name="flame::cAudioSource" />
 		<item type_name="cObject" />
 		<item type_name="cCharacter" />
@@ -21,5 +21,6 @@
 				</item>
 			</children>
 		</item>
+		<item file_id="47312eeca9261dbad6e7f5424b98da84" name="abilities" />
 	</children>
 </prefab>

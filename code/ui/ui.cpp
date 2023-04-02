@@ -1,35 +1,37 @@
 #include <flame/graphics/canvas.h>
 #include <flame/universe/components/camera.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/components/image.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
 
 #include "../game.h"
 #include "../entities/character.h"
+#include "../entities/ability.h"
 #include "ui.h"
 
-static graphics::CanvasPtr canvas = nullptr;
+graphics::CanvasPtr canvas = nullptr;
+EntityPtr ui_ability_slots[4];
 
 void init_ui()
 {
-	if (!canvas)
+	canvas = sRenderer::instance()->canvas;
+
+	if (auto ui = root->find_child("ui"); ui)
 	{
-		auto renderer = sRenderer::instance();
-		if (renderer->use_window_targets)
-			canvas = graphics::Canvas::create(renderer->window);
-		else
-			canvas = graphics::Canvas::create(renderer->window, renderer->iv_tars);
-		canvas->clear_framebuffer = false;
+		if (auto bar = ui->find_child("abilities_bar"); bar)
+		{
+			for (auto i = 0; i < 4; i++)
+			{
+				auto e = bar->find_child("slot" + str(i + 1));
+				ui_ability_slots[i] = e;
+			}
+		}
 	}
 }
 
 void deinit_ui()
 {
-	if (canvas)
-	{
-		delete canvas;
-		canvas = nullptr;
-	}
 }
 
 void update_ui()
@@ -49,6 +51,20 @@ void update_ui()
 			auto h = p2.y - p0.y;
 			if (w > 0.f && h > 0.f)
 				canvas->add_rect_filled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * w, h), cvec4(80, 160, 85, 255));
+		}
+	}
+
+	if (main_player.character)
+	{
+		for (auto i = 0; i < 4; i++)
+		{
+			if (auto e = ui_ability_slots[i]; e)
+			{
+				if (auto ability = main_player.character->get_ability(i); ability)
+					e->get_component_t<cImage>()->set_image_name(ability->icon_name);
+				else
+					e->get_component_t<cImage>()->set_image_name(L"");
+			}
 		}
 	}
 }

@@ -825,12 +825,12 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 					if (!atk_projectile.empty())
 					{
 						auto character = this;
-						add_projectile(atk_projectile,
-							p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f,
-							[character](const vec3&, cCharacterPtr target) {
-								if (target)
-									attack_proc(character, target);
-							});
+						auto pj = add_projectile(atk_projectile,
+							p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f);
+						pj->on_end = [character](const vec3&, cCharacterPtr target) {
+							if (target)
+								attack_proc(character, target);
+						};
 					}
 					else
 						attack_proc(this, target);

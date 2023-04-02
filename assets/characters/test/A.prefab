@@ -2,7 +2,7 @@
 <prefab file_id="3e84f1d94e681e8d13f72291b3fb7d62">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavAgent" radius="0.5" separation_group="0" />
+		<item type_name="flame::cNavAgent" radius="0.5" />
 		<item type_name="flame::cAudioSource" />
 		<item type_name="cObject" />
 		<item type_name="cCharacter" />
@@ -19,6 +19,13 @@
 						<item type_name="flame::cNode" pos="0,100,0" qut="0.707107,-0.707107,0,0" scl="50,50,100" />
 						<item type_name="flame::cMesh" mesh_name="test.fmod#mesh0" material_name="A.fmat" />
 					</components>
+				</item>
+			</children>
+		</item>
+		<item file_id="4adcb42f098c09d81da85c5cce3e5b82" name="abilities">
+			<children>
+				<item filename="assets\abilities\fire_breath.prefab">
+					<modifications />
 				</item>
 			</children>
 		</item>

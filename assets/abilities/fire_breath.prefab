@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<prefab file_id="4794e76dfd942b087387cc2be098239a" name="fire_breath">
+	<components>
+		<item type_name="cAbility" icon_name="assets\icons\old Ancient Beast icons\magmaspawn lavariver.jpg">
+			<active type="" />
+			<passive type="" />
+		</item>
+	</components>
+</prefab>

@@ -302,19 +302,19 @@ cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
 	{
-		auto harvester = e->add_component_t<cNWDataHarvester>();
-		harvester->add_target(th<cCharacter>(), "hp"_h);
-		harvester->add_target(th<cCharacter>(), "hp_max"_h);
-		harvester->add_target(th<cCharacter>(), "mp"_h);
-		harvester->add_target(th<cCharacter>(), "mp_max"_h);
-		harvester->add_target(th<cCharacter>(), "lv"_h);
+		//auto harvester = e->add_component_t<cNWDataHarvester>();
+		//harvester->add_target(th<cCharacter>(), "hp"_h);
+		//harvester->add_target(th<cCharacter>(), "hp_max"_h);
+		//harvester->add_target(th<cCharacter>(), "mp"_h);
+		//harvester->add_target(th<cCharacter>(), "mp_max"_h);
+		//harvester->add_target(th<cCharacter>(), "lv"_h);
 	}
 	root->add_child(e);
 
 	return character;
 }
 
-cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
+cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, uint id)
 {
 	auto e = get_prefab(prefab_path)->copy();
 	e->node()->set_pos(pos);
@@ -324,13 +324,12 @@ cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const ve
 	projectiles.push_back(projectile);
 	projectile->target.set(target);
 	projectile->speed = speed;
-	projectile->on_end = on_end;
 	root->add_child(e);
 
 	return projectile;
 }
 
-cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id)
+cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, uint id)
 {
 	auto e = get_prefab(prefab_path)->copy();
 	e->node()->set_pos(pos);
@@ -341,18 +340,17 @@ cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const ve
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
-	projectile->on_end = on_end;
 	root->add_child(e);
 
 	return projectile;
 }
 
-cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& eul, float duration, uint id)
+cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const quat& qut, float duration, uint id)
 {
 	auto e = get_prefab(prefab_path)->copy();
 	auto node = e->node();
 	node->set_pos(pos);
-	node->set_eul(eul);
+	node->set_qut(qut);
 	auto object = e->get_component_t<cObject>();
 	//object->init(3000 + prefab_id, id);
 	auto effect = e->get_component_t<cEffect>();
@@ -395,6 +393,15 @@ struct cGameCreate : cGame::Create
 }cGame_create;
 cGame::Create& cGame::create = cGame_create;
 
+bool cGame::get_debug_colliders()
+{
+	return debug_colliders;
+}
+
+void cGame::set_debug_colliders(bool v)
+{
+	debug_colliders = v;
+}
 
 cGame::~cGame()
 {
@@ -408,6 +415,7 @@ void cGame::start()
 	main_player.init(root->find_child("main_player"));
 	main_camera.init(root->find_child("main_camera"));
 	init_ui();
+	init_control();
 }
 
 void cGame::update()

@@ -20,7 +20,6 @@ struct cAbility : Component
 	std::filesystem::path	icon_name;
 	// Reflect
 	uvec2					icon_tile_coord = uvec2(0);
-	graphics::ImagePtr		icon_image = nullptr;
 	// Reflect
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	// Reflect
@@ -35,13 +34,13 @@ struct cAbility : Component
 	// Reflect
 	float					channel_time = 0.f;
 	// Reflect
-	uint					mp;
+	uint					mp = 0;
 	// Reflect
-	float					cd;
+	float					cd = 0;
 	// Reflect
-	float					distance;
+	float					distance = 0.f;
 	// Reflect
-	float					range;
+	float					range = 0.f;
 	// Reflect
 	float					angle = 0.f;
 	// Reflect

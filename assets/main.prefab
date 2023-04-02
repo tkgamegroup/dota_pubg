@@ -3,7 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavScene" generate_delay_frames="1" />
-		<item type_name="cGame" camera_length="20" camera_angle="60" />
+		<item type_name="cGame" camera_length="20" camera_angle="60" debug_colliders="true" />
 	</components>
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="main_camera">
@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1506,709" align="Fill" />
+				<item type_name="flame::cElement" ext="1378,637" align="Fill" />
 			</components>
 			<children>
 				<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
 					<components>
-						<item type_name="flame::cElement" pos="679,669" ext="148,40" background_col="0,0,0,100" align="Bottom" />
+						<item type_name="flame::cElement" pos="615,597" ext="148,40" background_col="0,0,0,100" align="Bottom" />
 					</components>
 					<children>
 						<item file_id="4f86e3b23a9b82911716bc0eaaddb2b7" name="slot1">
@@ -66,7 +66,7 @@
 				</item>
 			</children>
 		</item>
-		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="Entity 0" tag="General|MarkNavMesh">
+		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="ground" tag="General|MarkNavMesh">
 			<components>
 				<item type_name="flame::cNode" qut="0,0,0,0" scl="5,1,5" />
 				<item type_name="flame::cMesh" mesh_name="standard_plane" material_name="flame\materials\check.fmat" />
@@ -109,7 +109,7 @@
 				<item type_name="flame::cNode" pos="1.5,1,1.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="flame::cNavObstacle" radius="0.7" />
-				<item type_name="cSpawner" enable="false" prefab_path="characters\test\A.prefab" faction="Party1" unit_type="LaneCreep" unit_target_pos="47,1,47" />
+				<item type_name="cSpawner" prefab_path="characters\test\A.prefab" faction="Party1" unit_type="LaneCreep" unit_target_pos="47,1,47" />
 			</components>
 		</item>
 		<item file_id="43ced12d98a5419315d2e79f8e8e1a89" name="Entity 1">
@@ -122,11 +122,21 @@
 		</item>
 		<item file_id="4aee062e6c4f09511be57e034fe5f390" name="DefenseTower">
 			<components>
-				<item type_name="flame::cNode" pos="27.5,0,24.5" scl="2,5,2" />
+				<item type_name="flame::cNode" pos="23,0,18" scl="2,5,2" />
 				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
 				<item type_name="flame::cNavObstacle" height="5" />
 				<item type_name="cObject" />
 				<item type_name="cCharacter" faction="Party1" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
+				<item type_name="cAI" type="DefenseTower" />
+			</components>
+		</item>
+		<item file_id="416eff6b470a32c0351a0a8a8367c2a2" name="DefenseTower">
+			<components>
+				<item type_name="flame::cNode" pos="29.5,0,32" scl="2,5,2" />
+				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
+				<item type_name="flame::cNavObstacle" height="5" />
+				<item type_name="cObject" />
+				<item type_name="cCharacter" faction="Party2" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
 				<item type_name="cAI" type="DefenseTower" />
 			</components>
 		</item>

@@ -158,8 +158,8 @@ struct Tracker
 
 	void set(ComponentPtr t)
 	{
+		set(t ? t->entity : nullptr);
 		comp = t;
-		set(comp ? comp->entity : nullptr);
 	}
 
 	template<class T>

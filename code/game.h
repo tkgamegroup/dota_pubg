@@ -35,9 +35,9 @@ void add_player(vec3& pos, uint& faction, uint& prefab_id);
 std::vector<cCharacterPtr> find_characters(FactionFlags faction, const vec3& pos, float r1, float r0 = 0.f, float central_angle = 360.f, float direction_angle = 0.f);
 std::vector<cCharacterPtr> find_characters_within_camera();
 cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& pos, FactionFlags faction, uint id = 0);
-cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
-cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, const std::function<void(const vec3&, cCharacterPtr)>& on_end, uint id = 0);
-cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& eul, float duration, uint id = 0);
+cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, uint id = 0);
+cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, uint id = 0);
+cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const quat& qut, float duration, uint id = 0);
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num = 1, uint id = 0);
 void teleport(cCharacterPtr character, const vec3& location);
 
@@ -55,6 +55,10 @@ struct cGame : Component
 	bool enable_control = true;
 	// Reflect
 	bool enable_ui = true;
+	// Reflect
+	bool get_debug_colliders();
+	// Reflect
+	void set_debug_colliders(bool v);
 
 	~cGame();
 

@@ -48,7 +48,7 @@ struct cSectorCollider : Component
 	// Reflect
 	FactionFlags faction = FactionNone;
 	// Reflect
-	float collide_delay = 0.f;
+	float delay = 0.f;
 
 	float off = 0.f;
 	float r0, r1;
@@ -69,3 +69,5 @@ struct cSectorCollider : Component
 	// Reflect static
 	EXPORT static Create& create;
 };
+
+extern bool debug_colliders;
