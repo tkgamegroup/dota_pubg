@@ -1,6 +1,7 @@
 #include <flame/graphics/canvas.h>
 #include <flame/universe/components/camera.h>
 #include <flame/universe/components/nav_agent.h>
+#include <flame/universe/components/text.h>
 #include <flame/universe/components/image.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
@@ -61,9 +62,25 @@ void update_ui()
 			if (auto e = ui_ability_slots[i]; e)
 			{
 				if (auto ability = main_player.character->get_ability(i); ability)
-					e->get_component_t<cImage>()->set_image_name(ability->icon_name);
+				{
+					if (auto img = e->get_component_t<cImage>(); img)
+						img->set_image_name(ability->icon_name);
+					if (auto e2 = e->find_child("mana"); e2)
+					{
+						if (auto txt = e2->get_component_t<cText>(); txt)
+							txt->set_text(wstr(ability->mp));
+					}
+				}
 				else
-					e->get_component_t<cImage>()->set_image_name(L"");
+				{
+					if (auto img = e->get_component_t<cImage>(); img)
+						img->set_image_name(L"");
+					if (auto e2 = e->find_child("mana"); e2)
+					{
+						if (auto txt = e2->get_component_t<cText>(); txt)
+							txt->set_text(L"");
+					}
+				}
 			}
 		}
 	}
