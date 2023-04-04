@@ -13,9 +13,11 @@
 #include <flame/graphics/gui.h>
 #include <flame/universe/components/nav_agent.h>
 
-// Reflect
+// Reflect ctor dtor
 struct EXPORT AbilityFunc_add_attribute : PassiveAbilityFunc
 {
+	~AbilityFunc_add_attribute() {}
+
 	// Reflect
 	std::vector<std::pair<CharacterAttribute, int>> attribute_changes;
 
@@ -33,9 +35,12 @@ struct EXPORT AbilityFunc_add_attribute : PassiveAbilityFunc
 	}
 };
 
-// Reflect
+// Reflect ctor dtor
 struct EXPORT AbilityFunc_fire_breath : ActiveAbilityFunc
 {
+	~AbilityFunc_fire_breath() {}
+
+	// Reflect
 	uint damage = 50;
 
 	void exec(cAbilityPtr ability, cCharacterPtr character, const vec3& location, cCharacterPtr target) override

@@ -29,70 +29,123 @@
 				<item type_name="flame::cElement" ext="1506,532" align="Fill" />
 			</components>
 			<children>
-				<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
+				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="679,492" ext="148,40" background_col="0,0,0,100" align="Bottom" />
+						<item type_name="flame::cElement" pos="679,452" ext="148,80" background_col="0,0,0,100" align="Bottom" />
 					</components>
 					<children>
-						<item file_id="4f86e3b23a9b82911716bc0eaaddb2b7" name="slot1">
+						<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="32,32" />
-								<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-								<item type_name="flame::cReceiver" />
+								<item type_name="flame::cElement" ext="148,32" align="TopLeft" />
 							</components>
 							<children>
-								<item file_id="4b71299206f814b953d7e0305118e895" name="mana">
+								<item file_id="4f86e3b23a9b82911716bc0eaaddb2b7" name="slot1">
 									<components>
-										<item type_name="flame::cElement" pos="1,21" />
-										<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
+										<item type_name="flame::cElement" pos="4,4" ext="32,32" />
+										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
+										<item type_name="flame::cReceiver" />
 									</components>
+									<children>
+										<item file_id="4b71299206f814b953d7e0305118e895" name="mana">
+											<components>
+												<item type_name="flame::cElement" pos="1,21" />
+												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
+											</components>
+										</item>
+										<item file_id="4c39acdeb7db288c11c7aae5c817a68b" name="key">
+											<components>
+												<item type_name="flame::cElement" pos="2,-2" />
+												<item type_name="flame::cText" text="Q" sdf="true" thickness="0.5" border="0.2" />
+											</components>
+										</item>
+									</children>
+								</item>
+								<item file_id="4f58d8957ff30e5729bcfea82cff4a98" name="slot2">
+									<components>
+										<item type_name="flame::cElement" pos="40,4" ext="32,32" />
+										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
+										<item type_name="flame::cReceiver" />
+									</components>
+									<children>
+										<item file_id="49956f5863403c86028e16bf744cb487" name="mana">
+											<components>
+												<item type_name="flame::cElement" pos="1,21" />
+												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
+											</components>
+										</item>
+										<item file_id="42e5651c7f2b03cba41d0888df8cccb3" name="key">
+											<components>
+												<item type_name="flame::cElement" pos="2,-2" />
+												<item type_name="flame::cText" text="W" sdf="true" thickness="0.5" border="0.2" />
+											</components>
+										</item>
+									</children>
+								</item>
+								<item file_id="45b9b2ab1f6abd4a31f298fe087f90a2" name="slot3">
+									<components>
+										<item type_name="flame::cElement" pos="76,4" ext="32,32" />
+										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
+										<item type_name="flame::cReceiver" />
+									</components>
+									<children>
+										<item file_id="42430b4a700d4b825bfc3ae5882a7899" name="mana">
+											<components>
+												<item type_name="flame::cElement" pos="1,21" />
+												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
+											</components>
+										</item>
+										<item file_id="42764f6216294cf769e1f7d8abba0692" name="key">
+											<components>
+												<item type_name="flame::cElement" pos="2,-2" />
+												<item type_name="flame::cText" text="E" sdf="true" thickness="0.5" border="0.2" />
+											</components>
+										</item>
+									</children>
+								</item>
+								<item file_id="4f831be6ca30045c42d490322832dc92" name="slot4">
+									<components>
+										<item type_name="flame::cElement" pos="112,4" ext="32,32" />
+										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
+										<item type_name="flame::cReceiver" />
+									</components>
+									<children>
+										<item file_id="42712855582769b516016754746be39f" name="mana">
+											<components>
+												<item type_name="flame::cElement" pos="1,21" />
+												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
+											</components>
+										</item>
+										<item file_id="4990c52cf310f34983b40ee9677d1fa3" name="key">
+											<components>
+												<item type_name="flame::cElement" pos="2,-2" />
+												<item type_name="flame::cText" text="R" sdf="true" thickness="0.5" border="0.2" />
+											</components>
+										</item>
+									</children>
 								</item>
 							</children>
 						</item>
-						<item file_id="4f58d8957ff30e5729bcfea82cff4a98" name="slot2">
+						<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
 							<components>
-								<item type_name="flame::cElement" pos="40,4" ext="32,32" />
-								<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-								<item type_name="flame::cReceiver" />
+								<item type_name="flame::cElement" pos="2,39" ext="144,19" background_col="0,204,0,255" />
 							</components>
-							<children>
-								<item file_id="49956f5863403c86028e16bf744cb487" name="mana">
-									<components>
-										<item type_name="flame::cElement" pos="1,21" />
-										<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-									</components>
-								</item>
-							</children>
 						</item>
-						<item file_id="45b9b2ab1f6abd4a31f298fe087f90a2" name="slot3">
+						<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
 							<components>
-								<item type_name="flame::cElement" pos="76,4" ext="32,32" />
-								<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-								<item type_name="flame::cReceiver" />
+								<item type_name="flame::cElement" pos="2,60" ext="144,19" background_col="0,24,232,255" />
 							</components>
-							<children>
-								<item file_id="42430b4a700d4b825bfc3ae5882a7899" name="mana">
-									<components>
-										<item type_name="flame::cElement" pos="1,21" />
-										<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-									</components>
-								</item>
-							</children>
 						</item>
-						<item file_id="4f831be6ca30045c42d490322832dc92" name="slot4">
+						<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
 							<components>
-								<item type_name="flame::cElement" pos="112,4" ext="32,32" />
-								<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-								<item type_name="flame::cReceiver" />
+								<item type_name="flame::cElement" pos="52.2,39" />
+								<item type_name="flame::cText" text="100/100" font_size="18" sdf="true" thickness="0.5" />
 							</components>
-							<children>
-								<item file_id="42712855582769b516016754746be39f" name="mana">
-									<components>
-										<item type_name="flame::cElement" pos="1,21" />
-										<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-									</components>
-								</item>
-							</children>
+						</item>
+						<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+							<components>
+								<item type_name="flame::cElement" pos="53,60" />
+								<item type_name="flame::cText" text="100/100" font_size="18" sdf="true" thickness="0.5" border="0.2" />
+							</components>
 						</item>
 					</children>
 				</item>

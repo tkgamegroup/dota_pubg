@@ -4,12 +4,16 @@
 #include "../command.h"
 
 struct ActiveAbilityFunc
-{
+{ 
+	virtual ~ActiveAbilityFunc() {}
+
 	virtual void exec(cAbilityPtr ability, cCharacterPtr character, const vec3& location, cCharacterPtr target) = 0;
 };
 
 struct PassiveAbilityFunc
 {
+	virtual ~PassiveAbilityFunc() {}
+
 	virtual void exec(cAbilityPtr ability, cCharacterPtr character) = 0;
 };
 

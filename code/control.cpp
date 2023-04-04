@@ -12,6 +12,7 @@
 
 #include "game.h"
 #include "control.h"
+#include "ui/ui.h"
 #include "network.h"
 #include "entities/object.h"
 #include "entities/character.h"
@@ -44,100 +45,94 @@ void reset_select()
 
 void init_control()
 {
-	if (auto ui = root->find_child("ui"); ui)
+	for (auto i = 0; i < 4; i++)
 	{
-		if (auto bar = ui->find_child("abilities_bar"); bar)
+		if (ui_ability_slots[i])
 		{
-			for (auto i = 0; i < 4; i++)
+			if (auto receiver = ui_ability_slots[i]->get_component_t<cReceiver>(); receiver)
 			{
-				if (auto e = bar->find_child("slot" + str(i + 1)); e)
-				{
-					if (auto receiver = e->get_component_t<cReceiver>(); receiver)
+				receiver->click_listeners.add([i]() {
+					if (main_player.character)
 					{
-						receiver->click_listeners.add([i]() {
-							if (main_player.character)
+						if (auto ability = main_player.character->get_ability(i); ability)
+						{
+							if (ability->cd_timer > 0.f)
 							{
-								if (auto ability = main_player.character->get_ability(i); ability)
+								//illegal_op_str = "Cooldowning.";
+								//illegal_op_str_timer = 3.f;
+								return;
+							}
+
+							if (main_player.character->mp < ability->mp)
+							{
+								//illegal_op_str = "Not Enough MP.";
+								//illegal_op_str_timer = 3.f;
+								return;
+							}
+
+							select_mode = ability->target_type;
+							if (select_mode == TargetNull)
+							{
+								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+									main_player.character->cmd_cast_ability(ability);
+								else if (multi_player == MultiPlayerAsClient)
 								{
-									if (ability->cd_timer > 0.f)
-									{
-										//illegal_op_str = "Cooldowning.";
-										//illegal_op_str_timer = 3.f;
-										return;
-									}
-
-									if (main_player.character->mp < ability->mp)
-									{
-										//illegal_op_str = "Not Enough MP.";
-										//illegal_op_str_timer = 3.f;
-										return;
-									}
-
-									select_mode = ability->target_type;
-									if (select_mode == TargetNull)
-									{
+									//std::ostringstream res;
+									//nwCommandCharacterStruct stru;
+									//stru.id = main_player.character->object->uid;
+									//stru.type = "CastAbility"_h;
+									//stru.id2 = ins->id;
+									//pack_msg(res, nwCommandCharacter, stru);
+									//so_client->send(res.str());
+								}
+							}
+							else
+							{
+								if (ability->target_type & TargetLocation)
+								{
+									select_location_callback = [ability](const vec3& location) {
 										if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-											main_player.character->cmd_cast_ability(ability);
+											main_player.character->cmd_cast_ability_to_location(ability, location);
 										else if (multi_player == MultiPlayerAsClient)
 										{
 											//std::ostringstream res;
 											//nwCommandCharacterStruct stru;
 											//stru.id = main_player.character->object->uid;
-											//stru.type = "CastAbility"_h;
+											//stru.type = "CastAbilityToLocation"_h;
 											//stru.id2 = ins->id;
+											//stru.t.location = location;
 											//pack_msg(res, nwCommandCharacter, stru);
 											//so_client->send(res.str());
 										}
-									}
-									else
-									{
-										if (ability->target_type & TargetLocation)
+									};
+									select_distance = ability->distance;
+									select_range = ability->range;
+									select_angle = ability->angle;
+									select_start_radius = ability->start_radius;
+								}
+								if (ability->target_type & TargetEnemy)
+								{
+									select_enemy_callback = [ability](cCharacterPtr character) {
+										if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
+											main_player.character->cmd_cast_ability_to_target(ability, character);
+										else if (multi_player == MultiPlayerAsClient)
 										{
-											select_location_callback = [ability](const vec3& location) {
-												if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-													main_player.character->cmd_cast_ability_to_location(ability, location);
-												else if (multi_player == MultiPlayerAsClient)
-												{
-													//std::ostringstream res;
-													//nwCommandCharacterStruct stru;
-													//stru.id = main_player.character->object->uid;
-													//stru.type = "CastAbilityToLocation"_h;
-													//stru.id2 = ins->id;
-													//stru.t.location = location;
-													//pack_msg(res, nwCommandCharacter, stru);
-													//so_client->send(res.str());
-												}
-											};
-											select_distance = ability->distance;
-											select_range = ability->range;
-											select_angle = ability->angle;
-											select_start_radius = ability->start_radius;
+											//std::ostringstream res;
+											//nwCommandCharacterStruct stru;
+											//stru.id = main_player.character->object->uid;
+											//stru.type = "CastAbilityToTarget"_h;
+											//stru.id2 = ins->id;
+											//stru.t.target = character->object->uid;
+											//pack_msg(res, nwCommandCharacter, stru);
+											//so_client->send(res.str());
 										}
-										if (ability->target_type & TargetEnemy)
-										{
-											select_enemy_callback = [ability](cCharacterPtr character) {
-												if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-													main_player.character->cmd_cast_ability_to_target(ability, character);
-												else if (multi_player == MultiPlayerAsClient)
-												{
-													//std::ostringstream res;
-													//nwCommandCharacterStruct stru;
-													//stru.id = main_player.character->object->uid;
-													//stru.type = "CastAbilityToTarget"_h;
-													//stru.id2 = ins->id;
-													//stru.t.target = character->object->uid;
-													//pack_msg(res, nwCommandCharacter, stru);
-													//so_client->send(res.str());
-												}
-											};
-											select_distance = ability->distance;
-										}
-									}
+									};
+									select_distance = ability->distance;
 								}
 							}
-							});
+						}
 					}
-				}
+				});
 			}
 		}
 	}
