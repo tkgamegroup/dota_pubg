@@ -3,7 +3,7 @@
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavScene" generate_delay_frames="1" />
-		<item type_name="cGame" camera_length="20" camera_angle="60" debug_colliders="true" />
+		<item type_name="cGame" camera_length="20" camera_angle="60" enable_collider_debugging="true" />
 	</components>
 	<children>
 		<item file_id="0b98df4544962b9fd73e96b5109b62f2" name="main_camera">

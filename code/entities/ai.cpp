@@ -20,7 +20,7 @@ void cAI::update()
 		{
 			if (character->search_timer <= 0.f)
 			{
-				auto enemies = find_characters(~character->faction, character->node->pos, 5.f);
+				auto enemies = find_characters_within_circle(~character->faction, character->node->pos, 5.f);
 				if (!enemies.empty())
 				{
 					character->cmd_attack_target(enemies[0]);

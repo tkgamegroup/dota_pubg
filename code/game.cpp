@@ -238,18 +238,44 @@ void add_player(vec3& pos, uint& faction, uint& prefab_id)
 	idx++;
 }
 
-std::vector<cCharacterPtr> find_characters(FactionFlags faction, const vec3& pos, float r1, float r0, float central_angle, float direction_angle)
+std::vector<cCharacterPtr> find_characters_within_circle(FactionFlags faction, const vec3& pos, float radius)
 {
 	std::vector<cCharacterPtr> ret;
 
 	std::vector<cNodePtr> objs;
-	sScene::instance()->octree->get_colliding(pos.xz(), r1, objs, CharacterTag);
+	sScene::instance()->octree->get_colliding(pos.xz(), radius, objs, CharacterTag);
+	for (auto obj : objs)
+	{
+		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
+			ret.push_back(chr);
+	}
+
+	// sort them by distances
+	std::vector<std::pair<float, cCharacterPtr>> distance_list(ret.size());
+	for (auto i = 0; i < ret.size(); i++)
+	{
+		auto c = ret[i];
+		distance_list[i] = std::make_pair(distance(c->node->pos, pos), c);
+	}
+	std::sort(distance_list.begin(), distance_list.end(), [](const auto& a, const auto& b) {
+		return a.first < b.first;
+		});
+	for (auto i = 0; i < ret.size(); i++)
+		ret[i] = distance_list[i].second;
+	return ret;
+}
+
+std::vector<cCharacterPtr> find_characters_within_sector(FactionFlags faction, const vec3& pos, float inner_radius, float outer_radius, float angle, float rotation)
+{
+	std::vector<cCharacterPtr> ret;
+
+	std::vector<cNodePtr> objs;
+	sScene::instance()->octree->get_colliding(pos.xz(), outer_radius, objs, CharacterTag);
 	for (auto obj : objs)
 	{
 		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
 		{
-			if (central_angle == 360.f ||
-				circle_sector_intersect(obj->pos, chr->nav_agent->radius, pos, r0, r1, central_angle, direction_angle))
+			if (circle_sector_intersect(obj->pos, chr->nav_agent->radius, pos, inner_radius, outer_radius, angle, rotation))
 				ret.push_back(chr);
 		}
 	}
@@ -269,7 +295,7 @@ std::vector<cCharacterPtr> find_characters(FactionFlags faction, const vec3& pos
 	return ret;
 }
 
-std::vector<cCharacterPtr> find_characters_within_camera()
+std::vector<cCharacterPtr> find_characters_within_camera(FactionFlags faction)
 {
 	std::vector<cCharacterPtr> ret;
 
@@ -277,7 +303,7 @@ std::vector<cCharacterPtr> find_characters_within_camera()
 	sScene::instance()->octree->get_within_frustum(main_camera.camera->frustum, objs, CharacterTag);
 	for (auto obj : objs)
 	{
-		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr)
+		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
 			ret.push_back(chr);
 	}
 
@@ -393,20 +419,25 @@ struct cGameCreate : cGame::Create
 }cGame_create;
 cGame::Create& cGame::create = cGame_create;
 
-bool cGame::get_debug_colliders()
+bool cGame::get_enable_collider_debugging()
 {
-	return debug_colliders;
+	return enable_collider_debugging;
 }
 
-void cGame::set_debug_colliders(bool v)
+void cGame::set_enable_collider_debugging(bool v)
 {
-	debug_colliders = v;
+	enable_collider_debugging = v;
 }
+
+static std::vector<graphics::ImagePtr> preload_images;
 
 cGame::~cGame()
 {
 	prefabs.clear();
 	deinit_ui();
+
+	for (auto img : preload_images)
+		graphics::Image::release(img);
 }
 
 void cGame::start()
@@ -416,6 +447,8 @@ void cGame::start()
 	main_camera.init(root->find_child("main_camera"));
 	init_ui();
 	init_control();
+
+	preload_images.push_back(graphics::Image::get(L"assets\\effects\\Fireball.png"));
 }
 
 void cGame::update()
@@ -457,6 +490,20 @@ void cGame::update()
 		update_control();
 	if (enable_ui)
 		update_ui();
+
+	if (wtf)
+	{
+		if (auto chr = main_player.character; chr)
+		{
+			chr->set_hp(chr->hp_max);
+			chr->set_mp(chr->mp_max);
+			for (auto i = 0; i < 4; i++)
+			{
+				if (auto ability = chr->get_ability(i); ability)
+					ability->cd_timer = 0.f;
+			}
+		}
+	}
 }
 
 cLauncher::~cLauncher()

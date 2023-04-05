@@ -423,7 +423,7 @@ void cCharacter::update()
 			{
 				if (search_timer <= 0.f)
 				{
-					auto enemies = find_characters(~faction, node->pos, max(atk_distance, 5.f));
+					auto enemies = find_characters_within_circle(~faction, node->pos, max(atk_distance, 5.f));
 					if (!enemies.empty())
 						target.set(enemies.front());
 
@@ -444,7 +444,7 @@ void cCharacter::update()
 			{
 				if (search_timer <= 0.f)
 				{
-					auto enemies = find_characters(~faction, node->pos, max(atk_distance, 1.5f));
+					auto enemies = find_characters_within_circle(~faction, node->pos, max(atk_distance, 1.5f));
 					if (!enemies.empty())
 						target.set(enemies.front());
 

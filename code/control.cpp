@@ -145,14 +145,30 @@ void update_control()
 		return;
 
 	auto input = sInput::instance();
-	auto hovering_node = (all(greaterThanEqual(input->mpos, vec2(0.f))) && all(lessThan(input->mpos, tar_ext))) ? sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
-		if (draw_data.categories & CateMesh)
-		{
-			if (auto character = n->entity->get_component_t<cCharacter>(); character)
+
+	cNodePtr hovering_node = nullptr;
+	if (!input->mouse_used && all(greaterThanEqual(input->mpos, vec2(0.f))) && all(lessThan(input->mpos, tar_ext)))
+	{
+		hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
+			if (draw_data.categories & CateMesh)
 			{
-				if (character != main_player.character && character->armature)
+				if (auto character = n->entity->get_component_t<cCharacter>(); character)
 				{
-					for (auto& c : character->armature->entity->children)
+					if (character != main_player.character && character->armature)
+					{
+						for (auto& c : character->armature->entity->children)
+						{
+							if (auto mesh = c->get_component_t<cMesh>(); mesh)
+							{
+								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+							}
+						}
+					}
+				}
+				if (auto chest = n->entity->get_component_t<cChest>(); chest)
+				{
+					for (auto& c : chest->entity->get_all_children())
 					{
 						if (auto mesh = c->get_component_t<cMesh>(); mesh)
 						{
@@ -161,49 +177,38 @@ void update_control()
 						}
 					}
 				}
-			}
-			if (auto chest = n->entity->get_component_t<cChest>(); chest)
-			{
-				for (auto& c : chest->entity->get_all_children())
+				if (n->entity->tag & TagMarkNavMesh)
 				{
-					if (auto mesh = c->get_component_t<cMesh>(); mesh)
+					if (auto mesh = n->entity->get_component_t<cMesh>(); mesh)
 					{
 						if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
 							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 					}
 				}
 			}
-			if (n->entity->tag & TagMarkNavMesh)
+			if (draw_data.categories & CateTerrain)
 			{
-				if (auto mesh = n->entity->get_component_t<cMesh>(); mesh)
+				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
 				{
-					if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-						draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+					if (terrain->instance_id != -1)
+						draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
 				}
 			}
-		}
-		if (draw_data.categories & CateTerrain)
-		{
-			if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
+			if (draw_data.categories & CateMarchingCubes)
 			{
-				if (terrain->instance_id != -1)
-					draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
-			}
-		}
-		if (draw_data.categories & CateMarchingCubes)
-		{
-			if (auto volume = n->entity->get_component_t<cVolume>(); volume)
-			{
-				if (volume->marching_cubes)
+				if (auto volume = n->entity->get_component_t<cVolume>(); volume)
 				{
-					if (volume->instance_id != -1)
-						draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
+					if (volume->marching_cubes)
+					{
+						if (volume->instance_id != -1)
+							draw_data.volumes.emplace_back(volume->instance_id, volume->blocks, volume->material_res_id);
+					}
 				}
 			}
-		}
-		if (sInput::instance()->kpressed(Keyboard_F12))
-			draw_data.graphics_debug = true;
-	}) : nullptr;
+			if (sInput::instance()->kpressed(Keyboard_F12))
+				draw_data.graphics_debug = true;
+		});
+	}
 
 	hovering_character = nullptr;
 	hovering_chest = nullptr;

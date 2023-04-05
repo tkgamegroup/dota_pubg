@@ -170,7 +170,7 @@ void update_ui()
 	if (main_camera.camera)
 	{
 		auto camera_x = main_camera.node->x_axis();
-		for (auto& character : find_characters_within_camera())
+		for (auto& character : find_characters_within_camera((FactionFlags)0xffffffff))
 		{
 			auto radius = character->get_radius();
 			auto height = character->get_height();

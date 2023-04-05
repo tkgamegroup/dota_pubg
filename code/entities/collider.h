@@ -34,15 +34,13 @@ struct cSectorCollider : Component
 	cNodePtr node;
 
 	// Reflect
-	float radius = 0.f;
+	float inner_radius = 0.f;
 	// Reflect
-	float start_radius = 0.f;
+	float outer_radius = 0.f;
 	// Reflect
-	float window_length = 0.f;
+	float length = 0.f;
 	// Reflect
-	float central_angle = 0.f;
-	// Reflect
-	float direction_angle = 0.f;
+	float angle = 0.f;
 	// Reflect
 	float speed = 0.f;
 	// Reflect
@@ -52,6 +50,7 @@ struct cSectorCollider : Component
 
 	float off = 0.f;
 	float r0, r1;
+	float yaw_angle;
 	vec3 c;
 	float t;
 
@@ -70,4 +69,4 @@ struct cSectorCollider : Component
 	EXPORT static Create& create;
 };
 
-extern bool debug_colliders;
+extern bool enable_collider_debugging;

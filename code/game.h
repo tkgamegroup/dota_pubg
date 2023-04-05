@@ -32,8 +32,9 @@ void enable_game(bool v);
 EntityPtr get_prefab(const std::filesystem::path& path);
 std::filesystem::path get_prefab_path(uint prefab_id /* path hash */ );
 void add_player(vec3& pos, uint& faction, uint& prefab_id);
-std::vector<cCharacterPtr> find_characters(FactionFlags faction, const vec3& pos, float r1, float r0 = 0.f, float central_angle = 360.f, float direction_angle = 0.f);
-std::vector<cCharacterPtr> find_characters_within_camera();
+std::vector<cCharacterPtr> find_characters_within_circle(FactionFlags faction, const vec3& pos, float radius);
+std::vector<cCharacterPtr> find_characters_within_sector(FactionFlags faction, const vec3& pos, float inner_radius, float outer_radius, float angle, float rotation);
+std::vector<cCharacterPtr> find_characters_within_camera(FactionFlags faction);
 cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& pos, FactionFlags faction, uint id = 0);
 cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, uint id = 0);
 cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, uint id = 0);
@@ -56,9 +57,11 @@ struct cGame : Component
 	// Reflect
 	bool enable_ui = true;
 	// Reflect
-	bool get_debug_colliders();
+	bool get_enable_collider_debugging();
 	// Reflect
-	void set_debug_colliders(bool v);
+	void set_enable_collider_debugging(bool v);
+	// Reflect
+	bool wtf = false;
 
 	~cGame();
 

@@ -48,7 +48,7 @@ void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector
 
 void cCircleCollider::update()
 {
-	auto characters = find_characters(faction, node->global_pos(), radius);
+	auto characters = find_characters_within_circle(faction, node->global_pos(), radius);
 	process_colliding(characters, last_collidings, callbacks);
 }
 
@@ -69,7 +69,7 @@ void cSectorCollider::on_active()
 	r0 = r1 = 0.f;
 	t = 0.f;
 
-	if (debug_colliders)
+	if (enable_collider_debugging)
 	{
 		node->drawers.add([this](DrawData& draw_data) {
 			switch (draw_data.pass)
@@ -84,8 +84,8 @@ void cSectorCollider::on_active()
 					};
 					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r1));
 					std::vector<vec3> pts;
-					auto i_beg = circle_draw.get_idx(direction_angle - central_angle);
-					auto i_end = circle_draw.get_idx(direction_angle + central_angle);
+					auto i_beg = circle_draw.get_idx(yaw_angle - angle);
+					auto i_end = circle_draw.get_idx(yaw_angle + angle);
 					for (auto i = i_beg; i < i_end; i++)
 					{
 						pts.push_back(mat * vec4(c + vec3(r0 * circle_draw.get_pt(i), 0.f).xzy(), 1.f));
@@ -115,15 +115,16 @@ void cSectorCollider::on_inactive()
 void cSectorCollider::update()
 {
 	off += speed * delta_time;
-	r0 = start_radius + max(off - window_length, 0.f);
-	r1 = radius + off;
-	c = dir_xz(direction_angle) * -start_radius;
+	r0 = inner_radius + max(off - length, 0.f);
+	r1 = outer_radius + off;
+	yaw_angle = yaw(node->g_qut);
+	c = node->x_axis() * -inner_radius;
 	t += delta_time;
 
 	if (t >= delay)
 	{
 		auto pos = c + node->global_pos();
-		auto characters = find_characters(faction, pos, r1, r0, central_angle, direction_angle);
+		auto characters = find_characters_within_sector(faction, pos, r0, r1, angle, yaw_angle);
 		process_colliding(characters, last_collidings, callbacks);
 	}
 }
@@ -139,4 +140,4 @@ struct cSectorColliderCreate : cSectorCollider::Create
 }cSectorCollider_create;
 cSectorCollider::Create& cSectorCollider::create = cSectorCollider_create;
 
-bool debug_colliders = false;
+bool enable_collider_debugging = false;
