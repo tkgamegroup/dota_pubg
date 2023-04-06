@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <prefab file_id="4794e76dfd942b087387cc2be098239a" name="fire_breath">
 	<components>
-		<item type_name="cAbility" icon_name="assets\icons\old Ancient Beast icons\magmaspawn lavariver.jpg" target_type="Location" max_lv="1" cast_time="0.5" mp="100" cd="12" distance="9" angle="22.5" start_radius="2">
-			<active type="AbilityFunc_fire_breath" damage="50" />
+		<item type_name="cAbility" icon_name="assets\icons\old Ancient Beast icons\magmaspawn lavariver.jpg" target_type="Location" max_lv="1" cast_time="0.5" mp="100" cd="12" distance="9">
+			<active type="AbilityFunc_thorwer" prefab_path="assets\effects\flame_thrower.prefab" damage="50" />
 			<passive type="" />
 		</item>
 	</components>

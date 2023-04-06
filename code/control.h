@@ -10,8 +10,6 @@ extern bool				hovering_terrain;
 extern TargetTypeFlags	select_mode;
 extern float			select_distance;
 extern float			select_range;
-extern float			select_angle;
-extern float			select_start_radius;
 
 void init_control();
 void update_control();

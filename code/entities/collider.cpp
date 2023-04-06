@@ -75,9 +75,10 @@ void cSectorCollider::on_active()
 			switch (draw_data.pass)
 			{
 			case PassPrimitive:
-				if (t >= delay)
+				if (t >= delay && t <= delay + duration)
 				{
 					auto& mat = node->transform;
+					auto c = vec3(-inner_radius, 0.f, 0.f);
 
 					auto circle_lod = [](float r) {
 						return r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0)));
@@ -118,12 +119,11 @@ void cSectorCollider::update()
 	r0 = inner_radius + max(off - length, 0.f);
 	r1 = outer_radius + off;
 	yaw_angle = yaw(node->g_qut);
-	c = node->x_axis() * -inner_radius;
 	t += delta_time;
 
-	if (t >= delay)
+	if (t >= delay && t <= delay + duration)
 	{
-		auto pos = c + node->global_pos();
+		auto pos = node->transform * vec4(-inner_radius, 0.f, 0.f, 1.f);
 		auto characters = find_characters_within_sector(faction, pos, r0, r1, angle, yaw_angle);
 		process_colliding(characters, last_collidings, callbacks);
 	}

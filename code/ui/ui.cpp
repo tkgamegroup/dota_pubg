@@ -93,36 +93,7 @@ void init_ui()
 			//}
 			if (select_distance > 0.f)
 			{
-				if (select_angle > 0.f)
-				{
-					auto r = select_distance;
-					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-					auto center = main_player.node->pos;
-					auto dir = hovering_pos - center;
-					center -= normalize(dir) * select_start_radius;
-					auto ang = angle_xz(dir);
-					std::vector<vec3> pts;
-					auto i_beg = circle_draw.get_idx(ang - select_angle);
-					auto i_end = circle_draw.get_idx(ang + select_angle);
-					for (auto i = i_beg; i < i_end; i++)
-					{
-						auto a = center + vec3(select_start_radius * circle_draw.get_pt(i + 1), 0.f).xzy();
-						auto b = center + vec3(select_start_radius * circle_draw.get_pt(i), 0.f).xzy();
-						auto c = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-						auto d = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-
-						pts.push_back(a);
-						pts.push_back(b);
-						pts.push_back(d);
-
-						pts.push_back(d);
-						pts.push_back(b);
-						pts.push_back(c);
-					}
-
-					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));
-				}
-				else if (select_range > 0.f)
+				if (select_range > 0.f)
 				{
 					auto r = select_range;
 					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));

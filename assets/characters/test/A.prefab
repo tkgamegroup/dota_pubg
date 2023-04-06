@@ -23,11 +23,6 @@
 			</children>
 		</item>
 		<item file_id="4adcb42f098c09d81da85c5cce3e5b82" name="abilities">
-			<children>
-				<item filename="assets\abilities\fire_breath.prefab">
-					<modifications />
-				</item>
-			</children>
 		</item>
 	</children>
 </prefab>

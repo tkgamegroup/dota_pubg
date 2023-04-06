@@ -46,10 +46,6 @@ struct cAbility : Component
 	// Reflect
 	float					range = 0.f;
 	// Reflect
-	float					angle = 0.f;
-	// Reflect
-	float					start_radius = 0.f;
-	// Reflect
 	uint lv = 0;
 
 	float cd_max = 0.f;

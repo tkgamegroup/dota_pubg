@@ -38,7 +38,7 @@ struct cSectorCollider : Component
 	// Reflect
 	float outer_radius = 0.f;
 	// Reflect
-	float length = 0.f;
+	float length = 2.f;
 	// Reflect
 	float angle = 0.f;
 	// Reflect
@@ -47,11 +47,12 @@ struct cSectorCollider : Component
 	FactionFlags faction = FactionNone;
 	// Reflect
 	float delay = 0.f;
+	// Reflect
+	float duration = 1.f;
 
 	float off = 0.f;
 	float r0, r1;
 	float yaw_angle;
-	vec3 c;
 	float t;
 
 	std::vector<Tracker> last_collidings;

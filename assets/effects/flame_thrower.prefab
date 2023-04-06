@@ -5,13 +5,13 @@
 		<item type_name="flame::cAudioSource" />
 		<item type_name="cObject" />
 		<item type_name="cEffect" />
-		<item type_name="cSectorCollider" inner_radius="2" outer_radius="3" length="2.2" angle="22.5" speed="8" />
+		<item type_name="cSectorCollider" inner_radius="2" outer_radius="3" length="2" angle="22.5" speed="8" />
 	</components>
 	<children>
 		<item file_id="335e6e4c4b81ab7d038d848f9fb6d080">
 			<components>
 				<item type_name="flame::cNode" pos="-2,0,0" />
-				<item type_name="flame::cParticleSystem" particle_life_time="1.25" particle_life_time_start="0.3" particle_speed="8" emitt_type="4095282997" emitt_duration="0.3" emitt_num="200" emitt_angle="22.5" material_name="fireball.fmat" />
+				<item type_name="flame::cParticleSystem" texture_tiles="7,7" texture_tiles_range="7,-1" particle_life_time="1" particle_speed="8" emitt_type="4095282997" emitt_duration="0.25" emitt_num="200" emitt_offset="2" emitt_angle="22.5" material_name="fireball.fmat" />
 			</components>
 		</item>
 	</children>

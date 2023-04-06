@@ -29,8 +29,6 @@ std::function<void(cCharacterPtr)>		select_enemy_callback;
 std::function<void(const vec3& pos)>	select_location_callback;
 float									select_distance = 0.f;
 float									select_range = 0.f;
-float									select_angle = 0.f;
-float									select_start_radius = 0.f;
 
 void reset_select()
 {
@@ -39,8 +37,6 @@ void reset_select()
 	select_location_callback = nullptr;
 	select_distance = 0.f;
 	select_range = 0.f;
-	select_angle = 0.f;
-	select_start_radius = 0.f;
 }
 
 void init_control()
@@ -107,8 +103,6 @@ void init_control()
 									};
 									select_distance = ability->distance;
 									select_range = ability->range;
-									select_angle = ability->angle;
-									select_start_radius = ability->start_radius;
 								}
 								if (ability->target_type & TargetEnemy)
 								{
