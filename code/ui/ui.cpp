@@ -23,6 +23,7 @@ cElementPtr ui_hp_bar = nullptr;
 cElementPtr ui_mp_bar = nullptr;
 cTextPtr ui_hp_text = nullptr;
 cTextPtr ui_mp_text = nullptr;
+cTextPtr ui_tip = nullptr;
 
 int circle_lod(float r)
 {
@@ -52,9 +53,15 @@ void init_ui()
 			ui_hp_text = bottom_bar->find_child("hp_text")->get_component_t<cText>();
 			ui_mp_text = bottom_bar->find_child("mp_text")->get_component_t<cText>();
 		}
+
+		if (auto e = ui->find_child("tip"); e)
+			ui_tip = e->get_component_t<cText>();
 	}
 
 	renderer->before_render_callbacks.add([]() {
+		std::wstring tip_str = L"";
+		vec3 tip_pos;
+
 		if (main_player.character)
 		{
 			auto r = main_player.nav_agent->radius + 0.05f;
@@ -100,6 +107,9 @@ void init_ui()
 				}
 				sRenderer::instance()->draw_outlines(ds, main_player.character &&
 					hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
+
+				tip_str = s2w(hovering_character->entity->name);
+				tip_pos = hovering_character->get_pos() + vec3(0.f, 0.2f, 0.f);
 			}
 		}
 		if (hovering_chest)
@@ -145,6 +155,23 @@ void init_ui()
 				}
 
 				sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
+			}
+		}
+
+		if (ui_tip)
+		{
+			if (tip_str.empty())
+				ui_tip->entity->set_enable(false);
+			else
+			{
+				if (main_camera.camera)
+				{
+					ui_tip->entity->set_enable(true);
+					ui_tip->set_text(tip_str);
+					ui_tip->element->set_pos(main_camera.camera->world_to_screen(tip_pos));
+				}
+				else
+					ui_tip->entity->set_enable(false);
 			}
 		}
 	}, "game_hud"_h);

@@ -149,6 +149,12 @@
 						</item>
 					</children>
 				</item>
+				<item file_id="4d1f1d8a3ae7254f78cd6f9c930a4dbd" name="tip">
+					<components>
+						<item type_name="flame::cElement" ext="40,20" background_col="0,0,0,200" />
+						<item type_name="flame::cText" text="Hello" font_size="18" sdf="true" thickness="0.5" border="0.2" />
+					</components>
+				</item>
 			</children>
 		</item>
 		<item file_id="5d460bde4a1d41c1599adf995491b8dd" name="ground" tag="General|MarkNavMesh">
