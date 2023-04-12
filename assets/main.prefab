@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1506,532" align="Fill" />
+				<item type_name="flame::cElement" ext="1506,687" align="Fill" />
 			</components>
 			<children>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="679,452" ext="148,80" background_col="0,0,0,100" align="Bottom" />
+						<item type_name="flame::cElement" pos="679,607" ext="148,80" background_col="0,0,0,100" align="Bottom" />
 					</components>
 					<children>
 						<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
@@ -205,25 +205,16 @@
 				<item type_name="cSpawner" prefab_path="characters\test\B.prefab" faction="Party2" unit_type="LaneCreep" unit_target_pos="1,1,1" />
 			</components>
 		</item>
-		<item file_id="4aee062e6c4f09511be57e034fe5f390" name="DefenseTower">
-			<components>
-				<item type_name="flame::cNode" pos="23,0,18" scl="2,5,2" />
-				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
-				<item type_name="flame::cNavObstacle" height="5" />
-				<item type_name="cObject" />
-				<item type_name="cCharacter" faction="Party1" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
-				<item type_name="cAI" type="DefenseTower" />
-			</components>
+		<item filename="DefenseTower.prefab">
+			<modifications>
+				<item target="4aee062e6c4f09511be57e034fe5f390|flame::cNode|pos" value="23,0,18" />
+			</modifications>
 		</item>
-		<item file_id="416eff6b470a32c0351a0a8a8367c2a2" name="DefenseTower">
-			<components>
-				<item type_name="flame::cNode" pos="29.5,0,32" scl="2,5,2" />
-				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
-				<item type_name="flame::cNavObstacle" height="5" />
-				<item type_name="cObject" />
-				<item type_name="cCharacter" faction="Party2" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
-				<item type_name="cAI" type="DefenseTower" />
-			</components>
+		<item filename="DefenseTower.prefab">
+			<modifications>
+				<item target="4aee062e6c4f09511be57e034fe5f390|flame::cNode|pos" value="30,0,32" />
+				<item target="4aee062e6c4f09511be57e034fe5f390|cCharacter|faction" value="Party2" />
+			</modifications>
 		</item>
 	</children>
 </prefab>

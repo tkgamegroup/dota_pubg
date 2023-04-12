@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<prefab file_id="4aee062e6c4f09511be57e034fe5f390" name="DefenseTower">
+	<components>
+		<item type_name="flame::cNode" />
+		<item type_name="flame::cNavObstacle" height="5" />
+		<item type_name="cObject" />
+		<item type_name="cCharacter" faction="Party1" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
+		<item type_name="cAI" type="DefenseTower" />
+	</components>
+	<children>
+		<item file_id="491f8cfec1808702d8d7855c8304b1a4" name="Root">
+			<components>
+				<item type_name="flame::cNode" scl="2,5,2" />
+				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
+			</components>
+		</item>
+	</children>
+</prefab>

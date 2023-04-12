@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<prefab file_id="3e84f1d94e681e8d13f72291b3fb7d62">
+<prefab file_id="3e84f1d94e681e8d13f72291b3fb7d62" name="Swordsman">
 	<components>
 		<item type_name="flame::cNode" />
 		<item type_name="flame::cNavAgent" radius="0.5" separation_group="0" />
