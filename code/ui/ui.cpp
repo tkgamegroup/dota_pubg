@@ -47,94 +47,16 @@ void init_ui()
 			ui_mp_text = bottom_bar->find_child("mp_text")->get_component_t<cText>();
 		}
 	}
-
-	root->node()->drawers.add([](DrawData& draw_data) {
-		switch (draw_data.pass)
-		{
-		case PassOutline:
-			if (hovering_character)
-			{
-				if (auto armature = hovering_character->armature; armature && armature->model)
-				{
-					for (auto& c : armature->entity->children)
-					{
-						if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
-							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1,
-								main_player.character && hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255));
-					}
-				}
-			}
-			if (hovering_chest)
-			{
-				for (auto& c : hovering_chest->entity->get_all_children())
-				{
-					if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
-						draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, -1, cvec4(64, 128, 64, 255));
-				}
-			}
-			break;
-		case PassPrimitive:
-		{
-			auto circle_lod = [](float r) {
-				return r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0)));
-			};
-			//if (main_player.character)
-			//{
-			//	auto r = main_player.nav_agent->radius;
-			//	auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-			//	std::vector<vec3> pts(circle_draw.pts.size() * 2);
-			//	auto center = main_player.node->pos;
-			//	for (auto i = 0; i < circle_draw.pts.size(); i++)
-			//	{
-			//		pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-			//		pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-			//	}
-			//	draw_data.primitives.emplace_back("LineList"_h, std::move(pts), cvec4(255, 255, 255, 255));
-			//}
-			if (select_distance > 0.f)
-			{
-				if (select_range > 0.f)
-				{
-					auto r = select_range;
-					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-					auto center = hovering_pos;
-					std::vector<vec3> pts(circle_draw.pts.size() * 3);
-					for (auto i = 0; i < circle_draw.pts.size(); i++)
-					{
-						pts[i * 2 + 0] = center;
-						pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-						pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-					}
-
-					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));
-				}
-				else
-				{
-					auto r = select_distance;
-					auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-					auto center = main_player.node->pos;
-					std::vector<vec3> pts(circle_draw.pts.size() * 3);
-					for (auto i = 0; i < circle_draw.pts.size(); i++)
-					{
-						pts[i * 3 + 0] = center;
-						pts[i * 3 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-						pts[i * 3 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-					}
-
-					draw_data.primitives.emplace_back("TriangleList"_h, std::move(pts), cvec4(0, 255, 0, 100));
-				}
-			}
-		}
-			break;
-		}
-	}, "ui"_h);
 }
 
 void deinit_ui()
 {
-	if (root)
-		root->node()->drawers.remove("ui"_h);
 }
+
+int circle_lod(float r) 
+{
+	return r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0)));
+};
 
 void update_ui()
 {
@@ -192,6 +114,79 @@ void update_ui()
 				if (ui_mp_text)
 					ui_mp_text->set_text(wstr(main_player.character->mp) + L"/" + wstr(main_player.character->mp_max));
 			}
+		}
+	}
+
+	if (hovering_character)
+	{
+		if (auto armature = hovering_character->armature; armature && armature->model)
+		{
+			std::vector<CommonDraw> ds;
+			for (auto& c : armature->entity->children)
+			{
+				if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+					ds.emplace_back("mesh"_h, mesh->mesh_res_id, mesh->instance_id);
+			}
+			sRenderer::instance()->draw_outlines(ds, main_player.character && 
+				hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
+		}
+	}
+	if (hovering_chest)
+	{
+		for (auto& c : hovering_chest->entity->get_all_children())
+		{
+			if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+			{
+				CommonDraw d("mesh"_h, mesh->mesh_res_id, mesh->instance_id);
+				sRenderer::instance()->draw_outlines({ d }, cvec4(64, 128, 64, 255), 4, "BOX"_h);
+			}
+		}
+	}
+
+	if (main_player.character)
+	{
+		auto r = main_player.nav_agent->radius;
+		auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+		std::vector<vec3> pts(circle_draw.pts.size() * 2);
+		auto center = main_player.node->pos;
+		for (auto i = 0; i < circle_draw.pts.size(); i++)
+		{
+			pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+			pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+		}
+		sRenderer::instance()->draw_primitives("LineList"_h, pts.data(), pts.size(), cvec4(255, 255, 255, 255), true);
+	}
+	if (select_distance > 0.f)
+	{
+		if (select_range > 0.f)
+		{
+			auto r = select_range;
+			auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+			auto center = hovering_pos;
+			std::vector<vec3> pts(circle_draw.pts.size() * 3);
+			for (auto i = 0; i < circle_draw.pts.size(); i++)
+			{
+				pts[i * 2 + 0] = center;
+				pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+				pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+			}
+
+			sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
+		}
+		else
+		{
+			auto r = select_distance;
+			auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+			auto center = main_player.node->pos;
+			std::vector<vec3> pts(circle_draw.pts.size() * 3);
+			for (auto i = 0; i < circle_draw.pts.size(); i++)
+			{
+				pts[i * 3 + 0] = center;
+				pts[i * 3 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+				pts[i * 3 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+			}
+
+			sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
 		}
 	}
 }
