@@ -1,0 +1,18 @@
+model:
+<?xml version="1.0"?>
+<model>
+	<meshes>
+		<mesh bounds="-1,-1,2,1,1,2">
+			<positions data_offset="0" data_size="72" />
+			<uvs data_offset="72" data_size="48" />
+			<normals data_offset="120" data_size="72" />
+			<indices data_offset="192" data_size="24" />
+		</mesh>
+	</meshes>
+	<bones />
+</model>
+
+data:
+AACAvwAAgD8AAABAAACAPwAAgL8AAABAAACAPwAAgD8AAABAAACAvwAAgD8AAABAAACAvwAAgL8AAABAAACAPwAAgL8AAABAAABgPwAAAD8AACA_AACAPgAAID8AAAA_AABgPwAAAD8AAGA_AACAPgAAID8AAIA-AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_
+AAAAAAEAAAACAAAAAwAAAAQAAAAFAAAA
+
