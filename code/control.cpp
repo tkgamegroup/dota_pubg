@@ -148,14 +148,17 @@ void update_control()
 			{
 				if (auto character = n->entity->get_component_t<cCharacter>(); character)
 				{
-					if (character != main_player.character && character->armature)
+					if (character != main_player.character)
 					{
-						for (auto& c : character->armature->entity->children)
+						if (auto first_child = character->entity->children.empty() ? nullptr : character->entity->children[0].get(); first_child)
 						{
-							if (auto mesh = c->get_component_t<cMesh>(); mesh)
+							for (auto& c : first_child->children)
 							{
-								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+								if (auto mesh = c->get_component_t<cMesh>(); mesh)
+								{
+									if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+										draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
+								}
 							}
 						}
 					}
