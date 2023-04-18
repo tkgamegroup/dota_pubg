@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item name="RootNode">
+			<components>
+				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
+			</components>
+			<children>
+				<item name="Cube.016">
+					<components>
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
+						<item type_name="flame::cMesh" mesh_name="0000.fmod#mesh0" material_name="default" />
+					</components>
+				</item>
+			</children>
+		</item>
+	</children>
+</prefab>
