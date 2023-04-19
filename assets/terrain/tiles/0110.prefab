@@ -12,8 +12,21 @@
 				<item name="Circle.004">
 					<components>
 						<item type_name="flame::cNode" qut="0.707107,-0.707107,2.30405e-07,2.30405e-07" scl="100,100,100" />
-						<item type_name="flame::cMesh" mesh_name="0110.fmod#mesh0" material_name="default" />
 					</components>
+					<children>
+						<item name="0">
+							<components>
+								<item type_name="flame::cNode" />
+								<item type_name="flame::cMesh" mesh_name="0110.fmod#mesh0" material_name="0110_Material.008.fmat" />
+							</components>
+						</item>
+						<item name="1">
+							<components>
+								<item type_name="flame::cNode" />
+								<item type_name="flame::cMesh" mesh_name="0110.fmod#mesh1" material_name="0110_Material.009.fmat" />
+							</components>
+						</item>
+					</children>
 				</item>
 			</children>
 		</item>

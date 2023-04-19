@@ -9,10 +9,10 @@
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
 			</components>
 			<children>
-				<item name="Cube.016">
+				<item name="Cube.037">
 					<components>
 						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
-						<item type_name="flame::cMesh" mesh_name="0000.fmod#mesh0" material_name="default" />
+						<item type_name="flame::cMesh" mesh_name="0000.fmod#mesh0" material_name="0000_Material.011.fmat" />
 					</components>
 				</item>
 			</children>

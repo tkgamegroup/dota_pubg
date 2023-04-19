@@ -12,7 +12,7 @@
 				<item name="Cube.016">
 					<components>
 						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
-						<item type_name="flame::cMesh" mesh_name="1111.fmod#mesh0" material_name="default" />
+						<item type_name="flame::cMesh" mesh_name="1111.fmod#mesh0" material_name="1111_Material.010.fmat" />
 					</components>
 				</item>
 			</children>
