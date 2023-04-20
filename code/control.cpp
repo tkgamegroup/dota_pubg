@@ -427,13 +427,13 @@ void command_character_attack_location(cCharacterPtr character, const vec3& pos)
 void command_character_pickup(cCharacterPtr character, cChestPtr chest)
 {
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-		character->cmd_pick_up(chest);
+		character->cmd_interact(chest);
 	else if (multi_player == MultiPlayerAsClient)
 	{
 		std::ostringstream res;
 		nwCommandCharacterStruct stru;
 		stru.id = character->object->uid;
-		stru.type = "PickUp"_h;
+		stru.type = "Interact"_h;
 		stru.t.target = chest->object->uid;
 		pack_msg(res, nwCommandCharacter, stru);
 		so_client->send(res.str());

@@ -54,8 +54,7 @@ struct cCharacter : Component
 		CommandAttackTarget,
 		CommandAttackLocation,
 		CommandHold,
-		CommandPickUp,
-		CommandGotoShop,
+		CommandInteract,
 		CommandCastAbility,
 		CommandCastAbilityToLocation,
 		CommandCastAbilityToTarget
@@ -196,9 +195,9 @@ struct cCharacter : Component
 	bool stats_dirty = true;
 	InitStats init_stats;
 	Command command = CommandIdle;
-	Tracker target;
-	vec3 target_location;
-	voidptr target_obj;
+	Tracker target; // character, chest, shop, etc
+	vec3	target_location;
+	voidptr target_obj; // ability, item, etc
 	CharacterAction action = CharacterActionNone;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;
@@ -243,8 +242,7 @@ struct cCharacter : Component
 	void cmd_attack_target(cCharacterPtr target);
 	void cmd_attack_location(const vec3& location);
 	void cmd_hold();
-	void cmd_pick_up(cChestPtr target);
-	void cmd_goto_shop(cShopPtr target);
+	void cmd_interact(ComponentPtr target);
 	void cmd_cast_ability(cAbilityPtr ability);
 	void cmd_cast_ability_to_location(cAbilityPtr ability, const vec3& location);
 	void cmd_cast_ability_to_target(cAbilityPtr ability, cCharacterPtr target);

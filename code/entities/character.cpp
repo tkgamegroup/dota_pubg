@@ -457,20 +457,25 @@ void cCharacter::update()
 			else
 				action = CharacterActionNone;
 			break;
-		case CommandPickUp:
+		case CommandInteract:
 			if (!target.comp)
 				cmd_idle();
 			else
 			{
-				auto chest = target.get<cChestPtr>();
-				if (process_approach(chest->node->pos, 1.5f))
+				switch (target.comp->type_hash)
 				{
-					if (gain_item(chest->item_id, chest->item_num))
-						chest->die();
+				case "cChest"_h:
+					auto chest = target.get<cChestPtr>();
+					if (process_approach(chest->node->pos, 1.5f))
+					{
+						if (gain_item(chest->item_id, chest->item_num))
+							chest->die();
 
-					if (nav_agent)
-						nav_agent->stop();
-					cmd_idle();
+						if (nav_agent)
+							nav_agent->stop();
+						cmd_idle();
+					}
+					break;
 				}
 			}
 			break;
@@ -973,17 +978,10 @@ void cCharacter::cmd_hold()
 	command = CommandHold;
 }
 
-void cCharacter::cmd_pick_up(cChestPtr _target)
+void cCharacter::cmd_interact(ComponentPtr _target)
 {
 	reset_cmd();
-	command = CommandPickUp;
-	target.set(_target);
-}
-
-void cCharacter::cmd_goto_shop(cShopPtr _target)
-{
-	reset_cmd();
-	command = CommandGotoShop;
+	command = CommandInteract;
 	target.set(_target);
 }
 
