@@ -816,35 +816,33 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			nav_agent->set_target(p1);
 		}
 
-		if (attack_hit_timer > 0.f)
+		if (action_timer >= 0.f)
 		{
-			attack_hit_timer -= delta_time;
-			if (attack_hit_timer <= 0.f)
+			action_timer += delta_time;
+			if (pre_action_time > 0.f)
 			{
-				if (distance(p0, p1) <= atk_distance + 3.5f)
+				if (action_timer >= pre_action_time)
 				{
-					if (!atk_projectile.empty())
+					if (distance(p0, p1) <= atk_distance + 3.5f)
 					{
-						auto character = this;
-						auto pj = add_projectile(atk_projectile,
-							p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f);
-						pj->on_end = [character](const vec3&, cCharacterPtr target) {
-							if (target)
-								attack_proc(character, target);
-						};
+						if (!atk_projectile.empty())
+						{
+							auto character = this;
+							auto pj = add_projectile(atk_projectile, p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f);
+							pj->on_end = [character](const vec3&, cCharacterPtr target) {
+								if (target)
+									attack_proc(character, target);
+							};
+						}
+						else
+							attack_proc(this, target);
 					}
-					else
-						attack_proc(this, target);
+
+					attack_interval_timer = (atk_interval - atk_point) / attack_speed;
+					pre_action_time = 0.f;
 				}
-
-				attack_interval_timer = (atk_interval - atk_point) / attack_speed;
 			}
-		}
-
-		if (attack_timer > 0.f)
-		{
-			attack_timer -= delta_time;
-			if (attack_timer <= 0.f)
+			if (action_timer >= total_action_time)
 				action = CharacterActionNone;
 		}
 	}
@@ -871,9 +869,10 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 			if (approached)
 			{
 				attack_speed = max(0.01f, atk_sp / 100.f); 
-				attack_hit_timer = atk_point / attack_speed;
-				attack_timer = atk_time / attack_speed;
+				pre_action_time = atk_point / attack_speed;
+				total_action_time = atk_time / attack_speed;
 				action = CharacterActionAttack;
+				action_timer = 0.f;
 
 				if (audio_source)
 					audio_source->play("attack_precast"_h);
@@ -895,44 +894,69 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 {
 	if (state & CharacterStateStun)
 	{
-		cast_timer = -1.f;
-		nav_agent->stop();
+		if (nav_agent)
+			nav_agent->stop();
 		action = CharacterActionNone;
 		return;
 	}
 
-	auto pos = target ? target->node->pos : location;
+	auto p0 = node->pos;
+	auto p1 = target ? target->node->pos : location;
 
-	auto approached = ability->target_type == TargetNull ? true : process_approach(pos, ability->distance, 15.f);
-	if (cast_timer > 0.f)
+	if (action == CharacterActionCast)
 	{
-		cast_timer -= delta_time;
-		if (cast_timer <= 0.f)
+		if (nav_agent)
 		{
-			cast_ability(ability, pos, target);
-			nav_agent->stop();
-			cmd_idle();
-		}
-		else
-		{
-			action = CharacterActionCast;
 			nav_agent->set_speed_scale(0.f);
+			nav_agent->set_target(p1);
+		}
+
+		if (action_timer >= 0.f)
+		{
+			action_timer += delta_time;
+			if (pre_action_time > 0.f)
+			{
+				if (action_timer >= pre_action_time)
+				{
+					if (distance(p0, p1) <= ability->distance + 1.f)
+					{
+						cast_ability(ability, p1, target);
+						nav_agent->stop();
+						cmd_idle();
+					}
+					pre_action_time = 0.f;
+				}
+			}
+			if (action_timer < total_action_time)
+				action = CharacterActionNone;
 		}
 	}
 	else
 	{
+		auto approached = false;
+		if (ability->target_type == TargetNull)
+			approached = true;
+		else
+		{
+			if (nav_agent)
+				approached = process_approach(p1, ability->distance, 15.f);
+		}
+
 		if (approached)
 		{
 			if (ability->cast_time == 0.f)
 			{
-				cast_ability(ability, pos, target);
+				cast_ability(ability, p1, target);
 				nav_agent->stop();
 				cmd_idle();
 			}
 			else
 			{
-				cast_speed = cast_time / ability->cast_time;
-				cast_timer = cast_point / cast_speed;
+				cast_speed = 1.f;
+				pre_action_time = ability->cast_point / attack_speed;
+				total_action_time = ability->cast_time / attack_speed;
+				action = CharacterActionCast;
+				action_timer = 0.f;
 			}
 		}
 	}

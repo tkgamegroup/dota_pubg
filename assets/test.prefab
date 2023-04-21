@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<prefab file_id="45967dcb033f8ff3a96ac06060bd6eb2">
+	<components>
+		<item type_name="flame::cNode" />
+		<item type_name="flame::cNavScene" generate_delay_frames="1" />
+		<item type_name="cGame" enable_collider_debugging="true" />
+	</components>
+	<children>
+		<item file_id="4b0808e971f12006579bbc881b34199e" name="Directional Light">
+			<components>
+				<item type_name="flame::cNode" qut="0.800103,-0.46194,0.331414,0.191342" />
+				<item type_name="flame::cDirLight" />
+			</components>
+		</item>
+		<item file_id="420ade78b28c2af6ea92a9a849d9b69a" name="Plane" tag="General|MarkNavMesh">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="standard_plane" material_name="default" />
+			</components>
+		</item>
+		<item file_id="477b1aca2604b5b86c61dd8e61d5b19b" name="main_camera">
+			<components>
+				<item type_name="flame::cNode" pos="2,-5,1.5" />
+				<item type_name="flame::cCamera" />
+			</components>
+		</item>
+		<item filename="characters\test\A.prefab">
+			<modifications>
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="1,0,1" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|cCharacter|faction" value="Party1" />
+			</modifications>
+		</item>
+		<item filename="characters\test\B.prefab">
+			<modifications>
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="8.5,0,8.5" />
+			</modifications>
+		</item>
+	</children>
+</prefab>

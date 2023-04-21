@@ -136,10 +136,6 @@ struct cCharacter : Component
 	// Reflect
 	std::filesystem::path atk_projectile;
 	// Reflect
-	float cast_time = 1.f;
-	// Reflect
-	float cast_point = 1.f;
-	// Reflect
 	uint phy_def = 0;
 	// Reflect
 	void set_phy_def(uint v);
@@ -204,10 +200,11 @@ struct cCharacter : Component
 	float cast_speed = 1.f;
 	float regeneration_timer = 1.f;
 	float search_timer = 0.f;
+
 	float attack_interval_timer = 0.f;
-	float attack_hit_timer = 0.f;
-	float attack_timer = 0.f;
-	float cast_timer = 0.f;
+	float pre_action_time = 0.f;
+	float total_action_time = 0.f;
+	float action_timer = -1.f;
 
 	Listeners<void(CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3)> message_listeners;
 

@@ -36,6 +36,8 @@ struct cAbility : Component
 	// Reflect
 	float					cast_time = 0.f;
 	// Reflect
+	float					cast_point = 0.f;
+	// Reflect
 	float					channel_time = 0.f;
 	// Reflect
 	uint					mp = 0;
