@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1378,615" align="Fill" />
+				<item type_name="flame::cElement" ext="1378,491" align="Fill" />
 			</components>
 			<children>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="615,535" ext="148,80" background_col="0,0,0,100" align="Bottom" />
+						<item type_name="flame::cElement" pos="615,411" ext="148,80" background_col="0,0,0,100" align="Bottom" />
 					</components>
 					<children>
 						<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
@@ -267,6 +267,9 @@
 						<item v="0" />
 						<item v="0" />
 						<item v="0" />
+						<item v="2" />
+						<item v="2" />
+						<item v="2" />
 						<item v="0" />
 						<item v="0" />
 						<item v="0" />
@@ -298,11 +301,8 @@
 						<item v="0" />
 						<item v="0" />
 						<item v="0" />
-						<item v="0" />
-						<item v="0" />
-						<item v="0" />
-						<item v="0" />
-						<item v="0" />
+						<item v="1" />
+						<item v="1" />
 						<item v="0" />
 						<item v="0" />
 						<item v="0" />

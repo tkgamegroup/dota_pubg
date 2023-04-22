@@ -9,21 +9,21 @@
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
 			</components>
 			<children>
-				<item name="0001">
+				<item name="110H">
 					<components>
-						<item type_name="flame::cNode" qut="0.5,-0.5,-0.5,-0.5" scl="100,100,100" />
+						<item type_name="flame::cNode" qut="-1.37679e-07,1.37679e-07,0.707107,0.707107" scl="100,100,100" />
 					</components>
 					<children>
 						<item name="0">
 							<components>
 								<item type_name="flame::cNode" />
-								<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\0001.fmod#mesh0" material_name="dirt.fmat" />
+								<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\110H.fmod#mesh0" material_name="grass.fmat" />
 							</components>
 						</item>
 						<item name="1">
 							<components>
 								<item type_name="flame::cNode" />
-								<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\0001.fmod#mesh1" material_name="grass.fmat" />
+								<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\110H.fmod#mesh1" material_name="dirt.fmat" />
 							</components>
 						</item>
 					</children>
