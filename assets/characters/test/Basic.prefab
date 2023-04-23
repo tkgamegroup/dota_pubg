@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<prefab>
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item name="RootNode">
+			<components>
+				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
+				<item type_name="flame::cArmature" armature_name="Basic.fmod" />
+			</components>
+			<children>
+				<item name="Basic">
+					<components>
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="50,50,100" />
+						<item type_name="flame::cMesh" mesh_name="Basic.fmod#mesh0" material_name="material.fmat" />
+					</components>
+				</item>
+				<item name="Basic.a">
+					<components>
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
+					</components>
+					<children>
+						<item name="Bone">
+							<components>
+								<item type_name="flame::cNode" pos="0,1.77636e-15,0.121283" qut="0.707107,0.707107,0,0" />
+							</components>
+							<children>
+								<item name="Bone_end">
+									<components>
+										<item type_name="flame::cNode" pos="0,2,-1.77636e-15" />
+									</components>
+								</item>
+							</children>
+						</item>
+					</children>
+				</item>
+			</children>
+		</item>
+	</children>
+</prefab>
