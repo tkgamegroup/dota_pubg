@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1378,491" align="Fill" />
+				<item type_name="flame::cElement" ext="1506,687" align="Fill" />
 			</components>
 			<children>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="615,411" ext="148,80" background_col="0,0,0,100" align="Bottom" />
+						<item type_name="flame::cElement" pos="679,607" ext="148,80" background_col="0,0,0,100" align="Bottom" />
 					</components>
 					<children>
 						<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
@@ -1274,14 +1274,6 @@
 				<item type_name="flame::cMesh" mesh_name="standard_tri_prism" material_name="flame\materials\check.fmat" />
 			</components>
 		</item>
-		<item filename="characters\test\0.prefab">
-			<modifications>
-				<item target="3f4a114348074a5f09ebe29084a57689|flame::cNode|pos" value="0,100,-3.05176e-05" />
-				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="5,1,6" />
-				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
-				<item target="3e84f1d94e681e8d13f72291b3fb7d62|cCharacter|faction" value="Party1" />
-			</modifications>
-		</item>
 		<item file_id="4030f825973cd191d6225944041627a1" name="Entity 1">
 			<components>
 				<item type_name="flame::cNode" pos="2.5,1,4" />
@@ -1317,6 +1309,13 @@
 				<item type_name="cCharacter" faction="Party2" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
 				<item type_name="cAI" type="DefenseTower" />
 			</components>
+		</item>
+		<item filename="characters\test\A.prefab">
+			<modifications>
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|cCharacter|faction" value="Party1" />
+				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="7,0,16" />
+			</modifications>
 		</item>
 	</children>
 </prefab>
