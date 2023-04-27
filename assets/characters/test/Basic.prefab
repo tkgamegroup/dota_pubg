@@ -10,12 +10,6 @@
 				<item type_name="flame::cArmature" armature_name="Basic.fmod" />
 			</components>
 			<children>
-				<item file_id="4f1576fd4d6a66fc516c3c9fab5359b0" name="Basic">
-					<components>
-						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="50,50,100" />
-						<item type_name="flame::cMesh" mesh_name="Basic.fmod#mesh0" material_name="material.fmat" />
-					</components>
-				</item>
 				<item file_id="452efb27c8bf8854620e5fd5fc17aa8d" name="Basic.a">
 					<components>
 						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
@@ -34,6 +28,12 @@
 							</children>
 						</item>
 					</children>
+				</item>
+				<item file_id="4f1576fd4d6a66fc516c3c9fab5359b0" name="Basic">
+					<components>
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="50,50,100" />
+						<item type_name="flame::cMesh" mesh_name="Basic.fmod#mesh0" material_name="material.fmat" />
+					</components>
 				</item>
 			</children>
 		</item>

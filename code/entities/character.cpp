@@ -246,7 +246,13 @@ void cCharacter::on_init()
 		auto radius = get_radius();
 		auto height = get_height();
 		if (radius > 0.f && height > 0.f)
-			b.expand(AABB(vec3(-radius, 0.f, -radius), vec3(radius, height, radius)));
+		{
+			AABB _b(vec3(-radius, 0.f, -radius), vec3(radius, height, radius));
+			mat4 m(1.f);
+			m = translate(mat4(1.f), node->global_pos());
+			m = m * mat4(node->g_qut);
+			b.expand(AABB(_b.get_points(m)));
+		}
 	}, "character"_h);
 }
 

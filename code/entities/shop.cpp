@@ -19,7 +19,11 @@ cShop::~cShop()
 void cShop::on_init()
 {
 	node->measurers.add([this](AABB& b) {
-		b.expand(AABB(vec3(-0.3f, 0.f, -0.2f), vec3(0.3f, 0.4f, 0.2f)));
+		AABB _b(vec3(-0.3f, 0.f, -0.2f), vec3(0.3f, 0.4f, 0.2f));
+		mat4 m(1.f);
+		m = translate(mat4(1.f), node->global_pos());
+		m = m * mat4(node->g_qut);
+		b.expand(AABB(_b.get_points(m)));
 	}, "shop"_h);
 }
 
