@@ -254,6 +254,13 @@ void cCharacter::start()
 {
 	entity->tag = entity->tag | CharacterTag;
 
+	entity->traversal_bfs([this](EntityPtr e, int depth) {
+		if (auto a = e->get_component_t<cArmature>(); a)
+			armature = a;
+		if ((armature) || depth > 2)
+			return false; 
+	});
+
 	if (audio_source)
 	{
 		std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
