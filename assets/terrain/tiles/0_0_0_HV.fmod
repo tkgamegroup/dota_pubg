@@ -1,0 +1,26 @@
+model:
+<?xml version="1.0"?>
+<model>
+	<meshes>
+		<mesh bounds="-1,-1,0,1,1,1">
+			<positions data_offset="0" data_size="144" />
+			<uvs data_offset="144" data_size="96" />
+			<normals data_offset="240" data_size="144" />
+			<indices data_offset="384" data_size="48" />
+		</mesh>
+		<mesh bounds="-1,-0.5,0,1,0,1">
+			<positions data_offset="432" data_size="108" />
+			<uvs data_offset="540" data_size="72" />
+			<normals data_offset="612" data_size="108" />
+			<indices data_offset="720" data_size="36" />
+		</mesh>
+	</meshes>
+	<bones />
+</model>
+
+data:
+AACAPwAAAAAAAAAA__9_vwAAgD8AAAAAAACAvwAAAAAAAAAAAACAPwAAAL8AAIA_AACAvwAAgL8AAAAAAACAPwAAgL8AAIA_AACAPwAAAAAAAAAAAACAPwAAgD8AAAAA__9_vwAAgD8AAAAAAACAPwAAAL8AAIA_AACAvwAAAL8AAAAAAACAvwAAgL8AAAAAtfrkPjhk2D3rxec4wvh_P7b65D7C-H8_rxflPgCg5zjmxis_wfh_P-bGKz8AwOc4
+tfrkPjhk2D2ct-c4SGTYPevF5zjC-H8_rxflPgCg5ziwF-U-wvh_P-bGKz_B-H8_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_AAAAAAAAAAAAAIA_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_
+AAAAAAEAAAACAAAAAwAAAAQAAAAFAAAABgAAAAcAAAAIAAAACQAAAAoAAAALAAAAAACAPwAAAAAAAIA_AACAvwAAAL8AAAAAAACAPwAAAL8AAIA_AACAPwAAAAAAAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAIA_AACAPwAAAAAAAIA_AACAvwAAAAAAAAAAAACAvwAAAL8AAAAAClJGOACARjgJAGU-5_x_PwgAZT4AgEY4A5WEOMDWTD52zsw-
+2_t_P3XOzD4AgIQ4ClJGOACARjipbkY45vx_PwkAZT7n_H8_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAALvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_AAAAAAEAAAACAAAAAwAAAAQAAAAFAAAABgAAAAcAAAAIAAAA
+

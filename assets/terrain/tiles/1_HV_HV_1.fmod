@@ -1,0 +1,19 @@
+model:
+<?xml version="1.0"?>
+<model>
+	<meshes>
+		<mesh bounds="-1,-1,1,1,1,2">
+			<positions data_offset="0" data_size="144" />
+			<uvs data_offset="144" data_size="96" />
+			<normals data_offset="240" data_size="144" />
+			<indices data_offset="384" data_size="48" />
+		</mesh>
+	</meshes>
+	<bones />
+</model>
+
+data:
+AACAvwAAAAAAAIA_AACAPwAAgL8AAABAAACAPwAAAAAAAABAAACAvwAAgD8AAIA_AACAPwAAAAAAAABAAACAPwAAgD8AAABAAACAvwAAAAAAAIA_AACAvwAAgL8AAIA_AACAPwAAgL8AAABAAACAvwAAgD8AAIA_AACAvwAAAAAAAIA_AACAPwAAAAAAAABAFh7lPj33fz_MA2U_ADAMORYe5T4AUAw5HjIMOT33fz8H--Q-ADAMOR4yDDkAUAw5
+Fh7lPj33fz_MA2U_PPd_P8wDZT8AMAw5HjIMOT33fz8H--Q-PPd_Pwf75D4AMAw5LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_LvnkvgAAAAAu-WQ_
+AAAAAAEAAAACAAAAAwAAAAQAAAAFAAAABgAAAAcAAAAIAAAACQAAAAoAAAALAAAA
+

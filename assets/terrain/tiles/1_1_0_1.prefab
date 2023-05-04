@@ -1,29 +1,29 @@
 <?xml version="1.0"?>
-<prefab>
+<prefab file_id="436aa00a9bf9395b036adb781c547aa1">
 	<components>
 		<item type_name="flame::cNode" />
 	</components>
 	<children>
-		<item name="RootNode">
+		<item file_id="43fa49e36b264e3f9e8d0f69735663ae" name="RootNode">
 			<components>
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
 			</components>
 			<children>
-				<item name="110H">
+				<item file_id="41706b5a12c06c2c880fcf91c1083aab" name="1_1_0_1">
 					<components>
-						<item type_name="flame::cNode" qut="-1.37679e-07,1.37679e-07,0.707107,0.707107" scl="100,100,100" />
+						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
 					</components>
 					<children>
 						<item name="0">
 							<components>
 								<item type_name="flame::cNode" />
-								<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\110H.fmod#mesh0" material_name="grass.fmat" />
+								<item type_name="flame::cMesh" mesh_name="1_1_0_1.fmod#mesh0" material_name="dirt.fmat" />
 							</components>
 						</item>
 						<item name="1">
 							<components>
 								<item type_name="flame::cNode" />
-								<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\110H.fmod#mesh1" material_name="dirt.fmat" />
+								<item type_name="flame::cMesh" mesh_name="1_1_0_1.fmod#mesh1" material_name="grass.fmat" />
 							</components>
 						</item>
 					</children>

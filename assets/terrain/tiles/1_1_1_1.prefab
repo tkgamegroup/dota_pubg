@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
-<prefab>
+<prefab file_id="4792f59d7cfcdfe70a13a70c858b09bc">
 	<components>
 		<item type_name="flame::cNode" />
 	</components>
 	<children>
-		<item name="RootNode">
+		<item file_id="42c13fd94faf94088e6a28c4b0e548b0" name="RootNode">
 			<components>
 				<item type_name="flame::cNode" scl="0.01,0.01,0.01" />
 			</components>
 			<children>
-				<item name="0000">
+				<item file_id="425462862050707ccbb278da3fa83ba3" name="1_1_1_1">
 					<components>
 						<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" scl="100,100,100" />
-						<item type_name="flame::cMesh" mesh_name="D:\dota_pubg\assets\terrain\tiles\0000.fmod#mesh0" material_name="grass.fmat" />
+						<item type_name="flame::cMesh" mesh_name="1_1_1_1.fmod#mesh0" material_name="grass.fmat" />
 					</components>
 				</item>
 			</children>
