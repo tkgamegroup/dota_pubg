@@ -456,11 +456,13 @@ void cGame::update()
 	removing_dead_effects = true;
 	for (auto o : dead_effects)
 		o->entity->remove_from_parent();
+	dead_effects.clear();
 	removing_dead_effects = false;
 
 	removing_dead_projectiles = true;
 	for (auto o : dead_projectiles)
 		o->entity->remove_from_parent();
+	dead_projectiles.clear();
 	removing_dead_projectiles = false;
 
 	removing_dead_chests = true;
@@ -470,6 +472,7 @@ void cGame::update()
 			hovering_chest = nullptr;
 		o->entity->remove_from_parent();
 	}
+	dead_chests.clear();
 	removing_dead_chests = false;
 
 	removing_dead_characters = true;
@@ -479,12 +482,8 @@ void cGame::update()
 			hovering_character = nullptr;
 		o->entity->remove_from_parent();
 	}
-	removing_dead_characters = false;
-
-	dead_effects.clear();
-	dead_projectiles.clear();
-	dead_chests.clear();
 	dead_characters.clear();
+	removing_dead_characters = false;
 
 	if (enable_control)
 		update_control();
@@ -518,7 +517,7 @@ void enter_scene(EntityPtr root)
 		root->remove_component<cLauncher>();
 		root->load(L"assets\\main.prefab");
 		return false;
-		});
+	});
 }
 
 void cLauncher::start()
@@ -543,7 +542,7 @@ void cLauncher::start()
 				enter_scene(entity);
 			}
 		}
-		}, (uint)this);
+	}, (uint)this);
 }
 
 struct cLauncherCreate : cLauncher::Create

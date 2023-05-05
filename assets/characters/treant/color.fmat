@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<material color_map="0">
-	<shader_defines>
-		<item v="COLOR_MAP=0" />
-	</shader_defines>
-	<textures>
-		<item filename="treant_color.jpg" srgb="true" auto_mipmap="true" />
-	</textures>
-</material>

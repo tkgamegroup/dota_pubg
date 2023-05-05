@@ -509,28 +509,37 @@ void cCharacter::update()
 
 	if (armature)
 	{
-		switch (action)
+		if (dead)
 		{
-		case CharacterActionNone:
-			armature->loop = true;
+			armature->loop = false;
 			armature->playing_speed = 1.f;
-			armature->play("idle"_h);
-			break;
-		case CharacterActionMove:
-			armature->loop = true;
-			armature->playing_speed = move_speed;
-			armature->play("run"_h);
-			break;
-		case CharacterActionAttack:
-			armature->loop = false;
-			armature->playing_speed = attack_speed;
-			armature->play("attack"_h);
-			break;
-		case CharacterActionCast:
-			armature->loop = false;
-			armature->playing_speed = cast_speed;
-			armature->play("cast"_h);
-			break;
+			armature->play("die"_h);
+		}
+		else
+		{
+			switch (action)
+			{
+			case CharacterActionNone:
+				armature->loop = true;
+				armature->playing_speed = 1.f;
+				armature->play("idle"_h);
+				break;
+			case CharacterActionMove:
+				armature->loop = true;
+				armature->playing_speed = move_speed;
+				armature->play("run"_h);
+				break;
+			case CharacterActionAttack:
+				armature->loop = false;
+				armature->playing_speed = attack_speed;
+				armature->play("attack"_h);
+				break;
+			case CharacterActionCast:
+				armature->loop = false;
+				armature->playing_speed = cast_speed;
+				armature->play("cast"_h);
+				break;
+			}
 		}
 	}
 }
