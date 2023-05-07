@@ -115,8 +115,7 @@ void MainPlayer::init(EntityPtr e)
 MainCamera main_camera;
 MainPlayer main_player;
 
-Entity** editor_p_selecting_entity = nullptr;
-bool* editor_p_control = nullptr;
+GameState game_state = GameStatePrepare;
 
 EntityPtr root = nullptr;
 

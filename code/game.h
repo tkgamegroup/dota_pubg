@@ -28,6 +28,13 @@ struct MainPlayer
 };
 extern MainPlayer main_player;
 
+enum GameState
+{
+	GameStatePrepare,
+	GameStateBattle
+};
+extern GameState game_state;
+
 void enable_game(bool v);
 EntityPtr get_prefab(const std::filesystem::path& path);
 std::filesystem::path get_prefab_path(uint prefab_id /* path hash */ );
