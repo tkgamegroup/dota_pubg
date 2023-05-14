@@ -26,126 +26,146 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1378,615" align="Fill" />
+				<item type_name="flame::cElement" ext="1397,615" />
 			</components>
 			<children>
-				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
+				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="615,535" ext="148,80" background_col="0,0,0,100" align="Bottom" />
+						<item type_name="flame::cElement" pos="576.5,0" ext="244,24" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
-						<item file_id="4630474add39c38c036fe1bda0cbe4ba" name="abilities_bar">
+						<item file_id="4b5d2c756749a5b980691f9e3c77d1a8" name="gold_text">
 							<components>
-								<item type_name="flame::cElement" ext="148,32" align="TopLeft" />
+								<item type_name="flame::cElement" pos="4,4" ext="51.5,16" />
+								<item type_name="flame::cText" text="Gold: 500" font_size="16" sdf="true" thickness="0.5" />
+							</components>
+						</item>
+						<item file_id="4027d3a13b30b832fd5e665d7cae5d81" name="wood_text">
+							<components>
+								<item type_name="flame::cElement" pos="59.5,4" ext="58,16" />
+								<item type_name="flame::cText" text="Wood: 500" font_size="16" sdf="true" thickness="0.5" />
+							</components>
+						</item>
+						<item file_id="4267e8bcf6ab70857d1e29698638f9b1" name="stone_text">
+							<components>
+								<item type_name="flame::cElement" pos="121.5,4" ext="57,16" />
+								<item type_name="flame::cText" text="Stone: 500" font_size="16" sdf="true" thickness="0.5" />
+							</components>
+						</item>
+						<item file_id="4eecbdccde93bb6c58ffc4d76ba8cba8" name="food_text">
+							<components>
+								<item type_name="flame::cElement" pos="182.5,4" ext="57.5,16" />
+								<item type_name="flame::cText" text="Food: 6/36" font_size="16" sdf="true" thickness="0.5" />
+							</components>
+						</item>
+					</children>
+				</item>
+				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
+					<components>
+						<item type_name="flame::cElement" pos="0,307" horizontal_alignment="End0" vertical_alignment="Center" />
+					</components>
+				</item>
+				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
+					<components>
+						<item type_name="flame::cElement" pos="1396,307" horizontal_alignment="End1" vertical_alignment="Center" />
+					</components>
+				</item>
+				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
+					<components>
+						<item type_name="flame::cElement" pos="622.5,565" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cLayout" />
+					</components>
+					<children>
+						<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
+							<components>
+								<item type_name="flame::cElement" pos="4,4" ext="144,19" background_col="0,204,0,255" />
 							</components>
 							<children>
-								<item file_id="4f86e3b23a9b82911716bc0eaaddb2b7" name="slot1">
+								<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="32,32" />
-										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-										<item type_name="flame::cReceiver" />
+										<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+										<item type_name="flame::cText" text="100/100" font_size="18" sdf="true" thickness="0.5" />
 									</components>
-									<children>
-										<item file_id="4b71299206f814b953d7e0305118e895" name="mana">
-											<components>
-												<item type_name="flame::cElement" pos="1,21" />
-												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-											</components>
-										</item>
-										<item file_id="4c39acdeb7db288c11c7aae5c817a68b" name="key">
-											<components>
-												<item type_name="flame::cElement" pos="2,-2" />
-												<item type_name="flame::cText" text="Q" sdf="true" thickness="0.5" border="0.2" />
-											</components>
-										</item>
-									</children>
-								</item>
-								<item file_id="4f58d8957ff30e5729bcfea82cff4a98" name="slot2">
-									<components>
-										<item type_name="flame::cElement" pos="40,4" ext="32,32" />
-										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-										<item type_name="flame::cReceiver" />
-									</components>
-									<children>
-										<item file_id="49956f5863403c86028e16bf744cb487" name="mana">
-											<components>
-												<item type_name="flame::cElement" pos="1,21" />
-												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-											</components>
-										</item>
-										<item file_id="42e5651c7f2b03cba41d0888df8cccb3" name="key">
-											<components>
-												<item type_name="flame::cElement" pos="2,-2" />
-												<item type_name="flame::cText" text="W" sdf="true" thickness="0.5" border="0.2" />
-											</components>
-										</item>
-									</children>
-								</item>
-								<item file_id="45b9b2ab1f6abd4a31f298fe087f90a2" name="slot3">
-									<components>
-										<item type_name="flame::cElement" pos="76,4" ext="32,32" />
-										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-										<item type_name="flame::cReceiver" />
-									</components>
-									<children>
-										<item file_id="42430b4a700d4b825bfc3ae5882a7899" name="mana">
-											<components>
-												<item type_name="flame::cElement" pos="1,21" />
-												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-											</components>
-										</item>
-										<item file_id="42764f6216294cf769e1f7d8abba0692" name="key">
-											<components>
-												<item type_name="flame::cElement" pos="2,-2" />
-												<item type_name="flame::cText" text="E" sdf="true" thickness="0.5" border="0.2" />
-											</components>
-										</item>
-									</children>
-								</item>
-								<item file_id="4f831be6ca30045c42d490322832dc92" name="slot4">
-									<components>
-										<item type_name="flame::cElement" pos="112,4" ext="32,32" />
-										<item type_name="flame::cImage" auto_size="false" image_name="icons\question.jpg" />
-										<item type_name="flame::cReceiver" />
-									</components>
-									<children>
-										<item file_id="42712855582769b516016754746be39f" name="mana">
-											<components>
-												<item type_name="flame::cElement" pos="1,21" />
-												<item type_name="flame::cText" text="100" col="0,120,255,255" font_size="12" sdf="true" thickness="0.5" border="0.25" />
-											</components>
-										</item>
-										<item file_id="4990c52cf310f34983b40ee9677d1fa3" name="key">
-											<components>
-												<item type_name="flame::cElement" pos="2,-2" />
-												<item type_name="flame::cText" text="R" sdf="true" thickness="0.5" border="0.2" />
-											</components>
-										</item>
-									</children>
 								</item>
 							</children>
 						</item>
-						<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
-							<components>
-								<item type_name="flame::cElement" pos="2,39" ext="144,19" background_col="0,204,0,255" />
-							</components>
-						</item>
 						<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
 							<components>
-								<item type_name="flame::cElement" pos="2,60" ext="144,19" background_col="0,24,232,255" />
+								<item type_name="flame::cElement" pos="4,27" ext="144,19" background_col="0,24,232,255" />
 							</components>
+							<children>
+								<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+									<components>
+										<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+										<item type_name="flame::cText" text="100/100" font_size="18" sdf="true" thickness="0.5" border="0.2" />
+									</components>
+								</item>
+							</children>
 						</item>
-						<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
+					</children>
+				</item>
+				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
+					<components>
+						<item type_name="flame::cElement" pos="1124.88,563" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" />
+					</components>
+					<children>
+						<item file_id="443890cfd0983db458192a0b4ab539be" name="building_button">
 							<components>
-								<item type_name="flame::cElement" pos="52.2,39" />
-								<item type_name="flame::cText" text="100/100" font_size="18" sdf="true" thickness="0.5" />
+								<item type_name="flame::cElement" pos="4,4" ext="63,28" background_col="180,176,49,255" />
+								<item type_name="flame::cLayout" />
 							</components>
+							<children>
+								<item file_id="4810a3faa0b55e2cdbb44f0bdb5900bf" name="text">
+									<components>
+										<item type_name="flame::cElement" pos="4,4" ext="55,20" />
+										<item type_name="flame::cText" text="Building" font_size="20" sdf="true" thickness="0.5" border="0.1" />
+									</components>
+								</item>
+							</children>
 						</item>
-						<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+						<item file_id="4c85a3e171dbe08b50fb1231e3460e85" name="army_button">
 							<components>
-								<item type_name="flame::cElement" pos="53,60" />
-								<item type_name="flame::cText" text="100/100" font_size="18" sdf="true" thickness="0.5" border="0.2" />
+								<item type_name="flame::cElement" pos="71,4" ext="45.5,28" background_col="49,163,180,255" />
+								<item type_name="flame::cLayout" />
 							</components>
+							<children>
+								<item file_id="49d0bc87a25bfcddb090f1bc0e8a16bd" name="text">
+									<components>
+										<item type_name="flame::cElement" pos="4,4" ext="37.5,20" />
+										<item type_name="flame::cText" text="Army" font_size="20" sdf="true" thickness="0.5" border="0.1" />
+									</components>
+								</item>
+							</children>
+						</item>
+						<item file_id="4a8a7c587df72e7b376c6a16fa1df195" name="route_button">
+							<components>
+								<item type_name="flame::cElement" pos="120.5,4" ext="48.625,28" background_col="180,100,49,255" />
+								<item type_name="flame::cLayout" />
+							</components>
+							<children>
+								<item file_id="480dedc76cafa8b5e603f1a168b0ce91" name="text">
+									<components>
+										<item type_name="flame::cElement" pos="4,4" ext="40.625,20" />
+										<item type_name="flame::cText" text="Route" font_size="20" sdf="true" thickness="0.5" border="0.1" />
+									</components>
+								</item>
+							</children>
+						</item>
+						<item file_id="49fd950a0823eb9f305e43dcf8eb5c8e" name="start_button">
+							<components>
+								<item type_name="flame::cElement" pos="173.125,4" ext="83,28" background_col="51,180,49,255" />
+								<item type_name="flame::cLayout" />
+							</components>
+							<children>
+								<item file_id="4111d67dac2d4e0085fced399d1f4d9d" name="text">
+									<components>
+										<item type_name="flame::cElement" pos="4,4" ext="75,20" />
+										<item type_name="flame::cText" text="Start Battle" font_size="20" sdf="true" thickness="0.5" border="0.1" />
+									</components>
+								</item>
+							</children>
 						</item>
 					</children>
 				</item>
@@ -1249,49 +1269,6 @@
 				</item>
 			</components>
 			<children />
-		</item>
-		<item file_id="4030f825973cd191d6225944041627a1" name="Entity 1">
-			<components>
-				<item type_name="flame::cNode" pos="1.5,2,2" />
-				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
-				<item type_name="flame::cNavObstacle" radius="0.7" />
-				<item type_name="cSpawner" prefab_path="characters\A.prefab" faction="Party1" unit_type="LaneCreep" unit_target_pos="47,1,47" />
-			</components>
-		</item>
-		<item file_id="43ced12d98a5419315d2e79f8e8e1a89" name="Entity 1">
-			<components>
-				<item type_name="flame::cNode" pos="48.5,1,48" />
-				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
-				<item type_name="flame::cNavObstacle" radius="0.7" />
-				<item type_name="cSpawner" prefab_path="characters\B.prefab" faction="Party2" unit_type="LaneCreep" unit_target_pos="1,1,1" />
-			</components>
-		</item>
-		<item file_id="4aee062e6c4f09511be57e034fe5f390" name="DefenseTower">
-			<components>
-				<item type_name="flame::cNode" pos="23,0,18" scl="2,5,2" />
-				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
-				<item type_name="flame::cNavObstacle" height="5" />
-				<item type_name="cObject" />
-				<item type_name="cCharacter" faction="Party1" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
-				<item type_name="cAI" type="DefenseTower" />
-			</components>
-		</item>
-		<item file_id="416eff6b470a32c0351a0a8a8367c2a2" name="DefenseTower">
-			<components>
-				<item type_name="flame::cNode" pos="29.5,0,32" scl="2,5,2" />
-				<item type_name="flame::cMesh" mesh_name="standard_cylinder" material_name="default" />
-				<item type_name="flame::cNavObstacle" height="5" />
-				<item type_name="cObject" />
-				<item type_name="cCharacter" faction="Party2" hp="2000" hp_max="2000" mp="0" mp_max="0" atk="120" atk_distance="6" atk_interval="1.5" atk_time="1" atk_point="0.5" atk_projectile="characters\bullet.prefab" phy_def="100" mov_sp="0" />
-				<item type_name="cAI" type="DefenseTower" />
-			</components>
-		</item>
-		<item filename="characters\A.prefab">
-			<modifications>
-				<item target="3e84f1d94e681e8d13f72291b3fb7d62|name" value="main_player" />
-				<item target="3e84f1d94e681e8d13f72291b3fb7d62|cCharacter|faction" value="Party1" />
-				<item target="3e84f1d94e681e8d13f72291b3fb7d62|flame::cNode|pos" value="7,0,16" />
-			</modifications>
 		</item>
 	</children>
 </prefab>
