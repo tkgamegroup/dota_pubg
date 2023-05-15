@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1525,687" />
+				<item type_name="flame::cElement" ext="1397,615" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="636.5,0" ext="252,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="603.25,0" ext="190.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -42,7 +42,7 @@
 				</item>
 				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,243" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="0,207" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -77,7 +77,7 @@
 				</item>
 				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
 					<components>
-						<item type_name="flame::cElement" pos="1409,243" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1281,207" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -112,7 +112,7 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="686.5,637" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="622.5,565" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" />
 					</components>
 					<children>
@@ -146,71 +146,38 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1252.88,635" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1124.88,563" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" />
 					</components>
 					<children>
-						<item file_id="443890cfd0983db458192a0b4ab539be" name="building_button">
-							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="63,28" background_col="180,176,49,255" />
-								<item type_name="flame::cLayout" />
-							</components>
-							<children>
-								<item file_id="4810a3faa0b55e2cdbb44f0bdb5900bf" name="text">
-									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="55,20" />
-										<item type_name="flame::cText" text="Building" font_size="20" border="0.1" />
-									</components>
-								</item>
-							</children>
+						<item filename="ui\button.prefab">
+							<modifications>
+								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,176,49,255" />
+								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Building" />
+							</modifications>
 						</item>
-						<item file_id="4c85a3e171dbe08b50fb1231e3460e85" name="army_button">
-							<components>
-								<item type_name="flame::cElement" pos="71,4" ext="45.5,28" background_col="49,163,180,255" />
-								<item type_name="flame::cLayout" />
-							</components>
-							<children>
-								<item file_id="49d0bc87a25bfcddb090f1bc0e8a16bd" name="text">
-									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="37.5,20" />
-										<item type_name="flame::cText" text="Army" font_size="20" border="0.1" />
-									</components>
-								</item>
-							</children>
+						<item filename="ui\button.prefab">
+							<modifications>
+								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="49,163,180,255" />
+								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Army" />
+							</modifications>
 						</item>
-						<item file_id="4a8a7c587df72e7b376c6a16fa1df195" name="route_button">
-							<components>
-								<item type_name="flame::cElement" pos="120.5,4" ext="48.625,28" background_col="180,100,49,255" />
-								<item type_name="flame::cLayout" />
-							</components>
-							<children>
-								<item file_id="480dedc76cafa8b5e603f1a168b0ce91" name="text">
-									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="40.625,20" />
-										<item type_name="flame::cText" text="Route" font_size="20" border="0.1" />
-									</components>
-								</item>
-							</children>
+						<item filename="ui\button.prefab">
+							<modifications>
+								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,100,49,255" />
+								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Route" />
+							</modifications>
 						</item>
-						<item file_id="49fd950a0823eb9f305e43dcf8eb5c8e" name="start_button">
-							<components>
-								<item type_name="flame::cElement" pos="173.125,4" ext="83,28" background_col="51,180,49,255" />
-								<item type_name="flame::cLayout" />
-							</components>
-							<children>
-								<item file_id="4111d67dac2d4e0085fced399d1f4d9d" name="text">
-									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="75,20" />
-										<item type_name="flame::cText" text="Start Battle" font_size="20" border="0.1" />
-									</components>
-								</item>
-							</children>
+						<item filename="ui\button.prefab">
+							<modifications>
+								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Start Battle" />
+							</modifications>
 						</item>
 					</children>
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
 					<components>
-						<item type_name="flame::cElement" pos="406.5,139.5" ext="712,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="342.5,103.5" ext="712,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -236,7 +203,7 @@
 								</item>
 								<item file_id="424ac3e695bf5882711eaebc83f653b1" name="space_3">
 									<components>
-										<item type_name="flame::cElement" pos="270.8,76" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="274.8,78" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="45926d9b91a52a09cbb533926f27a3ad" name="space_4">
@@ -261,7 +228,7 @@
 								</item>
 								<item file_id="44900f91f9e7fda62088c50c4e9796ba" name="space_8">
 									<components>
-										<item type_name="flame::cElement" pos="66.8,274" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="66.8,282" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4f7c5caf9c7c4c8e123f3879a22b4fb8" name="space_9">
@@ -271,7 +238,7 @@
 								</item>
 								<item file_id="4b5c64d7f492ce798dc2ca04fd2a0497" name="space_10">
 									<components>
-										<item type_name="flame::cElement" pos="276.8,268" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="274.8,280" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="43eaed927a22156bb04590b07e13a7a7" name="space_11">
@@ -302,14 +269,23 @@
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
 							<children>
-								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case" enable="false">
+								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,24" />
+										<item type_name="flame::cElement" pos="4,4" ext="94.25,28" />
+										<item type_name="flame::cLayout" />
 									</components>
+									<children>
+										<item file_id="4dc5058ff3da270618c5c02d5331fb8c" name="title_text">
+											<components>
+												<item type_name="flame::cElement" pos="4,4" ext="86.25,20" />
+												<item type_name="flame::cText" text="Empty Space" font_size="20" />
+											</components>
+										</item>
+									</children>
 								</item>
-								<item file_id="4ace711d5894d25817ed82b5d38ee5ad" name="built_up_case">
+								<item file_id="4ace711d5894d25817ed82b5d38ee5ad" name="built_up_case" enable="false">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="252,180" />
+										<item type_name="flame::cElement" pos="4,4" ext="198.5,260" />
 										<item type_name="flame::cLayout" />
 									</components>
 									<children>
@@ -333,35 +309,50 @@
 										</item>
 										<item file_id="4e928f3db480029d387a278553b25daa" name="upgrade_field">
 											<components>
-												<item type_name="flame::cElement" pos="4,84" ext="244,44" background_col="0,0,0,64" />
-												<item type_name="flame::cLayout" padding="0,0,0,0" />
+												<item type_name="flame::cElement" pos="4,84" ext="190.5,84" background_col="0,0,0,64" />
+												<item type_name="flame::cLayout" />
 											</components>
 											<children>
 												<item file_id="4d9a57bf7794c3ed93dea1b059c66886" name="text">
 													<components>
-														<item type_name="flame::cElement" ext="121.5,16" />
+														<item type_name="flame::cElement" pos="4,4" ext="121.5,16" />
 														<item type_name="flame::cText" text="Upgrade to LV2 needs:" />
 													</components>
 												</item>
 												<item filename="ui\resources_bar.prefab">
 													<modifications />
 												</item>
+												<item filename="ui\button.prefab">
+													<modifications>
+														<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Upgrade" />
+													</modifications>
+												</item>
 											</children>
 										</item>
 										<item file_id="4cebfe6700730738dd6ae8160a3dcda0" name="destroy_field">
 											<components>
-												<item type_name="flame::cElement" pos="4,132" ext="244,44" background_col="0,0,0,64" />
-												<item type_name="flame::cLayout" padding="0,0,0,0" />
+												<item type_name="flame::cElement" pos="4,172" ext="190.5,84" background_col="0,0,0,64" />
+												<item type_name="flame::cLayout" />
 											</components>
 											<children>
 												<item file_id="415006868ca9d38594c2eb7b462dab85" name="text">
 													<components>
-														<item type_name="flame::cElement" ext="170,16" />
+														<item type_name="flame::cElement" pos="4,4" ext="170,16" />
 														<item type_name="flame::cText" text="Destroy this building can return:" />
 													</components>
 												</item>
 												<item filename="ui\resources_bar.prefab">
-													<modifications />
+													<modifications>
+														<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cText|text" value="Gold: 250" />
+														<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cText|text" value="Wood: 250" />
+														<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cText|text" value="Stone: 250" />
+													</modifications>
+												</item>
+												<item filename="ui\button.prefab">
+													<modifications>
+														<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Destroy" />
+														<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,81,49,255" />
+													</modifications>
 												</item>
 											</children>
 										</item>
