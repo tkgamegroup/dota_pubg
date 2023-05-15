@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<prefab file_id="44add67d5a82088b2e6a49cffb074096" name="resources_bar">
+	<components>
+		<item type_name="flame::cElement" pos="59.5,4" ext="182.5,24" />
+		<item type_name="flame::cLayout" type="Horizontal" />
+	</components>
+	<children>
+		<item file_id="4b5d2c756749a5b980691f9e3c77d1a8" name="gold_text">
+			<components>
+				<item type_name="flame::cElement" pos="4,4" ext="51.5,16" />
+				<item type_name="flame::cText" text="Gold: 500" />
+			</components>
+		</item>
+		<item file_id="4027d3a13b30b832fd5e665d7cae5d81" name="wood_text">
+			<components>
+				<item type_name="flame::cElement" pos="59.5,4" ext="58,16" />
+				<item type_name="flame::cText" text="Wood: 500" />
+			</components>
+		</item>
+		<item file_id="4267e8bcf6ab70857d1e29698638f9b1" name="stone_text">
+			<components>
+				<item type_name="flame::cElement" pos="121.5,4" ext="57,16" />
+				<item type_name="flame::cText" text="Stone: 500" />
+			</components>
+		</item>
+	</children>
+</prefab>
