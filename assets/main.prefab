@@ -271,14 +271,30 @@
 							<children>
 								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="94.25,28" />
-										<item type_name="flame::cLayout" />
+										<item type_name="flame::cElement" pos="4,4" ext="292,392" horizontal_alignment="Fill" vertical_alignment="Fill" />
+										<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 									</components>
 									<children>
 										<item file_id="4dc5058ff3da270618c5c02d5331fb8c" name="title_text">
 											<components>
 												<item type_name="flame::cElement" pos="4,4" ext="86.25,20" />
 												<item type_name="flame::cText" text="Empty Space" font_size="20" />
+											</components>
+										</item>
+										<item file_id="41b18bc1784bc5ebb6642d2521d6f39a" name="text">
+											<components>
+												<item type_name="flame::cElement" pos="4,28" ext="128.5,16" />
+												<item type_name="flame::cText" text="Select a building to build" />
+											</components>
+										</item>
+										<item file_id="450567ff9f586e586cc51da0bfba1e90" name="building_list">
+											<components>
+												<item type_name="flame::cElement" pos="4,48" ext="284,150" background_col="0,0,0,64" horizontal_alignment="Fill" />
+											</components>
+										</item>
+										<item file_id="4c059ae88e680050cbe0d392653d6cb0" name="building_info">
+											<components>
+												<item type_name="flame::cElement" pos="4,202" ext="284,200" horizontal_alignment="Fill" />
 											</components>
 										</item>
 									</children>
