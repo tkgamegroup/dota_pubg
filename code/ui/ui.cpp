@@ -18,7 +18,9 @@
 #include "ui.h"
 
 graphics::CanvasPtr canvas = nullptr;
-EntityPtr ui = nullptr;
+EntityPtr ui_building_window = nullptr;
+EntityPtr ui_army_window = nullptr;
+EntityPtr ui_route_window = nullptr;
 EntityPtr ui_ability_slots[4] = { nullptr, nullptr, nullptr, nullptr };
 cElementPtr ui_hp_bar = nullptr;
 cElementPtr ui_mp_bar = nullptr;
@@ -36,8 +38,12 @@ void init_ui()
 	auto renderer = sRenderer::instance();
 	canvas = renderer->canvas;
 
-	if (ui = root->find_child("ui"); ui)
+	if (auto ui = root->find_child("ui"); ui)
 	{
+		ui_building_window = ui->find_child("building_window");
+		ui_army_window = ui->find_child("army_window");
+		ui_route_window = ui->find_child("route_window");
+
 		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
 		{
 			if (auto abilities_bar = bottom_bar->find_child("abilities_bar"); abilities_bar)
@@ -49,10 +55,16 @@ void init_ui()
 				}
 			}
 
-			ui_hp_bar = bottom_bar->find_child("hp_bar")->element();
-			ui_mp_bar = bottom_bar->find_child("mp_bar")->element();
-			ui_hp_text = ui_hp_bar->entity->find_child("hp_text")->get_component_t<cText>();
-			ui_mp_text = ui_mp_bar->entity->find_child("mp_text")->get_component_t<cText>();
+			if (auto e = bottom_bar->find_child("hp_bar"); e)
+			{
+				ui_hp_bar = e->element();
+				ui_hp_text = e->find_child("hp_text")->get_component_t<cText>();
+			}
+			if (auto e = bottom_bar->find_child("mp_bar"); e)
+			{
+				ui_mp_bar = e->element();
+				ui_mp_text = e->find_child("mp_text")->get_component_t<cText>();
+			}
 		}
 
 		if (auto e = ui->find_child("tip"); e)
@@ -236,9 +248,39 @@ struct EXPORT Action_open_building_window : Action
 {
 	void exec() override
 	{
-		if (auto window = ui->find_child("building_window"); window)
-		{
-			window->set_enable(true);
-		}
+		if (ui_building_window)
+			ui_building_window->set_enable(!ui_building_window->enable);
+		if (ui_army_window)
+			ui_army_window->set_enable(false);
+		if (ui_route_window)
+			ui_route_window->set_enable(false);
+	}
+};
+
+// Reflect ctor dtor
+struct EXPORT Action_open_army_window : Action
+{
+	void exec() override
+	{
+		if (ui_army_window)
+			ui_army_window->set_enable(!ui_army_window->enable);
+		if (ui_building_window)
+			ui_building_window->set_enable(false);
+		if (ui_route_window)
+			ui_route_window->set_enable(false);
+	}
+};
+
+// Reflect ctor dtor
+struct EXPORT Action_open_route_window : Action
+{
+	void exec() override
+	{
+		if (ui_route_window)
+			ui_route_window->set_enable(!ui_route_window->enable);
+		if (ui_building_window)
+			ui_building_window->set_enable(false);
+		if (ui_army_window)
+			ui_army_window->set_enable(false);
 	}
 };

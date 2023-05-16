@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1525,687" />
+				<item type_name="flame::cElement" ext="1397,615" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="663.25,0" ext="198.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="599.25,0" ext="198.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -42,7 +42,7 @@
 				</item>
 				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,239" ext="116,209" horizontal_alignment="End0" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="0,203" ext="116,209" horizontal_alignment="End0" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -77,7 +77,7 @@
 				</item>
 				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
 					<components>
-						<item type_name="flame::cElement" pos="1409,239" ext="116,209" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1281,203" ext="116,209" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -112,7 +112,7 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="686.5,633" ext="152,54" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="622.5,561" ext="152,54" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" />
 					</components>
 					<children>
@@ -146,7 +146,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1248.88,631" ext="276.125,56" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1120.88,559" ext="276.125,56" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" />
 					</components>
 					<children>
@@ -163,12 +163,18 @@
 							<modifications>
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="49,163,180,255" />
 								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Army" />
+								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
+									<value type="Action_open_army_window" />
+								</item>
 							</modifications>
 						</item>
 						<item filename="ui\button.prefab">
 							<modifications>
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,100,49,255" />
 								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Route" />
+								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
+									<value type="Action_open_route_window" />
+								</item>
 							</modifications>
 						</item>
 						<item filename="ui\button.prefab">
@@ -462,15 +468,16 @@
 						</item>
 					</children>
 				</item>
-				<item file_id="4f3375e95b75a811f633c5243055dc82" name="army_window" enable="false">
+				<item file_id="4f3375e95b75a811f633c5243055dc82" name="army_window">
 					<components>
-						<item type_name="flame::cElement" pos="404.5,139.5" ext="716,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="340.5,103.5" ext="716,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
 						<item file_id="4ab9e98d60fbb17be0c80e85e3d0cc8d" name="formation_area">
 							<components>
 								<item type_name="flame::cElement" pos="4,4" ext="400,400" background_col="0,0,0,64" />
+								<item type_name="flame::cLayout" type="Grid" columns="5" auto_width="false" auto_height="false" />
 							</components>
 						</item>
 						<item file_id="47586407d45a13763721674d0c765aa7" name="right_area">
