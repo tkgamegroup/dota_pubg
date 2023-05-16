@@ -18,6 +18,7 @@
 #include "ui.h"
 
 graphics::CanvasPtr canvas = nullptr;
+EntityPtr ui = nullptr;
 EntityPtr ui_ability_slots[4] = { nullptr, nullptr, nullptr, nullptr };
 cElementPtr ui_hp_bar = nullptr;
 cElementPtr ui_mp_bar = nullptr;
@@ -35,7 +36,7 @@ void init_ui()
 	auto renderer = sRenderer::instance();
 	canvas = renderer->canvas;
 
-	if (auto ui = root->find_child("ui"); ui)
+	if (ui = root->find_child("ui"); ui)
 	{
 		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
 		{
@@ -50,8 +51,8 @@ void init_ui()
 
 			ui_hp_bar = bottom_bar->find_child("hp_bar")->element();
 			ui_mp_bar = bottom_bar->find_child("mp_bar")->element();
-			ui_hp_text = bottom_bar->find_child("hp_text")->get_component_t<cText>();
-			ui_mp_text = bottom_bar->find_child("mp_text")->get_component_t<cText>();
+			ui_hp_text = ui_hp_bar->entity->find_child("hp_text")->get_component_t<cText>();
+			ui_mp_text = ui_mp_bar->entity->find_child("mp_text")->get_component_t<cText>();
 		}
 
 		if (auto e = ui->find_child("tip"); e)
@@ -229,3 +230,15 @@ void update_ui()
 		}
 	}
 }
+
+// Reflect ctor dtor
+struct EXPORT Action_open_building_window : Action
+{
+	void exec() override
+	{
+		if (auto window = ui->find_child("building_window"); window)
+		{
+			window->set_enable(true);
+		}
+	}
+};

@@ -1,8 +1,11 @@
 <?xml version="1.0"?>
 <prefab file_id="49fd950a0823eb9f305e43dcf8eb5c8e" name="button">
 	<components>
-		<item type_name="flame::cElement" pos="4,28" ext="53.625,28" background_col="51,180,49,255" />
+		<item type_name="flame::cElement" pos="4,28" ext="53.625,32" background_col="51,180,49,255" />
 		<item type_name="flame::cLayout" />
+		<item type_name="flame::cReceiver">
+			<click_action type="" />
+		</item>
 	</components>
 	<children>
 		<item file_id="4111d67dac2d4e0085fced399d1f4d9d" name="text">
