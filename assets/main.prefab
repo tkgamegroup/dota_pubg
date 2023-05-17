@@ -184,115 +184,116 @@
 						</item>
 					</children>
 				</item>
-				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window" enable="false">
+				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
 					<components>
-						<item type_name="flame::cElement" pos="399.5,139.5" ext="726,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="411.5,153.5" ext="574,308" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
 						<item file_id="4955a5fb094b190454a4bfbd1c53edaf" name="building_area">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="400,400" background_col="0,0,0,64" />
+								<item type_name="flame::cElement" pos="4,4" ext="248,300" background_col="0,0,0,64" />
+								<item type_name="flame::cLayout" type="Circle" columns="7" auto_width="false" auto_height="false" />
 							</components>
 							<children>
 								<item file_id="49cea6f746a481168208592654e123af" name="space_0">
 									<components>
-										<item type_name="flame::cElement" pos="164.8,18" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="108,0" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4279f813785c7d08bc9ef92271606384" name="space_1">
 									<components>
-										<item type_name="flame::cElement" pos="60.8,80" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="36,36" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="430ac3f17aec6aefce00ad5e85a6a697" name="space_2">
 									<components>
-										<item type_name="flame::cElement" pos="166.8,76" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="72,36" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="424ac3e695bf5882711eaebc83f653b1" name="space_3">
 									<components>
-										<item type_name="flame::cElement" pos="274.8,78" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="108,36" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="45926d9b91a52a09cbb533926f27a3ad" name="space_4">
 									<components>
-										<item type_name="flame::cElement" pos="22.8,176" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="144,36" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4dbfdce2e73eb981f8d2d3b4e661c6bc" name="space_5">
 									<components>
-										<item type_name="flame::cElement" pos="114.8,136" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="180,36" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4f451e4b84823b7cc9cc06c44276ba98" name="space_6">
 									<components>
-										<item type_name="flame::cElement" pos="238.8,136" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="36,72" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="49ceb3eb08ff6f3818a456b929977c8a" name="space_7">
 									<components>
-										<item type_name="flame::cElement" pos="328.8,194" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="72,72" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="44900f91f9e7fda62088c50c4e9796ba" name="space_8">
 									<components>
-										<item type_name="flame::cElement" pos="66.8,282" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="108,72" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4f7c5caf9c7c4c8e123f3879a22b4fb8" name="space_9">
 									<components>
-										<item type_name="flame::cElement" pos="174.8,282" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="144,72" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4b5c64d7f492ce798dc2ca04fd2a0497" name="space_10">
 									<components>
-										<item type_name="flame::cElement" pos="274.8,280" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="180,72" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="43eaed927a22156bb04590b07e13a7a7" name="space_11">
 									<components>
-										<item type_name="flame::cElement" pos="174.8,344" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="0,108" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4e8acf2613b64cfd5a040fda260f9b80" name="space_12">
 									<components>
-										<item type_name="flame::cElement" pos="172.8,184" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="36,108" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="46c5a3e8599824c946973772afd222b2" name="space_13">
 									<components>
-										<item type_name="flame::cElement" pos="112.8,220" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="72,108" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 								<item file_id="4230799c4152bbaf6f63f8a5443a9898" name="space_14">
 									<components>
-										<item type_name="flame::cElement" pos="240.8,224" ext="32,32" background_col="0,0,0,64" />
+										<item type_name="flame::cElement" pos="108,108" ext="32,32" background_col="0,0,0,64" />
 									</components>
 								</item>
 							</children>
 						</item>
 						<item file_id="4df03324dea0b59f1f6985966ae6509a" name="right_area">
 							<components>
-								<item type_name="flame::cElement" pos="408,4" ext="310,400" vertical_alignment="Fill" />
+								<item type_name="flame::cElement" pos="256,4" ext="310,300" vertical_alignment="Fill" />
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
 							<children>
 								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="302,392" horizontal_alignment="Fill" vertical_alignment="Fill" />
+										<item type_name="flame::cElement" pos="4,4" ext="302,292" horizontal_alignment="Fill" vertical_alignment="Fill" />
 										<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 									</components>
 									<children>
 										<item file_id="4dc5058ff3da270618c5c02d5331fb8c" name="title_text">
 											<components>
-												<item type_name="flame::cElement" pos="4,4" ext="0,0" />
+												<item type_name="flame::cElement" pos="4,4" ext="86.25,20" />
 												<item type_name="flame::cText" text="Empty Space" font_size="20" />
 											</components>
 										</item>
 										<item file_id="41b18bc1784bc5ebb6642d2521d6f39a" name="text">
 											<components>
-												<item type_name="flame::cElement" pos="4,28" ext="0,0" />
+												<item type_name="flame::cElement" pos="4,28" ext="128.5,16" />
 												<item type_name="flame::cText" text="Select a building to build" />
 											</components>
 										</item>
@@ -366,13 +367,13 @@
 											<children>
 												<item file_id="45f6f2b23523e6359491e04a0d2ff5b8" name="title_text">
 													<components>
-														<item type_name="flame::cElement" pos="4,4" ext="0,0" />
+														<item type_name="flame::cElement" pos="4,4" ext="35,20" />
 														<item type_name="flame::cText" text="Farm" font_size="20" />
 													</components>
 												</item>
 												<item file_id="439f4cb5d0fda3ef375e5a14b35e9dae" name="info_text">
 													<components>
-														<item type_name="flame::cElement" pos="4,28" ext="0,0" />
+														<item type_name="flame::cElement" pos="4,28" ext="71,16" />
 														<item type_name="flame::cText" text="Provide food." />
 													</components>
 												</item>
@@ -468,7 +469,7 @@
 						</item>
 					</children>
 				</item>
-				<item file_id="4f3375e95b75a811f633c5243055dc82" name="army_window">
+				<item file_id="4f3375e95b75a811f633c5243055dc82" name="army_window" enable="false">
 					<components>
 						<item type_name="flame::cElement" pos="340.5,103.5" ext="716,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
