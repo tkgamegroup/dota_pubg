@@ -236,9 +236,12 @@ struct EXPORT Action_open_building_window : Action
 {
 	void exec() override
 	{
-		if (auto window = ui->find_child("building_window"); window)
+		if (ui)
 		{
-			window->set_enable(true);
+			if (auto window = ui->find_child("building_window"); window)
+			{
+				window->set_enable(true);
+			}
 		}
 	}
 };
