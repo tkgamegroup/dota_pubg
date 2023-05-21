@@ -31,7 +31,7 @@
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="599.25,0" ext="198.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="603.25,0" ext="190.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -42,13 +42,13 @@
 				</item>
 				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,203" ext="116,209" horizontal_alignment="End0" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="0,207" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
 						<item file_id="4f6fb9319b8b6541e9426222e638049b" name="background">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="108,51" background_col="0,0,0,128" />
+								<item type_name="flame::cElement" pos="4,4" ext="108,47" background_col="0,0,0,128" />
 								<item type_name="flame::cLayout" />
 							</components>
 							<children>
@@ -77,13 +77,13 @@
 				</item>
 				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
 					<components>
-						<item type_name="flame::cElement" pos="1281,203" ext="116,209" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1281,207" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
 						<item file_id="43350bafe0c8cf035a29e02e6199efa5" name="background">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="108,51" background_col="0,0,0,128" />
+								<item type_name="flame::cElement" pos="4,4" ext="108,47" background_col="0,0,0,128" />
 								<item type_name="flame::cLayout" />
 							</components>
 							<children>
@@ -112,33 +112,41 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="622.5,561" ext="152,54" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
-						<item type_name="flame::cLayout" />
+						<item type_name="flame::cElement" pos="622.5,565" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
-						<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
+						<item file_id="40d3cd79033d7e0300e1dd077e1ef29a" name="selected_target">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="144,19" background_col="0,204,0,255" />
+								<item type_name="flame::cElement" ext="152,50" />
+								<item type_name="flame::cLayout" />
 							</components>
 							<children>
-								<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
+								<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
 									<components>
-										<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-										<item type_name="flame::cText" text="100/100" font_size="18" />
+										<item type_name="flame::cElement" pos="4,4" ext="144,19" background_col="0,204,0,255" />
 									</components>
+									<children>
+										<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
+											<components>
+												<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+												<item type_name="flame::cText" text="100/100" font_size="18" />
+											</components>
+										</item>
+									</children>
 								</item>
-							</children>
-						</item>
-						<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
-							<components>
-								<item type_name="flame::cElement" pos="4,27" ext="144,19" background_col="0,24,232,255" />
-							</components>
-							<children>
-								<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+								<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
 									<components>
-										<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-										<item type_name="flame::cText" text="100/100" font_size="18" border="0.2" />
+										<item type_name="flame::cElement" pos="4,27" ext="144,19" background_col="0,24,232,255" />
 									</components>
+									<children>
+										<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+											<components>
+												<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+												<item type_name="flame::cText" text="100/100" font_size="18" border="0.2" />
+											</components>
+										</item>
+									</children>
 								</item>
 							</children>
 						</item>
@@ -146,7 +154,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1120.88,559" ext="276.125,56" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1124.88,563" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" />
 					</components>
 					<children>
@@ -186,7 +194,7 @@
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
 					<components>
-						<item type_name="flame::cElement" pos="449.2,153.5" ext="498.6,308" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="451.2,153.5" ext="494.6,308" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -210,7 +218,7 @@
 							<children>
 								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="300,276" />
+										<item type_name="flame::cElement" pos="4,4" ext="300,264" />
 										<item type_name="flame::cLayout" />
 									</components>
 									<children>
@@ -236,7 +244,7 @@
 										</item>
 										<item file_id="4c059ae88e680050cbe0d392653d6cb0" name="building_info">
 											<components>
-												<item type_name="flame::cElement" pos="4,152" ext="194.5,116" />
+												<item type_name="flame::cElement" pos="4,152" ext="190.5,108" />
 												<item type_name="flame::cLayout" />
 											</components>
 											<children>
