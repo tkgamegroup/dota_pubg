@@ -26,7 +26,7 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1397,615" />
+				<item type_name="flame::cElement" ext="1397,615" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
@@ -186,103 +186,32 @@
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
 					<components>
-						<item type_name="flame::cElement" pos="411.5,153.5" ext="574,308" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="449.2,153.5" ext="498.6,308" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
 						<item file_id="4955a5fb094b190454a4bfbd1c53edaf" name="building_area">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="248,300" background_col="0,0,0,64" />
-								<item type_name="flame::cLayout" type="Circle" columns="7" auto_width="false" auto_height="false" />
+								<item type_name="flame::cElement" pos="4,4" ext="184,300" background_col="0,0,0,64" />
+								<item type_name="flame::cLayout" type="Circle" columns="5" auto_width="false" auto_height="false" />
+								<item type_name="flame::cList" prefab_name="ui\building_slot.prefab" count="21">
+									<modifiers>
+										<item _0="flame::cReceiver" _1="click_action.index" _2="output(i)" />
+									</modifiers>
+								</item>
 							</components>
-							<children>
-								<item file_id="49cea6f746a481168208592654e123af" name="space_0">
-									<components>
-										<item type_name="flame::cElement" pos="108,0" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4279f813785c7d08bc9ef92271606384" name="space_1">
-									<components>
-										<item type_name="flame::cElement" pos="36,36" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="430ac3f17aec6aefce00ad5e85a6a697" name="space_2">
-									<components>
-										<item type_name="flame::cElement" pos="72,36" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="424ac3e695bf5882711eaebc83f653b1" name="space_3">
-									<components>
-										<item type_name="flame::cElement" pos="108,36" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="45926d9b91a52a09cbb533926f27a3ad" name="space_4">
-									<components>
-										<item type_name="flame::cElement" pos="144,36" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4dbfdce2e73eb981f8d2d3b4e661c6bc" name="space_5">
-									<components>
-										<item type_name="flame::cElement" pos="180,36" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4f451e4b84823b7cc9cc06c44276ba98" name="space_6">
-									<components>
-										<item type_name="flame::cElement" pos="36,72" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="49ceb3eb08ff6f3818a456b929977c8a" name="space_7">
-									<components>
-										<item type_name="flame::cElement" pos="72,72" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="44900f91f9e7fda62088c50c4e9796ba" name="space_8">
-									<components>
-										<item type_name="flame::cElement" pos="108,72" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4f7c5caf9c7c4c8e123f3879a22b4fb8" name="space_9">
-									<components>
-										<item type_name="flame::cElement" pos="144,72" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4b5c64d7f492ce798dc2ca04fd2a0497" name="space_10">
-									<components>
-										<item type_name="flame::cElement" pos="180,72" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="43eaed927a22156bb04590b07e13a7a7" name="space_11">
-									<components>
-										<item type_name="flame::cElement" pos="0,108" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4e8acf2613b64cfd5a040fda260f9b80" name="space_12">
-									<components>
-										<item type_name="flame::cElement" pos="36,108" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="46c5a3e8599824c946973772afd222b2" name="space_13">
-									<components>
-										<item type_name="flame::cElement" pos="72,108" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-								<item file_id="4230799c4152bbaf6f63f8a5443a9898" name="space_14">
-									<components>
-										<item type_name="flame::cElement" pos="108,108" ext="32,32" background_col="0,0,0,64" />
-									</components>
-								</item>
-							</children>
+							<children />
 						</item>
 						<item file_id="4df03324dea0b59f1f6985966ae6509a" name="right_area">
 							<components>
-								<item type_name="flame::cElement" pos="256,4" ext="310,300" vertical_alignment="Fill" />
+								<item type_name="flame::cElement" pos="192,4" ext="298.6,300" vertical_alignment="Fill" />
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
 							<children>
 								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="302,292" horizontal_alignment="Fill" vertical_alignment="Fill" />
-										<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
+										<item type_name="flame::cElement" pos="4,4" ext="300,276" />
+										<item type_name="flame::cLayout" />
 									</components>
 									<children>
 										<item file_id="4dc5058ff3da270618c5c02d5331fb8c" name="title_text">
@@ -299,69 +228,15 @@
 										</item>
 										<item file_id="450567ff9f586e586cc51da0bfba1e90" name="building_list">
 											<components>
-												<item type_name="flame::cElement" pos="4,48" ext="294,100" background_col="0,0,0,64" horizontal_alignment="Fill" />
-												<item type_name="flame::cLayout" type="Grid" columns="8" auto_width="false" auto_height="false" />
+												<item type_name="flame::cElement" pos="4,48" ext="292,100" background_col="0,0,0,64" />
+												<item type_name="flame::cList" prefab_name="ui\building_info.prefab" count="9" />
+												<item type_name="flame::cLayout" type="Grid" columns="8" auto_height="false" />
 											</components>
-											<children>
-												<item file_id="4c9f12d170a81dcaaadc3a09cf2be393" name="item_0">
-													<components>
-														<item type_name="flame::cElement" pos="4,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="4ae08ca14a8f72c02f4b1c43d16f3094" name="item_1">
-													<components>
-														<item type_name="flame::cElement" pos="40,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="4988fe4bdf90edf96e17bf45746a769c" name="item_2">
-													<components>
-														<item type_name="flame::cElement" pos="76,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="43f64b404083cd4ed4f2b4209fbb7bb0" name="item_3">
-													<components>
-														<item type_name="flame::cElement" pos="112,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="49cd8408add9e39308232b84d31f8494" name="item_4">
-													<components>
-														<item type_name="flame::cElement" pos="148,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="444c6f50f9d426b28342a28c828fe4af" name="item_5">
-													<components>
-														<item type_name="flame::cElement" pos="184,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="4e1e8db049706fe221e87426a043c0bf" name="item_6">
-													<components>
-														<item type_name="flame::cElement" pos="220,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="46475793ece0045ad839acbabb091084" name="item_7">
-													<components>
-														<item type_name="flame::cElement" pos="256,4" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-												<item file_id="49ffa1882cc71fa3715ac3968aec1588" name="item_8">
-													<components>
-														<item type_name="flame::cElement" pos="4,40" ext="32,32" background_col="0,0,0,64" />
-														<item type_name="flame::cImage" />
-													</components>
-												</item>
-											</children>
+											<children />
 										</item>
 										<item file_id="4c059ae88e680050cbe0d392653d6cb0" name="building_info">
 											<components>
-												<item type_name="flame::cElement" pos="4,152" ext="194.5,116" horizontal_alignment="Fill" />
+												<item type_name="flame::cElement" pos="4,152" ext="194.5,116" />
 												<item type_name="flame::cLayout" />
 											</components>
 											<children>
@@ -392,7 +267,7 @@
 								</item>
 								<item file_id="4ace711d5894d25817ed82b5d38ee5ad" name="built_up_case" enable="false">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="198.5,260" />
+										<item type_name="flame::cElement" pos="4,4" ext="202.5,280" />
 										<item type_name="flame::cLayout" />
 									</components>
 									<children>
@@ -416,7 +291,7 @@
 										</item>
 										<item file_id="4e928f3db480029d387a278553b25daa" name="upgrade_field">
 											<components>
-												<item type_name="flame::cElement" pos="4,84" ext="190.5,84" background_col="0,0,0,64" />
+												<item type_name="flame::cElement" pos="4,84" ext="194.5,92" background_col="0,0,0,64" />
 												<item type_name="flame::cLayout" />
 											</components>
 											<children>
@@ -438,7 +313,7 @@
 										</item>
 										<item file_id="4cebfe6700730738dd6ae8160a3dcda0" name="destroy_field">
 											<components>
-												<item type_name="flame::cElement" pos="4,172" ext="190.5,84" background_col="0,0,0,64" />
+												<item type_name="flame::cElement" pos="4,180" ext="194.5,92" background_col="0,0,0,64" />
 												<item type_name="flame::cLayout" />
 											</components>
 											<children>

@@ -284,3 +284,15 @@ struct EXPORT Action_open_route_window : Action
 			ui_army_window->set_enable(false);
 	}
 };
+
+// Reflect ctor dtor
+struct EXPORT Action_building_slot_select : Action
+{
+	// Reflect
+	uint index;
+
+	void exec() override
+	{
+		printf("%d\n", index);
+	}
+};
