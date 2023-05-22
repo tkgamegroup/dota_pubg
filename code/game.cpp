@@ -32,7 +32,7 @@ void MainCamera::init(EntityPtr e)
 	}
 }
 
-void MainPlayer::init(EntityPtr e)
+void Player::init(EntityPtr e)
 {
 	entity = e;
 	if (e)
@@ -113,7 +113,7 @@ void MainPlayer::init(EntityPtr e)
 }
 
 MainCamera main_camera;
-MainPlayer main_player;
+Player main_player;
 
 GameState game_state = GameStatePrepare;
 
