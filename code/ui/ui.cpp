@@ -17,10 +17,74 @@
 #include "../entities/chest.h"
 #include "ui.h"
 
-graphics::CanvasPtr canvas = nullptr;
-EntityPtr ui_building_window = nullptr;
+struct UI_building_window
+{
+	EntityPtr window = nullptr;
+	EntityPtr building_area = nullptr;
+	EntityPtr empty_case = nullptr;
+	EntityPtr built_up_case = nullptr;
+
+	void init(EntityPtr ui)
+	{
+		window = ui->find_child("building_window");
+		if (window)
+		{
+			building_area = window->find_child_recursively("building_area");
+			empty_case = window->find_child_recursively("empty_case");
+			built_up_case = window->find_child_recursively("built_up_case");
+		}
+	}
+
+}ui_building_window;
+
 EntityPtr ui_army_window = nullptr;
 EntityPtr ui_route_window = nullptr;
+
+// Reflect ctor dtor
+struct EXPORT Action_open_building_window : Action
+{
+	void exec() override
+	{
+		if (ui_building_window.window)
+			ui_building_window.window->set_enable(!ui_building_window.window->enable);
+		if (ui_army_window)
+			ui_army_window->set_enable(false);
+		if (ui_route_window)
+			ui_route_window->set_enable(false);
+	}
+};
+
+// Reflect ctor dtor
+struct EXPORT Action_building_slot_select : Action
+{
+	// Reflect
+	uint index;
+
+	void exec() override
+	{
+		if (ui_building_window.building_area)
+		{
+			for (auto& c : ui_building_window.building_area->children)
+			{
+				if (auto element = c->element(); element)
+				{
+					auto col = element->frame_col;
+					col.a = 0;
+					element->set_frame_col(col);
+				}
+			}
+
+			if (auto element = ui_building_window.building_area->children[index]->element(); element)
+			{
+				auto col = element->frame_col;
+				col.a = 255;
+				element->set_frame_col(col);
+			}
+		}
+	}
+};
+
+graphics::CanvasPtr canvas = nullptr;
 EntityPtr ui_ability_slots[4] = { nullptr, nullptr, nullptr, nullptr };
 cElementPtr ui_hp_bar = nullptr;
 cElementPtr ui_mp_bar = nullptr;
@@ -40,7 +104,7 @@ void init_ui()
 
 	if (auto ui = root->find_child("ui"); ui)
 	{
-		ui_building_window = ui->find_child("building_window");
+		ui_building_window.init(ui);
 		ui_army_window = ui->find_child("army_window");
 		ui_route_window = ui->find_child("route_window");
 
@@ -244,28 +308,14 @@ void update_ui()
 }
 
 // Reflect ctor dtor
-struct EXPORT Action_open_building_window : Action
-{
-	void exec() override
-	{
-		if (ui_building_window)
-			ui_building_window->set_enable(!ui_building_window->enable);
-		if (ui_army_window)
-			ui_army_window->set_enable(false);
-		if (ui_route_window)
-			ui_route_window->set_enable(false);
-	}
-};
-
-// Reflect ctor dtor
 struct EXPORT Action_open_army_window : Action
 {
 	void exec() override
 	{
 		if (ui_army_window)
 			ui_army_window->set_enable(!ui_army_window->enable);
-		if (ui_building_window)
-			ui_building_window->set_enable(false);
+		if (ui_building_window.window)
+			ui_building_window.window->set_enable(false);
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
 	}
@@ -278,21 +328,9 @@ struct EXPORT Action_open_route_window : Action
 	{
 		if (ui_route_window)
 			ui_route_window->set_enable(!ui_route_window->enable);
-		if (ui_building_window)
-			ui_building_window->set_enable(false);
+		if (ui_building_window.window)
+			ui_building_window.window->set_enable(false);
 		if (ui_army_window)
 			ui_army_window->set_enable(false);
-	}
-};
-
-// Reflect ctor dtor
-struct EXPORT Action_building_slot_select : Action
-{
-	// Reflect
-	uint index;
-
-	void exec() override
-	{
-		printf("%d\n", index);
 	}
 };

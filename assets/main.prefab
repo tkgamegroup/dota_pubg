@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1533,687" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1428,615" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="671.25,0" ext="190.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="618.75,0" ext="190.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -43,13 +43,25 @@
 										<item first="flame::cText|text" second="output('Gold: ', main_player.gold)" />
 									</value>
 								</item>
+								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cDataUpdater|add" />
+								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cDataUpdater|items">
+									<value>
+										<item first="flame::cText|text" second="output('Wood: ', main_player.wood)" />
+									</value>
+								</item>
+								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cDataUpdater|add" />
+								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cDataUpdater|items">
+									<value>
+										<item first="flame::cText|text" second="output('Stone: ', main_player.stone)" />
+									</value>
+								</item>
 							</modifications>
 						</item>
 					</children>
 				</item>
 				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,243" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="0,207" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -84,7 +96,7 @@
 				</item>
 				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
 					<components>
-						<item type_name="flame::cElement" pos="1417,243" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1312,207" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -119,7 +131,7 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="690.5,637" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="638,565" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
@@ -161,7 +173,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1260.88,635" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1155.88,563" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" />
 					</components>
 					<children>
@@ -201,7 +213,7 @@
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
 					<components>
-						<item type_name="flame::cElement" pos="519.2,189.5" ext="494.6,308" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="466.7,153.5" ext="494.6,308" background_col="0,0,0,160" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
