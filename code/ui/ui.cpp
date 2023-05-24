@@ -37,7 +37,20 @@ struct UI_building_window
 
 }ui_building_window;
 
-EntityPtr ui_army_window = nullptr;
+struct UI_army_window
+{
+	EntityPtr window = nullptr;
+
+	void init(EntityPtr ui)
+	{
+		window = ui->find_child("army_window");
+		if (window)
+		{
+
+		}
+	}
+}ui_army_window;
+
 EntityPtr ui_route_window = nullptr;
 
 // Reflect ctor dtor
@@ -47,8 +60,8 @@ struct EXPORT Action_open_building_window : Action
 	{
 		if (ui_building_window.window)
 			ui_building_window.window->set_enable(!ui_building_window.window->enable);
-		if (ui_army_window)
-			ui_army_window->set_enable(false);
+		if (ui_army_window.window)
+			ui_army_window.window->set_enable(false);
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
 	}
@@ -84,6 +97,58 @@ struct EXPORT Action_building_slot_select : Action
 	}
 };
 
+// Reflect ctor dtor
+struct EXPORT Action_open_army_window : Action
+{
+	void exec() override
+	{
+		if (ui_army_window.window)
+			ui_army_window.window->set_enable(!ui_army_window.window->enable);
+		if (ui_building_window.window)
+			ui_building_window.window->set_enable(false);
+		if (ui_route_window)
+			ui_route_window->set_enable(false);
+	}
+};
+
+// Reflect ctor dtor
+struct EXPORT Action_formation_slot_click : Action
+{
+	// Reflect
+	uint index;
+
+	void exec() override
+	{
+
+	}
+};
+
+// Reflect ctor dtor
+struct EXPORT Action_unit_slot_select : Action
+{
+	// Reflect
+	uint index;
+
+	void exec() override
+	{
+
+	}
+};
+
+// Reflect ctor dtor
+struct EXPORT Action_open_route_window : Action
+{
+	void exec() override
+	{
+		if (ui_route_window)
+			ui_route_window->set_enable(!ui_route_window->enable);
+		if (ui_building_window.window)
+			ui_building_window.window->set_enable(false);
+		if (ui_army_window.window)
+			ui_army_window.window->set_enable(false);
+	}
+};
+
 graphics::CanvasPtr canvas = nullptr;
 EntityPtr ui_ability_slots[4] = { nullptr, nullptr, nullptr, nullptr };
 cElementPtr ui_hp_bar = nullptr;
@@ -105,7 +170,7 @@ void init_ui()
 	if (auto ui = root->find_child("ui"); ui)
 	{
 		ui_building_window.init(ui);
-		ui_army_window = ui->find_child("army_window");
+		ui_army_window.init(ui);
 		ui_route_window = ui->find_child("route_window");
 
 		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
@@ -306,31 +371,3 @@ void update_ui()
 		}
 	}
 }
-
-// Reflect ctor dtor
-struct EXPORT Action_open_army_window : Action
-{
-	void exec() override
-	{
-		if (ui_army_window)
-			ui_army_window->set_enable(!ui_army_window->enable);
-		if (ui_building_window.window)
-			ui_building_window.window->set_enable(false);
-		if (ui_route_window)
-			ui_route_window->set_enable(false);
-	}
-};
-
-// Reflect ctor dtor
-struct EXPORT Action_open_route_window : Action
-{
-	void exec() override
-	{
-		if (ui_route_window)
-			ui_route_window->set_enable(!ui_route_window->enable);
-		if (ui_building_window.window)
-			ui_building_window.window->set_enable(false);
-		if (ui_army_window)
-			ui_army_window->set_enable(false);
-	}
-};
