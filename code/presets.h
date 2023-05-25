@@ -18,6 +18,8 @@ struct UnitInfosPreset
 	std::vector<UnitInfo> infos;
 };
 
+extern UnitInfosPreset unit_infos;
+
 struct BuildingInfo
 {
 	std::string				name;
@@ -33,3 +35,7 @@ struct BuildingInfosPreset
 	// Reflect
 	std::vector<BuildingInfo> infos;
 };
+
+extern BuildingInfosPreset building_infos;
+
+void init_presets();

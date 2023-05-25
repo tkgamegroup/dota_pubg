@@ -1,2 +1,6 @@
 <?xml version="1.0"?>
-<preset type="UnitInfosPreset" />
+<preset type="UnitInfosPreset">
+	<infos>
+		<item name="chuizibing" icon_uvs="0,0,1,1" />
+	</infos>
+</preset>

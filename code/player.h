@@ -8,7 +8,6 @@ struct Player
 {
 	// Reflect
 	uint faction;
-	uint character_id;
 
 	// Reflect
 	uint gold = 0;
@@ -17,14 +16,9 @@ struct Player
 	// Reflect
 	uint stone = 0;
 
-	EntityPtr entity = nullptr;
-	cNodePtr node = nullptr;
-	cNavAgentPtr nav_agent = nullptr;
-	cCharacterPtr character = nullptr;
-
-	void init(EntityPtr e);
-	std::vector<BuildingInfo> get_avaliable_building_infos() const;
-	std::vector<UnitInfo> get_avaliable_unit_infos() const;
+	void init();
+	std::vector<std::string> avaliable_building_infos;
+	std::vector<std::string> avaliable_unit_infos;
 };
 // Reflect
 extern Player main_player;

@@ -7,6 +7,7 @@
 #include <flame/universe/components/element.h>
 #include <flame/universe/components/text.h>
 #include <flame/universe/components/image.h>
+#include <flame/universe/components/list.h>
 #include <flame/universe/systems/input.h>
 #include <flame/universe/systems/renderer.h>
 
@@ -68,8 +69,6 @@ struct EXPORT Action_open_building_window : Action
 			ui_army_window.window->set_enable(false);
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
-
-		auto avaliable_buildings = main_player.get_avaliable_building_infos();
 	}
 };
 
@@ -115,7 +114,14 @@ struct EXPORT Action_open_army_window : Action
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
 
-		auto avaliable_units = main_player.get_avaliable_unit_infos();
+		if (ui_army_window.unit_list)
+		{
+			if (auto list = ui_army_window.unit_list->get_component_t<cList>(); list)
+			{
+				list->set_count(main_player.avaliable_unit_infos.size());
+				;
+			}
+		}
 	}
 };
 
@@ -158,7 +164,6 @@ struct EXPORT Action_open_route_window : Action
 };
 
 graphics::CanvasPtr canvas = nullptr;
-EntityPtr ui_ability_slots[4] = { nullptr, nullptr, nullptr, nullptr };
 cElementPtr ui_hp_bar = nullptr;
 cElementPtr ui_mp_bar = nullptr;
 cTextPtr ui_hp_text = nullptr;
@@ -183,15 +188,6 @@ void init_ui()
 
 		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
 		{
-			if (auto abilities_bar = bottom_bar->find_child("abilities_bar"); abilities_bar)
-			{
-				for (auto i = 0; i < 4; i++)
-				{
-					auto e = abilities_bar->find_child("slot" + str(i + 1));
-					ui_ability_slots[i] = e;
-				}
-			}
-
 			if (auto e = bottom_bar->find_child("hp_bar"); e)
 			{
 				ui_hp_bar = e->element();
@@ -215,62 +211,64 @@ void deinit_ui()
 
 void update_ui()
 {
-	if (main_player.character)
-	{
-		for (auto i = 0; i < 4; i++)
-		{
-			if (auto e = ui_ability_slots[i]; e)
-			{
-				if (auto ability = main_player.character->get_ability(i); ability)
-				{
-					if (auto img = e->get_component_t<cImage>(); img)
-						img->set_image_name(ability->icon_name);
-					if (auto e2 = e->find_child("mana"); e2)
-					{
-						if (auto txt = e2->get_component_t<cText>(); txt)
-							txt->set_text(wstr(ability->mp));
-					}
-				}
-				else
-				{
-					if (auto img = e->get_component_t<cImage>(); img)
-						img->set_image_name(L"");
-					if (auto e2 = e->find_child("mana"); e2)
-					{
-						if (auto txt = e2->get_component_t<cText>(); txt)
-							txt->set_text(L"");
-					}
-				}
+	// TODO: show selected character
+	//if (main_player.character)
+	//{
+	//	for (auto i = 0; i < 4; i++)
+	//	{
+	//		if (auto e = ui_ability_slots[i]; e)
+	//		{
+	//			if (auto ability = main_player.character->get_ability(i); ability)
+	//			{
+	//				if (auto img = e->get_component_t<cImage>(); img)
+	//					img->set_image_name(ability->icon_name);
+	//				if (auto e2 = e->find_child("mana"); e2)
+	//				{
+	//					if (auto txt = e2->get_component_t<cText>(); txt)
+	//						txt->set_text(wstr(ability->mp));
+	//				}
+	//			}
+	//			else
+	//			{
+	//				if (auto img = e->get_component_t<cImage>(); img)
+	//					img->set_image_name(L"");
+	//				if (auto e2 = e->find_child("mana"); e2)
+	//				{
+	//					if (auto txt = e2->get_component_t<cText>(); txt)
+	//						txt->set_text(L"");
+	//				}
+	//			}
 
-				if (ui_hp_bar)
-					ui_hp_bar->set_scl(vec2((float)main_player.character->hp / (float)main_player.character->hp_max, 1.f));
-				if (ui_mp_bar)
-					ui_mp_bar->set_scl(vec2((float)main_player.character->mp / (float)main_player.character->mp_max, 1.f));
-				if (ui_hp_text)
-					ui_hp_text->set_text(wstr(main_player.character->hp) + L"/" + wstr(main_player.character->hp_max));
-				if (ui_mp_text)
-					ui_mp_text->set_text(wstr(main_player.character->mp) + L"/" + wstr(main_player.character->mp_max));
-			}
-		}
-	}
+	//			if (ui_hp_bar)
+	//				ui_hp_bar->set_scl(vec2((float)main_player.character->hp / (float)main_player.character->hp_max, 1.f));
+	//			if (ui_mp_bar)
+	//				ui_mp_bar->set_scl(vec2((float)main_player.character->mp / (float)main_player.character->mp_max, 1.f));
+	//			if (ui_hp_text)
+	//				ui_hp_text->set_text(wstr(main_player.character->hp) + L"/" + wstr(main_player.character->hp_max));
+	//			if (ui_mp_text)
+	//				ui_mp_text->set_text(wstr(main_player.character->mp) + L"/" + wstr(main_player.character->mp_max));
+	//		}
+	//	}
+	//}
 
 	std::wstring tip_str = L"";
 	vec3 tip_pos;
 
-	if (main_player.character)
-	{
-		auto r = main_player.nav_agent->radius + 0.05f;
-		auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-		std::vector<vec3> pts(circle_draw.pts.size() * 2);
-		auto center = main_player.node->pos;
-		center.y += 0.1f;
-		for (auto i = 0; i < circle_draw.pts.size(); i++)
-		{
-			pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-			pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-		}
-		sRenderer::instance()->draw_primitives("LineList"_h, pts.data(), pts.size(), cvec4(85, 131, 79, 255), true);
-	}
+	// TODO: show selected character
+	//if (main_player.character)
+	//{
+	//	auto r = main_player.nav_agent->radius + 0.05f;
+	//	auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+	//	std::vector<vec3> pts(circle_draw.pts.size() * 2);
+	//	auto center = main_player.node->pos;
+	//	center.y += 0.1f;
+	//	for (auto i = 0; i < circle_draw.pts.size(); i++)
+	//	{
+	//		pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+	//		pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+	//	}
+	//	sRenderer::instance()->draw_primitives("LineList"_h, pts.data(), pts.size(), cvec4(85, 131, 79, 255), true);
+	//}
 
 	if (main_camera.camera)
 	{
@@ -306,8 +304,8 @@ void update_ui()
 					if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
 						ds.emplace_back("mesh"_h, mesh->mesh_res_id, mesh->instance_id);
 				}
-				sRenderer::instance()->draw_outlines(ds, main_player.character &&
-					hovering_character->faction == main_player.character->faction ? cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
+				sRenderer::instance()->draw_outlines(ds, hovering_character->faction == main_player.faction ? 
+					cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
 
 				tip_str = s2w(hovering_character->entity->name);
 				tip_pos = hovering_character->get_pos() + vec3(0.f, 0.2f, 0.f);
@@ -328,39 +326,39 @@ void update_ui()
 		}
 	}
 
-	if (select_distance > 0.f)
-	{
-		if (select_range > 0.f)
-		{
-			auto r = select_range;
-			auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-			auto center = hovering_pos;
-			std::vector<vec3> pts(circle_draw.pts.size() * 3);
-			for (auto i = 0; i < circle_draw.pts.size(); i++)
-			{
-				pts[i * 2 + 0] = center;
-				pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-				pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-			}
+	//if (select_distance > 0.f)
+	//{
+	//	if (select_range > 0.f)
+	//	{
+	//		auto r = select_range;
+	//		auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+	//		auto center = hovering_pos;
+	//		std::vector<vec3> pts(circle_draw.pts.size() * 3);
+	//		for (auto i = 0; i < circle_draw.pts.size(); i++)
+	//		{
+	//			pts[i * 2 + 0] = center;
+	//			pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+	//			pts[i * 2 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+	//		}
 
-			sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
-		}
-		else
-		{
-			auto r = select_distance;
-			auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-			auto center = main_player.node->pos;
-			std::vector<vec3> pts(circle_draw.pts.size() * 3);
-			for (auto i = 0; i < circle_draw.pts.size(); i++)
-			{
-				pts[i * 3 + 0] = center;
-				pts[i * 3 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-				pts[i * 3 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-			}
+	//		sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
+	//	}
+	//	else
+	//	{
+	//		auto r = select_distance;
+	//		auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+	//		auto center = main_player.node->pos;
+	//		std::vector<vec3> pts(circle_draw.pts.size() * 3);
+	//		for (auto i = 0; i < circle_draw.pts.size(); i++)
+	//		{
+	//			pts[i * 3 + 0] = center;
+	//			pts[i * 3 + 1] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+	//			pts[i * 3 + 2] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+	//		}
 
-			sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
-		}
-	}
+	//		sRenderer::instance()->draw_primitives("TriangleList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 100), true);
+	//	}
+	//}
 
 	if (ui_tip)
 	{

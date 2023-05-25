@@ -35,72 +35,72 @@ void ViewEquipment::on_draw()
 	ImGui::SameLine();
 
 	ImGui::SetCursorPos(offset + vec2(195.f, 20.f));
-	if (main_player.character)
-	{
-		if (ImGui::BeginTable("##t1", 3));
-		{
+	//if (main_player.character)
+	//{
+	//	if (ImGui::BeginTable("##t1", 3));
+	//	{
 
-			ImGui::TableNextRow();
-			ImGui::TableNextColumn();
-			ImGui::TextUnformatted("ATK DMG");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::TextUnformatted("Attack damage.");
-				ImGui::EndTooltip();
-			}
-			ImGui::TableNextColumn();
-			ImGui::Text("%5d", main_player.character->atk);
+	//		ImGui::TableNextRow();
+	//		ImGui::TableNextColumn();
+	//		ImGui::TextUnformatted("ATK DMG");
+	//		if (ImGui::IsItemHovered())
+	//		{
+	//			ImGui::BeginTooltip();
+	//			ImGui::TextUnformatted("Attack damage.");
+	//			ImGui::EndTooltip();
+	//		}
+	//		ImGui::TableNextColumn();
+	//		ImGui::Text("%5d", main_player.character->atk);
 
-			ImGui::TableNextRow();
-			ImGui::TableNextColumn();
-			ImGui::TextUnformatted("Physical DEF");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::TextUnformatted("Physical Defense.");
-				ImGui::EndTooltip();
-			}
-			ImGui::TableNextColumn();
-			ImGui::Text("%5d", main_player.character->phy_def);
+	//		ImGui::TableNextRow();
+	//		ImGui::TableNextColumn();
+	//		ImGui::TextUnformatted("Physical DEF");
+	//		if (ImGui::IsItemHovered())
+	//		{
+	//			ImGui::BeginTooltip();
+	//			ImGui::TextUnformatted("Physical Defense.");
+	//			ImGui::EndTooltip();
+	//		}
+	//		ImGui::TableNextColumn();
+	//		ImGui::Text("%5d", main_player.character->phy_def);
 
-			ImGui::TableNextRow();
-			ImGui::TableNextColumn();
-			ImGui::TextUnformatted("Magic DEF");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::TextUnformatted("Magic Defense.");
-				ImGui::EndTooltip();
-			}
-			ImGui::TableNextColumn();
-			ImGui::Text("%5d", main_player.character->mag_def);
+	//		ImGui::TableNextRow();
+	//		ImGui::TableNextColumn();
+	//		ImGui::TextUnformatted("Magic DEF");
+	//		if (ImGui::IsItemHovered())
+	//		{
+	//			ImGui::BeginTooltip();
+	//			ImGui::TextUnformatted("Magic Defense.");
+	//			ImGui::EndTooltip();
+	//		}
+	//		ImGui::TableNextColumn();
+	//		ImGui::Text("%5d", main_player.character->mag_def);
 
-			ImGui::TableNextRow();
-			ImGui::TableNextColumn();
-			ImGui::TextUnformatted("Move SP");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::TextUnformatted("Move speed.");
-				ImGui::EndTooltip();
-			}
-			ImGui::TableNextColumn();
-			ImGui::Text("%5d", main_player.character->mov_sp);
+	//		ImGui::TableNextRow();
+	//		ImGui::TableNextColumn();
+	//		ImGui::TextUnformatted("Move SP");
+	//		if (ImGui::IsItemHovered())
+	//		{
+	//			ImGui::BeginTooltip();
+	//			ImGui::TextUnformatted("Move speed.");
+	//			ImGui::EndTooltip();
+	//		}
+	//		ImGui::TableNextColumn();
+	//		ImGui::Text("%5d", main_player.character->mov_sp);
 
-			ImGui::TableNextRow();
-			ImGui::TableNextColumn();
-			ImGui::TextUnformatted("ATK SP");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::TextUnformatted("Attack speed.");
-				ImGui::EndTooltip();
-			}
-			ImGui::TableNextColumn();
-			ImGui::Text("%5d", main_player.character->atk_sp);
+	//		ImGui::TableNextRow();
+	//		ImGui::TableNextColumn();
+	//		ImGui::TextUnformatted("ATK SP");
+	//		if (ImGui::IsItemHovered())
+	//		{
+	//			ImGui::BeginTooltip();
+	//			ImGui::TextUnformatted("Attack speed.");
+	//			ImGui::EndTooltip();
+	//		}
+	//		ImGui::TableNextColumn();
+	//		ImGui::Text("%5d", main_player.character->atk_sp);
 
-			ImGui::EndTable();
-		}
-	}
+	//		ImGui::EndTable();
+	//	}
+	//}
 }

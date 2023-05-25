@@ -201,15 +201,6 @@ cCharacter::~cCharacter()
 	node->measurers.remove("character"_h);
 
 	if (armature)
-		armature->playing_callbacks.remove("character"_h);
-
-	if (main_player.character == this)
-	{
-		main_player.entity = nullptr;
-		main_player.node = nullptr;
-		main_player.nav_agent = nullptr;
-		main_player.character = nullptr;
-	}
 
 	std::erase_if(characters, [this](const auto& i) {
 		return i == this;
@@ -585,12 +576,6 @@ void cCharacter::inflict_damage(cCharacterPtr target, DamageType type, uint valu
 	;
 	if (target->take_damage(type, value))
 		gain_exp(target->exp_max * 0.15f);
-
-	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-	{
-		if (target == main_player.character || this == main_player.character)
-			add_floating_text(target->node->pos + vec3(0.f, 0.8f, 0.f), str(value), cvec4(255));
-	}
 }
 
 bool cCharacter::take_damage(DamageType type, uint value)

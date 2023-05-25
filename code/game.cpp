@@ -10,6 +10,7 @@
 #include "map.h"
 #include "control.h"
 #include "network.h"
+#include "presets.h"
 #include "ui/ui.h"
 #include "entities/ability.h"
 #include "entities/buff.h"
@@ -362,10 +363,11 @@ cGame::~cGame()
 void cGame::start()
 {
 	root = entity;
-	main_player.init(root->find_child("main_player"));
 	main_camera.init(root->find_child("main_camera"));
 	init_ui();
 	init_control();
+	init_presets();
+	main_player.init();
 
 	preload_images.push_back(graphics::Image::get(L"assets\\effects\\Fireball.png"));
 }
@@ -408,20 +410,6 @@ void cGame::update()
 		update_control();
 	if (enable_ui)
 		update_ui();
-
-	if (wtf)
-	{
-		if (auto chr = main_player.character; chr)
-		{
-			chr->set_hp(chr->hp_max);
-			chr->set_mp(chr->mp_max);
-			for (auto i = 0; i < 4; i++)
-			{
-				if (auto ability = chr->get_ability(i); ability)
-					ability->cd_timer = 0.f;
-			}
-		}
-	}
 }
 
 cLauncher::~cLauncher()

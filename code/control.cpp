@@ -42,95 +42,7 @@ void reset_select()
 
 void init_control()
 {
-	for (auto i = 0; i < 4; i++)
-	{
-		if (ui_ability_slots[i])
-		{
-			if (auto receiver = ui_ability_slots[i]->get_component_t<cReceiver>(); receiver)
-			{
-				receiver->click_listeners.add([i]() {
-					if (main_player.character)
-					{
-						if (auto ability = main_player.character->get_ability(i); ability)
-						{
-							if (ability->cd_timer > 0.f)
-							{
-								//illegal_op_str = "Cooldowning.";
-								//illegal_op_str_timer = 3.f;
-								return;
-							}
 
-							if (main_player.character->mp < ability->mp)
-							{
-								//illegal_op_str = "Not Enough MP.";
-								//illegal_op_str_timer = 3.f;
-								return;
-							}
-
-							select_mode = ability->target_type;
-							if (select_mode == TargetNull)
-							{
-								if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-									main_player.character->cmd_cast_ability(ability);
-								else if (multi_player == MultiPlayerAsClient)
-								{
-									//std::ostringstream res;
-									//nwCommandCharacterStruct stru;
-									//stru.id = main_player.character->object->uid;
-									//stru.type = "CastAbility"_h;
-									//stru.id2 = ins->id;
-									//pack_msg(res, nwCommandCharacter, stru);
-									//so_client->send(res.str());
-								}
-							}
-							else
-							{
-								if (ability->target_type & TargetLocation)
-								{
-									select_location_callback = [ability](const vec3& location) {
-										if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-											main_player.character->cmd_cast_ability_to_location(ability, location);
-										else if (multi_player == MultiPlayerAsClient)
-										{
-											//std::ostringstream res;
-											//nwCommandCharacterStruct stru;
-											//stru.id = main_player.character->object->uid;
-											//stru.type = "CastAbilityToLocation"_h;
-											//stru.id2 = ins->id;
-											//stru.t.location = location;
-											//pack_msg(res, nwCommandCharacter, stru);
-											//so_client->send(res.str());
-										}
-									};
-									select_distance = ability->distance;
-									select_range = ability->range;
-								}
-								if (ability->target_type & TargetEnemy)
-								{
-									select_enemy_callback = [ability](cCharacterPtr character) {
-										if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
-											main_player.character->cmd_cast_ability_to_target(ability, character);
-										else if (multi_player == MultiPlayerAsClient)
-										{
-											//std::ostringstream res;
-											//nwCommandCharacterStruct stru;
-											//stru.id = main_player.character->object->uid;
-											//stru.type = "CastAbilityToTarget"_h;
-											//stru.id2 = ins->id;
-											//stru.t.target = character->object->uid;
-											//pack_msg(res, nwCommandCharacter, stru);
-											//so_client->send(res.str());
-										}
-									};
-									select_distance = ability->distance;
-								}
-							}
-						}
-					}
-				});
-			}
-		}
-	}
 }
 
 void update_control()
@@ -149,17 +61,14 @@ void update_control()
 			{
 				if (auto character = n->entity->get_component_t<cCharacter>(); character)
 				{
-					if (character != main_player.character)
+					if (auto first_child = character->entity->children.empty() ? nullptr : character->entity->children[0].get(); first_child)
 					{
-						if (auto first_child = character->entity->children.empty() ? nullptr : character->entity->children[0].get(); first_child)
+						for (auto& c : first_child->children)
 						{
-							for (auto& c : first_child->children)
+							if (auto mesh = c->get_component_t<cMesh>(); mesh)
 							{
-								if (auto mesh = c->get_component_t<cMesh>(); mesh)
-								{
-									if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-										draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
-								}
+								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 							}
 						}
 					}
@@ -215,9 +124,9 @@ void update_control()
 	if (hovering_node)
 	{
 		auto can_select = [](cCharacterPtr character) {
-			if (!(select_mode & TargetEnemy) && main_player.character->faction != character->faction)
+			if (!(select_mode & TargetEnemy) && main_player.faction != character->faction)
 				return false;
-			if (!(select_mode & TargetFriendly) && main_player.character->faction == character->faction)
+			if (!(select_mode & TargetFriendly) && main_player.faction == character->faction)
 				return false;
 			return true;
 		};
@@ -275,7 +184,7 @@ void update_control()
 		{
 			if (select_mode & TargetEnemy)
 			{
-				if (hovering_character && main_player.character->faction != hovering_character->faction)
+				if (hovering_character && main_player.faction != hovering_character->faction)
 				{
 					if (select_enemy_callback)
 						select_enemy_callback(hovering_character);
@@ -293,58 +202,6 @@ void update_control()
 			}
 		}
 	}
-	if (main_player.character)
-	{
-		if (input->mpressed(Mouse_Right))
-		{
-			if (select_mode == TargetNull)
-			{
-				if (hovering_character)
-				{
-					if (hovering_character->faction != main_player.character->faction)
-						command_character_attack_target(main_player.character, hovering_character);
-				}
-				else if (hovering_chest)
-					command_character_pickup(main_player.character, hovering_chest);
-				else if (hovering_terrain)
-				{
-					command_character_moveto(main_player.character, hovering_pos);
-					//add_location_icon(hovering_pos);
-				}
-			}
-			else
-				reset_select();
-		}
-
-		if (input->kpressed(Keyboard_A))
-		{
-			select_mode = TargetTypeFlags(TargetEnemy | TargetLocation);
-			select_enemy_callback = [](cCharacterPtr character) {
-				command_character_attack_target(main_player.character, character);
-			};
-			select_location_callback = [](const vec3& pos) {
-				command_character_attack_location(main_player.character, pos);
-			};
-		}
-		if (input->kpressed(Keyboard_S))
-			command_character_idle(main_player.character);
-		if (input->kpressed(Keyboard_H))
-			command_character_hold(main_player.character);
-		//for (auto i = 0; i < countof(shortcuts); i++)
-		//{
-		//	auto shortcut = shortcuts[i].get();
-		//	if (shortcut->key != KeyboardKey_Count && input->kpressed(shortcut->key))
-		//		shortcut->click();
-		//}
-	}
-	//if (input->kpressed(Keyboard_Esc))
-	//	reset_select();
-	//if (input->kpressed(Keyboard_F1))
-	//	toggle_equipment_view();
-	//if (input->kpressed(Keyboard_F2))
-	//	toggle_ability_view();
-	//if (input->kpressed(Keyboard_F3))
-	//	toggle_inventory_view();
 }
 
 void command_character_idle(cCharacterPtr character)
