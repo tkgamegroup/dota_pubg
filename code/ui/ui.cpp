@@ -41,13 +41,16 @@ struct UI_building_window
 struct UI_army_window
 {
 	EntityPtr window = nullptr;
+	EntityPtr fomation_area = nullptr;
+	EntityPtr unit_list = nullptr;
 
 	void init(EntityPtr ui)
 	{
 		window = ui->find_child("army_window");
 		if (window)
 		{
-
+			fomation_area = window->find_child_recursively("fomation_area");
+			unit_list = window->find_child_recursively("unit_list");
 		}
 	}
 }ui_army_window;
