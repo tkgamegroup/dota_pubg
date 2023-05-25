@@ -11,6 +11,7 @@
 #include <flame/universe/systems/renderer.h>
 
 #include "game.h"
+#include "player.h"
 #include "control.h"
 #include "ui/ui.h"
 #include "network.h"

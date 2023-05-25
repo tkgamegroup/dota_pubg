@@ -3,6 +3,7 @@
 #include "ui.h"
 #include "view_equipment.h"
 #include "../game.h"
+#include "../player.h"
 #include "../entities/character.h"
 #include "../entities/buff.h"
 

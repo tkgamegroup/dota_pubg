@@ -6,6 +6,7 @@
 #include <flame/universe/systems/scene.h>
 
 #include "game.h"
+#include "player.h"
 #include "map.h"
 #include "control.h"
 #include "network.h"
@@ -32,88 +33,7 @@ void MainCamera::init(EntityPtr e)
 	}
 }
 
-void Player::init(EntityPtr e)
-{
-	entity = e;
-	if (e)
-	{
-		node = e->node();
-		nav_agent = e->get_component_t<cNavAgent>();
-		character = e->get_component_t<cCharacter>();
-
-		character->message_listeners.add([](CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3) {
-			//auto find_shortcut = [](Shortcut::Type type, int id) {
-			//	for (auto& shortcut : shortcuts)
-			//	{
-			//		if (shortcut->type == type && shortcut->id == id)
-			//			return true;
-			//	}
-			//	return false;
-			//};
-
-			//switch (msg)
-			//{
-			//case CharacterGainItem:
-			//{
-			//	auto ins = main_player.character->inventory[p2.i].get();
-			//	if (Item::get(ins->id).active && !find_shortcut(Shortcut::tItem, ins->id))
-			//	{
-			//		for (auto& shortcut : shortcuts)
-			//		{
-			//			if (shortcut->type == Shortcut::tNull)
-			//			{
-			//				auto key = shortcut->key;
-			//				shortcut.reset(new ItemShortcut(ins));
-			//				shortcut->key = key;
-			//				break;
-			//			}
-			//		}
-			//	}
-			//}
-			//	break;
-			//case CharacterGainAbility:
-			//{
-			//	auto ins = main_player.character->abilities[p2.i].get();
-			//	if (ins->lv > 0 && Ability::get(ins->id).active && !find_shortcut(Shortcut::tAbility, ins->id))
-			//	{
-			//		for (auto& shortcut : shortcuts)
-			//		{
-			//			if (shortcut->type == Shortcut::tNull)
-			//			{
-			//				auto key = shortcut->key;
-			//				shortcut.reset(new AbilityShortcut(ins));
-			//				shortcut->key = key;
-			//				break;
-			//			}
-			//		}
-			//	}
-			//}
-			//	break;
-			//case CharacterAbilityLevelUp:
-			//{
-			//	auto ins = main_player.character->abilities[p0.i].get();
-			//	if (ins->lv == 1 && Ability::get(ins->id).active && !find_shortcut(Shortcut::tAbility, ins->id))
-			//	{
-			//		for (auto& shortcut : shortcuts)
-			//		{
-			//			if (shortcut->type == Shortcut::tNull)
-			//			{
-			//				auto key = shortcut->key;
-			//				shortcut.reset(new AbilityShortcut(ins));
-			//				shortcut->key = key;
-			//				break;
-			//			}
-			//		}
-			//	}
-			//}
-			//	break;
-			//}
-		});
-	}
-}
-
 MainCamera main_camera;
-Player main_player;
 
 GameState game_state = GameStatePrepare;
 

@@ -14,30 +14,6 @@ struct MainCamera
 };
 extern MainCamera main_camera;
 
-// Reflect
-struct Player
-{
-	// Reflect
-	uint faction;
-	uint character_id;
-
-	// Reflect
-	uint gold = 0;
-	// Reflect
-	uint wood = 0;
-	// Reflect
-	uint stone = 0;
-
-	EntityPtr entity = nullptr;
-	cNodePtr node = nullptr;
-	cNavAgentPtr nav_agent = nullptr;
-	cCharacterPtr character = nullptr;
-
-	void init(EntityPtr e);
-};
-// Reflect
-extern Player main_player;
-
 enum GameState
 {
 	GameStatePrepare,

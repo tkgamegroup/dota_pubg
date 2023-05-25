@@ -11,6 +11,7 @@
 #include <flame/universe/systems/renderer.h>
 
 #include "../game.h"
+#include "../player.h"
 #include "../control.h"
 #include "../entities/character.h"
 #include "../entities/ability.h"
@@ -64,6 +65,8 @@ struct EXPORT Action_open_building_window : Action
 			ui_army_window.window->set_enable(false);
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
+
+		auto avaliable_buildings = main_player.get_avaliable_building_infos();
 	}
 };
 
@@ -108,6 +111,8 @@ struct EXPORT Action_open_army_window : Action
 			ui_building_window.window->set_enable(false);
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
+
+		auto avaliable_units = main_player.get_avaliable_unit_infos();
 	}
 };
 

@@ -11,6 +11,7 @@
 #include <flame/universe/systems/scene.h>
 
 #include "game.h"
+#include "player.h"
 #include "map.h"
 #include "entities/object.h"
 #include "entities/character.h"

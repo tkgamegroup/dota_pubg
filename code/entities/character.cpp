@@ -11,6 +11,7 @@
 #include <flame/universe/systems/renderer.h>
 
 #include "../game.h"
+#include "../player.h"
 #include "../map.h"
 #include "../ui/floating_text.h"
 #include "character.h"
