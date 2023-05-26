@@ -1,9 +1,11 @@
+#include <flame/audio/buffer.h>
 #include <flame/graphics/image.h>
 #include <flame/universe/components/stretched_image.h>
 #include <flame/universe/components/receiver.h>
 #include <flame/universe/systems/input.h>
 
 #include "button.h"
+#include "../audio.h"
 
 void cButton::set_normal_image_name(const std::filesystem::path& image_name)
 {
@@ -95,6 +97,34 @@ void cButton::set_pressed_image_name(const std::filesystem::path& image_name)
 	data_changed("pressed_image_name"_h);
 }
 
+void cButton::set_click_sound_name(const std::filesystem::path& sound_name)
+{
+	if (click_sound_name == sound_name)
+		return;
+
+	auto old_one = click_sound;
+	if (!click_sound_name.empty())
+		AssetManagemant::release(Path::get(click_sound_name));
+
+	click_sound_name = sound_name;
+	click_sound = nullptr;
+	if (!click_sound_name.empty())
+	{
+		AssetManagemant::get(Path::get(click_sound_name));
+		click_sound = !click_sound_name.empty() ? audio::Buffer::get(click_sound_name) : nullptr;
+	}
+
+	if (!click_sound_name.empty())
+		AssetManagemant::release(Path::get(click_sound_name));
+	click_sound_name = sound_name;
+	if (!click_sound_name.empty())
+		AssetManagemant::get(Path::get(click_sound_name));
+
+	if (old_one)
+		audio::Buffer::release(old_one);
+	data_changed("click_sound_name"_h);
+}
+
 void cButton::update_state()
 {
 	auto input = sInput::instance();
@@ -116,6 +146,10 @@ void cButton::on_init()
 		case "gain_focus"_h:
 		case "lost_focus"_h:
 			update_state();
+			break;
+		case "mouse_down"_h:
+			if (click_sound)
+				play_global_sound(click_sound, 1.f);
 			break;
 		}
 	});

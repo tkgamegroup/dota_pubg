@@ -24,12 +24,18 @@ struct cButton : Component
 	// Reflect
 	void set_pressed_image_name(const std::filesystem::path& image_name);
 
+	// Reflect
+	std::filesystem::path click_sound_name;
+	// Reflect
+	void set_click_sound_name(const std::filesystem::path& sound_name);
+
 	void update_state();
 	void on_init() override;
 
 	graphics::ImagePtr normal_image = nullptr;
 	graphics::ImagePtr hovered_image = nullptr;
 	graphics::ImagePtr pressed_image = nullptr;
+	audio::BufferPtr click_sound = nullptr;
 
 	struct Create
 	{

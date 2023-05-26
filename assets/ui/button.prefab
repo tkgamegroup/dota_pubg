@@ -7,7 +7,7 @@
 		<item type_name="flame::cReceiver">
 			<click_action type="" />
 		</item>
-		<item type_name="cButton" normal_image_name="button_normal.png" hovered_image_name="button_hovered.png" pressed_image_name="button_pressed.png" />
+		<item type_name="cButton" normal_image_name="button_normal.png" hovered_image_name="button_hovered.png" pressed_image_name="button_pressed.png" click_sound_name="click1.wav" />
 	</components>
 	<children>
 		<item file_id="4111d67dac2d4e0085fced399d1f4d9d" name="text">
