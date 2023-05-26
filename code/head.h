@@ -21,6 +21,7 @@ FLAME_TYPE(cChest)
 FLAME_TYPE(cShop)
 FLAME_TYPE(cAI)
 FLAME_TYPE(cNWDataHarvester)
+FLAME_TYPE(cButton)
 
 const auto CharacterTag = TagUser;
 
