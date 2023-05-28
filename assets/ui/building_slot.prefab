@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <prefab file_id="49cea6f746a481168208592654e123af" name="building_slot">
 	<components>
-		<item type_name="flame::cElement" pos="108,0" ext="32,32" background_col="0,0,0,64" frame_col="220,141,32,0" frame_thickness="4" />
+		<item type_name="flame::cElement" pos="108,0" ext="32,32" background_col="255,255,255,64" frame_col="220,141,32,0" frame_thickness="4" />
 		<item type_name="flame::cReceiver">
 			<click_action type="Action_building_slot_select" index="3452816845" />
 		</item>

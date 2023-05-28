@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1428,615" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1405,615" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="618.75,0" ext="190.5,32" background_col="0,0,0,128" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="602.35,0" ext="200.3,38.4" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -96,7 +96,7 @@
 				</item>
 				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
 					<components>
-						<item type_name="flame::cElement" pos="1312,207" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1289,207" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -131,19 +131,20 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="638,565" ext="152,50" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="622.5,557" ext="160,58" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
 						<item file_id="40d3cd79033d7e0300e1dd077e1ef29a" name="selected_target">
 							<components>
-								<item type_name="flame::cElement" ext="152,50" />
-								<item type_name="flame::cLayout" />
+								<item type_name="flame::cElement" ext="160,58" />
+								<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
+								<item type_name="flame::cLayout" padding="8,8,8,8" />
 							</components>
 							<children>
 								<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="144,19" background_col="0,204,0,255" />
+										<item type_name="flame::cElement" pos="8,8" ext="144,19" background_col="0,204,0,255" />
 									</components>
 									<children>
 										<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
@@ -156,7 +157,7 @@
 								</item>
 								<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
 									<components>
-										<item type_name="flame::cElement" pos="4,27" ext="144,19" background_col="0,24,232,255" />
+										<item type_name="flame::cElement" pos="8,31" ext="144,19" background_col="0,24,232,255" />
 									</components>
 									<children>
 										<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
@@ -173,8 +174,8 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1155.88,563" ext="272.125,52" horizontal_alignment="End1" vertical_alignment="End1" />
-						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" />
+						<item type_name="flame::cElement" pos="1008.88,559" ext="396.125,56" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" item_spacing="0" />
 					</components>
 					<children>
 						<item filename="ui\button.prefab">
@@ -213,13 +214,14 @@
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
 					<components>
-						<item type_name="flame::cElement" pos="466.7,153.5" ext="494.6,308" background_col="0,0,0,160" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="455.2,153.5" ext="494.6,308" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
 						<item file_id="4955a5fb094b190454a4bfbd1c53edaf" name="building_area">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="184,300" background_col="0,0,0,64" />
+								<item type_name="flame::cElement" pos="4,4" ext="184,300" />
 								<item type_name="flame::cLayout" type="Circle" columns="5" auto_width="false" auto_height="false" />
 								<item type_name="flame::cList" prefab_name="ui\building_slot.prefab" count="21">
 									<modifiers>
@@ -237,7 +239,7 @@
 							<children>
 								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="300,264" />
+										<item type_name="flame::cElement" pos="4,4" ext="264,274.4" />
 										<item type_name="flame::cLayout" />
 									</components>
 									<children>
@@ -255,15 +257,15 @@
 										</item>
 										<item file_id="450567ff9f586e586cc51da0bfba1e90" name="building_list">
 											<components>
-												<item type_name="flame::cElement" pos="4,48" ext="292,100" background_col="0,0,0,64" />
+												<item type_name="flame::cElement" pos="4,48" ext="256,100" />
 												<item type_name="flame::cList" prefab_name="ui\building_info.prefab" count="9" />
-												<item type_name="flame::cLayout" type="Grid" columns="8" auto_height="false" />
+												<item type_name="flame::cLayout" type="Grid" columns="7" auto_height="false" />
 											</components>
 											<children />
 										</item>
 										<item file_id="4c059ae88e680050cbe0d392653d6cb0" name="building_info">
 											<components>
-												<item type_name="flame::cElement" pos="4,152" ext="190.5,108" />
+												<item type_name="flame::cElement" pos="4,152" ext="200.3,118.4" />
 												<item type_name="flame::cLayout" />
 											</components>
 											<children>
@@ -1497,7 +1499,6 @@
 					</samples>
 				</item>
 			</components>
-			<children />
 		</item>
 	</children>
 </prefab>

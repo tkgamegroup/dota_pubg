@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <prefab file_id="4c9f12d170a81dcaaadc3a09cf2be393" name="building_info">
 	<components>
-		<item type_name="flame::cElement" pos="4,4" ext="32,32" background_col="0,0,0,64" frame_col="220,141,32,0" frame_thickness="4" />
+		<item type_name="flame::cElement" pos="4,4" ext="32,32" background_col="255,255,255,64" frame_col="220,141,32,0" frame_thickness="4" />
 		<item type_name="flame::cImage" />
 		<item type_name="flame::cReceiver">
 			<click_action type="" />
