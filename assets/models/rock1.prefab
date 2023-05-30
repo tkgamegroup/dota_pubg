@@ -10,12 +10,5 @@
 				<item type_name="flame::cMesh" mesh_name="rock1.fmod#mesh0" material_name="rock1_mat_rock_01.fmat" />
 			</components>
 		</item>
-		<item file_id="147117a24e862659fcaf809c565574d0" name="blocker">
-			<components>
-				<item type_name="flame::cNode" pos="0,0.47,0" scl="3,1.02,3" />
-				<item type_name="flame::cMesh" enable="false" mesh_name="standard_cylinder" material_name="default" cast_shadow="false" />
-				<item type_name="flame::cNavMesh" />
-			</components>
-		</item>
 	</children>
 </prefab>
