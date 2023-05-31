@@ -536,7 +536,7 @@ void cCharacter::update()
 	}
 }
 
-void cCharacter::die()
+void cCharacter::die(uint type)
 {
 	if (dead)
 		return;
@@ -588,7 +588,7 @@ bool cCharacter::take_damage(DamageType type, uint value)
 		return false;
 	}
 
-	die();
+	die("no_hp"_h);
 	return true;
 }
 

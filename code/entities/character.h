@@ -214,7 +214,7 @@ struct cCharacter : Component
 	void start() override;
 	void update() override;
 
-	void die();
+	void die(uint type);
 
 	void inflict_damage(cCharacterPtr target, DamageType type, uint value);
 	bool take_damage(DamageType type, uint value); // return true if the damage causes the character die

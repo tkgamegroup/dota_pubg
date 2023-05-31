@@ -7,7 +7,7 @@
 #include "collider.h"
 #include "character.h"
 
-void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector<Tracker>& last_collidings, const Listeners<void(cCharacterPtr character, bool enter_or_exit)>& callbacks)
+void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector<Tracker>& last_collidings, const Listeners<void(cCharacterPtr character, uint type)>& callbacks)
 {
 	for (auto c : characters)
 	{
@@ -22,7 +22,7 @@ void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector
 		}
 		if (!found)
 		{
-			callbacks.call(c, true);
+			callbacks.call(c, "enter"_h);
 			last_collidings.emplace_back(c);
 		}
 	}
@@ -39,7 +39,7 @@ void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector
 		}
 		if (!found)
 		{
-			callbacks.call(it->get<cCharacterPtr>(), false);
+			callbacks.call(it->get<cCharacterPtr>(), "exit"_h);
 			it = last_collidings.erase(it);
 		}
 		else

@@ -36,7 +36,7 @@ void MainCamera::init(EntityPtr e)
 
 MainCamera main_camera;
 
-GameState game_state = GameStatePrepare;
+GameState game_state = GameStatePreparation;
 
 EntityPtr root = nullptr;
 
@@ -91,6 +91,22 @@ void enable_game(bool v)
 {
 	World::instance()->update_components = v;
 	sScene::instance()->enable = v;
+}
+
+void start_battle()
+{
+	assert(game_state == GameStatePreparation);
+	game_state = GameStateBattle;
+	player1.spawn_troop();
+	player2.spawn_troop();
+}
+
+void end_battle()
+{
+	assert(game_state == GameStateBattle);
+	player1.remove_troop();
+	player2.remove_troop();
+	game_state = GameStatePreparation;
 }
 
 static std::map<std::filesystem::path, EntityPtr> prefabs;
@@ -367,7 +383,16 @@ void cGame::start()
 	init_ui();
 	init_control();
 	init_presets();
-	main_player.init();
+
+	// init players
+	player1.faction = FactionParty1;
+	player2.faction = FactionParty2;
+	player1.init(root->find_child_recursively("player1_town"));
+	player2.init(root->find_child_recursively("player2_town"));
+	player1.troop_spawn_off = vec3(+8.f, 0.f, 0.f);
+	player2.troop_spawn_off = vec3(-8.f, 0.f, 0.f);
+	player1.troop_target_pos = player2.town_pos;
+	player2.troop_target_pos = player1.town_pos;
 
 	preload_images.push_back(graphics::Image::get(L"assets\\effects\\Fireball.png"));
 }
@@ -410,6 +435,15 @@ void cGame::update()
 		update_control();
 	if (enable_ui)
 		update_ui();
+
+	if (game_state == GameStateBattle)
+	{
+		if (player1.troop.empty() && player2.troop.empty())
+		{
+
+			end_battle();
+		}
+	}
 }
 
 cLauncher::~cLauncher()

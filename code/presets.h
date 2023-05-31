@@ -9,6 +9,8 @@ struct UnitInfo
 	uvec2					icon_tile_coord = uvec2(0);
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	std::string				description;
+
+	std::filesystem::path	prefab_name;
 };
 
 // Reflect

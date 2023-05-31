@@ -260,7 +260,7 @@ void update_vision()
 	{
 		for (auto& f : factions)
 		{
-			if (main_player.faction != f.first && multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
+			if (player1.faction != f.first && multi_player != SinglePlayer && multi_player != MultiPlayerAsHost)
 				continue;
 
 			auto it = visions.find(f.first);
@@ -392,12 +392,12 @@ void update_vision()
 							cast_beam(get_beam(-i, -range));
 					}
 
-					if (f.first == main_player.faction)
+					if (f.first == player1.faction)
 					{
 						graphics::Queue::get()->wait_idle();
 
 						graphics::InstanceCommandBuffer cb;
-						memcpy(vision_stagbuf->mapped, visions[main_player.faction].data(), vision_stagbuf->size);
+						memcpy(vision_stagbuf->mapped, visions[player1.faction].data(), vision_stagbuf->size);
 						cb->image_barrier(img_vision, {}, graphics::ImageLayoutTransferDst);
 						cb->copy_buffer_to_image(vision_stagbuf, img_vision, graphics::BufferImageCopy(uvec3(vision_map_W, vision_map_H, 1)));
 						cb->image_barrier(img_vision, {}, graphics::ImageLayoutShaderReadOnly);

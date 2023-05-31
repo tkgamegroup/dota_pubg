@@ -15,7 +15,7 @@ struct cCircleCollider : Component
 	FactionFlags faction = FactionNone;
 
 	std::vector<Tracker> last_collidings;
-	Listeners<void(cCharacterPtr character, bool enter_or_exit)> callbacks;
+	Listeners<void(cCharacterPtr character, uint type)> callbacks;
 
 	void update() override;
 
@@ -56,7 +56,7 @@ struct cSectorCollider : Component
 	float t;
 
 	std::vector<Tracker> last_collidings;
-	Listeners<void(cCharacterPtr character, bool enter_or_exit)> callbacks;
+	Listeners<void(cCharacterPtr character, uint type)> callbacks;
 
 	void on_active() override;
 	void on_inactive() override;

@@ -124,9 +124,9 @@ void update_control()
 	if (hovering_node)
 	{
 		auto can_select = [](cCharacterPtr character) {
-			if (!(select_mode & TargetEnemy) && main_player.faction != character->faction)
+			if (!(select_mode & TargetEnemy) && player1.faction != character->faction)
 				return false;
-			if (!(select_mode & TargetFriendly) && main_player.faction == character->faction)
+			if (!(select_mode & TargetFriendly) && player1.faction == character->faction)
 				return false;
 			return true;
 		};
@@ -184,7 +184,7 @@ void update_control()
 		{
 			if (select_mode & TargetEnemy)
 			{
-				if (hovering_character && main_player.faction != hovering_character->faction)
+				if (hovering_character && player1.faction != hovering_character->faction)
 				{
 					if (select_enemy_callback)
 						select_enemy_callback(hovering_character);

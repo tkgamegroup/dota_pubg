@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1405,615" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1617,638" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="602.35,0" ext="200.3,38.4" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="708.35,0" ext="200.3,38.4" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -61,7 +61,7 @@
 				</item>
 				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,207" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="0,218.5" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -84,10 +84,10 @@
 										</item>
 									</children>
 								</item>
-								<item file_id="41c39c3808237c3f0a82c1f7e7437284" name="army_text">
+								<item file_id="41c39c3808237c3f0a82c1f7e7437284" name="troop_text">
 									<components>
-										<item type_name="flame::cElement" pos="4,27" ext="41,16" />
-										<item type_name="flame::cText" text="Army: 6" />
+										<item type_name="flame::cElement" pos="4,27" ext="43,16" />
+										<item type_name="flame::cText" text="troop: 6" />
 									</components>
 								</item>
 							</children>
@@ -96,7 +96,7 @@
 				</item>
 				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
 					<components>
-						<item type_name="flame::cElement" pos="1289,207" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1501,218.5" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" padding="4,4,4,150" />
 					</components>
 					<children>
@@ -119,10 +119,10 @@
 										</item>
 									</children>
 								</item>
-								<item file_id="49fa3db964a8a2a4908ffcfc853fe889" name="army_text">
+								<item file_id="49fa3db964a8a2a4908ffcfc853fe889" name="troop_text">
 									<components>
-										<item type_name="flame::cElement" pos="4,27" ext="41,16" />
-										<item type_name="flame::cText" text="Army: 6" />
+										<item type_name="flame::cElement" pos="4,27" ext="43,16" />
+										<item type_name="flame::cText" text="troop: 6" />
 									</components>
 								</item>
 							</children>
@@ -131,7 +131,7 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="622.5,557" ext="160,58" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="728.5,580" ext="160,58" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
@@ -174,7 +174,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1008.88,559" ext="396.125,56" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1220.88,582" ext="396.125,56" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" item_spacing="0" />
 					</components>
 					<children>
@@ -190,9 +190,9 @@
 						<item filename="ui\button.prefab">
 							<modifications>
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="49,163,180,255" />
-								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Army" />
+								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="troop" />
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_open_army_window" />
+									<value type="Action_open_troop_window" />
 								</item>
 							</modifications>
 						</item>
@@ -212,9 +212,9 @@
 						</item>
 					</children>
 				</item>
-				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window">
+				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window" enable="false">
 					<components>
-						<item type_name="flame::cElement" pos="455.2,153.5" ext="494.6,308" horizontal_alignment="Center" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="561.2,165" ext="494.6,308" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
@@ -373,7 +373,7 @@
 						</item>
 					</children>
 				</item>
-				<item file_id="4f3375e95b75a811f633c5243055dc82" name="army_window" enable="false">
+				<item file_id="4f3375e95b75a811f633c5243055dc82" name="troop_window" enable="false">
 					<components>
 						<item type_name="flame::cElement" pos="340.5,103.5" ext="716,408" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" />
@@ -391,7 +391,7 @@
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
 							<children>
-								<item file_id="445955dbdbd9c1a79ffb4748dbccabb9" name="army_list">
+								<item file_id="445955dbdbd9c1a79ffb4748dbccabb9" name="troop_list">
 									<components>
 										<item type_name="flame::cElement" pos="4,4" />
 									</components>
@@ -405,7 +405,7 @@
 		<item file_id="47faee369fd69ffc1fc09cc1b8296b95" name="map">
 			<components>
 				<item type_name="flame::cNode" />
-				<item type_name="flame::cTileMap" tiles_path="terrain\tiles">
+				<item type_name="flame::cTileMap" extent="16,4,16" blocks="8,2,8" tiles_path="terrain\tiles">
 					<samples>
 						<item height="1" />
 						<item height="1" />
@@ -417,757 +417,6 @@
 						<item height="1" />
 						<item height="1" />
 						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1175,104 +424,8 @@
 						<item />
 						<item />
 						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item height="1" />
 						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1280,40 +433,8 @@
 						<item />
 						<item />
 						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item height="1" />
 						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1321,40 +442,8 @@
 						<item />
 						<item />
 						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item height="1" />
 						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1362,24 +451,8 @@
 						<item />
 						<item />
 						<item />
-						<item />
 						<item height="1" />
 						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1387,24 +460,8 @@
 						<item />
 						<item />
 						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item height="1" />
 						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1412,40 +469,8 @@
 						<item />
 						<item />
 						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
 						<item height="1" />
 						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
 						<item />
 						<item />
 						<item />
@@ -1453,39 +478,6 @@
 						<item />
 						<item />
 						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
 						<item height="1" />
 						<item height="1" />
 						<item height="1" />
@@ -1499,6 +491,7 @@
 					</samples>
 				</item>
 			</components>
+			<children />
 		</item>
 	</children>
 </prefab>

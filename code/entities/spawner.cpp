@@ -18,11 +18,9 @@ void cSpawner::update()
 	{
 		for (auto i = 0; i < spawn_number; i++)
 		{
-			auto character = add_character(prefab_path, node->pos, faction);
-			if (character)
+			if (auto character = add_character(prefab_path, node->pos, faction); character)
 			{
-				auto ai = character->entity->get_component_t<cAI>();
-				if (ai)
+				if (auto ai = character->entity->get_component_t<cAI>(); ai)
 				{
 					ai->type = unit_type;
 					ai->target_pos = unit_target_pos;
