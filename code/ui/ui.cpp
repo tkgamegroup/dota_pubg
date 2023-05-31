@@ -116,19 +116,36 @@ struct EXPORT Action_open_troop_window : Action
 		if (ui_route_window)
 			ui_route_window->set_enable(false);
 
-		selected_unit_index = 0;
-		if (ui_troop_window.unit_list)
+		if (ui_troop_window.window->enable)
 		{
-			if (auto list = ui_troop_window.unit_list->get_component_t<cList>(); list)
-			{
-				list->set_count(player1.avaliable_unit_infos.size() + 1);
+			selected_unit_index = 0;
 
-				if (auto image = ui_troop_window.unit_list->children[0]->get_component_t<cImage>(); image)
-					image->set_image_name(L"assets\\icons\\red_cross.png");
-				for (auto i = 0; i < player1.avaliable_unit_infos.size(); i++)
+			if (ui_troop_window.formation_area)
+			{
+				if (auto list = ui_troop_window.formation_area->get_component_t<cList>(); list)
 				{
-					if (auto image = ui_troop_window.unit_list->children[i + 1]->get_component_t<cImage>(); image)
-						image->set_image_name(player1.avaliable_unit_infos[i]->icon_name);
+					list->set_count(player1.formation.size());
+					for (auto i = 0; i < player1.formation.size(); i++)
+					{
+						if (auto image = ui_troop_window.formation_area->children[i]->get_component_t<cImage>(); image)
+							image->set_image_name(player1.formation[i] ? player1.formation[i]->icon_name : L"");
+					}
+				}
+			}
+
+			if (ui_troop_window.unit_list)
+			{
+				if (auto list = ui_troop_window.unit_list->get_component_t<cList>(); list)
+				{
+					list->set_count(player1.avaliable_unit_infos.size() + 1);
+
+					if (auto image = ui_troop_window.unit_list->children[0]->get_component_t<cImage>(); image)
+						image->set_image_name(L"assets\\icons\\red_cross.png");
+					for (auto i = 0; i < player1.avaliable_unit_infos.size(); i++)
+					{
+						if (auto image = ui_troop_window.unit_list->children[i + 1]->get_component_t<cImage>(); image)
+							image->set_image_name(player1.avaliable_unit_infos[i]->icon_name);
+					}
 				}
 			}
 		}
@@ -169,7 +186,7 @@ struct EXPORT Action_unit_slot_select : Action
 
 	void exec() override
 	{
-		selected_unit_index = 0;
+		selected_unit_index = index;
 
 		if (ui_troop_window.unit_list)
 		{

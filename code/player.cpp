@@ -15,16 +15,13 @@ void Player::init(EntityPtr e_town)
 	{
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
 			if (type == "enter"_h)
-			{
-				auto character_faction = character->faction;
-				if (faction != character_faction && character_faction >= FactionParty1 && character_faction <= FactionParty4)
-					character->die("removed"_h);
-			}
+				character->die("removed"_h);
 		});
 	}
 
 	formation.resize(TROOP_CX * TROOP_CY);
 
+	avaliable_unit_infos.clear();
 	if (!unit_infos.infos.empty())
 		avaliable_unit_infos.push_back(&unit_infos.infos[0]);
 }
@@ -39,8 +36,10 @@ void Player::spawn_troop()
 	{
 		for (auto x = 0; x < TROOP_CX; x++)
 		{
-			if (auto character = add_character(formation[y * TROOP_CX + x]->prefab_name,
-				off + vec3(x * gap, 0.f, y * gap), faction); character)
+			auto unit_info = formation[y * TROOP_CX + x];
+			if (!unit_info)
+				continue;
+			if (auto character = add_character(unit_info->prefab_name, off + vec3(x * gap, 0.f, y * gap), faction); character)
 			{
 				if (auto ai = character->entity->get_component_t<cAI>(); ai)
 				{
