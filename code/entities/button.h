@@ -29,6 +29,7 @@ struct cButton : Component
 	// Reflect
 	void set_click_sound_name(const std::filesystem::path& sound_name);
 
+	~cButton();
 	void update_state();
 	void on_init() override;
 

@@ -1,3 +1,6 @@
+#include <flame/graphics/material.h>
+#include <flame/universe/components/mesh.h>
+
 #include "game.h"
 #include "player.h"
 #include "presets.h"
@@ -15,14 +18,14 @@ void Player::init(EntityPtr _e_town)
 		{
 			auto x_dir = normalize(e_formation_grid->node()->pos);
 			auto y_dir = cross(x_dir, vec3(0.f, 1.f, 0.f));
-			auto off = (FORMATION_CY - 1) * FORMATION_GAP * 0.5f * y_dir;
+			auto off = -(FORMATION_CY - 1) * FORMATION_GAP * 0.5f * y_dir;
 			if (auto e_grid_item = get_prefab(L"assets\\grid_unit.prefab"); e_grid_item)
 			{
 				for (auto y = 0; y < FORMATION_CY; y++)
 				{
 					for (auto x = 0; x < FORMATION_CX; x++)
 					{
-						auto e = e_grid_item->copy();
+						auto e = e_grid_item->duplicate();
 						e->name = std::format("{}, {}", x, y);
 						auto n = e->node();
 						n->set_pos(vec3(x * FORMATION_GAP, 0.8f, y * FORMATION_GAP) + off);
@@ -52,6 +55,39 @@ void Player::init(EntityPtr _e_town)
 void Player::set_formation(uint index, UnitInfo* unit_info)
 {
 	formation[index] = unit_info;
+
+	auto e = e_formation_grid->children[index].get();
+	if (unit_info)
+	{
+		auto e_unit = get_prefab(unit_info->prefab_name)->duplicate();
+		e_unit->backward_traversal([](EntityPtr e) {
+			std::vector<uint> comp_hashes(e->components.size());
+			for (auto i = 0; i < e->components.size(); i++)
+				comp_hashes[i] = e->components[i]->type_hash;
+			for (auto it = comp_hashes.rbegin(); it != comp_hashes.rend(); it++)
+			{
+				if (*it != th<cNode>() && *it != th<cMesh>())
+					e->remove_component(*it);
+			}
+
+			if (auto mesh = e->get_component_t<cMesh>(); mesh)
+			{
+				if (mesh->material)
+				{
+					auto new_material = graphics::Material::create();
+					new_material->copy_from(mesh->material);
+					mesh->set_material_name(L"0x" + wstr_hex((uint64)new_material));
+					e->message_listeners.add([new_material](uint hash, void*, void*) {
+						if (hash == "destroyed"_h)
+							delete new_material;
+					});
+				}
+			}
+		});
+		e->add_child(e_unit);
+	}
+	else
+		e->remove_all_children();
 }
 
 void Player::spawn_troop()

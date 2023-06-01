@@ -269,7 +269,7 @@ cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3
 	auto pos = get_avaliable_pos(_pos, radius, 4.f, 20);
 	if (pos.x >= 10000.f)
 		return nullptr;
-	e = e->copy();
+	e = e->duplicate();
 
 	auto node = e->node();
 	auto object = e->get_component_t<cObject>();
@@ -294,7 +294,7 @@ cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3
 
 cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, uint id)
 {
-	auto e = get_prefab(prefab_path)->copy();
+	auto e = get_prefab(prefab_path)->duplicate();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
 	//object->init(2000 + prefab_id, id);
@@ -309,7 +309,7 @@ cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const ve
 
 cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, uint id)
 {
-	auto e = get_prefab(prefab_path)->copy();
+	auto e = get_prefab(prefab_path)->duplicate();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
 	//object->init(2000 + prefab_id, id);
@@ -325,7 +325,7 @@ cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const ve
 
 cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const quat& qut, float duration, uint id)
 {
-	auto e = get_prefab(prefab_path)->copy();
+	auto e = get_prefab(prefab_path)->duplicate();
 	auto node = e->node();
 	node->set_pos(pos);
 	node->set_qut(qut);
@@ -341,7 +341,7 @@ cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos,
 
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
-	auto e = get_prefab(L"assets\\models\\chest.prefab")->copy();
+	auto e = get_prefab(L"assets\\models\\chest.prefab")->duplicate();
 	e->node()->set_pos(get_map_coord(pos));
 	root->add_child(e);
 	auto object = e->get_component_t<cObject>();
@@ -470,7 +470,7 @@ void enter_scene(EntityPtr root)
 {
 	add_event([root]() {
 		graphics::gui_set_clear(false, vec4(0.f));
-		root->remove_component<cLauncher>();
+		root->remove_component_t<cLauncher>();
 		root->load(L"assets\\main.prefab");
 		return false;
 	});

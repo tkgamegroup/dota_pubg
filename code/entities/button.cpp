@@ -24,12 +24,6 @@ void cButton::set_normal_image_name(const std::filesystem::path& image_name)
 		normal_image = !normal_image_name.empty() ? graphics::Image::get(normal_image_name, false) : nullptr;
 	}
 
-	if (!normal_image_name.empty())
-		AssetManagemant::release(Path::get(normal_image_name));
-	normal_image_name = image_name;
-	if (!normal_image_name.empty())
-		AssetManagemant::get(Path::get(normal_image_name));
-
 	update_state();
 
 	if (old_one)
@@ -54,12 +48,6 @@ void cButton::set_hovered_image_name(const std::filesystem::path& image_name)
 		hovered_image = !hovered_image_name.empty() ? graphics::Image::get(hovered_image_name, false) : nullptr;
 	}
 
-	if (!hovered_image_name.empty())
-		AssetManagemant::release(Path::get(hovered_image_name));
-	hovered_image_name = image_name;
-	if (!hovered_image_name.empty())
-		AssetManagemant::get(Path::get(hovered_image_name));
-
 	update_state();
 
 	if (old_one)
@@ -83,12 +71,6 @@ void cButton::set_pressed_image_name(const std::filesystem::path& image_name)
 		AssetManagemant::get(Path::get(pressed_image_name));
 		pressed_image = !pressed_image_name.empty() ? graphics::Image::get(pressed_image_name, false) : nullptr;
 	}
-
-	if (!pressed_image_name.empty())
-		AssetManagemant::release(Path::get(pressed_image_name));
-	pressed_image_name = image_name;
-	if (!pressed_image_name.empty())
-		AssetManagemant::get(Path::get(pressed_image_name));
 
 	update_state();
 
@@ -123,6 +105,18 @@ void cButton::set_click_sound_name(const std::filesystem::path& sound_name)
 	if (old_one)
 		audio::Buffer::release(old_one);
 	data_changed("click_sound_name"_h);
+}
+
+cButton::~cButton() 
+{
+	if (!normal_image_name.empty())
+		AssetManagemant::release(Path::get(normal_image_name));
+	if (!hovered_image_name.empty())
+		AssetManagemant::release(Path::get(hovered_image_name));
+	if (!pressed_image_name.empty())
+		AssetManagemant::release(Path::get(pressed_image_name));
+	if (!click_sound_name.empty())
+		AssetManagemant::release(Path::get(click_sound_name));
 }
 
 void cButton::update_state()
