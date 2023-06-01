@@ -10,7 +10,11 @@ struct MainCamera
 	cNodePtr node = nullptr;
 	cCameraPtr camera = nullptr;
 
+	vec3 follow_target = vec3(0.f, -2000.f, 0.f);
+
 	void init(EntityPtr e);
+	void set_follow_target(const AABB& bounds);
+	void update();
 };
 extern MainCamera main_camera;
 

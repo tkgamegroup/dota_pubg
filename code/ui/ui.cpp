@@ -19,220 +19,137 @@
 #include "../entities/chest.h"
 #include "ui.h"
 
-struct UI_building_window
-{
-	EntityPtr window = nullptr;
-	EntityPtr building_area = nullptr;
-	EntityPtr empty_case = nullptr;
-	EntityPtr built_up_case = nullptr;
+UI_building_window ui_building_window;
+UI_troop_window ui_troop_window;
 
-	void init(EntityPtr ui)
+void UI_building_window::init(EntityPtr ui)
+{
+	window = ui->find_child("building_window");
+	if (window)
 	{
-		window = ui->find_child("building_window");
-		if (window)
-		{
-			building_area = window->find_child_recursively("building_area");
-			empty_case = window->find_child_recursively("empty_case");
-			built_up_case = window->find_child_recursively("built_up_case");
-		}
+		building_area = window->find_child_recursively("building_area");
+		empty_case = window->find_child_recursively("empty_case");
+		built_up_case = window->find_child_recursively("built_up_case");
 	}
+}
 
-}ui_building_window;
-
-struct UI_troop_window
+void UI_building_window::open()
 {
-	EntityPtr window = nullptr;
-	EntityPtr formation_area = nullptr;
-	EntityPtr unit_list = nullptr;
+	if (ui_building_window.window)
+		ui_building_window.window->set_enable(!ui_building_window.window->enable);
+	if (ui_troop_window.window)
+		ui_troop_window.window->set_enable(false);
+}
 
-	void init(EntityPtr ui)
+void UI_building_window::select_building_area(uint index)
+{
+	if (ui_building_window.building_area)
 	{
-		window = ui->find_child("troop_window");
-		if (window)
+		for (auto& c : ui_building_window.building_area->children)
 		{
-			formation_area = window->find_child_recursively("formation_area");
-			unit_list = window->find_child_recursively("unit_list");
-		}
-	}
-}ui_troop_window;
-
-EntityPtr ui_route_window = nullptr;
-
-// Reflect ctor dtor
-struct EXPORT Action_open_building_window : Action
-{
-	void exec() override
-	{
-		if (ui_building_window.window)
-			ui_building_window.window->set_enable(!ui_building_window.window->enable);
-		if (ui_troop_window.window)
-			ui_troop_window.window->set_enable(false);
-		if (ui_route_window)
-			ui_route_window->set_enable(false);
-	}
-};
-
-// Reflect ctor dtor
-struct EXPORT Action_building_slot_select : Action
-{
-	// Reflect
-	uint index;
-
-	void exec() override
-	{
-		if (ui_building_window.building_area)
-		{
-			for (auto& c : ui_building_window.building_area->children)
-			{
-				if (auto element = c->element(); element)
-				{
-					auto col = element->frame_col;
-					col.a = 0;
-					element->set_frame_col(col);
-				}
-			}
-
-			if (auto element = ui_building_window.building_area->children[index]->element(); element)
+			if (auto element = c->element(); element)
 			{
 				auto col = element->frame_col;
-				col.a = 255;
+				col.a = 0;
 				element->set_frame_col(col);
 			}
 		}
-	}
-};
 
-uint selected_unit_index = 0;
-
-// Reflect ctor dtor
-struct EXPORT Action_open_troop_window : Action
-{
-	void exec() override
-	{
-		if (ui_troop_window.window)
-			ui_troop_window.window->set_enable(!ui_troop_window.window->enable);
-		if (ui_building_window.window)
-			ui_building_window.window->set_enable(false);
-		if (ui_route_window)
-			ui_route_window->set_enable(false);
-
-		if (ui_troop_window.window->enable)
+		if (auto element = ui_building_window.building_area->children[index]->element(); element)
 		{
-			selected_unit_index = 0;
-
-			if (ui_troop_window.formation_area)
-			{
-				if (auto list = ui_troop_window.formation_area->get_component_t<cList>(); list)
-				{
-					list->set_count(player1.formation.size());
-					for (auto i = 0; i < player1.formation.size(); i++)
-					{
-						if (auto image = ui_troop_window.formation_area->children[i]->get_component_t<cImage>(); image)
-							image->set_image_name(player1.formation[i] ? player1.formation[i]->icon_name : L"");
-					}
-				}
-			}
-
-			if (ui_troop_window.unit_list)
-			{
-				if (auto list = ui_troop_window.unit_list->get_component_t<cList>(); list)
-				{
-					list->set_count(player1.avaliable_unit_infos.size() + 1);
-
-					if (auto image = ui_troop_window.unit_list->children[0]->get_component_t<cImage>(); image)
-						image->set_image_name(L"assets\\icons\\red_cross.png");
-					for (auto i = 0; i < player1.avaliable_unit_infos.size(); i++)
-					{
-						if (auto image = ui_troop_window.unit_list->children[i + 1]->get_component_t<cImage>(); image)
-							image->set_image_name(player1.avaliable_unit_infos[i]->icon_name);
-					}
-				}
-			}
+			auto col = element->frame_col;
+			col.a = 255;
+			element->set_frame_col(col);
 		}
 	}
-};
+}
 
-// Reflect ctor dtor
-struct EXPORT Action_formation_slot_click : Action
+void UI_troop_window::init(EntityPtr ui)
 {
-	// Reflect
-	uint index;
-
-	void exec() override
+	window = ui->find_child("troop_window");
+	if (window)
 	{
-		if (selected_unit_index == 0)
-			player1.formation[index] = nullptr;
-		else
-			player1.formation[index] = player1.avaliable_unit_infos[selected_unit_index - 1];
+		formation_area = window->find_child_recursively("formation_area");
+		unit_list = window->find_child_recursively("unit_list");
+	}
+}
 
+void UI_troop_window::open()
+{
+	if (ui_troop_window.window)
+		ui_troop_window.window->set_enable(!ui_troop_window.window->enable);
+	if (ui_building_window.window)
+		ui_building_window.window->set_enable(false);
+
+	if (ui_troop_window.window->enable)
+	{
 		if (ui_troop_window.formation_area)
 		{
-			if (auto image = ui_troop_window.formation_area->children[index]->get_component_t<cImage>(); image)
+			if (auto list = ui_troop_window.formation_area->get_component_t<cList>(); list)
 			{
-				if (!player1.formation[index])
-					image->set_image_name(L"");
-				else
-					image->set_image_name(player1.formation[index]->icon_name);
+				list->set_count(player1.formation.size());
+				for (auto i = 0; i < player1.formation.size(); i++)
+				{
+					if (auto image = ui_troop_window.formation_area->children[i]->get_component_t<cImage>(); image)
+						image->set_image_name(player1.formation[i] ? player1.formation[i]->icon_name : L"");
+				}
 			}
 		}
-	}
-};
-
-// Reflect ctor dtor
-struct EXPORT Action_unit_slot_select : Action
-{
-	// Reflect
-	uint index;
-
-	void exec() override
-	{
-		selected_unit_index = index;
 
 		if (ui_troop_window.unit_list)
 		{
-			for (auto& c : ui_troop_window.unit_list->children)
+			if (auto list = ui_troop_window.unit_list->get_component_t<cList>(); list)
 			{
-				if (auto element = c->element(); element)
-				{
-					auto col = element->frame_col;
-					col.a = 0;
-					element->set_frame_col(col);
-				}
-			}
+				list->set_count(player1.avaliable_unit_infos.size() + 1);
 
-			if (auto element = ui_troop_window.unit_list->children[index]->element(); element)
-			{
-				auto col = element->frame_col;
-				col.a = 255;
-				element->set_frame_col(col);
+				if (auto image = ui_troop_window.unit_list->children[0]->get_component_t<cImage>(); image)
+					image->set_image_name(L"assets\\icons\\red_cross.png");
+				for (auto i = 0; i < player1.avaliable_unit_infos.size(); i++)
+				{
+					if (auto image = ui_troop_window.unit_list->children[i + 1]->get_component_t<cImage>(); image)
+						image->set_image_name(player1.avaliable_unit_infos[i]->icon_name);
+				}
 			}
 		}
 	}
-};
+}
 
-// Reflect ctor dtor
-struct EXPORT Action_open_route_window : Action
+void UI_troop_window::select_formation_slot(uint index)
 {
-	void exec() override
+	if (ui_troop_window.formation_area)
 	{
-		if (ui_route_window)
-			ui_route_window->set_enable(!ui_route_window->enable);
-		if (ui_building_window.window)
-			ui_building_window.window->set_enable(false);
-		if (ui_troop_window.window)
-			ui_troop_window.window->set_enable(false);
+		if (auto image = ui_troop_window.formation_area->children[index]->get_component_t<cImage>(); image)
+		{
+			if (!player1.formation[index])
+				image->set_image_name(L"");
+			else
+				image->set_image_name(player1.formation[index]->icon_name);
+		}
 	}
-};
+}
 
-// Reflect ctor dtor
-struct EXPORT Action_start_battle : Action
+void UI_troop_window::select_unit_slot(uint index)
 {
-	void exec() override
+	if (ui_troop_window.unit_list)
 	{
-		if (game_state == GameStatePreparation)
-			start_battle();
+		for (auto& c : ui_troop_window.unit_list->children)
+		{
+			if (auto element = c->element(); element)
+			{
+				auto col = element->frame_col;
+				col.a = 0;
+				element->set_frame_col(col);
+			}
+		}
+
+		if (auto element = ui_troop_window.unit_list->children[index]->element(); element)
+		{
+			auto col = element->frame_col;
+			col.a = 255;
+			element->set_frame_col(col);
+		}
 	}
-};
+}
 
 graphics::CanvasPtr canvas = nullptr;
 cElementPtr ui_hp_bar = nullptr;
@@ -255,7 +172,6 @@ void init_ui()
 	{
 		ui_building_window.init(ui);
 		ui_troop_window.init(ui);
-		ui_route_window = ui->find_child("route_window");
 
 		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
 		{

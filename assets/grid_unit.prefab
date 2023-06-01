@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<prefab file_id="4862034cb27c0cd715c73d13a949f8bb" name="RootNode">
+	<components>
+		<item type_name="flame::cNode" />
+	</components>
+	<children>
+		<item file_id="4893063c527b03e11728cd2ad7d5c6aa" name="Plane">
+			<components>
+				<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" />
+				<item type_name="flame::cMesh" mesh_name="models\grid_unit.fmod#mesh0" material_name="materials\Material.001.fmat" />
+			</components>
+		</item>
+	</children>
+</prefab>

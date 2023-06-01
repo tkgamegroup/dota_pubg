@@ -26,12 +26,39 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1489,566" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1563,638" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
-				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="top_bar">
+				<item file_id="4127ba5f935134e5068a6f298ba80bbd" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" pos="644.35,0" ext="200.3,38.4" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1563,32" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
+						<item type_name="flame::cLayout" type="Free" padding="8,0,8,4" auto_width="false" auto_height="false" />
+					</components>
+					<children>
+						<item file_id="47811256007f52cbabff7390a0fb1682" name="player1_stats">
+							<components>
+								<item type_name="flame::cElement" pos="8,6" ext="37.5,16" horizontal_alignment="End0" vertical_alignment="Center" />
+								<item type_name="flame::cText" text="Player1" />
+							</components>
+						</item>
+						<item file_id="485f16cc07f4052c2649ac31724c70a2" name="player2_stats">
+							<components>
+								<item type_name="flame::cElement" pos="1515,6" ext="40,16" horizontal_alignment="End1" vertical_alignment="Center" />
+								<item type_name="flame::cText" text="Player2" />
+							</components>
+						</item>
+						<item file_id="4f805fbcaffedf152d6c21ef1f6af884" name="round_info">
+							<components>
+								<item type_name="flame::cElement" pos="744.75,6" ext="57.5,16" horizontal_alignment="Center" vertical_alignment="Center" />
+								<item type_name="flame::cText" text="Battle 2:00" />
+							</components>
+						</item>
+					</children>
+				</item>
+				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
+					<components>
+						<item type_name="flame::cElement" pos="0,599.6" ext="257.8,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
@@ -55,83 +82,19 @@
 										<item first="flame::cText|text" second="output('Stone: ', main_player.stone)" />
 									</value>
 								</item>
+								<item target="495c7eb8cb346e3434343d20b444bd91|flame::cDataUpdater|add" />
+								<item target="495c7eb8cb346e3434343d20b444bd91|flame::cDataUpdater|items">
+									<value>
+										<item first="flame::cText|text" second="output('Food: ', main_player.food)" />
+									</value>
+								</item>
 							</modifications>
-						</item>
-					</children>
-				</item>
-				<item file_id="46d8f3113ed816250331d8f246f9feac" name="left_panel">
-					<components>
-						<item type_name="flame::cElement" pos="0,182.5" ext="116,201" horizontal_alignment="End0" vertical_alignment="Center" />
-						<item type_name="flame::cLayout" padding="4,4,4,150" />
-					</components>
-					<children>
-						<item file_id="4f6fb9319b8b6541e9426222e638049b" name="background">
-							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="108,47" background_col="0,0,0,128" />
-								<item type_name="flame::cLayout" />
-							</components>
-							<children>
-								<item file_id="441d186c1d587f9ab6d4a4e56d64279f" name="hp_bar">
-									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="100,19" background_col="0,204,0,255" />
-									</components>
-									<children>
-										<item file_id="435d5789224f57fce8a586c86ec95f97" name="hp_text">
-											<components>
-												<item type_name="flame::cElement" pos="25.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-												<item type_name="flame::cText" text="100/100" font_size="18" />
-											</components>
-										</item>
-									</children>
-								</item>
-								<item file_id="41c39c3808237c3f0a82c1f7e7437284" name="troop_text">
-									<components>
-										<item type_name="flame::cElement" pos="4,27" ext="43,16" />
-										<item type_name="flame::cText" text="troop: 6" />
-									</components>
-								</item>
-							</children>
-						</item>
-					</children>
-				</item>
-				<item file_id="4988db3552c60b5441f49466da7ba0a2" name="right_panel">
-					<components>
-						<item type_name="flame::cElement" pos="1373,182.5" ext="116,201" horizontal_alignment="End1" vertical_alignment="Center" />
-						<item type_name="flame::cLayout" padding="4,4,4,150" />
-					</components>
-					<children>
-						<item file_id="43350bafe0c8cf035a29e02e6199efa5" name="background">
-							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="108,47" background_col="0,0,0,128" />
-								<item type_name="flame::cLayout" />
-							</components>
-							<children>
-								<item file_id="4808ad33a8aa93f2c414d8e31feb798d" name="hp_bar">
-									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="100,19" background_col="0,204,0,255" />
-									</components>
-									<children>
-										<item file_id="4c7b40b3708a364b5360caf403f34b84" name="hp_text">
-											<components>
-												<item type_name="flame::cElement" pos="25.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-												<item type_name="flame::cText" text="100/100" font_size="18" />
-											</components>
-										</item>
-									</children>
-								</item>
-								<item file_id="49fa3db964a8a2a4908ffcfc853fe889" name="troop_text">
-									<components>
-										<item type_name="flame::cElement" pos="4,27" ext="43,16" />
-										<item type_name="flame::cText" text="troop: 6" />
-									</components>
-								</item>
-							</children>
 						</item>
 					</children>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
 					<components>
-						<item type_name="flame::cElement" pos="664.5,508" ext="160,58" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="701.5,580" ext="160,58" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
@@ -174,7 +137,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1090.38,510" ext="398.625,56" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1164.38,582" ext="398.625,56" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,16,20" item_spacing="0" />
 					</components>
 					<children>
@@ -183,7 +146,7 @@
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,176,49,255" />
 								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Building" />
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_open_building_window" />
+									<value type="Action_enter_editring_building" />
 								</item>
 							</modifications>
 						</item>
@@ -192,7 +155,7 @@
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="49,163,180,255" />
 								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Troop" />
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_open_troop_window" />
+									<value type="Action_enter_editing_troop" />
 								</item>
 							</modifications>
 						</item>
@@ -201,7 +164,7 @@
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,100,49,255" />
 								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Route" />
 								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_open_route_window" />
+									<value type="" />
 								</item>
 							</modifications>
 						</item>
@@ -1528,6 +1491,13 @@
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="cCircleCollider" radius="2" faction="Party2" />
 			</components>
+			<children>
+				<item file_id="480019532b6dc66d8a3127011d2808a5" name="formation_grid">
+					<components>
+						<item type_name="flame::cNode" pos="3,0,0" />
+					</components>
+				</item>
+			</children>
 		</item>
 		<item file_id="4ea3f908473492d1ae81b42af8b5d495" name="player2_town">
 			<components>

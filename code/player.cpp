@@ -5,12 +5,35 @@
 #include "entities/ai.h"
 #include "entities/collider.h"
 
-const auto TROOP_CX = 4;
-const auto TROOP_CY = 4;
-
-void Player::init(EntityPtr e_town)
+void Player::init(EntityPtr _e_town)
 {
-	town_pos = e_town->node()->pos;
+	e_town = _e_town;
+	if (e_town)
+	{
+		e_formation_grid = e_town->find_child_recursively("formation_grid");
+		if (e_formation_grid)
+		{
+			auto x_dir = normalize(e_formation_grid->node()->pos);
+			auto y_dir = cross(x_dir, vec3(0.f, 1.f, 0.f));
+			auto off = (FORMATION_CY - 1) * FORMATION_GAP * 0.5f * y_dir;
+			if (auto e_grid_item = get_prefab(L"assets\\grid_unit.prefab"); e_grid_item)
+			{
+				for (auto y = 0; y < FORMATION_CY; y++)
+				{
+					for (auto x = 0; x < FORMATION_CX; x++)
+					{
+						auto e = e_grid_item->copy();
+						e->name = std::format("{}, {}", x, y);
+						auto n = e->node();
+						n->set_pos(vec3(x * FORMATION_GAP, 0.8f, y * FORMATION_GAP) + off);
+						n->set_scl(vec3(FORMATION_GAP));
+						e_formation_grid->add_child(e);
+					}
+				}
+			}
+		}
+	}
+
 	if (auto collider = e_town->get_component_t<cCircleCollider>(); collider)
 	{
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
@@ -19,43 +42,53 @@ void Player::init(EntityPtr e_town)
 		});
 	}
 
-	formation.resize(TROOP_CX * TROOP_CY);
+	formation.resize(FORMATION_CX * FORMATION_CY);
 
 	avaliable_unit_infos.clear();
 	if (!unit_infos.infos.empty())
 		avaliable_unit_infos.push_back(&unit_infos.infos[0]);
 }
 
+void Player::set_formation(uint index, UnitInfo* unit_info)
+{
+	formation[index] = unit_info;
+}
+
 void Player::spawn_troop()
 {
 	troop.clear();
-
-	auto gap = 2.f;
-	auto off = town_pos + troop_spawn_off + vec3((TROOP_CX - 1) * gap * 0.5f, 0.f, (TROOP_CY - 1) * gap * 0.5f);
-	for (auto y = 0; y < TROOP_CY; y++)
+	
+	if (e_formation_grid)
 	{
-		for (auto x = 0; x < TROOP_CX; x++)
+		auto off = e_formation_grid->node()->global_pos();
+		auto x_dir = normalize(off - e_town->node()->global_pos());
+		auto y_dir = cross(x_dir, vec3(0.f, 1.f, 0.f));
+		off -= (FORMATION_CY - 1) * FORMATION_GAP * 0.5f * y_dir;
+		for (auto y = 0; y < FORMATION_CY; y++)
 		{
-			auto unit_info = formation[y * TROOP_CX + x];
-			if (!unit_info)
-				continue;
-			if (auto character = add_character(unit_info->prefab_name, off + vec3(x * gap, 0.f, y * gap), faction); character)
+			for (auto x = 0; x < FORMATION_CX; x++)
 			{
-				if (auto ai = character->entity->get_component_t<cAI>(); ai)
+				auto unit_info = formation[y * FORMATION_CX + x];
+				if (!unit_info)
+					continue;
+				if (auto character = add_character(unit_info->prefab_name, off + x * FORMATION_GAP * x_dir + y * FORMATION_GAP * y_dir, faction); character)
 				{
-					ai->type = UnitLaneCreep;
-					ai->target_pos = troop_target_pos;
-				}
-
-				character->entity->message_listeners.add([this, character](uint hash, void*, void*) {
-					if (hash == "destroyed"_h)
+					if (auto ai = character->entity->get_component_t<cAI>(); ai)
 					{
-						std::erase_if(troop, [&](const auto& i) {
-							return i == character;
-						});
+						ai->type = UnitLaneCreep;
+						ai->target_pos = troop_target_location;
 					}
-				});
-				troop.push_back(character);
+
+					character->entity->message_listeners.add([this, character](uint hash, void*, void*) {
+						if (hash == "destroyed"_h)
+						{
+							std::erase_if(troop, [&](const auto& i) {
+								return i == character;
+							});
+						}
+					});
+					troop.push_back(character);
+				}
 			}
 		}
 	}

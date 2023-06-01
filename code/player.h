@@ -3,6 +3,10 @@
 #include "head.h"
 #include "presets.h"
 
+inline const auto FORMATION_CX = 4;
+inline const auto FORMATION_CY = 4;
+inline const auto FORMATION_GAP = 2.f;
+
 // Reflect
 struct Player
 {
@@ -18,20 +22,18 @@ struct Player
 	// Reflect
 	uint food = 0;
 
-	// Reflect
-	vec3 town_pos = vec3(0.f);
-	// Reflect
-	vec3 troop_spawn_off = vec3(0.f);
-	// Reflect
-	vec3 troop_target_pos = vec3(0.f);
+	vec3 troop_target_location = vec3(0.f);
 
 	std::vector<UnitInfo*> formation;
+	EntityPtr e_town = nullptr;
+	EntityPtr e_formation_grid = nullptr;
 	std::vector<cCharacterPtr> troop;
 
 	std::vector<BuildingInfo*> avaliable_building_infos;
 	std::vector<UnitInfo*> avaliable_unit_infos;
 
-	void init(EntityPtr e_town);
+	void init(EntityPtr _e_town);
+	void set_formation(uint index, UnitInfo* unit_info);
 	void spawn_troop();
 	void remove_troop();
 };

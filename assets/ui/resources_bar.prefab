@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <prefab file_id="44add67d5a82088b2e6a49cffb074096" name="resources_bar">
 	<components>
-		<item type_name="flame::cElement" pos="59.5,4" ext="192.3,30.4" />
+		<item type_name="flame::cElement" pos="59.5,4" ext="249.8,30.4" />
 		<item type_name="flame::cStretchedImage" image_name="frame.png" border="8,8,8,8" />
 		<item type_name="flame::cLayout" type="Horizontal" padding="10.3,6.4,7.5,8" />
 	</components>
@@ -22,6 +22,12 @@
 			<components>
 				<item type_name="flame::cElement" pos="127.8,6.4" ext="57,16" />
 				<item type_name="flame::cText" text="Stone: 500" />
+			</components>
+		</item>
+		<item file_id="495c7eb8cb346e3434343d20b444bd91" name="food_text">
+			<components>
+				<item type_name="flame::cElement" pos="188.8,6.4" ext="53.5,16" />
+				<item type_name="flame::cText" text="Food: 100" />
 			</components>
 		</item>
 	</children>

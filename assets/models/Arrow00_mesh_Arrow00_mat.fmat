@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<material color="0.588235,0.588235,0.588235,1" color_map="0">
-	<textures>
-		<item filename="Arrow00_diff.png" />
-	</textures>
-</material>

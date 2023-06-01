@@ -34,6 +34,22 @@ void MainCamera::init(EntityPtr e)
 	}
 }
 
+void MainCamera::set_follow_target(const AABB& bounds)
+{
+	follow_target = fit_camera_to_object(mat3(node->g_qut), camera->fovy, camera->zNear, camera->aspect, bounds);
+}
+
+void MainCamera::update()
+{
+	if (follow_target.y > -1000.f)
+	{
+		static vec3 velocity = vec3(0.f);
+		node->set_pos(smooth_damp(node->pos, follow_target, velocity, 0.6f, 20.f, delta_time));
+		if (distance(node->pos, follow_target) < 0.2f)
+			follow_target.y = -2000.f;
+	}
+}
+
 MainCamera main_camera;
 
 GameState game_state = GameStatePreparation;
@@ -389,10 +405,8 @@ void cGame::start()
 	player2.faction = FactionParty2;
 	player1.init(root->find_child_recursively("player1_town"));
 	player2.init(root->find_child_recursively("player2_town"));
-	player1.troop_spawn_off = vec3(+8.f, 0.f, 0.f);
-	player2.troop_spawn_off = vec3(-8.f, 0.f, 0.f);
-	player1.troop_target_pos = player2.town_pos;
-	player2.troop_target_pos = player1.town_pos;
+	player1.troop_target_location = player2.e_town ? player2.e_town->node()->pos : vec3(0.f);
+	player2.troop_target_location = player1.e_town ? player1.e_town->node()->pos : vec3(0.f);
 
 	preload_images.push_back(graphics::Image::get(L"assets\\effects\\Fireball.png"));
 }
@@ -435,6 +449,7 @@ void cGame::update()
 		update_control();
 	if (enable_ui)
 		update_ui();
+	main_camera.update();
 
 	if (game_state == GameStateBattle)
 	{

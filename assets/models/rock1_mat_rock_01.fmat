@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<material color_map="0">
-	<textures>
-		<item filename="rock1.png" srgb="true"/>
-	</textures>
-</material>
