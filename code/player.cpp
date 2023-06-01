@@ -19,7 +19,7 @@ void Player::init(EntityPtr _e_town)
 			auto x_dir = normalize(e_formation_grid->node()->pos);
 			auto y_dir = cross(x_dir, vec3(0.f, 1.f, 0.f));
 			auto off = -(FORMATION_CY - 1) * FORMATION_GAP * 0.5f * y_dir;
-			if (auto e_grid_item = get_prefab(L"assets\\grid_unit.prefab"); e_grid_item)
+			if (auto e_grid_item = get_prefab(L"assets\\grid_cell.prefab"); e_grid_item)
 			{
 				for (auto y = 0; y < FORMATION_CY; y++)
 				{
@@ -27,9 +27,9 @@ void Player::init(EntityPtr _e_town)
 					{
 						auto e = e_grid_item->duplicate();
 						e->name = std::format("{}, {}", x, y);
-						auto n = e->node();
-						n->set_pos(vec3(x * FORMATION_GAP, 0.8f, y * FORMATION_GAP) + off);
-						n->set_scl(vec3(FORMATION_GAP));
+						e->node()->set_pos(vec3(x * FORMATION_GAP, 0.8f, y * FORMATION_GAP) + off);
+						// the first child is the model
+						e->children[0]->node()->set_scl(vec3(FORMATION_GAP));
 						e_formation_grid->add_child(e);
 					}
 				}
@@ -54,6 +54,8 @@ void Player::init(EntityPtr _e_town)
 
 void Player::set_formation(uint index, UnitInfo* unit_info)
 {
+	if (formation[index] == unit_info)
+		return;
 	formation[index] = unit_info;
 
 	auto e = e_formation_grid->children[index].get();
@@ -66,28 +68,28 @@ void Player::set_formation(uint index, UnitInfo* unit_info)
 				comp_hashes[i] = e->components[i]->type_hash;
 			for (auto it = comp_hashes.rbegin(); it != comp_hashes.rend(); it++)
 			{
-				if (*it != th<cNode>() && *it != th<cMesh>())
+				if (*it != th<cNode>() && *it != th<cMesh>() && *it != th<cArmature>())
 					e->remove_component(*it);
 			}
 
-			if (auto mesh = e->get_component_t<cMesh>(); mesh)
-			{
-				if (mesh->material)
-				{
-					auto new_material = graphics::Material::create();
-					new_material->copy_from(mesh->material);
-					mesh->set_material_name(L"0x" + wstr_hex((uint64)new_material));
-					e->message_listeners.add([new_material](uint hash, void*, void*) {
-						if (hash == "destroyed"_h)
-							delete new_material;
-					});
-				}
-			}
+			//if (auto mesh = e->get_component_t<cMesh>(); mesh)
+			//{
+			//	if (mesh->material)
+			//	{
+			//		auto new_material = graphics::Material::create();
+			//		new_material->copy_from(mesh->material);
+			//		mesh->set_material_name(L"0x" + wstr_hex((uint64)new_material));
+			//		e->message_listeners.add([new_material](uint hash, void*, void*) {
+			//			if (hash == "destroyed"_h)
+			//				delete new_material;
+			//		});
+			//	}
+			//}
 		});
 		e->add_child(e_unit);
 	}
 	else
-		e->remove_all_children();
+		e->remove_child(e->children[1].get()); // the first child is the grid cell model, the second is the unit preview
 }
 
 void Player::spawn_troop()
