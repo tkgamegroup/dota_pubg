@@ -41,7 +41,14 @@ void Player::init(EntityPtr _e_town)
 	{
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
 			if (type == "enter"_h)
+			{
 				character->die("removed"_h);
+				town_hp--;
+				if (town_hp == 0)
+				{
+
+				}
+			}
 		});
 	}
 

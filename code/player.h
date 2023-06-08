@@ -22,6 +22,9 @@ struct Player
 	// Reflect
 	uint food = 0;
 
+	// Reflect
+	uint town_hp = 30;
+
 	vec3 troop_target_location = vec3(0.f);
 
 	std::vector<UnitInfo*> formation;
