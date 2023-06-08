@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <material tiling="1" code_file="flame/shaders/standard_layered_mat.glsl">
-	<shader_defines>
+	<defines>
 		<item v="frag:LAYERS=3" />
 		<item v="frag:TRI_PLANAR" />
 		<item v="frag:TEXTURE_VARIANT" />
-	</shader_defines>
+	</defines>
 	<textures>
 		<item filename="assets/terrain/rock.jpg" srgb="true" auto_mipmap="true" />
 		<item filename="assets/terrain/grass.jpg" srgb="true" auto_mipmap="true" />

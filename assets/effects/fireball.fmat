@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <material color_map="0">
-	<shader_defines>
+	<defines>
 		<item v="COLOR_MAP=0" />
 		<item v="bsc=SrcAlpha" />
 		<item v="bdc=OneMinusSrcAlpha" />
-	</shader_defines>
+	</defines>
 	<textures>
 		<item filename="Fireball.png" srgb="true" auto_mipmap="true" />
 	</textures>
