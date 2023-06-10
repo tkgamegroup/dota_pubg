@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <material color="1,0,0,1" color_map="0">
-	<code_defines>
+	<defines>
 		<item v="frag:TINT_COLOR" />
-	</code_defines>
+	</defines>
 	<textures>
 		<item filename="A.png" srgb="true" mag_filter="Linear" min_filter="Linear" linear_mipmap="true" address_mode="Repeat" auto_mipmap="true" />
 	</textures>

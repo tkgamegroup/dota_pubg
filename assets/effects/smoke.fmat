@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <material color_map="0" float_values="15,0,0,0" int_values="6,5,0,0">
-	<shader_defines>
+	<defines>
 		<item v="COLOR_MAP=0" />
 		<item v="bsc=One" />
 		<item v="bdc=One" />
 		<item v="frag:ALPHA_MUL" />
-	</shader_defines>
+	</defines>
 	<textures>
 		<item filename="Smoke30Frames.png" srgb="true" auto_mipmap="true" />
 	</textures>
