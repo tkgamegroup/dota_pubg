@@ -72,19 +72,19 @@ void Player::set_formation(uint index, UnitInfo* unit_info)
 					e->remove_component(*it);
 			}
 
-			//if (auto mesh = e->get_component_t<cMesh>(); mesh)
-			//{
-			//	if (mesh->material)
-			//	{
-			//		auto new_material = graphics::Material::create();
-			//		new_material->copy_from(mesh->material);
-			//		mesh->set_material_name(L"0x" + wstr_hex((uint64)new_material));
-			//		e->message_listeners.add([new_material](uint hash, void*, void*) {
-			//			if (hash == "destroyed"_h)
-			//				delete new_material;
-			//		});
-			//	}
-			//}
+			if (auto mesh = e->get_component_t<cMesh>(); mesh)
+			{
+				if (mesh->material)
+				{
+					auto new_material = graphics::Material::create();
+					TypeInfo::get<graphics::Material>()->copy(new_material, mesh->material);
+					mesh->set_material_name(L"0x" + wstr_hex((uint64)new_material));
+					e->message_listeners.add([new_material](uint hash, void*, void*) {
+						if (hash == "destroyed"_h)
+							delete new_material;
+					});
+				}
+			}
 		});
 		e->add_child(e_unit);
 	}
