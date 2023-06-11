@@ -64,30 +64,6 @@
 					<children>
 						<item filename="D:\dota_pubg\assets\ui\resources_bar.prefab">
 							<modifications>
-								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cDataUpdater|add" />
-								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cDataUpdater|items">
-									<value>
-										<item first="flame::cText|text" second="output('Gold: ', main_player.gold)" />
-									</value>
-								</item>
-								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cDataUpdater|add" />
-								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cDataUpdater|items">
-									<value>
-										<item first="flame::cText|text" second="output('Wood: ', main_player.wood)" />
-									</value>
-								</item>
-								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cDataUpdater|add" />
-								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cDataUpdater|items">
-									<value>
-										<item first="flame::cText|text" second="output('Stone: ', main_player.stone)" />
-									</value>
-								</item>
-								<item target="495c7eb8cb346e3434343d20b444bd91|flame::cDataUpdater|add" />
-								<item target="495c7eb8cb346e3434343d20b444bd91|flame::cDataUpdater|items">
-									<value>
-										<item first="flame::cText|text" second="output('Food: ', main_player.food)" />
-									</value>
-								</item>
 							</modifications>
 						</item>
 					</children>

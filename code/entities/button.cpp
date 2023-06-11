@@ -21,7 +21,7 @@ void cButton::set_normal_image_name(const std::filesystem::path& image_name)
 	if (!normal_image_name.empty())
 	{
 		AssetManagemant::get(Path::get(normal_image_name));
-		normal_image = !normal_image_name.empty() ? graphics::Image::get(normal_image_name, false) : nullptr;
+		normal_image = !normal_image_name.empty() ? graphics::Image::get(normal_image_name) : nullptr;
 	}
 
 	update_state();
@@ -45,7 +45,7 @@ void cButton::set_hovered_image_name(const std::filesystem::path& image_name)
 	if (!hovered_image_name.empty())
 	{
 		AssetManagemant::get(Path::get(hovered_image_name));
-		hovered_image = !hovered_image_name.empty() ? graphics::Image::get(hovered_image_name, false) : nullptr;
+		hovered_image = !hovered_image_name.empty() ? graphics::Image::get(hovered_image_name) : nullptr;
 	}
 
 	update_state();
@@ -69,7 +69,7 @@ void cButton::set_pressed_image_name(const std::filesystem::path& image_name)
 	if (!pressed_image_name.empty())
 	{
 		AssetManagemant::get(Path::get(pressed_image_name));
-		pressed_image = !pressed_image_name.empty() ? graphics::Image::get(pressed_image_name, false) : nullptr;
+		pressed_image = !pressed_image_name.empty() ? graphics::Image::get(pressed_image_name) : nullptr;
 	}
 
 	update_state();
