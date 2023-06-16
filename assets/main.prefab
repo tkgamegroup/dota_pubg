@@ -26,12 +26,12 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1563,638" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1531,638" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4127ba5f935134e5068a6f298ba80bbd" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1563,32" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1531,32" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 						<item type_name="flame::cLayout" type="Free" padding="8,0,8,4" auto_width="false" auto_height="false" />
 					</components>
@@ -44,13 +44,13 @@
 						</item>
 						<item file_id="485f16cc07f4052c2649ac31724c70a2" name="player2_stats">
 							<components>
-								<item type_name="flame::cElement" pos="1515,6" ext="40,16" horizontal_alignment="End1" vertical_alignment="Center" />
+								<item type_name="flame::cElement" pos="1483,6" ext="40,16" horizontal_alignment="End1" vertical_alignment="Center" />
 								<item type_name="flame::cText" text="Player2" />
 							</components>
 						</item>
 						<item file_id="4f805fbcaffedf152d6c21ef1f6af884" name="round_info">
 							<components>
-								<item type_name="flame::cElement" pos="744.75,6" ext="57.5,16" horizontal_alignment="Center" vertical_alignment="Center" />
+								<item type_name="flame::cElement" pos="728.75,6" ext="57.5,16" horizontal_alignment="Center" vertical_alignment="Center" />
 								<item type_name="flame::cText" text="Battle 2:00" />
 							</components>
 						</item>
@@ -58,52 +58,66 @@
 				</item>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,599.6" ext="257.8,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,599.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
-					<children>
-						<item filename="D:\dota_pubg\assets\ui\resources_bar.prefab">
-							<modifications>
-							</modifications>
-						</item>
-					</children>
 				</item>
-				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_bar">
+				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_left_bar">
 					<components>
-						<item type_name="flame::cElement" pos="701.5,580" ext="160,58" background_col="0,0,0,100" horizontal_alignment="Center" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,494" ext="300,144" background_col="0,0,0,100" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
 						<item file_id="40d3cd79033d7e0300e1dd077e1ef29a" name="selected_target">
 							<components>
-								<item type_name="flame::cElement" ext="160,58" />
+								<item type_name="flame::cElement" ext="300,144" />
 								<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
-								<item type_name="flame::cLayout" padding="8,8,8,8" />
+								<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" />
 							</components>
 							<children>
-								<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
+								<item file_id="4196b1b63bbd60bee29b2882b48b6c9d" name="avatar_image">
 									<components>
-										<item type_name="flame::cElement" pos="8,8" ext="144,19" background_col="0,204,0,255" />
+										<item type_name="flame::cElement" pos="8,8" ext="128,128" />
+										<item type_name="flame::cImage" auto_size="false" image_name="images\1.png" />
+									</components>
+								</item>
+								<item file_id="4c1e21fb39f55226a6257a92012154b8" name="right">
+									<components>
+										<item type_name="flame::cElement" pos="140,8" ext="152,78" />
+										<item type_name="flame::cLayout" />
 									</components>
 									<children>
-										<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
+										<item file_id="4bef328b0fb97bcc493037bdef6cafbb" name="name">
 											<components>
-												<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-												<item type_name="flame::cText" text="100/100" font_size="18" />
+												<item type_name="flame::cElement" pos="4,4" ext="49.5,24" />
+												<item type_name="flame::cText" text="Name" font_size="24" />
 											</components>
 										</item>
-									</children>
-								</item>
-								<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
-									<components>
-										<item type_name="flame::cElement" pos="8,31" ext="144,19" background_col="0,24,232,255" />
-									</components>
-									<children>
-										<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+										<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
 											<components>
-												<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-												<item type_name="flame::cText" text="100/100" font_size="18" border="0.2" />
+												<item type_name="flame::cElement" pos="4,32" ext="144,19" background_col="0,204,0,255" />
 											</components>
+											<children>
+												<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
+													<components>
+														<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+														<item type_name="flame::cText" text="100/100" font_size="18" />
+													</components>
+												</item>
+											</children>
+										</item>
+										<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
+											<components>
+												<item type_name="flame::cElement" pos="4,55" ext="144,19" background_col="0,24,232,255" />
+											</components>
+											<children>
+												<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
+													<components>
+														<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+														<item type_name="flame::cText" text="100/100" font_size="18" border="0.2" />
+													</components>
+												</item>
+											</children>
 										</item>
 									</children>
 								</item>
@@ -113,8 +127,21 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1178.38,600" ext="384.625,38" background_col="0,0,0,159" horizontal_alignment="End1" vertical_alignment="End1" />
-						<item type_name="flame::cLayout" type="Horizontal" padding="4,4,2,2" item_spacing="0" />
+						<item type_name="flame::cElement" pos="1377.7,601.6" ext="153.3,36.4" background_col="0,0,0,159" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" />
+					</components>
+					<children>
+						<item filename="D:\dota_pubg\assets\ui\resources_bar.prefab">
+							<modifications>
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pos" value="4,4" />
+							</modifications>
+						</item>
+					</children>
+				</item>
+				<item file_id="494c90f7b5aa516814a003708e8ea1aa" name="top_bar">
+					<components>
+						<item type_name="flame::cElement" pos="572.188,30" ext="386.625,40" horizontal_alignment="Center" />
+						<item type_name="flame::cLayout" type="Horizontal" item_spacing="0" />
 					</components>
 					<children>
 						<item filename="ui\button.prefab">
@@ -167,7 +194,7 @@
 								<item type_name="flame::cElement" pos="4,4" ext="184,300" />
 								<item type_name="flame::cList" prefab_name="ui\building_slot.prefab" count="21">
 									<modifiers>
-										<item first="flame::cReceiver|click_action.index" second="i" />
+										<item />
 									</modifiers>
 								</item>
 								<item type_name="flame::cLayout" type="Circle" columns="5" auto_width="false" auto_height="false" />
@@ -188,13 +215,13 @@
 									<children>
 										<item file_id="4dc5058ff3da270618c5c02d5331fb8c" name="title_text">
 											<components>
-												<item type_name="flame::cElement" pos="4,4" ext="86.25,20" />
+												<item type_name="flame::cElement" pos="4,4" ext="0,0" />
 												<item type_name="flame::cText" text="Empty Space" font_size="20" />
 											</components>
 										</item>
 										<item file_id="41b18bc1784bc5ebb6642d2521d6f39a" name="text">
 											<components>
-												<item type_name="flame::cElement" pos="4,28" ext="128.5,16" />
+												<item type_name="flame::cElement" pos="4,28" ext="0,0" />
 												<item type_name="flame::cText" text="Select a building to build" />
 											</components>
 										</item>
@@ -214,13 +241,13 @@
 											<children>
 												<item file_id="45f6f2b23523e6359491e04a0d2ff5b8" name="title_text">
 													<components>
-														<item type_name="flame::cElement" pos="4,4" ext="35,20" />
+														<item type_name="flame::cElement" pos="4,4" ext="0,0" />
 														<item type_name="flame::cText" text="Farm" font_size="20" />
 													</components>
 												</item>
 												<item file_id="439f4cb5d0fda3ef375e5a14b35e9dae" name="info_text">
 													<components>
-														<item type_name="flame::cElement" pos="4,28" ext="71,16" />
+														<item type_name="flame::cElement" pos="4,28" ext="0,0" />
 														<item type_name="flame::cText" text="Provide food." />
 													</components>
 												</item>
@@ -331,7 +358,7 @@
 							<children>
 								<item file_id="4ea0f7318feba4d75f84ed2d1df0069a" name="title_text">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="35.625,20" />
+										<item type_name="flame::cElement" pos="4,4" ext="0,0" />
 										<item type_name="flame::cText" text="Units" font_size="20" />
 									</components>
 								</item>
@@ -340,7 +367,7 @@
 										<item type_name="flame::cElement" pos="4,28" ext="40,40" />
 										<item type_name="flame::cList" prefab_name="ui\unit_slot.prefab">
 											<modifiers>
-												<item first="flame::cReceiver|click_action.index" second="i" />
+												<item />
 											</modifiers>
 										</item>
 										<item type_name="flame::cLayout" type="Grid" columns="7" />
@@ -351,1105 +378,6 @@
 					</children>
 				</item>
 			</children>
-		</item>
-		<item file_id="47faee369fd69ffc1fc09cc1b8296b95" name="map">
-			<components>
-				<item type_name="flame::cNode" />
-				<item type_name="flame::cTileMap" tiles_path="terrain\tiles">
-					<samples>
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-						<item height="1" />
-					</samples>
-				</item>
-			</components>
-			<children />
 		</item>
 		<item file_id="48b492a25223ae2b0adf321d09bd8e9a" name="player1_town">
 			<components>
@@ -1471,6 +399,9 @@
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="cCircleCollider" radius="2" faction="Party1" />
 			</components>
+		</item>
+		<item filename="extra\lol_scene\scene.prefab">
+			<modifications />
 		</item>
 	</children>
 </prefab>
