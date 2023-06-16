@@ -11,7 +11,7 @@ struct UI_building_window
 	EntityPtr empty_case = nullptr;
 	EntityPtr built_up_case = nullptr;
 
-	void init(EntityPtr ui);
+	void init();
 	void open();
 	void select_building_area(uint index);
 };
@@ -23,12 +23,14 @@ struct UI_troop_window
 	EntityPtr formation_area = nullptr;
 	EntityPtr unit_list = nullptr;
 
-	void init(EntityPtr ui);
+	void init();
 	void open();
 	void select_formation_slot(uint index);
 	void select_unit_slot(uint index);
 };
 extern UI_troop_window ui_troop_window;
+
+extern EntityPtr ui;
 
 void init_ui();
 void deinit_ui();

@@ -19,10 +19,11 @@
 #include "../entities/chest.h"
 #include "ui.h"
 
+EntityPtr ui = nullptr;
 UI_building_window ui_building_window;
 UI_troop_window ui_troop_window;
 
-void UI_building_window::init(EntityPtr ui)
+void UI_building_window::init()
 {
 	window = ui->find_child("building_window");
 	if (window)
@@ -64,7 +65,7 @@ void UI_building_window::select_building_area(uint index)
 	}
 }
 
-void UI_troop_window::init(EntityPtr ui)
+void UI_troop_window::init()
 {
 	window = ui->find_child("troop_window");
 	if (window)
@@ -168,10 +169,10 @@ void init_ui()
 	auto renderer = sRenderer::instance();
 	canvas = renderer->canvas;
 
-	if (auto ui = root->find_child("ui"); ui)
+	if (ui = root->find_child("ui"); ui)
 	{
-		ui_building_window.init(ui);
-		ui_troop_window.init(ui);
+		ui_building_window.init();
+		ui_troop_window.init();
 
 		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
 		{

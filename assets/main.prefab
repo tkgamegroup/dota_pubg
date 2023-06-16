@@ -138,7 +138,7 @@
 						</item>
 					</children>
 				</item>
-				<item file_id="494c90f7b5aa516814a003708e8ea1aa" name="top_bar">
+				<item file_id="494c90f7b5aa516814a003708e8ea1aa" name="strategy_buttons">
 					<components>
 						<item type_name="flame::cElement" pos="572.188,30" ext="386.625,40" horizontal_alignment="Center" />
 						<item type_name="flame::cLayout" type="Horizontal" item_spacing="0" />

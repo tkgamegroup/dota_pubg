@@ -115,6 +115,9 @@ void start_battle()
 	game_state = GameStateBattle;
 	player1.spawn_troop();
 	player2.spawn_troop();
+
+	if (auto e = ui->find_child_recursively("strategy_buttons"); e)
+		e->set_enable(false);
 }
 
 void end_battle()
@@ -123,6 +126,9 @@ void end_battle()
 	player1.remove_troop();
 	player2.remove_troop();
 	game_state = GameStatePreparation;
+
+	if (auto e = ui->find_child_recursively("strategy_buttons"); e)
+		e->set_enable(true);
 }
 
 static std::map<std::filesystem::path, EntityPtr> prefabs;
