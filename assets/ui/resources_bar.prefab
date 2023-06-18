@@ -1,44 +1,43 @@
 <?xml version="1.0"?>
 <prefab file_id="44add67d5a82088b2e6a49cffb074096" name="resources_bar">
 	<components>
-		<item type_name="flame::cElement" pos="4,4" ext="147.3,30.4" />
-		<item type_name="flame::cStretchedImage" image_name="frame.png" border="8,8,8,8" />
-		<item type_name="flame::cLayout" type="Horizontal" padding="10.3,6.4,7.5,8" />
+		<item type_name="flame::cElement" pos="4,4" ext="137.5,24" />
+		<item type_name="flame::cLayout" type="Horizontal" />
 	</components>
 	<children>
 		<item file_id="46cc9bf641ce74b8abe1700592b723b9" name="blood_icon">
 			<components>
-				<item type_name="flame::cElement" pos="10.3,6.4" ext="16,16" />
-				<item type_name="flame::cImage" image_name="assets\icons\blood.png" auto_size="false" />
+				<item type_name="flame::cElement" pos="4,4" ext="16,16" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\icons\blood.png" />
 			</components>
 		</item>
 		<item file_id="4b5d2c756749a5b980691f9e3c77d1a8" name="blood_text">
 			<components>
-				<item type_name="flame::cElement" pos="30.3,6.4" ext="20.5,16" />
+				<item type_name="flame::cElement" pos="24,4" ext="20.5,16" />
 				<item type_name="flame::cText" text="500" />
 			</components>
 		</item>
 		<item file_id="42b99aa7d9eb17b00d9aaef49bb3f68f" name="bone_icon">
 			<components>
-				<item type_name="flame::cElement" pos="54.8,6.4" ext="16,16" />
-				<item type_name="flame::cImage" image_name="assets\icons\bone.png" auto_size="false" />
+				<item type_name="flame::cElement" pos="48.5,4" ext="16,16" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\icons\bone.png" />
 			</components>
 		</item>
 		<item file_id="4027d3a13b30b832fd5e665d7cae5d81" name="bone_text">
 			<components>
-				<item type_name="flame::cElement" pos="74.8,6.4" ext="20.5,16" />
+				<item type_name="flame::cElement" pos="68.5,4" ext="20.5,16" />
 				<item type_name="flame::cText" text="500" />
 			</components>
 		</item>
 		<item file_id="438f5872a327a77c9787c7aea42a35bf" name="soul_icon">
 			<components>
-				<item type_name="flame::cElement" pos="99.3,6.4" ext="16,16" />
-				<item type_name="flame::cImage" image_name="assets\icons\soul_sand.png" auto_size="false" />
+				<item type_name="flame::cElement" pos="93,4" ext="16,16" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\icons\soul_sand.png" />
 			</components>
 		</item>
 		<item file_id="4267e8bcf6ab70857d1e29698638f9b1" name="soul_text">
 			<components>
-				<item type_name="flame::cElement" pos="119.3,6.4" ext="20.5,16" />
+				<item type_name="flame::cElement" pos="113,4" ext="20.5,16" />
 				<item type_name="flame::cText" text="500" />
 			</components>
 		</item>

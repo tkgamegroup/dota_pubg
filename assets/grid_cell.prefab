@@ -7,7 +7,7 @@
 		<item file_id="4893063c527b03e11728cd2ad7d5c6aa" name="Plane">
 			<components>
 				<item type_name="flame::cNode" qut="0.707107,-0.707107,0,0" />
-				<item type_name="flame::cMesh" mesh_name="models\grid_cell.fmod#mesh0" material_name="materials\Material.001.fmat" />
+				<item type_name="flame::cMesh" mesh_name="models\grid_cell.fmod#mesh0" material_name="models\grid_cell.fmat" />
 			</components>
 		</item>
 	</children>

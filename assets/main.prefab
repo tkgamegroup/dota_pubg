@@ -15,56 +15,87 @@
 		</item>
 		<item file_id="b1cd234c469655697df697bd44ec8f00" name="Sun">
 			<components>
-				<item type_name="flame::cNode" qut="0.800103,-0.46194,0.331414,0.191342" />
-				<item type_name="flame::cDirLight" color="1,1,1,3" cast_shadow="true" />
+				<item type_name="flame::cNode" qut="0.899334,-0.415446,0.123817,0.0571972" />
+				<item type_name="flame::cDirLight" color="1,1,1,3.4" cast_shadow="true" />
 			</components>
 		</item>
 		<item file_id="82f4ac9944dcaea2d43185a721b76f02" name="renderer_settings">
 			<components>
-				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" />
+				<item type_name="flame::cRendererSettings" sky_map_name="skies\daytime_bc7.dds" sky_intensity="0.4" esm_factor="3000" />
 			</components>
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1531,638" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1387,566" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
-				<item file_id="4127ba5f935134e5068a6f298ba80bbd" name="top_bar">
+				<item file_id="47811256007f52cbabff7390a0fb1682" name="player1_stats">
 					<components>
-						<item type_name="flame::cElement" ext="1531,32" horizontal_alignment="Fill" vertical_alignment="End0" />
-						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
-						<item type_name="flame::cLayout" type="Free" padding="8,0,8,4" auto_width="false" auto_height="false" />
+						<item type_name="flame::cElement" ext="45.5,80" horizontal_alignment="End0" vertical_alignment="End0" />
+						<item type_name="flame::cLayout" />
 					</components>
 					<children>
-						<item file_id="47811256007f52cbabff7390a0fb1682" name="player1_stats">
+						<item file_id="479b1d03993fb802ea2dc750b0b75e9b" name="name">
 							<components>
-								<item type_name="flame::cElement" pos="8,6" ext="37.5,16" horizontal_alignment="End0" vertical_alignment="Center" />
+								<item type_name="flame::cElement" pos="4,4" ext="37.5,16" />
 								<item type_name="flame::cText" text="Player1" />
 							</components>
 						</item>
-						<item file_id="485f16cc07f4052c2649ac31724c70a2" name="player2_stats">
+						<item file_id="4fbb2dba04f4d572c0cd51264330dbb1" name="Entity">
 							<components>
-								<item type_name="flame::cElement" pos="1483,6" ext="40,16" horizontal_alignment="End1" vertical_alignment="Center" />
-								<item type_name="flame::cText" text="Player2" />
+								<item type_name="flame::cElement" pos="4,24" ext="24,24" />
+								<item type_name="flame::cImage" auto_size="false" image_name="icons\town.png" />
 							</components>
 						</item>
-						<item file_id="4f805fbcaffedf152d6c21ef1f6af884" name="round_info">
+						<item file_id="4290591f32aa298e7439eec02024a499" name="Entity">
 							<components>
-								<item type_name="flame::cElement" pos="728.75,6" ext="57.5,16" horizontal_alignment="Center" vertical_alignment="Center" />
-								<item type_name="flame::cText" text="Battle 2:00" />
+								<item type_name="flame::cElement" pos="4,52" ext="24,24" />
+								<item type_name="flame::cImage" auto_size="false" image_name="icons\troop.png" />
 							</components>
 						</item>
 					</children>
 				</item>
+				<item file_id="485f16cc07f4052c2649ac31724c70a2" name="player2_stats">
+					<components>
+						<item type_name="flame::cElement" pos="1339,0" ext="48,80" horizontal_alignment="End1" vertical_alignment="End0" />
+						<item type_name="flame::cLayout" />
+					</components>
+					<children>
+						<item file_id="4a090d1925dd2e81ca8f522afd96f88f" name="name">
+							<components>
+								<item type_name="flame::cElement" pos="4,4" ext="40,16" />
+								<item type_name="flame::cText" text="Player2" />
+							</components>
+						</item>
+						<item file_id="47f7a0bc632a9e074e574dd1bbaf029c" name="Entity">
+							<components>
+								<item type_name="flame::cElement" pos="4,24" ext="24,24" />
+								<item type_name="flame::cImage" auto_size="false" image_name="icons\town.png" />
+							</components>
+						</item>
+						<item file_id="4af99ec554a5c368c1bea30fe4a9fea7" name="Entity">
+							<components>
+								<item type_name="flame::cElement" pos="4,52" ext="24,24" />
+								<item type_name="flame::cImage" auto_size="false" image_name="icons\troop.png" />
+							</components>
+						</item>
+					</children>
+				</item>
+				<item file_id="4f805fbcaffedf152d6c21ef1f6af884" name="round_info">
+					<components>
+						<item type_name="flame::cElement" pos="670,0" ext="47,32" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cText" text="2:00" font_size="32" />
+					</components>
+				</item>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,599.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,527.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_left_bar">
 					<components>
-						<item type_name="flame::cElement" pos="0,494" ext="300,144" background_col="0,0,0,100" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,422" ext="300,144" background_col="0,0,0,100" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
@@ -127,64 +158,59 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1377.7,601.6" ext="153.3,36.4" background_col="0,0,0,159" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1190,496" ext="197,70" background_col="0,0,0,159" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" />
 					</components>
 					<children>
+						<item file_id="4cc9a95f8b2ef3cba13248cdd85c088d" name="buttons">
+							<components>
+								<item type_name="flame::cElement" pos="4,4" ext="191,40" />
+								<item type_name="flame::cLayout" type="Horizontal" />
+							</components>
+							<children>
+								<item filename="ui\button.prefab">
+									<modifications>
+										<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Building" />
+										<item target="49fd950a0823eb9f305e43dcf8eb5c8e|name" value="button" />
+										<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
+											<value type="Action_enter_editring_building" />
+										</item>
+									</modifications>
+								</item>
+								<item filename="ui\button.prefab">
+									<modifications>
+										<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Troop" />
+										<item target="49fd950a0823eb9f305e43dcf8eb5c8e|name" value="button" />
+										<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
+											<value type="Action_enter_editing_troop" />
+										</item>
+									</modifications>
+								</item>
+							</children>
+						</item>
 						<item filename="D:\dota_pubg\assets\ui\resources_bar.prefab">
 							<modifications>
-								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pos" value="4,4" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pos" value="4,44" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cLayout|auto_height" value="true" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|ext" value="137.5,24" />
 							</modifications>
 						</item>
 					</children>
 				</item>
-				<item file_id="494c90f7b5aa516814a003708e8ea1aa" name="strategy_buttons">
-					<components>
-						<item type_name="flame::cElement" pos="572.188,30" ext="386.625,40" horizontal_alignment="Center" />
-						<item type_name="flame::cLayout" type="Horizontal" item_spacing="0" />
-					</components>
-					<children>
-						<item filename="ui\button.prefab">
-							<modifications>
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,176,49,255" />
-								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Building" />
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_enter_editring_building" />
-								</item>
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|enable" value="true" />
-							</modifications>
+				<item filename="ui\button.prefab">
+					<modifications>
+						<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Start Battle" />
+						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
+							<value type="Action_start_battle" />
 						</item>
-						<item filename="ui\button.prefab">
-							<modifications>
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="49,163,180,255" />
-								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Troop" />
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_enter_editing_troop" />
-								</item>
-							</modifications>
-						</item>
-						<item filename="ui\button.prefab">
-							<modifications>
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|background_col" value="180,100,49,255" />
-								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Route" />
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="" />
-								</item>
-							</modifications>
-						</item>
-						<item filename="ui\button.prefab">
-							<modifications>
-								<item target="4111d67dac2d4e0085fced399d1f4d9d|flame::cText|text" value="Start Battle" />
-								<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cReceiver|click_action">
-									<value type="Action_start_battle" />
-								</item>
-							</modifications>
-						</item>
-					</children>
+						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|name" value="start_battle_button" />
+						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|horizontal_alignment" value="Center" />
+						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|pos" value="635,34.1" />
+					</modifications>
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window" enable="false">
 					<components>
-						<item type_name="flame::cElement" pos="1068.4,165" ext="494.6,308" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="892.4,129" ext="494.6,308" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
@@ -194,7 +220,7 @@
 								<item type_name="flame::cElement" pos="4,4" ext="184,300" />
 								<item type_name="flame::cList" prefab_name="ui\building_slot.prefab" count="21">
 									<modifiers>
-										<item />
+										<item type="DataBinding" address="flame::cReceiver|click_action.index" data="i" />
 									</modifiers>
 								</item>
 								<item type_name="flame::cLayout" type="Circle" columns="5" auto_width="false" auto_height="false" />
@@ -203,13 +229,13 @@
 						</item>
 						<item file_id="4df03324dea0b59f1f6985966ae6509a" name="right_area">
 							<components>
-								<item type_name="flame::cElement" pos="192,4" ext="298.6,300" vertical_alignment="Fill" />
+								<item type_name="flame::cElement" pos="192,0" ext="298.6,300" vertical_alignment="Fill" />
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
 							<children>
 								<item file_id="4dcec008abcd74161485655992db06ab" name="empty_area_case">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="265.8,274.4" />
+										<item type_name="flame::cElement" pos="4,4" ext="264,268" />
 										<item type_name="flame::cLayout" />
 									</components>
 									<children>
@@ -228,14 +254,18 @@
 										<item file_id="450567ff9f586e586cc51da0bfba1e90" name="building_list">
 											<components>
 												<item type_name="flame::cElement" pos="4,48" ext="256,100" />
-												<item type_name="flame::cList" prefab_name="ui\building_info.prefab" count="9" />
+												<item type_name="flame::cList" prefab_name="ui\building_info.prefab" count="9">
+													<modifiers>
+														<item type="DataBinding" address="flame::cReceiver|click_action.index" data="i" />
+													</modifiers>
+												</item>
 												<item type_name="flame::cLayout" type="Grid" columns="7" auto_height="false" />
 											</components>
 											<children />
 										</item>
 										<item file_id="4c059ae88e680050cbe0d392653d6cb0" name="building_info">
 											<components>
-												<item type_name="flame::cElement" pos="4,152" ext="257.8,118.4" />
+												<item type_name="flame::cElement" pos="4,152" ext="145.5,112" />
 												<item type_name="flame::cLayout" />
 											</components>
 											<children>
@@ -345,15 +375,15 @@
 				</item>
 				<item file_id="4f3375e95b75a811f633c5243055dc82" name="troop_window" enable="false">
 					<components>
-						<item type_name="flame::cElement" pos="1255,290" ext="308,58" background_col="0,0,0,100" horizontal_alignment="End1" vertical_alignment="Center" />
+						<item type_name="flame::cElement" pos="1115,225" ext="272,116" background_col="0,0,0,100" horizontal_alignment="End1" vertical_alignment="Center" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 					<children>
 						<item file_id="47586407d45a13763721674d0c765aa7" name="right_area">
 							<components>
-								<item type_name="flame::cElement" pos="4,4" ext="300,50" />
-								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
+								<item type_name="flame::cElement" pos="4,4" ext="264,108" />
+								<item type_name="flame::cLayout" />
 							</components>
 							<children>
 								<item file_id="4ea0f7318feba4d75f84ed2d1df0069a" name="title_text">
@@ -364,14 +394,15 @@
 								</item>
 								<item file_id="445955dbdbd9c1a79ffb4748dbccabb9" name="unit_list">
 									<components>
-										<item type_name="flame::cElement" pos="4,28" ext="40,40" />
-										<item type_name="flame::cList" prefab_name="ui\unit_slot.prefab">
+										<item type_name="flame::cElement" pos="4,28" ext="256,76" />
+										<item type_name="flame::cList" prefab_name="ui\unit_slot.prefab" count="10">
 											<modifiers>
-												<item />
+												<item type="DataBinding" address="flame::cReceiver|click_action.index" data="i" />
 											</modifiers>
 										</item>
 										<item type_name="flame::cLayout" type="Grid" columns="7" />
 									</components>
+									<children />
 								</item>
 							</children>
 						</item>
@@ -401,7 +432,11 @@
 			</components>
 		</item>
 		<item filename="extra\lol_scene\scene.prefab">
-			<modifications />
+			<modifications>
+				<item target="4b55cc64f1be8316d886e92ad6e8c5bb|enable" value="true" />
+				<item target="4df6501e9d5b3d3e397b23da922cbe8f|enable" value="true" />
+				<item target="4afee6e299af73c6f5e866ecec35b3aa|enable" value="true" />
+			</modifications>
 		</item>
 	</children>
 </prefab>
