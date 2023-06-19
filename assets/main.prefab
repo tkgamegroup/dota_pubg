@@ -2,7 +2,7 @@
 <prefab file_id="981dbd44482d08411d13848d51a0f520" name="Main">
 	<components>
 		<item type_name="flame::cNode" />
-		<item type_name="flame::cNavScene" generate_delay_frames="1" />
+		<item type_name="flame::cNavMesh" filename="main.navmesh" />
 		<item type_name="cGame" camera_length="20" camera_angle="60" enable_collider_debugging="true" />
 	</components>
 	<children>
@@ -26,7 +26,7 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1387,566" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1515,638" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="47811256007f52cbabff7390a0fb1682" name="player1_stats">
@@ -57,7 +57,7 @@
 				</item>
 				<item file_id="485f16cc07f4052c2649ac31724c70a2" name="player2_stats">
 					<components>
-						<item type_name="flame::cElement" pos="1339,0" ext="48,80" horizontal_alignment="End1" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="1467,0" ext="48,80" horizontal_alignment="End1" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" />
 					</components>
 					<children>
@@ -83,19 +83,19 @@
 				</item>
 				<item file_id="4f805fbcaffedf152d6c21ef1f6af884" name="round_info">
 					<components>
-						<item type_name="flame::cElement" pos="670,0" ext="47,32" horizontal_alignment="Center" vertical_alignment="End0" />
+						<item type_name="flame::cElement" pos="734,0" ext="47,32" horizontal_alignment="Center" vertical_alignment="End0" />
 						<item type_name="flame::cText" text="2:00" font_size="32" />
 					</components>
 				</item>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,527.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,599.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_left_bar">
 					<components>
-						<item type_name="flame::cElement" pos="0,422" ext="300,144" background_col="0,0,0,100" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,494" ext="300,144" background_col="0,0,0,100" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" />
 					</components>
 					<children>
@@ -158,7 +158,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="bottom_right_bar">
 					<components>
-						<item type_name="flame::cElement" pos="1190,496" ext="197,70" background_col="0,0,0,159" horizontal_alignment="End1" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="1318,568" ext="197,70" background_col="0,0,0,159" horizontal_alignment="End1" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" />
 					</components>
 					<children>
@@ -205,7 +205,7 @@
 						</item>
 						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|name" value="start_battle_button" />
 						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|horizontal_alignment" value="Center" />
-						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|pos" value="635,34.1" />
+						<item target="49fd950a0823eb9f305e43dcf8eb5c8e|flame::cElement|pos" value="699,34.1" />
 					</modifications>
 				</item>
 				<item file_id="4682aadb18b50f16efedcb554ab7b78d" name="building_window" enable="false">
@@ -412,7 +412,7 @@
 		</item>
 		<item file_id="48b492a25223ae2b0adf321d09bd8e9a" name="player1_town">
 			<components>
-				<item type_name="flame::cNode" pos="1.5,0,32" />
+				<item type_name="flame::cNode" pos="-44.5,3,-25.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="cCircleCollider" radius="2" faction="Party2" />
 			</components>
@@ -426,9 +426,15 @@
 		</item>
 		<item file_id="4ea3f908473492d1ae81b42af8b5d495" name="player2_town">
 			<components>
-				<item type_name="flame::cNode" pos="62.5,0,32" />
+				<item type_name="flame::cNode" pos="51.5,3,-25.5" />
 				<item type_name="flame::cMesh" mesh_name="standard_cube" material_name="default" />
 				<item type_name="cCircleCollider" radius="2" faction="Party1" />
+			</components>
+		</item>
+		<item file_id="470e2e4dd91afe0ac880f980335f9e86" name="navmesh_model">
+			<components>
+				<item type_name="flame::cNode" />
+				<item type_name="flame::cMesh" mesh_name="main.navmesh.fmod#mesh0" material_name="default" enable_render="false" />
 			</components>
 		</item>
 		<item filename="extra\lol_scene\scene.prefab">

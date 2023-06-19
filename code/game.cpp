@@ -173,7 +173,7 @@ static vec3 get_avaliable_pos(const vec3& pos, float radius, float max_distance,
 		bool ok = true;
 		ok = scene->navmesh_nearest_point(ret, vec3(2.f, 4.f, 2.f), ret);
 		if (ok)
-			ok = scene->navmesh_check_agents_and_obstacles(ret, radius);
+			ok = scene->navmesh_check_free_space(ret, radius);
 		if (ok)
 			break;
 		ret.xz = pos.xz() + circularRand(max_distance);

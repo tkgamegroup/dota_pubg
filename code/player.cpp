@@ -105,35 +105,33 @@ void Player::spawn_troop()
 	
 	if (e_formation_grid)
 	{
-		auto off = e_formation_grid->node()->global_pos();
-		auto x_dir = normalize(off - e_town->node()->global_pos());
-		auto y_dir = cross(x_dir, vec3(0.f, 1.f, 0.f));
-		off -= (FORMATION_CY - 1) * FORMATION_GAP * 0.5f * y_dir;
+		auto i = 0;
 		for (auto y = 0; y < FORMATION_CY; y++)
 		{
 			for (auto x = 0; x < FORMATION_CX; x++)
 			{
-				auto unit_info = formation[y * FORMATION_CX + x];
-				if (!unit_info)
-					continue;
-				if (auto character = add_character(unit_info->prefab_name, off + x * FORMATION_GAP * x_dir + y * FORMATION_GAP * y_dir, faction); character)
+				if (auto unit_info = formation[y * FORMATION_CX + x]; unit_info)
 				{
-					if (auto ai = character->entity->get_component_t<cAI>(); ai)
+					if (auto character = add_character(unit_info->prefab_name, e_formation_grid->children[i]->node()->global_pos(), faction); character)
 					{
-						ai->type = UnitLaneCreep;
-						ai->target_pos = troop_target_location;
-					}
-
-					character->entity->message_listeners.add([this, character](uint hash, void*, void*) {
-						if (hash == "destroyed"_h)
+						if (auto ai = character->entity->get_component_t<cAI>(); ai)
 						{
-							std::erase_if(troop, [&](const auto& i) {
-								return i == character;
-							});
+							ai->type = UnitLaneCreep;
+							ai->target_pos = troop_target_location;
 						}
-					});
-					troop.push_back(character);
+
+						character->entity->message_listeners.add([this, character](uint hash, void*, void*) {
+							if (hash == "destroyed"_h)
+							{
+								std::erase_if(troop, [&](const auto& i) {
+									return i == character;
+								});
+							}
+						});
+						troop.push_back(character);
+					}
 				}
+				i++;
 			}
 		}
 	}

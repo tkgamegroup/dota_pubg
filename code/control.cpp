@@ -26,16 +26,21 @@ cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
 bool			hovering_terrain = false;
 
-TargetTypeFlags							select_mode = TargetNull;
-std::function<void(cCharacterPtr)>		select_enemy_callback;
-std::function<void(const vec3& pos)>	select_location_callback;
-float									select_distance = 0.f;
-float									select_range = 0.f;
+TargetTypeFlags									select_mode = TargetNull;
+bool											select_multiple_times = false;
+std::function<void(bool, cCharacterPtr)>		select_character_callback;
+std::function<void(bool, const vec3& pos)>		select_location_callback;
+float											select_distance = 0.f;
+float											select_range = 0.f;
 
 void reset_select()
 {
 	select_mode = TargetNull;
-	select_enemy_callback = nullptr;
+	select_multiple_times = false;
+	if (select_character_callback)
+		select_character_callback(false, nullptr);
+	if (select_location_callback)
+		select_location_callback(false, vec3(0.f));
 	select_location_callback = nullptr;
 	select_distance = 0.f;
 	select_range = 0.f;
@@ -85,7 +90,8 @@ void update_control()
 						}
 					}
 				}
-				if (n->entity->tag & TagMarkNavMesh)
+
+				if (n->entity->name == "navmesh_model")
 				{
 					if (auto mesh = n->entity->get_component_t<cMesh>(); mesh)
 					{
@@ -142,7 +148,7 @@ void update_control()
 			hovering_chest = chest;
 			//tooltip = Item::get(hovering_chest->item_id).name;
 		}
-		if ((hovering_node->entity->tag & TagMarkNavMesh) || hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
+		if ((hovering_node->entity->name == "navmesh_model") || hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
 		{
 			hovering_terrain = true;
 
@@ -175,6 +181,11 @@ void update_control()
 		}
 	}
 
+	if (select_mode != TargetNull)
+	{
+		if (input->mpressed(Mouse_Right) || input->kpressed(Keyboard_Esc))
+			reset_select();
+	}
 	if (input->mpressed(Mouse_Left))
 	{
 		if (select_mode == TargetNull)
@@ -187,9 +198,10 @@ void update_control()
 			{
 				if (hovering_character && player1.faction != hovering_character->faction)
 				{
-					if (select_enemy_callback)
-						select_enemy_callback(hovering_character);
-					reset_select();
+					if (select_character_callback)
+						select_character_callback(true, hovering_character);
+					if (!select_multiple_times)
+						reset_select();
 				}
 			}
 			if (select_mode & TargetLocation)
@@ -197,8 +209,9 @@ void update_control()
 				if (hovering_terrain)
 				{
 					if (select_location_callback)
-						select_location_callback(hovering_pos);
-					reset_select();
+						select_location_callback(true, hovering_pos);
+					if (!select_multiple_times)
+						reset_select();
 				}
 			}
 		}
@@ -308,7 +321,7 @@ struct EXPORT Action_enter_editring_building : Action
 	}
 };
 
-uint formation_ui_selected_unit_index = 0;
+int formation_ui_selected_unit_index = -1;
 
 // Reflect ctor dtor
 struct EXPORT Action_enter_editing_troop : Action
@@ -316,7 +329,7 @@ struct EXPORT Action_enter_editing_troop : Action
 	void exec() override
 	{
 		ui_troop_window.open();
-		formation_ui_selected_unit_index = 0;
+		formation_ui_selected_unit_index = -1;
 
 		if (player1.e_formation_grid)
 		{
@@ -330,6 +343,24 @@ struct EXPORT Action_enter_editing_troop : Action
 			});
 			bounds.a.y = 0.f; bounds.b.y = 4.f;
 			main_camera.set_follow_target(bounds);
+
+			select_mode = TargetLocation;
+			select_multiple_times = true;
+			select_location_callback = [](bool ok, const vec3& pos) {
+				if (ok)
+				{
+					if (formation_ui_selected_unit_index > 0)
+					{
+
+						//player1.set_formation(index, formation_ui_selected_unit_index == 0 ? nullptr :
+						//	player1.avaliable_unit_infos[formation_ui_selected_unit_index - 1]);
+
+						//ui_troop_window.select_formation_slot(index);
+					}
+				}
+				else
+					formation_ui_selected_unit_index = -1;
+			};
 		}
 	}
 };
@@ -343,21 +374,6 @@ struct EXPORT Action_building_slot_select : Action
 	void exec() override
 	{
 		ui_building_window.select_building_area(index);
-	}
-};
-
-// Reflect ctor dtor
-struct EXPORT Action_formation_slot_click : Action
-{
-	// Reflect
-	uint index;
-
-	void exec() override
-	{
-		player1.set_formation(index, formation_ui_selected_unit_index == 0 ? nullptr :
-			player1.avaliable_unit_infos[formation_ui_selected_unit_index - 1]);
-
-		ui_troop_window.select_formation_slot(index);
 	}
 };
 
