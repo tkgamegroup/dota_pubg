@@ -39,6 +39,7 @@ void reset_select()
 	select_multiple_times = false;
 	if (select_character_callback)
 		select_character_callback(false, nullptr);
+	select_character_callback = nullptr;
 	if (select_location_callback)
 		select_location_callback(false, vec3(0.f));
 	select_location_callback = nullptr;
@@ -323,6 +324,43 @@ struct EXPORT Action_enter_editring_building : Action
 
 int formation_ui_selected_unit_index = -1;
 
+void formation_ui_select_unit(int index)
+{
+	formation_ui_selected_unit_index = index;
+	ui_troop_window.select_unit_slot(index);
+
+
+	select_mode = TargetLocation;
+	select_multiple_times = true;
+	select_location_callback = [](bool ok, const vec3& pos) {
+		if (ok)
+		{
+			auto index = 0;
+			for (auto& e : player1.e_formation_grid->children)
+			{
+				if (auto node = e->children[0]->node())
+				{
+					auto& b = node->bounds;
+					if (pos.x > b.a.x && pos.x < b.b.x && pos.z > b.a.z && pos.z < b.b.z)
+					{
+						player1.set_formation(index, formation_ui_selected_unit_index == 0 ? nullptr :
+							player1.avaliable_unit_infos[formation_ui_selected_unit_index - 1]);
+
+						ui_troop_window.select_formation_slot(index);
+						break;
+					}
+				}
+				index++;
+			}
+		}
+		else
+		{
+			formation_ui_selected_unit_index = -1;
+			ui_troop_window.select_unit_slot(-1);
+		}
+	};
+}
+
 // Reflect ctor dtor
 struct EXPORT Action_enter_editing_troop : Action
 {
@@ -343,25 +381,9 @@ struct EXPORT Action_enter_editing_troop : Action
 			});
 			bounds.a.y = 0.f; bounds.b.y = 4.f;
 			main_camera.set_follow_target(bounds);
-
-			select_mode = TargetLocation;
-			select_multiple_times = true;
-			select_location_callback = [](bool ok, const vec3& pos) {
-				if (ok)
-				{
-					if (formation_ui_selected_unit_index > 0)
-					{
-
-						//player1.set_formation(index, formation_ui_selected_unit_index == 0 ? nullptr :
-						//	player1.avaliable_unit_infos[formation_ui_selected_unit_index - 1]);
-
-						//ui_troop_window.select_formation_slot(index);
-					}
-				}
-				else
-					formation_ui_selected_unit_index = -1;
-			};
 		}
+
+		formation_ui_select_unit(-1);
 	}
 };
 
@@ -386,8 +408,8 @@ struct EXPORT Action_unit_slot_select : Action
 	void exec() override
 	{
 		formation_ui_selected_unit_index = index;
-
 		ui_troop_window.select_unit_slot(index);
+		formation_ui_select_unit(index);
 	}
 };
 

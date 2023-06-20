@@ -129,7 +129,7 @@ void UI_troop_window::select_formation_slot(uint index)
 	}
 }
 
-void UI_troop_window::select_unit_slot(uint index)
+void UI_troop_window::select_unit_slot(int index)
 {
 	if (ui_troop_window.unit_list)
 	{
@@ -143,11 +143,14 @@ void UI_troop_window::select_unit_slot(uint index)
 			}
 		}
 
-		if (auto element = ui_troop_window.unit_list->children[index]->element(); element)
+		if (index != -1)
 		{
-			auto col = element->frame_col;
-			col.a = 255;
-			element->set_frame_col(col);
+			if (auto element = ui_troop_window.unit_list->children[index]->element(); element)
+			{
+				auto col = element->frame_col;
+				col.a = 255;
+				element->set_frame_col(col);
+			}
 		}
 	}
 }

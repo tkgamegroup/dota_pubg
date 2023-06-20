@@ -26,7 +26,7 @@ struct UI_troop_window
 	void init();
 	void open();
 	void select_formation_slot(uint index);
-	void select_unit_slot(uint index);
+	void select_unit_slot(int index);
 };
 extern UI_troop_window ui_troop_window;
 

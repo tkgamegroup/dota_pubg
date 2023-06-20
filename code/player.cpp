@@ -85,14 +85,21 @@ void Player::set_formation(uint index, UnitInfo* unit_info)
 				{
 					auto new_material = graphics::Material::create();
 					TypeInfo::get<graphics::Material>()->copy(new_material, mesh->material);
+					new_material->render_queue = graphics::RenderQueue::Transparent;
+					new_material->color.a = 0.5f;
 					mesh->set_material_name(L"0x" + wstr_hex((uint64)new_material));
-					e->message_listeners.add([new_material](uint hash, void*, void*) {
+					e->message_listeners.add([mesh, new_material](uint hash, void*, void*) {
 						if (hash == "destroyed"_h)
+						{
+							mesh->set_material_name(L"");
 							delete new_material;
+						}
 					});
 				}
 			}
 		});
+		if (auto node = e_unit->node(); node)
+			node->set_pos(vec3(FORMATION_GAP * 0.5f, 0.f, FORMATION_GAP * 0.5f));
 		e->add_child(e_unit);
 	}
 	else
