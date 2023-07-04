@@ -18,16 +18,7 @@ struct MainCamera
 };
 extern MainCamera main_camera;
 
-enum GameState
-{
-	GameStatePreparation,
-	GameStateBattle
-};
-extern GameState game_state;
-
 void enable_game(bool v);
-void start_battle();
-void end_battle();
 EntityPtr get_prefab(const std::filesystem::path& path);
 std::filesystem::path get_prefab_path(uint prefab_id /* path hash */ );
 void add_player(vec3& pos, uint& faction, uint& prefab_id);

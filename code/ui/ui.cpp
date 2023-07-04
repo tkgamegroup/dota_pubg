@@ -20,147 +20,15 @@
 #include "ui.h"
 
 EntityPtr ui = nullptr;
-UI_building_window ui_building_window;
-UI_troop_window ui_troop_window;
-
-void UI_building_window::init()
-{
-	window = ui->find_child("building_window");
-	if (window)
-	{
-		building_area = window->find_child_recursively("building_area");
-		empty_case = window->find_child_recursively("empty_case");
-		built_up_case = window->find_child_recursively("built_up_case");
-	}
-}
-
-void UI_building_window::open()
-{
-	if (ui_building_window.window)
-		ui_building_window.window->set_enable(!ui_building_window.window->enable);
-	if (ui_troop_window.window)
-		ui_troop_window.window->set_enable(false);
-}
-
-void UI_building_window::select_building_area(uint index)
-{
-	if (ui_building_window.building_area)
-	{
-		for (auto& c : ui_building_window.building_area->children)
-		{
-			if (auto element = c->element(); element)
-			{
-				auto col = element->frame_col;
-				col.a = 0;
-				element->set_frame_col(col);
-			}
-		}
-
-		if (auto element = ui_building_window.building_area->children[index]->element(); element)
-		{
-			auto col = element->frame_col;
-			col.a = 255;
-			element->set_frame_col(col);
-		}
-	}
-}
-
-void UI_troop_window::init()
-{
-	window = ui->find_child("troop_window");
-	if (window)
-	{
-		formation_area = window->find_child_recursively("formation_area");
-		unit_list = window->find_child_recursively("unit_list");
-	}
-}
-
-void UI_troop_window::open()
-{
-	if (ui_troop_window.window)
-		ui_troop_window.window->set_enable(!ui_troop_window.window->enable);
-	if (ui_building_window.window)
-		ui_building_window.window->set_enable(false);
-
-	if (ui_troop_window.window->enable)
-	{
-		if (ui_troop_window.formation_area)
-		{
-			if (auto list = ui_troop_window.formation_area->get_component_t<cList>(); list)
-			{
-				list->set_count(player1.formation.size());
-				for (auto i = 0; i < player1.formation.size(); i++)
-				{
-					if (auto image = ui_troop_window.formation_area->children[i]->get_component_t<cImage>(); image)
-						image->set_image_name(player1.formation[i] ? player1.formation[i]->icon_name : L"");
-				}
-			}
-		}
-
-		if (ui_troop_window.unit_list)
-		{
-			if (auto list = ui_troop_window.unit_list->get_component_t<cList>(); list)
-			{
-				list->set_count(player1.avaliable_unit_infos.size() + 1);
-
-				if (auto image = ui_troop_window.unit_list->children[0]->get_component_t<cImage>(); image)
-					image->set_image_name(L"assets\\icons\\red_cross.png");
-				for (auto i = 0; i < player1.avaliable_unit_infos.size(); i++)
-				{
-					if (auto image = ui_troop_window.unit_list->children[i + 1]->get_component_t<cImage>(); image)
-						image->set_image_name(player1.avaliable_unit_infos[i]->icon_name);
-				}
-			}
-		}
-	}
-}
-
-void UI_troop_window::select_formation_slot(uint index)
-{
-	if (ui_troop_window.formation_area)
-	{
-		if (auto image = ui_troop_window.formation_area->children[index]->get_component_t<cImage>(); image)
-		{
-			if (!player1.formation[index])
-				image->set_image_name(L"");
-			else
-				image->set_image_name(player1.formation[index]->icon_name);
-		}
-	}
-}
-
-void UI_troop_window::select_unit_slot(int index)
-{
-	if (ui_troop_window.unit_list)
-	{
-		for (auto& c : ui_troop_window.unit_list->children)
-		{
-			if (auto element = c->element(); element)
-			{
-				auto col = element->frame_col;
-				col.a = 0;
-				element->set_frame_col(col);
-			}
-		}
-
-		if (index != -1)
-		{
-			if (auto element = ui_troop_window.unit_list->children[index]->element(); element)
-			{
-				auto col = element->frame_col;
-				col.a = 255;
-				element->set_frame_col(col);
-			}
-		}
-	}
-}
 
 graphics::CanvasPtr canvas = nullptr;
+cTextPtr ui_name_text = nullptr;
 cElementPtr ui_hp_bar = nullptr;
 cElementPtr ui_mp_bar = nullptr;
 cTextPtr ui_hp_text = nullptr;
 cTextPtr ui_mp_text = nullptr;
-cTextPtr ui_tip = nullptr;
+cListPtr ui_action_list = nullptr;
+cTextPtr ui_tooltip = nullptr;
 
 int circle_lod(float r)
 {
@@ -174,25 +42,26 @@ void init_ui()
 
 	if (ui = root->find_child("ui"); ui)
 	{
-		ui_building_window.init();
-		ui_troop_window.init();
-
-		if (auto bottom_bar = ui->find_child("bottom_bar"); bottom_bar)
+		if (auto bottom_bar = ui->find_child("bottom_panel"); bottom_bar)
 		{
-			if (auto e = bottom_bar->find_child("hp_bar"); e)
+			if (auto e = bottom_bar->find_child_recursively("name"); e)
+				ui_name_text = e->get_component_t<cText>();
+			if (auto e = bottom_bar->find_child_recursively("hp_bar"); e)
 			{
 				ui_hp_bar = e->element();
 				ui_hp_text = e->find_child("hp_text")->get_component_t<cText>();
 			}
-			if (auto e = bottom_bar->find_child("mp_bar"); e)
+			if (auto e = bottom_bar->find_child_recursively("mp_bar"); e)
 			{
 				ui_mp_bar = e->element();
 				ui_mp_text = e->find_child("mp_text")->get_component_t<cText>();
 			}
+			if (auto e = bottom_bar->find_child_recursively("action_list"); e)
+				ui_action_list = e->get_component_t<cList>();
 		}
 
-		if (auto e = ui->find_child("tip"); e)
-			ui_tip = e->get_component_t<cText>();
+		if (auto e = ui->find_child("tooltip"); e)
+			ui_tooltip = e->get_component_t<cText>();
 	}
 }
 
@@ -202,48 +71,36 @@ void deinit_ui()
 
 void update_ui()
 {
-	// TODO: show selected character
-	//if (main_player.character)
-	//{
-	//	for (auto i = 0; i < 4; i++)
-	//	{
-	//		if (auto e = ui_ability_slots[i]; e)
-	//		{
-	//			if (auto ability = main_player.character->get_ability(i); ability)
-	//			{
-	//				if (auto img = e->get_component_t<cImage>(); img)
-	//					img->set_image_name(ability->icon_name);
-	//				if (auto e2 = e->find_child("mana"); e2)
-	//				{
-	//					if (auto txt = e2->get_component_t<cText>(); txt)
-	//						txt->set_text(wstr(ability->mp));
-	//				}
-	//			}
-	//			else
-	//			{
-	//				if (auto img = e->get_component_t<cImage>(); img)
-	//					img->set_image_name(L"");
-	//				if (auto e2 = e->find_child("mana"); e2)
-	//				{
-	//					if (auto txt = e2->get_component_t<cText>(); txt)
-	//						txt->set_text(L"");
-	//				}
-	//			}
+	if (selected_target)
+	{
+		if (auto character = selected_target->entity->get_component_t<cCharacter>(); character)
+		{
 
-	//			if (ui_hp_bar)
-	//				ui_hp_bar->set_scl(vec2((float)main_player.character->hp / (float)main_player.character->hp_max, 1.f));
-	//			if (ui_mp_bar)
-	//				ui_mp_bar->set_scl(vec2((float)main_player.character->mp / (float)main_player.character->mp_max, 1.f));
-	//			if (ui_hp_text)
-	//				ui_hp_text->set_text(wstr(main_player.character->hp) + L"/" + wstr(main_player.character->hp_max));
-	//			if (ui_mp_text)
-	//				ui_mp_text->set_text(wstr(main_player.character->mp) + L"/" + wstr(main_player.character->mp_max));
-	//		}
-	//	}
-	//}
+		}
+		else if (selected_target->entity->name.ends_with("_town"))
+		{
+			if (ui_name_text)
+				ui_name_text->set_text(s2w(selected_target->entity->name));
 
-	std::wstring tip_str = L"";
-	vec3 tip_pos;
+			Player* player = nullptr;
+			if (selected_target->entity->name.starts_with("player1"))
+				player = &player1;
+			else if (selected_target->entity->name.starts_with("player2"))
+				player = &player2;
+
+			if (ui_hp_bar)
+				ui_hp_bar->set_scl(vec2((float)player->town_hp / (float)player->town_hp_max, 1.f));
+			if (ui_mp_bar)
+				ui_mp_bar->set_scl(vec2(0.f, 1.f));
+			if (ui_hp_text)
+				ui_hp_text->set_text(wstr(player->town_hp) + L"/" + wstr(player->town_hp_max));
+			if (ui_mp_text)
+				ui_mp_text->set_text(L"0/0");
+		}
+	}
+
+	std::wstring tooltip_str = L"";
+	vec3 tooltip_pos;
 
 	// TODO: show selected character
 	//if (main_player.character)
@@ -298,8 +155,8 @@ void update_ui()
 				sRenderer::instance()->draw_outlines(ds, hovering_character->faction == player1.faction ? 
 					cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
 
-				tip_str = s2w(hovering_character->entity->name);
-				tip_pos = hovering_character->get_pos() + vec3(0.f, 0.2f, 0.f);
+				tooltip_str = s2w(hovering_character->entity->name);
+				tooltip_pos = hovering_character->get_pos() + vec3(0.f, 0.2f, 0.f);
 			}
 		}
 		if (hovering_chest)
@@ -351,20 +208,20 @@ void update_ui()
 	//	}
 	//}
 
-	if (ui_tip)
+	if (ui_tooltip)
 	{
-		if (tip_str.empty())
-			ui_tip->entity->set_enable(false);
+		if (tooltip_str.empty())
+			ui_tooltip->entity->set_enable(false);
 		else
 		{
 			if (main_camera.camera)
 			{
-				ui_tip->entity->set_enable(true);
-				ui_tip->set_text(tip_str);
-				ui_tip->element->set_pos(main_camera.camera->world_to_screen(tip_pos));
+				ui_tooltip->entity->set_enable(true);
+				ui_tooltip->set_text(tooltip_str);
+				ui_tooltip->element->set_pos(main_camera.camera->world_to_screen(tooltip_pos));
 			}
 			else
-				ui_tip->entity->set_enable(false);
+				ui_tooltip->entity->set_enable(false);
 		}
 	}
 }

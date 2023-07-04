@@ -70,15 +70,15 @@ Parameter::Parameter(const std::string& str)
 
 void read_parameters(ParameterNames& parameter_names, ParameterPack& parameters, const std::vector<std::string>& tokens)
 {
-	for (auto& t : tokens)
-	{
-		auto sp = SUS::split(t, ':');
-		auto hash = sh(sp[0].c_str());
-		parameter_names.emplace_back(sp[0], hash);
-		auto& vec = parameters.emplace(hash, std::vector<Parameter>()).first->second;
-		for (auto& tt : SUS::split(sp[1], '/'))
-			vec.push_back(Parameter(tt));
-	}
+	//for (auto& t : tokens)
+	//{
+	//	auto sp = SUS::split(t, ':');
+	//	auto hash = sh(sp[0].c_str());
+	//	parameter_names.emplace_back(sp[0], hash);
+	//	auto& vec = parameters.emplace(hash, std::vector<Parameter>()).first->second;
+	//	for (auto& tt : SUS::split(sp[1], '/'))
+	//		vec.push_back(Parameter(tt));
+	//}
 }
 
 void CommandList::init_sub_groups()
@@ -100,95 +100,95 @@ void CommandList::init_sub_groups()
 
 void CommandList::build(const std::vector<std::string>& tokens)
 {
-	static auto reg_ret = std::regex(R"((%[\w]+)\:\=(.*))");
-	static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
-	std::smatch res;
+	//static auto reg_ret = std::regex(R"((%[\w]+)\:\=(.*))");
+	//static auto reg_exp = std::regex(R"(([\w]+)([\+\-\*\/])([\w]+))");
+	//std::smatch res;
 
-	uint used_reg[vREG7 - vREG0 + 1];
-	memset(used_reg, 0, sizeof(used_reg));
-	auto mark_used_reg = [&](uint v) {
-		if (v >= vREG0 && v <= vREG7)
-			used_reg[v - vREG0] = 1;
-	};
-	auto find_reg = [&](uint h)->Variable {
-		for (auto i = 0; i < countof(used_reg); i++)
-		{
-			if (used_reg[i] == h)
-				return (Variable)(vREG0 + i);
-		}
-		for (auto i = 0; i < countof(used_reg); i++)
-		{
-			if (used_reg[i] == 0)
-			{
-				used_reg[i] = h;
-				return (Variable)(vREG0 + i);
-			}
-		}
-	};
+	//uint used_reg[vREG7 - vREG0 + 1];
+	//memset(used_reg, 0, sizeof(used_reg));
+	//auto mark_used_reg = [&](uint v) {
+	//	if (v >= vREG0 && v <= vREG7)
+	//		used_reg[v - vREG0] = 1;
+	//};
+	//auto find_reg = [&](uint h)->Variable {
+	//	for (auto i = 0; i < countof(used_reg); i++)
+	//	{
+	//		if (used_reg[i] == h)
+	//			return (Variable)(vREG0 + i);
+	//	}
+	//	for (auto i = 0; i < countof(used_reg); i++)
+	//	{
+	//		if (used_reg[i] == 0)
+	//		{
+	//			used_reg[i] = h;
+	//			return (Variable)(vREG0 + i);
+	//		}
+	//	}
+	//};
 
-	for (auto& t : tokens)
-	{
-		if (t.empty()) continue;
+	//for (auto& t : tokens)
+	//{
+	//	if (t.empty()) continue;
 
-		auto& cmd = cmds.emplace_back();
-		std::get<2>(cmd) = vNull;
+	//	auto& cmd = cmds.emplace_back();
+	//	std::get<2>(cmd) = vNull;
 
-		std::vector<std::string> sp;
-		if (std::regex_search(t, res, reg_ret))
-		{
-			std::get<2>(cmd) = (Variable)Parameter(res[1].str()).u.v.u;
-			sp = SUS::split(res[2], ',');
-		}
-		else
-			sp = SUS::split(t, ',');
+	//	std::vector<std::string> sp;
+	//	if (std::regex_search(t, res, reg_ret))
+	//	{
+	//		std::get<2>(cmd) = (Variable)Parameter(res[1].str()).u.v.u;
+	//		sp = SUS::split(res[2], ',');
+	//	}
+	//	else
+	//		sp = SUS::split(t, ',');
 
-		TypeInfo::unserialize_t(sp[0], std::get<0>(cmd));
+	//	TypeInfo::unserialize_t(sp[0], std::get<0>(cmd));
 
-		for (auto i = 1; i < sp.size(); i++)
-		{
-			auto& tt = sp[i];
-			if (std::regex_search(tt, res, reg_exp))
-			{
-				auto& p = std::get<1>(cmd).emplace_back();
-				p.type = Parameter::tExpression;
-				switch (res[2].str()[0])
-				{
-				case '+': p.u.e.op = Parameter::OpAdd; break;
-				case '-': p.u.e.op = Parameter::OpMinus; break;
-				case '*': p.u.e.op = Parameter::OpMultiply; break;
-				case '/': p.u.e.op = Parameter::OpDivide; break;
-				}
+	//	for (auto i = 1; i < sp.size(); i++)
+	//	{
+	//		auto& tt = sp[i];
+	//		if (std::regex_search(tt, res, reg_exp))
+	//		{
+	//			auto& p = std::get<1>(cmd).emplace_back();
+	//			p.type = Parameter::tExpression;
+	//			switch (res[2].str()[0])
+	//			{
+	//			case '+': p.u.e.op = Parameter::OpAdd; break;
+	//			case '-': p.u.e.op = Parameter::OpMinus; break;
+	//			case '*': p.u.e.op = Parameter::OpMultiply; break;
+	//			case '/': p.u.e.op = Parameter::OpDivide; break;
+	//			}
 
-				std::get<1>(cmd).push_back(Parameter(res[1].str()));
-				std::get<1>(cmd).push_back(Parameter(res[3].str()));
-			}
-			else
-				std::get<1>(cmd).push_back(Parameter(tt));
-		}
-	}
+	//			std::get<1>(cmd).push_back(Parameter(res[1].str()));
+	//			std::get<1>(cmd).push_back(Parameter(res[3].str()));
+	//		}
+	//		else
+	//			std::get<1>(cmd).push_back(Parameter(tt));
+	//	}
+	//}
 
-	for (auto& cmd : cmds)
-	{
-		if (std::get<2>(cmd) != vNull)
-			mark_used_reg(std::get<2>(cmd));
-		for (auto& p : std::get<1>(cmd))
-		{
-			if (p.type == Parameter::tVariable)
-				mark_used_reg(p.u.v.i);
-		}
-	}
-	for (auto& cmd : cmds)
-	{
-		if (std::get<2>(cmd) != vNull && std::get<2>(cmd) > vCount)
-			std::get<2>(cmd) = find_reg(std::get<2>(cmd));
-		for (auto& p : std::get<1>(cmd))
-		{
-			if (p.type == Parameter::tVariable && p.u.v.u > vCount)
-				p.u.v.i = find_reg(p.u.v.i);
-		}
-	}
+	//for (auto& cmd : cmds)
+	//{
+	//	if (std::get<2>(cmd) != vNull)
+	//		mark_used_reg(std::get<2>(cmd));
+	//	for (auto& p : std::get<1>(cmd))
+	//	{
+	//		if (p.type == Parameter::tVariable)
+	//			mark_used_reg(p.u.v.i);
+	//	}
+	//}
+	//for (auto& cmd : cmds)
+	//{
+	//	if (std::get<2>(cmd) != vNull && std::get<2>(cmd) > vCount)
+	//		std::get<2>(cmd) = find_reg(std::get<2>(cmd));
+	//	for (auto& p : std::get<1>(cmd))
+	//	{
+	//		if (p.type == Parameter::tVariable && p.u.v.u > vCount)
+	//			p.u.v.i = find_reg(p.u.v.i);
+	//	}
+	//}
 
-	init_sub_groups();
+	//init_sub_groups();
 }
 
 CommandListExecuteThread::CommandListExecuteThread(const CommandList& cl, cCharacterPtr character, cCharacterPtr target_character, const vec3& target_pos, const ParameterPack& external_parameters, uint lv) :
