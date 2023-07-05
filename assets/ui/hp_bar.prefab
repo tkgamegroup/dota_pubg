@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<prefab file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
+	<components>
+		<item type_name="flame::cElement" ext="144,19" />
+	</components>
+	<children>
+		<item file_id="46f956a7908c3f8b8e18c70fb7faa082" name="bar">
+			<components>
+				<item type_name="flame::cElement" ext="144,19" background_col="0,204,0,255" horizontal_alignment="Fill" vertical_alignment="Fill" />
+			</components>
+		</item>
+		<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="text">
+			<components>
+				<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
+				<item type_name="flame::cText" text="100/100" font_size="18" />
+			</components>
+		</item>
+	</children>
+</prefab>

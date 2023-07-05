@@ -5,6 +5,8 @@
 #include <flame/universe/components/armature.h>
 #include <flame/universe/components/nav_agent.h>
 #include <flame/universe/components/element.h>
+#include <flame/universe/components/receiver.h>
+#include <flame/universe/components/layout.h>
 #include <flame/universe/components/text.h>
 #include <flame/universe/components/image.h>
 #include <flame/universe/components/list.h>
@@ -18,6 +20,8 @@
 #include "../entities/ability.h"
 #include "../entities/chest.h"
 #include "ui.h"
+
+bool selected_target_changed = false;
 
 EntityPtr ui = nullptr;
 
@@ -37,6 +41,10 @@ int circle_lod(float r)
 
 void init_ui()
 {
+	select_callbacks.add([]() {
+		selected_target_changed = true;
+	});
+
 	auto renderer = sRenderer::instance();
 	canvas = renderer->canvas;
 
@@ -48,13 +56,13 @@ void init_ui()
 				ui_name_text = e->get_component_t<cText>();
 			if (auto e = bottom_bar->find_child_recursively("hp_bar"); e)
 			{
-				ui_hp_bar = e->element();
-				ui_hp_text = e->find_child("hp_text")->get_component_t<cText>();
+				ui_hp_bar = e->find_child("bar")->element();
+				ui_hp_text = e->find_child("text")->get_component_t<cText>();
 			}
 			if (auto e = bottom_bar->find_child_recursively("mp_bar"); e)
 			{
-				ui_mp_bar = e->element();
-				ui_mp_text = e->find_child("mp_text")->get_component_t<cText>();
+				ui_mp_bar = e->find_child("bar")->element();
+				ui_mp_text = e->find_child("text")->get_component_t<cText>();
 			}
 			if (auto e = bottom_bar->find_child_recursively("action_list"); e)
 				ui_action_list = e->get_component_t<cList>();
@@ -96,11 +104,221 @@ void update_ui()
 				ui_hp_text->set_text(wstr(player->town_hp) + L"/" + wstr(player->town_hp_max));
 			if (ui_mp_text)
 				ui_mp_text->set_text(L"0/0");
+
+			if (ui_action_list)
+			{
+
+				struct TownPanel
+				{
+					enum Panel
+					{
+						PanelMain,
+						PanelBuilding
+					};
+
+					Panel panel = PanelMain;
+					int building_index = -1;
+
+					void enter_main_panel(Player* player)
+					{
+						panel = PanelMain;
+						building_index = -1;
+
+						auto e_list = ui_action_list->entity;
+						for (auto i = 0; i < ui_action_list->count; i++)
+						{
+							auto c = e_list->children[i].get();
+							if (i < player->buildings.size())
+							{
+								auto& building = player->buildings[i];
+								if (auto image = c->get_component_t<cImage>(); image)
+									image->set_image_name(building.info->icon_name);
+								if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+								{
+									receiver->event_listeners.clear();
+									receiver->event_listeners.add([this, player, c, i](uint type, const vec2&) {
+										switch (type)
+										{
+										case "mouse_enter"_h:
+											show_tooltip(c->element()->global_pos0() + vec2(0.f, -48.f), s2w(player->buildings[i].info->description));
+											break;
+										case "mouse_leave"_h:
+											close_tooltip();
+											break;
+										case "click"_h:
+											enter_building_panel(player, i);
+											close_tooltip();
+											break;
+										}
+									});
+								}
+							}
+							else
+							{
+								if (auto image = c->get_component_t<cImage>(); image)
+									image->set_image_name(L"");
+								if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+									receiver->event_listeners.clear();
+							}
+						}
+					}
+
+					void enter_building_panel(Player* player, uint index)
+					{
+						panel = PanelBuilding;
+						building_index = index;
+
+						auto e_list = ui_action_list->entity;
+						auto& building = player->buildings[index];
+						if (!building.info->training_actions.empty())
+						{
+							for (auto i = 0; i < ui_action_list->count; i++)
+							{
+								auto c = e_list->children[i].get();
+								if (i < building.info->training_actions.size())
+								{
+									auto& training = building.info->training_actions[i];
+									auto unit_info = unit_infos.find(training.name);
+									if (unit_info)
+									{
+										if (auto image = c->get_component_t<cImage>(); image)
+											image->set_image_name(unit_info->icon_name);
+										if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+										{
+											receiver->event_listeners.clear();
+											receiver->event_listeners.add([this, player, c, i](uint type, const vec2& v) {
+												switch (type)
+												{
+												case "mouse_enter"_h:
+												{
+													auto& building = player->buildings[building_index];
+													auto& training = building.info->training_actions[i];
+													auto unit_info = unit_infos.find(training.name);
+													if (unit_info)
+													{
+														std::wstring text;
+														text = s2w(unit_info->name);
+														text += L"\nLeft - Train One\n"
+															L"Right - Train Infinite";
+														show_tooltip(c->element()->global_pos0() + vec2(0.f, -48.f), text);
+													}
+												}
+													break;
+												case "mouse_leave"_h:
+													close_tooltip();
+													break;
+												case "click"_h:
+												{
+													auto& building = player->buildings[building_index];
+													auto& action = building.info->training_actions[i];
+													auto it = std::find_if(building.trainings.begin(), building.trainings.end(), [&](const auto& i) {
+														return i.action == &action;
+													});
+													if (it == building.trainings.end())
+													{
+														it = building.trainings.emplace(building.trainings.end(), Training());
+														it->action = &action;
+														it->timer = action.time;
+														it->number = 1;
+													}
+													else
+														it->number++;
+												}
+													break;
+												case "mouse_up"_h:
+													if (v.x == 1.f)
+													{
+
+													}
+													break;
+												}
+											});
+										}
+									}
+									else
+									{
+										if (auto image = c->get_component_t<cImage>(); image)
+											image->set_image_name(L"");
+										if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+											receiver->event_listeners.clear();
+									}
+								}
+								else
+								{
+									if (auto image = c->get_component_t<cImage>(); image)
+										image->set_image_name(L"");
+									if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+										receiver->event_listeners.clear();
+								}
+							}
+							
+							auto columns = e_list->get_component_t<cLayout>()->columns;
+							auto last_row = (int)floor(((float)e_list->children.size() - 0.5f) / columns);
+							auto c = e_list->children[last_row * columns].get();
+							if (auto image = c->get_component_t<cImage>(); image)
+								image->set_image_name(Path::get(L"assets\\extra\\icons\\back.png"));
+							if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+							{
+								receiver->event_listeners.clear();
+								receiver->event_listeners.add([this, player, c](uint type, const vec2&) {
+									switch (type)
+									{
+									case "mouse_enter"_h:
+										show_tooltip(c->element()->global_pos0() + vec2(0.f, -48.f), L"Back To Main Panel");
+										break;
+									case "mouse_leave"_h:
+										close_tooltip();
+										break;
+									case "click"_h:
+										enter_main_panel(player);
+										close_tooltip();
+										break;
+									}
+								});
+							}
+						}
+						else
+						{
+							for (auto i = 0; i < ui_action_list->count; i++)
+							{
+								auto c = e_list->children[i].get();
+								if (auto image = c->get_component_t<cImage>(); image)
+									image->set_image_name(L"");
+								if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+									receiver->event_listeners.clear();
+							}
+						}
+					}
+				};
+				static TownPanel town_panel;
+
+				if (selected_target_changed)
+					town_panel.enter_main_panel(player);
+			}
 		}
 	}
+	
+	if (selected_target_changed)
+	{
+		std::wstring tooltip_str = L"";
+		vec3 tooltip_pos;
 
-	std::wstring tooltip_str = L"";
-	vec3 tooltip_pos;
+		if (hovering_character)
+		{
+			tooltip_str = s2w(hovering_character->entity->name);
+			tooltip_pos = hovering_character->get_pos() + vec3(0.f, 0.2f, 0.f);
+		}
+
+		if (tooltip_str.empty())
+			close_tooltip();
+		else
+		{
+			if (main_camera.camera)
+				show_tooltip(main_camera.camera->world_to_screen(tooltip_pos), tooltip_str);
+			else
+				close_tooltip();
+		}
+	}
 
 	// TODO: show selected character
 	//if (main_player.character)
@@ -154,9 +372,6 @@ void update_ui()
 				}
 				sRenderer::instance()->draw_outlines(ds, hovering_character->faction == player1.faction ? 
 					cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
-
-				tooltip_str = s2w(hovering_character->entity->name);
-				tooltip_pos = hovering_character->get_pos() + vec3(0.f, 0.2f, 0.f);
 			}
 		}
 		if (hovering_chest)
@@ -208,20 +423,21 @@ void update_ui()
 	//	}
 	//}
 
+	selected_target_changed = false;
+}
+
+void show_tooltip(const vec2& pos, const std::wstring& text)
+{
 	if (ui_tooltip)
 	{
-		if (tooltip_str.empty())
-			ui_tooltip->entity->set_enable(false);
-		else
-		{
-			if (main_camera.camera)
-			{
-				ui_tooltip->entity->set_enable(true);
-				ui_tooltip->set_text(tooltip_str);
-				ui_tooltip->element->set_pos(main_camera.camera->world_to_screen(tooltip_pos));
-			}
-			else
-				ui_tooltip->entity->set_enable(false);
-		}
+		ui_tooltip->entity->set_enable(true);
+		ui_tooltip->set_text(text);
+		ui_tooltip->element->set_pos(pos);
 	}
+}
+
+void close_tooltip()
+{
+	if (ui_tooltip)
+		ui_tooltip->entity->set_enable(false);
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <preset type="UnitInfosPreset">
 	<infos>
-		<item name="Hammer Soldier" icon_name="images\1.png" icon_uvs="0,0,1,1" prefab_name="characters\A.prefab" />
+		<item name="Infantry" icon_name="extra\icons\footman.png" icon_uvs="0,0,1,1" prefab_name="extra\characters\ELF_SM_light_infantry_A.prefab" />
 	</infos>
 </preset>

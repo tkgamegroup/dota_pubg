@@ -3,15 +3,17 @@
 #include "head.h"
 
 extern vec3				hovering_pos;
+extern cNodePtr			hovering_node;
 extern cCharacterPtr	hovering_character;
 extern cChestPtr		hovering_chest;
 extern bool				hovering_terrain;
 extern cNodePtr			hovering_town;
 
-extern cNodePtr			selected_target;
-extern TargetTypeFlags	select_mode;
-extern float			select_distance;
-extern float			select_range;
+extern cNodePtr					selected_target;
+extern Listeners<void()>		select_callbacks;
+extern TargetTypeFlags			select_mode;
+extern float					select_distance;
+extern float					select_range;
 
 void init_control();
 void update_control();

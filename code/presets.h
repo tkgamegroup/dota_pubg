@@ -35,7 +35,7 @@ struct UnitAction
 struct TrainingAction
 {
 	std::string				name;
-	uint					time;
+	float					time;
 };
 
 // Reflect
@@ -43,6 +43,8 @@ struct UnitInfosPreset
 {
 	// Reflect
 	std::vector<UnitInfo> infos;
+
+	const UnitInfo* find(std::string_view name) const;
 };
 
 extern UnitInfosPreset unit_infos;

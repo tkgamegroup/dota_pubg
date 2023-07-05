@@ -26,24 +26,24 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1280,700" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1315,684" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,661.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,645.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,556" ext="1280,144" background_col="0,0,0,100" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,540" ext="1315,144" background_col="0,0,0,100" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" auto_width="false" />
 					</components>
 					<children>
 						<item file_id="40d3cd79033d7e0300e1dd077e1ef29a" name="panel">
 							<components>
-								<item type_name="flame::cElement" ext="1280,144" horizontal_alignment="Fill" />
+								<item type_name="flame::cElement" ext="1315,144" horizontal_alignment="Fill" />
 								<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 								<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 							</components>
@@ -56,8 +56,8 @@
 								</item>
 								<item file_id="4c1e21fb39f55226a6257a92012154b8" name="panel1">
 									<components>
-										<item type_name="flame::cElement" pos="140,8" ext="960,78" />
-										<item type_name="flame::cLayout" auto_width="false" />
+										<item type_name="flame::cElement" pos="140,8" ext="152,78" />
+										<item type_name="flame::cLayout" />
 									</components>
 									<children>
 										<item file_id="4bef328b0fb97bcc493037bdef6cafbb" name="name">
@@ -66,37 +66,33 @@
 												<item type_name="flame::cText" text="Name" font_size="24" />
 											</components>
 										</item>
-										<item file_id="46d4e5d1f6cc8c0f2ad74f94b044dd92" name="hp_bar">
-											<components>
-												<item type_name="flame::cElement" pos="4,32" ext="144,19" background_col="0,204,0,255" />
-											</components>
-											<children>
-												<item file_id="4111dc3bcf9a1c2e1e2fe73f907ec29c" name="hp_text">
-													<components>
-														<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-														<item type_name="flame::cText" text="100/100" font_size="18" />
-													</components>
-												</item>
-											</children>
+										<item filename="D:\dota_pubg\assets\ui\hp_bar.prefab">
+											<modifications>
+												<item target="46d4e5d1f6cc8c0f2ad74f94b044dd92|flame::cElement|pos" value="4,32" />
+											</modifications>
 										</item>
-										<item file_id="485985f657fcee391e84014770211093" name="mp_bar">
-											<components>
-												<item type_name="flame::cElement" pos="4,55" ext="144,19" background_col="0,24,232,255" />
-											</components>
-											<children>
-												<item file_id="419fbe0342f505b4881ac1e26f8b79b1" name="mp_text">
-													<components>
-														<item type_name="flame::cElement" pos="47.25,0.5" ext="49.5,18" horizontal_alignment="Center" vertical_alignment="Center" />
-														<item type_name="flame::cText" text="100/100" font_size="18" border="0.2" />
-													</components>
-												</item>
-											</children>
+										<item filename="ui\hp_bar.prefab">
+											<modifications>
+												<item target="46d4e5d1f6cc8c0f2ad74f94b044dd92|name" value="mp_bar" />
+												<item target="46f956a7908c3f8b8e18c70fb7faa082|flame::cElement|background_col" value="0,24,232,255" />
+											</modifications>
+										</item>
+									</children>
+								</item>
+								<item file_id="4bf7247f40c5c2f4423a4e70a0f08a85" name="panel2">
+									<components>
+										<item type_name="flame::cElement" pos="296,8" ext="800,48" />
+										<item type_name="flame::cLayout" type="Horizontal" auto_width="false" />
+									</components>
+									<children>
+										<item filename="ui\training_slot.prefab">
+											<modifications />
 										</item>
 									</children>
 								</item>
 								<item file_id="4259bf162f00672c937f45b846b7a584" name="action_list">
 									<components>
-										<item type_name="flame::cElement" pos="1104,8" ext="148,112" />
+										<item type_name="flame::cElement" pos="1100,8" ext="148,112" />
 										<item type_name="flame::cLayout" type="Grid" />
 										<item type_name="flame::cList" prefab_name="ui\action_slot.prefab" count="12" />
 									</components>
@@ -108,7 +104,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1280,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1315,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>
@@ -320,6 +316,12 @@
 							</children>
 						</item>
 					</children>
+				</item>
+				<item file_id="4ade7d698ecc6e14550cbec9dd5ac3a9" name="tooltip" enable="false">
+					<components>
+						<item type_name="flame::cElement" ext="28,16" background_col="0,0,0,200" pivot="0,1" />
+						<item type_name="flame::cText" text="Hello" />
+					</components>
 				</item>
 			</children>
 		</item>

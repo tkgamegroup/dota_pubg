@@ -1,2 +1,10 @@
 <?xml version="1.0"?>
-<preset type="BuildingInfosPreset" />
+<preset type="BuildingInfosPreset">
+	<infos>
+		<item name="Barracks" icon_name="extra\icons\BTNCrypt.png" description="Training warrios.">
+			<training_actions>
+				<item name="Infantry" time="10" />
+			</training_actions>
+		</item>
+	</infos>
+</preset>

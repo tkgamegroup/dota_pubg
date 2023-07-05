@@ -22,12 +22,14 @@
 #include "entities/chest.h"
 
 vec3			hovering_pos;
+cNodePtr		hovering_node = nullptr;
 cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
 bool			hovering_terrain = false;
 cNodePtr		hovering_town;
 
 cNodePtr										selected_target = nullptr;
+Listeners<void()>								select_callbacks;
 TargetTypeFlags									select_mode = TargetNull;
 bool											select_multiple_times = false;
 std::function<void(bool, cCharacterPtr)>		select_character_callback;
@@ -62,7 +64,7 @@ void update_control()
 
 	auto input = sInput::instance();
 
-	cNodePtr hovering_node = nullptr;
+	hovering_node = nullptr;
 	if (!input->mouse_used && all(greaterThanEqual(input->mpos, vec2(0.f))) && all(lessThan(input->mpos, tar_ext)))
 	{
 		hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
@@ -212,7 +214,12 @@ void update_control()
 			}
 			else if (hovering_town)
 			{
-				selected_target = hovering_town;
+				if (selected_target != hovering_town)
+				{
+					selected_target = hovering_town;
+					if (select_callbacks)
+						select_callbacks.call();
+				}
 			}
 		}
 		else

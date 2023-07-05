@@ -9,3 +9,5 @@ extern EntityPtr ui;
 void init_ui();
 void deinit_ui();
 void update_ui();
+void show_tooltip(const vec2& pos, const std::wstring& text);
+void close_tooltip();

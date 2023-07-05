@@ -3,10 +3,18 @@
 #include "head.h"
 #include "presets.h"
 
+struct Training
+{
+	const TrainingAction* action;
+	float timer;
+	int number; // -1 means infinite
+};
+
 struct BuildingInstance
 {
-	BuildingInfo* info;
+	const BuildingInfo* info;
 	int lv = 0;
+	std::vector<Training> trainings;
 };
 
 // Reflect

@@ -3,6 +3,16 @@
 UnitInfosPreset unit_infos;
 BuildingInfosPreset building_infos;
 
+const UnitInfo* UnitInfosPreset::find(std::string_view name) const
+{
+	for (auto& i : infos)
+	{
+		if (i.name == name)
+			return &i;
+	}
+	return nullptr;
+}
+
 const BuildingInfo* BuildingInfosPreset::find(std::string_view name) const
 {
 	for (auto& i : infos)

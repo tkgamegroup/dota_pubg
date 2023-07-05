@@ -14,6 +14,7 @@ void Player::init(EntityPtr _e_town)
 
 	if (auto collider = e_town->get_component_t<cCircleCollider>(); collider)
 	{
+		collider->callbacks.clear();
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
 			if (type == "enter"_h)
 			{
@@ -25,6 +26,13 @@ void Player::init(EntityPtr _e_town)
 				}
 			}
 		});
+	}
+
+	buildings.clear();
+	{
+		auto& building = buildings.emplace_back();
+		building.info = building_infos.find("Barracks");
+		building.lv = 1;
 	}
 }
 
