@@ -32,6 +32,7 @@ cElementPtr ui_mp_bar = nullptr;
 cTextPtr ui_hp_text = nullptr;
 cTextPtr ui_mp_text = nullptr;
 cListPtr ui_action_list = nullptr;
+cListPtr ui_training_list = nullptr;
 cTextPtr ui_tooltip = nullptr;
 
 int circle_lod(float r)
@@ -66,6 +67,8 @@ void init_ui()
 			}
 			if (auto e = bottom_bar->find_child_recursively("action_list"); e)
 				ui_action_list = e->get_component_t<cList>();
+			if (auto e = bottom_bar->find_child_recursively("training_list"); e)
+				ui_training_list = e->get_component_t<cList>();
 		}
 
 		if (auto e = ui->find_child("tooltip"); e)
@@ -105,25 +108,24 @@ void update_ui()
 			if (ui_mp_text)
 				ui_mp_text->set_text(L"0/0");
 
-			if (ui_action_list)
+			struct TownPanel
 			{
-
-				struct TownPanel
+				enum Panel
 				{
-					enum Panel
+					PanelMain,
+					PanelBuilding
+				};
+
+				Panel panel = PanelMain;
+				int building_index = -1;
+
+				void enter_main_panel(Player* player)
+				{
+					panel = PanelMain;
+					building_index = -1;
+
+					if (ui_action_list)
 					{
-						PanelMain,
-						PanelBuilding
-					};
-
-					Panel panel = PanelMain;
-					int building_index = -1;
-
-					void enter_main_panel(Player* player)
-					{
-						panel = PanelMain;
-						building_index = -1;
-
 						auto e_list = ui_action_list->entity;
 						for (auto i = 0; i < ui_action_list->count; i++)
 						{
@@ -162,12 +164,15 @@ void update_ui()
 							}
 						}
 					}
+				}
 
-					void enter_building_panel(Player* player, uint index)
+				void enter_building_panel(Player* player, uint index)
+				{
+					panel = PanelBuilding;
+					building_index = index;
+
+					if (ui_action_list)
 					{
-						panel = PanelBuilding;
-						building_index = index;
-
 						auto e_list = ui_action_list->entity;
 						auto& building = player->buildings[index];
 						if (!building.info->training_actions.empty())
@@ -213,7 +218,7 @@ void update_ui()
 													auto& action = building.info->training_actions[i];
 													auto it = std::find_if(building.trainings.begin(), building.trainings.end(), [&](const auto& i) {
 														return i.action == &action;
-													});
+														});
 													if (it == building.trainings.end())
 													{
 														it = building.trainings.emplace(building.trainings.end(), Training());
@@ -251,7 +256,7 @@ void update_ui()
 										receiver->event_listeners.clear();
 								}
 							}
-							
+
 							auto columns = e_list->get_component_t<cLayout>()->columns;
 							auto last_row = (int)floor(((float)e_list->children.size() - 0.5f) / columns);
 							auto c = e_list->children[last_row * columns].get();
@@ -289,12 +294,36 @@ void update_ui()
 							}
 						}
 					}
-				};
-				static TownPanel town_panel;
+				}
+			};
+			static TownPanel town_panel;
 
-				if (selected_target_changed)
-					town_panel.enter_main_panel(player);
+			switch (town_panel.panel)
+			{
+			case TownPanel::PanelMain:
+				break;
+			case TownPanel::PanelBuilding:
+			{
+				auto& building = player->buildings[town_panel.building_index];
+				if (!building.trainings.empty())
+				{
+					if (ui_training_list)
+					{
+						ui_training_list->set_count(building.trainings.size());
+						auto e_list = ui_training_list->entity;
+						for (auto i = 0; i < building.trainings.size(); i++)
+						{
+							auto c = e_list->children[i].get();
+							auto& training = building.trainings[i];
+						}
+					}
+				}
 			}
+				break;
+			}
+
+			if (selected_target_changed)
+				town_panel.enter_main_panel(player);
 		}
 	}
 	
