@@ -3,6 +3,7 @@
 #include "../head.h"
 #include "../command.h"
 
+// Reflect
 enum CharacterAction
 {
 	CharacterActionNone,
@@ -194,6 +195,7 @@ struct cCharacter : Component
 	Tracker target; // character, chest, shop, etc
 	vec3	target_location;
 	voidptr target_obj; // ability, item, etc
+	// Reflect
 	CharacterAction action = CharacterActionNone;
 	float move_speed = 1.f;
 	float attack_speed = 1.f;

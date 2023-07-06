@@ -47,10 +47,30 @@ void process_colliding(const std::vector<cCharacterPtr>& characters, std::vector
 	}
 }
 
+static int circle_lod(float r) 
+{
+	return r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0)));
+};
+
 void cCircleCollider::update()
 {
 	auto characters = find_characters_within_circle(faction, node->global_pos(), radius);
 	process_colliding(characters, last_collidings, callbacks);
+
+	if (enable_collider_debugging)
+	{
+		auto& mat = node->transform;
+
+		auto circle_draw = graphics::GuiCircleDrawer(circle_lod(radius));
+		std::vector<vec3> pts;
+		for (auto i = 0; i < circle_draw.pts.size(); i++)
+		{
+			pts.push_back(mat * vec4(vec3(radius * circle_draw.get_pt(i), 0.f).xzy(), 1.f));
+			pts.push_back(mat * vec4(vec3(radius * circle_draw.get_pt(i + 1), 0.f).xzy(), 1.f));
+		}
+
+		sRenderer::instance()->draw_primitives("LineList"_h, pts.data(), pts.size(), cvec4(0, 255, 0, 255));
+	}
 }
 
 struct cCircleColliderCreate : cCircleCollider::Create
@@ -94,9 +114,6 @@ void cSectorCollider::update()
 			auto& mat = node->transform;
 			auto c = vec3(-inner_radius, 0.f, 0.f);
 
-			auto circle_lod = [](float r) {
-				return r > 8.f ? 3 : (r > 4.f ? 3 : (r > 2.f ? 2 : (r > 1.f ? 1 : 0)));
-			};
 			auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r1));
 			std::vector<vec3> pts;
 			auto i_beg = circle_draw.get_idx(yaw_angle - angle);

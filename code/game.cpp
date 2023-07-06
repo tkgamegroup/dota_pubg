@@ -247,10 +247,16 @@ std::vector<cCharacterPtr> find_characters_within_camera(FactionFlags faction)
 cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& _pos, FactionFlags faction, uint id)
 {
 	auto e = get_prefab(prefab_path);
-	auto radius = e->get_component_t<cNavAgent>()->radius;
-	auto pos = get_avaliable_pos(_pos, radius, 4.f, 20);
-	if (pos.x >= 10000.f)
-		return nullptr;
+	float radius = 0.f;
+	if (auto nav_agent = e->get_component_t<cNavAgent>(); nav_agent)
+		radius = nav_agent->radius;
+	auto pos = _pos;
+	if (radius > 0.f)
+	{
+		pos = get_avaliable_pos(pos, radius, 4.f, 20);
+		if (pos.x >= 10000.f)
+			return nullptr;
+	}
 	e = e->duplicate();
 
 	auto node = e->node();
@@ -387,6 +393,22 @@ void cGame::start()
 	player2.faction = FactionParty2;
 	player1.init(root->find_child_recursively("player1_town"));
 	player2.init(root->find_child_recursively("player2_town"));
+	if (player2.e_town)
+	{
+		if (auto node = player2.e_town->node(); node)
+		{
+			node->update_transform_from_root();
+			player1.target_pos = node->global_pos();
+		}
+	}
+	if (player1.e_town)
+	{
+		if (auto node = player1.e_town->node(); node)
+		{
+			node->update_transform_from_root();
+			player2.target_pos = node->global_pos();
+		}
+	}
 
 	preload_images.push_back(graphics::Image::get(L"assets\\effects\\Fireball.png"));
 }
@@ -424,6 +446,18 @@ void cGame::update()
 	}
 	dead_characters.clear();
 	removing_dead_characters = false;
+
+	player1.update();
+	player2.update();
+
+	// naive ai for computer
+	for (auto& b : player2.buildings)
+	{
+		if (!b.info->training_actions.empty() && b.trainings.empty())
+		{
+
+		}
+	}
 
 	if (enable_control)
 		update_control();

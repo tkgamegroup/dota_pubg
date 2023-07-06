@@ -10,11 +10,19 @@ struct Training
 	int number; // -1 means infinite
 };
 
+struct Player;
+
 struct BuildingInstance
 {
+	Player* player;
 	const BuildingInfo* info;
 	int lv = 0;
+
 	std::vector<Training> trainings;
+	uint trainings_changed_frame;
+
+	void add_training(const TrainingAction* action, int number);
+	void remove_training(const TrainingAction* action);
 };
 
 // Reflect
@@ -24,13 +32,11 @@ struct Player
 	FactionFlags faction = FactionNone;
 
 	// Reflect
-	uint gold = 0;
+	uint blood = 1000;
 	// Reflect
-	uint wood = 0;
+	uint bones = 800;
 	// Reflect
-	uint stone = 0;
-	// Reflect
-	uint food = 0;
+	uint soul_sand = 10;
 
 	// Reflect
 	uint town_hp_max = 30;
@@ -38,12 +44,14 @@ struct Player
 	uint town_hp = 30;
 
 	EntityPtr e_town = nullptr;
-	std::vector<UnitInfo*> formation;
-	std::vector<cCharacterPtr> troop;
+	cNodePtr spawn_node = nullptr;
+	vec3 target_pos = vec3(0.f);
 
 	std::vector<BuildingInstance> buildings;
 
 	void init(EntityPtr _e_town);
+	void add_building(const BuildingInfo* info, int lv = 0);
+	void update();
 };
 
 // Reflect

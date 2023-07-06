@@ -11,13 +11,6 @@ struct UnitInfo
 	std::string				description;
 
 	std::filesystem::path	prefab_name;
-	uint					hp = 100;
-	uint					atk = 10;
-	float					atk_distance = 1.5f;
-	float					atk_interval = 2.f;
-	float					atk_time = 1.5f;
-	float					atk_point = 1.f;
-	uint					def = 0;
 };
 
 struct UnitAction
@@ -35,6 +28,9 @@ struct UnitAction
 struct TrainingAction
 {
 	std::string				name;
+	uint					cost_blood;
+	uint					cost_bones;
+	uint					cost_soul_sand;
 	float					time;
 };
 

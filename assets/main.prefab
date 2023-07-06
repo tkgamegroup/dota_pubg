@@ -26,24 +26,24 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1187,612" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1315,684" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,573.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,645.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,468" ext="1187,144" background_col="0,0,0,100" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,540" ext="1315,144" background_col="0,0,0,100" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" padding="0,0,0,0" auto_width="false" />
 					</components>
 					<children>
 						<item file_id="40d3cd79033d7e0300e1dd077e1ef29a" name="panel">
 							<components>
-								<item type_name="flame::cElement" ext="1187,144" horizontal_alignment="Fill" />
+								<item type_name="flame::cElement" ext="1315,144" horizontal_alignment="Fill" />
 								<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 								<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 							</components>
@@ -89,9 +89,8 @@
 											<components>
 												<item type_name="flame::cElement" pos="4,4" ext="288,48" />
 												<item type_name="flame::cLayout" />
-												<item type_name="flame::cList" prefab_name="ui\training_slot.prefab" count="1" />
+												<item type_name="flame::cList" prefab_name="ui\training_slot.prefab" />
 											</components>
-											<children />
 										</item>
 									</children>
 								</item>
@@ -109,7 +108,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1187,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1315,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>
@@ -343,6 +342,19 @@
 				<item target="4afee6e299af73c6f5e866ecec35b3aa|enable" value="true" />
 				<item target="49e95196de385cc61fb127ef7ad1288a|name" value="player1_town" />
 				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|name" value="player2_town" />
+				<item target="49e95196de385cc61fb127ef7ad1288a|4fd7e4645a6f4668ade16f097cedacad|add_child" />
+				<item target="4fd7e4645a6f4668ade16f097cedacad|name" value="spawn_node" />
+				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|4d648aed2c98d875e2191aece5c31ea0|add_child" />
+				<item target="4d648aed2c98d875e2191aece5c31ea0|name" value="spawn_node" />
+				<item target="4d648aed2c98d875e2191aece5c31ea0|flame::cNode|add" />
+				<item target="4fd7e4645a6f4668ade16f097cedacad|flame::cNode|add" />
+				<item target="4fd7e4645a6f4668ade16f097cedacad|flame::cNode|pos" value="10,0,0" />
+				<item target="4d648aed2c98d875e2191aece5c31ea0|flame::cNode|pos" value="-10,0,0" />
+				<item target="49e95196de385cc61fb127ef7ad1288a|cCircleCollider|add" />
+				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|cCircleCollider|add" />
+				<item target="49e95196de385cc61fb127ef7ad1288a|cCircleCollider|radius" value="5" />
+				<item target="49e95196de385cc61fb127ef7ad1288a|cCircleCollider|faction" value="Party2" />
+				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|cCircleCollider|faction" value="Party1" />
 			</modifications>
 		</item>
 	</children>
