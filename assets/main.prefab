@@ -86,9 +86,16 @@
 								<item type_name="flame::cLayout" type="Horizontal" auto_width="false" auto_height="false" />
 							</components>
 							<children>
-								<item file_id="434ce4bb09aa142e421c08987d0960b7" name="training_list">
+								<item file_id="434ce4bb09aa142e421c08987d0960b7" name="construction_list">
 									<components>
 										<item type_name="flame::cElement" pos="4,4" ext="288,48" />
+										<item type_name="flame::cLayout" />
+										<item type_name="flame::cList" prefab_name="ui\construction_slot.prefab" />
+									</components>
+								</item>
+								<item file_id="434ce4bb09aa142e421c08987d0960b7" name="training_list">
+									<components>
+										<item type_name="flame::cElement" pos="296,4" ext="288,48" />
 										<item type_name="flame::cLayout" />
 										<item type_name="flame::cList" prefab_name="ui\training_slot.prefab" />
 									</components>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<preset type="TownInfosPreset">
+	<infos>
+		<item name="Vampire" hp_max="30" />
+	</infos>
+</preset>

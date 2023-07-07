@@ -393,20 +393,20 @@ void cGame::start()
 	player2.faction = FactionParty2;
 	player1.init(root->find_child_recursively("player1_town"));
 	player2.init(root->find_child_recursively("player2_town"));
-	if (player2.e_town)
+	if (player2.town.e)
 	{
-		if (auto node = player2.e_town->node(); node)
+		if (auto node = player2.town.e->node(); node)
 		{
 			node->update_transform_from_root();
-			player1.target_pos = node->global_pos();
+			player1.town.target_pos = node->global_pos();
 		}
 	}
-	if (player1.e_town)
+	if (player1.town.e)
 	{
-		if (auto node = player1.e_town->node(); node)
+		if (auto node = player1.town.e->node(); node)
 		{
 			node->update_transform_from_root();
-			player2.target_pos = node->global_pos();
+			player2.town.target_pos = node->global_pos();
 		}
 	}
 
@@ -451,7 +451,7 @@ void cGame::update()
 	player2.update();
 
 	// naive ai for computer
-	for (auto& b : player2.buildings)
+	for (auto& b : player2.town.buildings)
 	{
 		if (!b.info->training_actions.empty() && b.trainings.empty())
 		{

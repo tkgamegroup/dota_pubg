@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<prefab file_id="411f070322cecb9e93cd3da87fe65bac" name="training_slot">
+	<components>
+		<item type_name="flame::cElement" pos="4,4" ext="280,40" background_col="255,255,255,64" frame_col="220,141,32,0" frame_thickness="4" />
+		<item type_name="flame::cLayout" type="Horizontal" />
+	</components>
+	<children>
+		<item file_id="4be7779386314f577831152c99b7bcaf" name="icon">
+			<components>
+				<item type_name="flame::cElement" pos="4,4" ext="32,32" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\extra\icons\blood_well.png" />
+			</components>
+		</item>
+		<item filename="hp_bar.prefab">
+			<modifications>
+				<item target="46d4e5d1f6cc8c0f2ad74f94b044dd92|flame::cElement|ext" value="200,19" />
+				<item target="4111dc3bcf9a1c2e1e2fe73f907ec29c|flame::cText|text" value="0:10" />
+				<item target="46f956a7908c3f8b8e18c70fb7faa082|flame::cElement|background_col" value="222,192,41,255" />
+				<item target="46d4e5d1f6cc8c0f2ad74f94b044dd92|flame::cElement|vertical_alignment" value="Center" />
+				<item target="46d4e5d1f6cc8c0f2ad74f94b044dd92|flame::cElement|pos" value="40,10.5" />
+				<item target="4111dc3bcf9a1c2e1e2fe73f907ec29c|flame::cElement|pos" value="86.7812,14.9" />
+				<item target="4111dc3bcf9a1c2e1e2fe73f907ec29c|flame::cElement|horizontal_alignment" value="Center" />
+				<item target="4111dc3bcf9a1c2e1e2fe73f907ec29c|flame::cElement|vertical_alignment" value="None" />
+			</modifications>
+		</item>
+		<item file_id="47d339ed8eaf1721433f6430a3a4c99a" name="cancel">
+			<components>
+				<item type_name="flame::cElement" pos="244,4" ext="32,32" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\extra\icons\cancel.png" />
+				<item type_name="flame::cReceiver">
+					<click_action type="" />
+					<mouse_enter_action type="" />
+					<mouse_leave_action type="" />
+				</item>
+			</components>
+		</item>
+	</children>
+</prefab>

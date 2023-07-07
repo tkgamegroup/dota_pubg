@@ -13,19 +13,22 @@ struct UnitInfo
 	std::filesystem::path	prefab_name;
 };
 
-struct UnitAction
+struct ResourceGenerating
 {
-	std::string				name;
-	std::filesystem::path	icon_name;
-	uvec2					icon_tile_coord = uvec2(0);
-	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
-	std::string				description;
-	std::string				tooltip;
-
-	VirtualUdt<Action>		click_action;
+	ResourceType			type;
+	uint					amount; // per minute
 };
 
 struct TrainingAction
+{
+	std::string				name;
+	uint					cost_blood;
+	uint					cost_bones;
+	uint					cost_soul_sand;
+	float					duration;
+};
+
+struct ConstructionAction
 {
 	std::string				name;
 	uint					cost_blood;
@@ -47,14 +50,14 @@ extern UnitInfosPreset unit_infos;
 
 struct BuildingInfo
 {
-	std::string					name;
-	std::filesystem::path		icon_name;
-	uvec2						icon_tile_coord = uvec2(0);
-	vec4						icon_uvs = vec4(vec2(0.f), vec2(1.f));
-	std::string					description;
+	std::string						name;
+	std::filesystem::path			icon_name;
+	uvec2							icon_tile_coord = uvec2(0);
+	vec4							icon_uvs = vec4(vec2(0.f), vec2(1.f));
+	std::string						description;
 
-	std::vector<TrainingAction> training_actions;
-	std::vector<UnitAction>		actions;
+	std::vector<ResourceGenerating> resource_generating;
+	std::vector<TrainingAction>		training_actions;
 };
 
 // Reflect
@@ -67,5 +70,28 @@ struct BuildingInfosPreset
 };
 
 extern BuildingInfosPreset building_infos;
+
+struct TownInfo
+{
+	std::string							name;
+	std::filesystem::path				icon_name;
+	uvec2								icon_tile_coord = uvec2(0);
+	vec4								icon_uvs = vec4(vec2(0.f), vec2(1.f));
+	std::string							description;
+
+	uint								hp_max;
+	std::vector<ConstructionAction>		construction_actions;
+};
+
+// Reflect
+struct TownInfosPreset
+{
+	// Reflect
+	std::vector<TownInfo> infos;
+
+	const TownInfo* find(std::string_view name) const;
+};
+
+extern TownInfosPreset town_infos;
 
 void init_presets();

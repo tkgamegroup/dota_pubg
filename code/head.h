@@ -36,6 +36,14 @@ enum FactionFlags
 	FactionParty4 = 1 << 4
 };
 
+// Reflect
+enum ResourceType
+{
+	ResourceBlood,
+	ResourceBones,
+	ResourceSoulSand
+};
+
 inline FactionFlags operator| (FactionFlags a, FactionFlags b) { return (FactionFlags)((int)a | (int)b); }
 inline FactionFlags operator~ (FactionFlags v) { return (FactionFlags)(~(int)v); }
 

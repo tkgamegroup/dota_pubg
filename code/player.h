@@ -27,6 +27,37 @@ struct BuildingInstance
 	void remove_training(const TrainingAction* action);
 };
 
+struct Construction
+{
+	const ConstructionAction* action;
+	float duration;
+	float timer;
+	bool resources_costed;
+};
+
+struct TownInstance
+{
+	EntityPtr e = nullptr;
+	Player* player;
+	const TownInfo* info;
+
+	uint hp_max;
+	uint hp;
+
+	std::vector<BuildingInstance> buildings;
+	std::vector<Construction> constructions;
+	uint constructions_changed_frame;
+
+	cNodePtr spawn_node = nullptr;
+	vec3 target_pos = vec3(0.f);
+
+	void init(EntityPtr _e, Player* player, const TownInfo* info);
+	void add_building(const BuildingInfo* info, int lv = 0);
+	void add_construction(const ConstructionAction* action);
+	void remove_construction(const ConstructionAction* action);
+	void update();
+};
+
 // Reflect
 struct Player
 {
@@ -41,18 +72,9 @@ struct Player
 	uint soul_sand = 10;
 
 	// Reflect
-	uint town_hp_max = 30;
-	// Reflect
-	uint town_hp = 30;
+	TownInstance town;
 
-	EntityPtr e_town = nullptr;
-	cNodePtr spawn_node = nullptr;
-	vec3 target_pos = vec3(0.f);
-
-	std::vector<BuildingInstance> buildings;
-
-	void init(EntityPtr _e_town);
-	void add_building(const BuildingInfo* info, int lv = 0);
+	void init(EntityPtr e_town);
 	void update();
 };
 

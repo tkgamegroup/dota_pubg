@@ -50,19 +50,24 @@ void BuildingInstance::remove_training(const TrainingAction* action)
 	trainings_changed_frame = frames;
 }
 
-void Player::init(EntityPtr _e_town)
+void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 {
-	e_town = _e_town;
+	e = _e;
+	player = _player;
+	info = _info;
 
-	if (auto collider = e_town->get_component_t<cCircleCollider>(); collider)
+	hp_max = info->hp_max;
+	hp = hp_max;
+
+	if (auto collider = e->get_component_t<cCircleCollider>(); collider)
 	{
 		collider->callbacks.clear();
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
 			if (type == "enter"_h)
 			{
 				character->die("removed"_h);
-				town_hp--;
-				if (town_hp == 0)
+				hp--;
+				if (hp == 0)
 				{
 
 				}
@@ -70,62 +75,117 @@ void Player::init(EntityPtr _e_town)
 		});
 	}
 
-	if (auto e_spawn_node = e_town->find_child("spawn_node"); e_spawn_node)
+	if (auto e_spawn_node = e->find_child("spawn_node"); e_spawn_node)
 		spawn_node = e_spawn_node->node();
 
 	buildings.clear();
-	add_building(building_infos.find("Barracks"), 1);
 }
 
-void Player::add_building(const BuildingInfo* info, int lv)
+void TownInstance::add_building(const BuildingInfo* info, int lv)
 {
 	auto& building = buildings.emplace_back();
-	building.player = this;
+	building.player = player;
 	building.info = info;
 	building.lv = lv;
 }
 
-void Player::update()
+void TownInstance::add_construction(const ConstructionAction* action)
 {
+	auto it = std::find_if(constructions.begin(), constructions.end(), [&](const auto& i) {
+		return i.action == action;
+	});
+	if (it == constructions.end())
+	{
+		it = constructions.emplace(constructions.end(), Construction());
+		it->action = action;
+		it->duration = action->duration;
+		it->timer = it->duration;
+	}
+	constructions_changed_frame = frames;
+}
+
+void TownInstance::remove_construction(const ConstructionAction* action)
+{
+	for (auto it = constructions.begin(); it != constructions.end(); it++)
+	{
+		if (it->action == action)
+		{
+			if (it->resources_costed)
+			{
+				player->blood += it->action->cost_blood;
+				player->bones += it->action->cost_bones;
+				player->soul_sand += it->action->cost_soul_sand;
+			}
+			constructions.erase(it);
+			return;
+		}
+	}
+	constructions_changed_frame = frames;
+}
+
+void TownInstance::update()
+{
+	for (auto& c : constructions)
+	{
+		if (c.timer <= 0.f)
+			continue;
+		if (!c.resources_costed)
+		{
+			if (player->blood >= c.action->cost_blood &&
+				player->bones >= c.action->cost_bones &&
+				player->soul_sand >= c.action->cost_soul_sand)
+			{
+				player->blood -= c.action->cost_blood;
+				player->bones -= c.action->cost_bones;
+				player->soul_sand -= c.action->cost_soul_sand;
+				c.resources_costed = true;
+			}
+			else
+				continue;
+		}
+		c.timer -= delta_time;
+		if (c.timer <= 0.f)
+		{
+
+		}
+	}
 	for (auto& b : buildings)
 	{
 		for (auto& t : b.trainings)
 		{
-			if (t.timer > 0.f)
+			if (t.timer <= 0.f)
+				continue;
+			if (!t.resources_costed)
 			{
-				if (!t.resources_costed)
+				if (player->blood >= t.action->cost_blood &&
+					player->bones >= t.action->cost_bones &&
+					player->soul_sand >= t.action->cost_soul_sand)
 				{
-					if (blood >= t.action->cost_blood &&
-						bones >= t.action->cost_bones &&
-						soul_sand >= t.action->cost_soul_sand)
-					{
-						blood -= t.action->cost_blood;
-						bones -= t.action->cost_bones;
-						soul_sand -= t.action->cost_soul_sand;
-						t.resources_costed = true;
-					}
-					else
-						continue;
+					player->blood -= t.action->cost_blood;
+					player->bones -= t.action->cost_bones;
+					player->soul_sand -= t.action->cost_soul_sand;
+					t.resources_costed = true;
 				}
-				t.timer -= delta_time;
-				if (t.timer <= 0.f)
+				else
+					continue;
+			}
+			t.timer -= delta_time;
+			if (t.timer <= 0.f)
+			{
+				if (t.number > 0)
+					t.number--;
+				t.timer = t.duration;
+				t.resources_costed = false;
+				if (spawn_node)
 				{
-					if (t.number > 0)
-						t.number--;
-					t.timer = t.duration;
-					t.resources_costed = false;
-					if (spawn_node)
+					if (auto unit_info = unit_infos.find(t.action->name); unit_info)
 					{
-						auto unit_info = unit_infos.find(t.action->name);
-						if (unit_info)
+						if (auto character = add_character(unit_info->prefab_name, spawn_node->global_pos(), player->faction); character)
 						{
-							if (auto character = add_character(unit_info->prefab_name, spawn_node->global_pos(), faction); character)
+							if (auto ai = character->entity->get_component_t<cAI>(); ai)
 							{
-								if (auto ai = character->entity->get_component_t<cAI>(); ai)
-								{
-									ai->type = UnitLaneCreep;
-									ai->target_pos = target_pos;
-								}
+								ai->type = UnitLaneCreep;
+								ai->target_pos = target_pos;
 							}
 						}
 					}
@@ -143,6 +203,23 @@ void Player::update()
 				it++;
 		}
 	}
+}
+
+void Player::init(EntityPtr e_town)
+{
+	{
+		auto info = town_infos.find("Vampire");
+		town.init(e_town, this, info);
+	}
+	{
+		auto info = building_infos.find("Barracks");
+		town.add_building(info, 1);
+	}
+}
+
+void Player::update()
+{
+	town.update();
 }
 
 Player player1;
