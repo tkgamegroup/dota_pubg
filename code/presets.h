@@ -31,7 +31,7 @@ struct TrainingAction
 	uint					cost_blood;
 	uint					cost_bones;
 	uint					cost_soul_sand;
-	float					time;
+	float					duration;
 };
 
 // Reflect

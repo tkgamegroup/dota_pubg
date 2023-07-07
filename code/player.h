@@ -6,8 +6,10 @@
 struct Training
 {
 	const TrainingAction* action;
+	float duration;
 	float timer;
 	int number; // -1 means infinite
+	bool resources_costed;
 };
 
 struct Player;

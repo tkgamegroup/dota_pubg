@@ -221,6 +221,12 @@ void update_control()
 						select_callbacks.call();
 				}
 			}
+			else
+			{
+				selected_target = nullptr;
+				if (select_callbacks)
+					select_callbacks.call();
+			}
 		}
 		else
 		{

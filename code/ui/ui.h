@@ -10,4 +10,5 @@ void init_ui();
 void deinit_ui();
 void update_ui();
 void show_tooltip(const vec2& pos, const std::wstring& text);
+void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bones, uint soul_sand);
 void close_tooltip();

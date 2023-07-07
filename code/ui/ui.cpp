@@ -21,17 +21,367 @@
 #include "../entities/chest.h"
 #include "ui.h"
 
-bool selected_target_changed = false;
+bool selected_target_changed = true;
 
 EntityPtr ui = nullptr;
 
 graphics::CanvasPtr canvas = nullptr;
-cTextPtr ui_name_text = nullptr;
-EntityPtr ui_hp_bar = nullptr;
-EntityPtr ui_mp_bar = nullptr;
-cListPtr ui_action_list = nullptr;
-cListPtr ui_training_list = nullptr;
-cTextPtr ui_tooltip = nullptr;
+EntityPtr ui_resource_bar = nullptr;
+
+struct BottomPanel
+{
+	enum PanelType
+	{
+		PanelNone,
+		PanelCharacter,
+		PanelTownMain,
+		PanelTownBuilding
+	};
+	PanelType type = PanelNone;
+
+	EntityPtr e = nullptr;
+	cImagePtr avatar_image = nullptr;
+	EntityPtr sub_panel1 = nullptr;
+	cTextPtr name_text = nullptr;
+	EntityPtr hp_bar = nullptr;
+	EntityPtr mp_bar = nullptr;
+	EntityPtr sub_panel2 = nullptr;
+	EntityPtr sub_panel3 = nullptr;
+	cListPtr training_list = nullptr;
+	cListPtr action_list = nullptr;
+
+	Player* player = nullptr;
+	int building_index = -1;
+
+	void init(EntityPtr _e)
+	{
+		e = _e;
+		if (auto e = _e->find_child("avatar_image"); e)
+			avatar_image = e->get_component_t<cImage>();
+		sub_panel1 = _e->find_child("sub_panel1");
+		if (sub_panel1)
+		{
+			if (auto e = sub_panel1->find_child("name"); e)
+				name_text = e->get_component_t<cText>();
+			hp_bar = sub_panel1->find_child("hp_bar");
+			mp_bar = sub_panel1->find_child("mp_bar");
+		}
+		sub_panel2 = _e->find_child("sub_panel2");
+		sub_panel3 = _e->find_child("sub_panel3");
+		if (sub_panel3)
+		{
+			if (auto e = sub_panel3->find_child("training_list"); e)
+				training_list = e->get_component_t<cList>();
+		}
+		if (auto e = _e->find_child("action_list"); e)
+			action_list = e->get_component_t<cList>();
+	}
+
+	void reset()
+	{
+		type = PanelNone;
+		if (avatar_image)
+			avatar_image->set_image_name(L"");
+		if (name_text)
+		{
+			name_text->set_col(cvec4(255));
+			name_text->set_text(L"");
+		}
+		if (hp_bar)
+			hp_bar->set_enable(false);
+		if (mp_bar)
+			mp_bar->set_enable(false);
+		if (sub_panel3)
+		{
+			for (auto& c : sub_panel3->children)
+			{
+				if (auto list = c->get_parent_component_t<cList>(); list)
+					list->set_count(0);
+				c->set_enable(false);
+			}
+		}
+		if (action_list)
+		{
+			for (auto& c : action_list->entity->children)
+			{
+				if (auto image = c->get_component_t<cImage>(); image)
+					image->set_image_name(L"");
+				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+					receiver->event_listeners.clear();
+			}
+		}
+
+		sInput::instance()->hovering_receiver = nullptr;
+	}
+
+	void enter_character_panel(cCharacterPtr character)
+	{
+		reset();
+		type = PanelCharacter;
+	}
+
+	void enter_town_panel(Player* _player)
+	{
+		reset();
+		type = PanelTownMain;
+		player = _player;
+		building_index = -1;
+
+		if (name_text)
+		{
+			cvec4 col = cvec4(255);
+			if (player == &player1)
+				col = cvec4(100, 255, 100, 255);
+			else if (player == &player2)
+				col = cvec4(255, 100, 100, 255);
+			name_text->set_col(col);
+			name_text->set_text(s2w(selected_target->entity->name));
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
+
+		if (action_list)
+		{
+			auto i = 0;
+			for (auto& c : action_list->entity->children)
+			{
+				if (player == &player1 && i < player->buildings.size())
+				{
+					auto& building = player->buildings[i];
+					if (auto image = c->get_component_t<cImage>(); image)
+						image->set_image_name(building.info->icon_name);
+					if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+					{
+						receiver->event_listeners.clear();
+						auto element = c->element();
+						receiver->event_listeners.add([this, element, i](uint type, const vec2&) {
+							switch (type)
+							{
+							case "mouse_enter"_h:
+								show_tooltip(element->global_pos0() + vec2(0.f, -8.f), s2w(player->buildings[i].info->description));
+								break;
+							case "click"_h:
+								enter_town_building_panel(i);
+								break;
+							}
+						});
+					}
+				}
+				i++;
+			}
+		}
+	}
+
+	void enter_town_building_panel(int index)
+	{
+		reset();
+		type = PanelTownBuilding;
+		building_index = index;
+
+		if (name_text)
+		{
+			cvec4 col = cvec4(255);
+			if (player == &player1)
+				col = cvec4(100, 255, 100, 255);
+			else if (player == &player2)
+				col = cvec4(255, 100, 100, 255);
+			name_text->set_col(col);
+			name_text->set_text(s2w(selected_target->entity->name));
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
+
+		if (action_list)
+		{
+			auto& building = player->buildings[index];
+			if (!building.info->training_actions.empty())
+			{
+				auto i = 0;
+				for (auto& c : action_list->entity->children)
+				{
+					if (i < building.info->training_actions.size())
+					{
+						auto& training = building.info->training_actions[i];
+						auto unit_info = unit_infos.find(training.name);
+						if (unit_info)
+						{
+							if (auto image = c->get_component_t<cImage>(); image)
+								image->set_image_name(unit_info->icon_name);
+							if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+							{
+								receiver->event_listeners.clear();
+								auto element = c->element();
+								receiver->event_listeners.add([this, element, i](uint type, const vec2& v) {
+									switch (type)
+									{
+									case "mouse_enter"_h:
+									{
+										auto& building = player->buildings[building_index];
+										auto& training = building.info->training_actions[i];
+										auto unit_info = unit_infos.find(training.name);
+										if (unit_info)
+										{
+											std::wstring text;
+											text = s2w(unit_info->name);
+											text += L"\nLeft - Train One\n"
+												L"Right - Train Infinite";
+											show_tooltip(element->global_pos0() + vec2(0.f, -8.f), text,
+												training.cost_blood, training.cost_bones, training.cost_soul_sand);
+										}
+									}
+										break;
+									case "click"_h:
+									{
+										auto& building = player->buildings[building_index];
+										building.add_training(&building.info->training_actions[i], 1);
+									}
+										break;
+									case "mouse_up"_h:
+										if (v.x == 1.f)
+										{
+											auto& building = player->buildings[building_index];
+											building.add_training(&building.info->training_actions[i], -1);
+										}
+										break;
+									}
+								});
+							}
+						}
+					}
+					i++;
+				}
+
+				auto columns = action_list->entity->get_component_t<cLayout>()->columns;
+				auto last_row = (int)floor(((float)action_list->entity->children.size() - 0.5f) / columns);
+				auto c = action_list->entity->children[last_row * columns].get();
+				if (auto image = c->get_component_t<cImage>(); image)
+					image->set_image_name(Path::get(L"assets\\extra\\icons\\back.png"));
+				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+				{
+					receiver->event_listeners.clear();
+					receiver->event_listeners.add([this, c](uint type, const vec2&) {
+						switch (type)
+						{
+						case "mouse_enter"_h:
+							show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
+							break;
+						case "click"_h:
+							enter_town_panel(player);
+							break;
+						}
+					});
+				}
+			}
+		}
+	}
+
+	void update()
+	{
+		if (selected_target_changed)
+		{
+			if (!selected_target)
+				reset();
+			else
+			{
+				if (selected_target->entity->name.ends_with("_town"))
+				{
+					Player* player = nullptr;
+					if (selected_target->entity->name.starts_with("player1"))
+						player = &player1;
+					else if (selected_target->entity->name.starts_with("player2"))
+						player = &player2;
+					enter_town_panel(player);
+				}
+			}
+		}
+
+		switch (type)
+		{
+		case PanelTownMain:
+			if (hp_bar)
+			{
+				hp_bar->find_child("bar")->element()->set_scl(vec2((float)player->town_hp / (float)player->town_hp_max, 1.f));
+				hp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(player->town_hp) + L"/" + wstr(player->town_hp_max));
+			}
+			break;
+		case PanelTownBuilding:
+		{
+			if (hp_bar)
+			{
+				hp_bar->find_child("bar")->element()->set_scl(vec2((float)player->town_hp / (float)player->town_hp_max, 1.f));
+				hp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(player->town_hp) + L"/" + wstr(player->town_hp_max));
+			}
+
+			auto& building = player->buildings[building_index];
+			if (training_list)
+			{
+				training_list->entity->set_enable(true);
+
+				static uint training_updated_frame = 0;
+				auto e_list = training_list->entity;
+				if (training_updated_frame <= building.trainings_changed_frame)
+				{
+					training_updated_frame = building.trainings_changed_frame;
+
+					training_list->set_count(building.trainings.size());
+					for (auto i = 0; i < building.trainings.size(); i++)
+					{
+						auto c = e_list->children[i].get();
+						auto& training = building.trainings[i];
+						auto unit_info = unit_infos.find(training.action->name);
+						if (unit_info)
+						{
+							if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
+								image->set_image_name(unit_info->icon_name);
+							auto cancel_button = c->find_child("cancel");
+							if (cancel_button)
+							{
+								if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
+								{
+									receiver->event_listeners.clear();
+									receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
+										switch (type)
+										{
+										case "mouse_enter"_h:
+											show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+											break;
+										case "click"_h:
+										{
+											auto& building = player->buildings[building_index];
+											building.remove_training(building.trainings[i].action);
+										}
+											break;
+										}
+									});
+								}
+							}
+						}
+						else
+						{
+							if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
+								image->set_image_name(L"");
+							if (auto receiver = c->find_child("cancel")->get_component_t<cReceiver>(); receiver)
+								receiver->event_listeners.clear();
+						}
+					}
+				}
+				for (auto i = 0; i < building.trainings.size(); i++)
+				{
+					auto c = e_list->children[i].get();
+					auto& training = building.trainings[i];
+					c->find_child_recursively("number")->get_component_t<cText>()->set_text(wstr(training.number));
+					c->find_child_recursively("bar")->element()->set_scl(vec2(1.f - training.timer / training.duration, 1.f));
+					c->find_child_recursively("text")->get_component_t<cText>()->set_text(std::format(L"{}:{}", int(training.timer / 60.f), int(training.timer)));
+				}
+			}
+		}
+			break;
+		}
+	}
+};
+
+BottomPanel bottom_panel;
+EntityPtr ui_tooltip = nullptr;
 
 static int circle_lod(float r)
 {
@@ -49,22 +399,12 @@ void init_ui()
 
 	if (ui = root->find_child("ui"); ui)
 	{
-		if (auto bottom_bar = ui->find_child("bottom_panel"); bottom_bar)
-		{
-			if (auto e = bottom_bar->find_child_recursively("name"); e)
-				ui_name_text = e->get_component_t<cText>();
-			if (auto e = bottom_bar->find_child_recursively("hp_bar"); e)
-				ui_hp_bar = e;
-			if (auto e = bottom_bar->find_child_recursively("mp_bar"); e)
-				ui_mp_bar = e;
-			if (auto e = bottom_bar->find_child_recursively("action_list"); e)
-				ui_action_list = e->get_component_t<cList>();
-			if (auto e = bottom_bar->find_child_recursively("training_list"); e)
-				ui_training_list = e->get_component_t<cList>();
-		}
-
+		if (auto top_bar = ui->find_child("top_bar"); top_bar)
+			ui_resource_bar = top_bar->find_child("resources_bar");
+		if (auto e = ui->find_child("bottom_panel"); e)
+			bottom_panel.init(e);
 		if (auto e = ui->find_child("tooltip"); e)
-			ui_tooltip = e->get_component_t<cText>();
+			ui_tooltip = e;
 	}
 }
 
@@ -77,297 +417,29 @@ void update_ui()
 	std::wstring tooltip_str = L"";
 	vec2 tooltip_pos;
 
-	if (selected_target)
+	if (ui_resource_bar)
 	{
-		if (auto character = selected_target->entity->get_component_t<cCharacter>(); character)
+		ui_resource_bar->find_child("blood_icon")->set_enable(true);
+		if (auto e = ui_resource_bar->find_child("blood_text"); e)
 		{
-
+			e->set_enable(true);
+			e->get_component_t<cText>()->set_text(wstr(player1.blood));
 		}
-		else if (selected_target->entity->name.ends_with("_town"))
+		ui_resource_bar->find_child("bones_icon")->set_enable(true);
+		if (auto e = ui_resource_bar->find_child("bones_text"); e)
 		{
-			struct TownPanel
-			{
-				enum Panel
-				{
-					PanelMain,
-					PanelBuilding
-				};
-
-				Panel panel = PanelMain;
-				int building_index = -1;
-
-				void enter_main_panel(Player* player)
-				{
-					panel = PanelMain;
-					building_index = -1;
-
-					if (ui_action_list)
-					{
-						auto e_list = ui_action_list->entity;
-						for (auto i = 0; i < ui_action_list->count; i++)
-						{
-							auto c = e_list->children[i].get();
-							if (player == &player1 && i < player->buildings.size())
-							{
-								auto& building = player->buildings[i];
-								if (auto image = c->get_component_t<cImage>(); image)
-									image->set_image_name(building.info->icon_name);
-								if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-								{
-									receiver->event_listeners.clear();
-									receiver->event_listeners.add([this, player, c, i](uint type, const vec2&) {
-										switch (type)
-										{
-										case "mouse_enter"_h:
-											show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), s2w(player->buildings[i].info->description));
-											break;
-										case "click"_h:
-											enter_building_panel(player, i);
-											break;
-										}
-									});
-								}
-							}
-							else
-							{
-								if (auto image = c->get_component_t<cImage>(); image)
-									image->set_image_name(L"");
-								if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-									receiver->event_listeners.clear();
-							}
-						}
-						
-						sInput::instance()->hovering_receiver = nullptr;
-					}
-
-					if (ui_training_list)
-					{
-						ui_training_list->set_count(0);
-						ui_training_list->entity->set_enable(false);
-					}
-				}
-
-				void enter_building_panel(Player* player, uint index)
-				{
-					panel = PanelBuilding;
-					building_index = index;
-
-					if (ui_action_list)
-					{
-						auto e_list = ui_action_list->entity;
-						auto& building = player->buildings[index];
-						if (!building.info->training_actions.empty())
-						{
-							for (auto i = 0; i < ui_action_list->count; i++)
-							{
-								auto c = e_list->children[i].get();
-								if (i < building.info->training_actions.size())
-								{
-									auto& training = building.info->training_actions[i];
-									auto unit_info = unit_infos.find(training.name);
-									if (unit_info)
-									{
-										if (auto image = c->get_component_t<cImage>(); image)
-											image->set_image_name(unit_info->icon_name);
-										if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-										{
-											receiver->event_listeners.clear();
-											receiver->event_listeners.add([this, player, c, i](uint type, const vec2& v) {
-												switch (type)
-												{
-												case "mouse_enter"_h:
-												{
-													auto& building = player->buildings[building_index];
-													auto& training = building.info->training_actions[i];
-													auto unit_info = unit_infos.find(training.name);
-													if (unit_info)
-													{
-														std::wstring text;
-														text = s2w(unit_info->name);
-														text += L"\nLeft - Train One\n"
-															L"Right - Train Infinite";
-														show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), text);
-													}
-												}
-													break;
-												case "click"_h:
-												{
-													auto& building = player->buildings[building_index];
-													building.add_training(&building.info->training_actions[i], 1);
-												}
-													break;
-												case "mouse_up"_h:
-													if (v.x == 1.f)
-													{
-
-													}
-													break;
-												}
-											});
-										}
-									}
-									else
-									{
-										if (auto image = c->get_component_t<cImage>(); image)
-											image->set_image_name(L"");
-										if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-											receiver->event_listeners.clear();
-									}
-								}
-								else
-								{
-									if (auto image = c->get_component_t<cImage>(); image)
-										image->set_image_name(L"");
-									if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-										receiver->event_listeners.clear();
-								}
-							}
-
-							auto columns = e_list->get_component_t<cLayout>()->columns;
-							auto last_row = (int)floor(((float)e_list->children.size() - 0.5f) / columns);
-							auto c = e_list->children[last_row * columns].get();
-							if (auto image = c->get_component_t<cImage>(); image)
-								image->set_image_name(Path::get(L"assets\\extra\\icons\\back.png"));
-							if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-							{
-								receiver->event_listeners.clear();
-								receiver->event_listeners.add([this, player, c](uint type, const vec2&) {
-									switch (type)
-									{
-									case "mouse_enter"_h:
-										show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
-										break;
-									case "click"_h:
-										enter_main_panel(player);
-										break;
-									}
-								});
-							}
-						}
-						else
-						{
-							for (auto i = 0; i < ui_action_list->count; i++)
-							{
-								auto c = e_list->children[i].get();
-								if (auto image = c->get_component_t<cImage>(); image)
-									image->set_image_name(L"");
-								if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-									receiver->event_listeners.clear();
-							}
-						}
-
-						sInput::instance()->hovering_receiver = nullptr;
-					}
-				}
-			};
-			static TownPanel town_panel;
-
-			Player* player = nullptr;
-			if		(selected_target->entity->name.starts_with("player1"))
-				player = &player1;
-			else if (selected_target->entity->name.starts_with("player2"))
-				player = &player2;
-
-			if (ui_name_text)
-			{
-				cvec4 col = cvec4(255);
-				if		(player == &player1)
-					col = cvec4(100, 255, 100, 255);
-				else if (player == &player2)
-					col = cvec4(255, 100, 100, 255);
-				ui_name_text->set_col(col);
-				ui_name_text->set_text(s2w(selected_target->entity->name));
-			}
-
-			if (ui_hp_bar)
-			{
-				ui_hp_bar->find_child("bar")->element()->set_scl(vec2((float)player->town_hp / (float)player->town_hp_max, 1.f));
-				ui_hp_bar->find_child("text")->get_component_t<cText>()->set_text(L"0/0");
-			}
-			if (ui_mp_bar)
-			{
-				ui_mp_bar->find_child("bar")->element()->set_scl(vec2(0.f, 1.f));
-				ui_mp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(player->town_hp) + L"/" + wstr(player->town_hp_max));
-			}
-
-			if (selected_target_changed)
-				town_panel.enter_main_panel(player);
-
-			switch (town_panel.panel)
-			{
-			case TownPanel::PanelMain:
-
-				break;
-			case TownPanel::PanelBuilding:
-			{
-				auto& building = player->buildings[town_panel.building_index];
-				if (ui_training_list)
-				{
-					static uint training_updated_frame = 0;
-					auto e_list = ui_training_list->entity;
-					if (training_updated_frame <= building.trainings_changed_frame)
-					{
-						training_updated_frame = building.trainings_changed_frame;
-
-						ui_training_list->set_count(building.trainings.size());
-						for (auto i = 0; i < building.trainings.size(); i++)
-						{
-							auto c = e_list->children[i].get();
-							auto& training = building.trainings[i];
-							auto unit_info = unit_infos.find(training.action->name);
-							if (unit_info)
-							{
-								if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
-									image->set_image_name(unit_info->icon_name);
-								auto cancel_button = c->find_child("cancel");
-								if (cancel_button)
-								{
-									if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
-									{
-										receiver->event_listeners.clear();
-										receiver->event_listeners.add([player, cancel_button, i](uint type, const vec2&) {
-											switch (type)
-											{
-											case "mouse_enter"_h:
-												show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
-												break;
-											case "click"_h:
-											{
-												auto& building = player->buildings[town_panel.building_index];
-												building.remove_training(building.trainings[i].action);
-											}
-												break;
-											}
-										});
-									}
-								}
-							}
-							else
-							{
-								if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
-									image->set_image_name(L"");
-								if (auto receiver = c->find_child("cancel")->get_component_t<cReceiver>(); receiver)
-									receiver->event_listeners.clear();
-							}
-						}
-					}
-					for (auto i = 0; i < building.trainings.size(); i++)
-					{
-						auto c = e_list->children[i].get();
-						auto& training = building.trainings[i];
-						c->find_child_recursively("number")->get_component_t<cText>()->set_text(wstr(training.number));
-						c->find_child_recursively("bar")->element()->set_scl(vec2(1.f - training.timer / training.action->time, 1.f));
-						c->find_child_recursively("text")->get_component_t<cText>()->set_text(std::format(L"{}:{}", int(training.timer / 60.f), int(training.timer)));
-					}
-				}
-			}
-				break;
-			}
-
-			if (selected_target_changed)
-				town_panel.enter_main_panel(player);
+			e->set_enable(true);
+			e->get_component_t<cText>()->set_text(wstr(player1.bones));
+		}
+		ui_resource_bar->find_child("soul_sand_icon")->set_enable(true);
+		if (auto e = ui_resource_bar->find_child("soul_sand_text"); e)
+		{
+			e->set_enable(true);
+			e->get_component_t<cText>()->set_text(wstr(player1.soul_sand));
 		}
 	}
+
+	bottom_panel.update();
 	
 	auto hovering_receiver = sInput::instance()->hovering_receiver;
 	if (!hovering_receiver)
@@ -501,14 +573,73 @@ void show_tooltip(const vec2& pos, const std::wstring& text)
 {
 	if (ui_tooltip)
 	{
-		ui_tooltip->entity->set_enable(true);
-		ui_tooltip->set_text(text);
-		ui_tooltip->element->set_pos(pos);
+		ui_tooltip->set_enable(true);
+		ui_tooltip->element()->set_pos(pos);
+		ui_tooltip->find_child("text")->get_component_t<cText>()->set_text(text);
+		ui_tooltip->find_child("resources")->set_enable(false);
+	}
+}
+
+void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bones, uint soul_sand)
+{
+	if (ui_tooltip)
+	{
+		ui_tooltip->set_enable(true);
+		ui_tooltip->element()->set_pos(pos);
+		ui_tooltip->find_child("text")->get_component_t<cText>()->set_text(text);
+		auto e_resources = ui_tooltip->find_child("resources");
+		e_resources->set_enable(true);
+		if (blood > 0)
+		{
+			e_resources->find_child("blood_icon")->set_enable(true);
+			if (auto e = e_resources->find_child("blood_text"); e)
+			{
+				e->set_enable(true);
+				e->get_component_t<cText>()->set_text(wstr(blood));
+			}
+		}
+		else
+		{
+			e_resources->find_child("blood_icon")->set_enable(false);
+			e_resources->find_child("blood_text")->set_enable(false);
+		}
+		if (bones > 0)
+		{
+			e_resources->find_child("bones_icon")->set_enable(true);
+			if (auto e = e_resources->find_child("bones_text"); e)
+			{
+				e->set_enable(true);
+				e->get_component_t<cText>()->set_text(wstr(bones));
+			}
+		}
+		else
+		{
+			e_resources->find_child("bones_icon")->set_enable(false);
+			e_resources->find_child("bones_text")->set_enable(false);
+		}
+		if (soul_sand > 0)
+		{
+			e_resources->find_child("soul_sand_icon")->set_enable(true);
+			if (auto e = e_resources->find_child("soul_sand_text"); e)
+			{
+				e->set_enable(true);
+				e->get_component_t<cText>()->set_text(wstr(soul_sand));
+			}
+		}
+		else
+		{
+			e_resources->find_child("soul_sand_icon")->set_enable(false);
+			e_resources->find_child("soul_sand_text")->set_enable(false);
+		}
+
 	}
 }
 
 void close_tooltip()
 {
 	if (ui_tooltip)
-		ui_tooltip->entity->set_enable(false);
+	{
+		ui_tooltip->set_enable(false);
+		ui_tooltip->find_child("resources")->set_enable(false);
+	}
 }

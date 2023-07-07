@@ -17,7 +17,8 @@ void BuildingInstance::add_training(const TrainingAction* action, int number)
 	{
 		it = trainings.emplace(trainings.end(), Training());
 		it->action = action;
-		it->timer = action->time;
+		it->duration = action->duration;
+		it->timer = it->duration;
 		it->number = number;
 	}
 	else
@@ -36,7 +37,7 @@ void BuildingInstance::remove_training(const TrainingAction* action)
 	{
 		if (it->action == action)
 		{
-			if (it->timer < it->action->time)
+			if (it->resources_costed)
 			{
 				player->blood += it->action->cost_blood;
 				player->bones += it->action->cost_bones;
@@ -92,7 +93,7 @@ void Player::update()
 		{
 			if (t.timer > 0.f)
 			{
-				if (t.timer == t.action->time)
+				if (!t.resources_costed)
 				{
 					if (blood >= t.action->cost_blood &&
 						bones >= t.action->cost_bones &&
@@ -101,6 +102,7 @@ void Player::update()
 						blood -= t.action->cost_blood;
 						bones -= t.action->cost_bones;
 						soul_sand -= t.action->cost_soul_sand;
+						t.resources_costed = true;
 					}
 					else
 						continue;
@@ -110,7 +112,8 @@ void Player::update()
 				{
 					if (t.number > 0)
 						t.number--;
-					t.timer = t.action->time;
+					t.timer = t.duration;
+					t.resources_costed = false;
 					if (spawn_node)
 					{
 						auto unit_info = unit_infos.find(t.action->name);

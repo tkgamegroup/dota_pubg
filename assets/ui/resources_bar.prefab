@@ -17,25 +17,25 @@
 				<item type_name="flame::cText" text="500" />
 			</components>
 		</item>
-		<item file_id="42b99aa7d9eb17b00d9aaef49bb3f68f" name="bone_icon">
+		<item file_id="42b99aa7d9eb17b00d9aaef49bb3f68f" name="bones_icon">
 			<components>
 				<item type_name="flame::cElement" pos="48.5,4" ext="16,16" />
 				<item type_name="flame::cImage" auto_size="false" image_name="assets\icons\bone.png" />
 			</components>
 		</item>
-		<item file_id="4027d3a13b30b832fd5e665d7cae5d81" name="bone_text">
+		<item file_id="4027d3a13b30b832fd5e665d7cae5d81" name="bones_text">
 			<components>
 				<item type_name="flame::cElement" pos="68.5,4" ext="20.5,16" />
 				<item type_name="flame::cText" text="500" />
 			</components>
 		</item>
-		<item file_id="438f5872a327a77c9787c7aea42a35bf" name="soul_icon">
+		<item file_id="438f5872a327a77c9787c7aea42a35bf" name="soul_sand_icon">
 			<components>
 				<item type_name="flame::cElement" pos="93,4" ext="16,16" />
 				<item type_name="flame::cImage" auto_size="false" image_name="assets\icons\soul_sand.png" />
 			</components>
 		</item>
-		<item file_id="4267e8bcf6ab70857d1e29698638f9b1" name="soul_text">
+		<item file_id="4267e8bcf6ab70857d1e29698638f9b1" name="soul_sand_text">
 			<components>
 				<item type_name="flame::cElement" pos="113,4" ext="20.5,16" />
 				<item type_name="flame::cText" text="500" />
