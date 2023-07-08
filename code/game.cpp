@@ -455,7 +455,14 @@ void cGame::update()
 	{
 		if (!b.info->training_actions.empty() && b.trainings.empty())
 		{
-
+			auto idx = linearRand(0, (int)b.info->training_actions.size() - 1);
+			auto& action = b.info->training_actions[idx];
+			if (player2.blood >= action.cost_blood &&
+				player2.bones >= action.cost_bones &&
+				player2.soul_sand >= action.cost_soul_sand)
+			{
+				b.add_training(&action, 1);
+			}
 		}
 	}
 

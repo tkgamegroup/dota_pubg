@@ -47,6 +47,10 @@ struct BottomPanel
 	EntityPtr hp_bar = nullptr;
 	EntityPtr mp_bar = nullptr;
 	EntityPtr sub_panel2 = nullptr;
+	EntityPtr resources_production_panel = nullptr;
+	cTextPtr blood_production_text = nullptr;
+	cTextPtr bones_production_text = nullptr;
+	cTextPtr soul_sand_production_text = nullptr;
 	EntityPtr sub_panel3 = nullptr;
 	cListPtr construction_list = nullptr;
 	cListPtr training_list = nullptr;
@@ -76,6 +80,19 @@ struct BottomPanel
 			mp_bar = sub_panel1->find_child("mp_bar");
 		}
 		sub_panel2 = _e->find_child("sub_panel2");
+		if (sub_panel2)
+		{
+			resources_production_panel = sub_panel2->find_child("resources_production");
+			if (resources_production_panel)
+			{
+				if (auto e = resources_production_panel->find_child("blood"); e)
+					blood_production_text = e->find_child("text")->get_component_t<cText>();
+				if (auto e = resources_production_panel->find_child("bones"); e)
+					bones_production_text = e->find_child("text")->get_component_t<cText>();
+				if (auto e = resources_production_panel->find_child("soul_sand"); e)
+					soul_sand_production_text = e->find_child("text")->get_component_t<cText>();
+			}
+		}
 		sub_panel3 = _e->find_child("sub_panel3");
 		if (sub_panel3)
 		{
@@ -102,6 +119,11 @@ struct BottomPanel
 			hp_bar->set_enable(false);
 		if (mp_bar)
 			mp_bar->set_enable(false);
+		if (sub_panel2)
+		{
+			for (auto& c : sub_panel2->children)
+				c->set_enable(false);
+		}
 		if (sub_panel3)
 		{
 			for (auto& c : sub_panel3->children)
@@ -145,6 +167,75 @@ struct BottomPanel
 		}
 		if (hp_bar)
 			hp_bar->set_enable(true);
+
+		if (resources_production_panel)
+			resources_production_panel->set_enable(true);
+	}
+
+	void update_town_basics()
+	{
+		if (hp_bar)
+		{
+			hp_bar->find_child("bar")->element()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
+			hp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
+		}
+
+		if (blood_production_text)
+			blood_production_text->set_text(wstr(town->get_blood_production()));
+		if (bones_production_text)
+			bones_production_text->set_text(wstr(town->get_bones_production()));
+		if (soul_sand_production_text)
+			soul_sand_production_text->set_text(wstr(town->get_soul_sand_production()));
+	}
+
+	void update_town_construction()
+	{
+		if (construction_list)
+		{
+			auto e_list = construction_list->entity;
+			e_list->set_enable(true);
+
+			static uint construction_updated_frame = 0;
+			if (construction_updated_frame <= town->constructions_changed_frame)
+			{
+				construction_updated_frame = town->constructions_changed_frame;
+
+				construction_list->set_count(town->constructions.size());
+				for (auto i = 0; i < town->constructions.size(); i++)
+				{
+					auto c = e_list->children[i].get();
+					auto& construction = town->constructions[i];
+					if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
+						image->set_image_name(construction.building_info->icon_name);
+					auto cancel_button = c->find_child("cancel");
+					if (cancel_button)
+					{
+						if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
+						{
+							receiver->event_listeners.clear();
+							receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
+								switch (type)
+								{
+								case "mouse_enter"_h:
+									show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+									break;
+								case "click"_h:
+									town->remove_construction(town->constructions[i].action);
+									break;
+								}
+							});
+						}
+					}
+				}
+			}
+			for (auto i = 0; i < town->constructions.size(); i++)
+			{
+				auto c = e_list->children[i].get();
+				auto& construction = town->constructions[i];
+				c->find_child_recursively("bar")->element()->set_scl(vec2(1.f - construction.timer / construction.duration, 1.f));
+				c->find_child_recursively("text")->get_component_t<cText>()->set_text(std::format(L"{}:{}", int(construction.timer / 60.f), int(construction.timer)));
+			}
+		}
 	}
 
 	void enter_town_panel(TownInstance* _town)
@@ -189,7 +280,19 @@ struct BottomPanel
 				if (auto image = c->get_component_t<cImage>(); image)
 					image->set_image_name(Path::get(L"assets\\extra\\icons\\build.png"));
 				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
-					enter_town_construction_panel();
+				{
+					receiver->event_listeners.add([this, c](uint type, const vec2&) {
+						switch (type)
+						{
+						case "mouse_enter"_h:
+							show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Build");
+							break;
+						case "click"_h:
+							enter_town_construction_panel();
+							break;
+						}
+					});
+				}
 			}
 			else
 			{
@@ -198,7 +301,17 @@ struct BottomPanel
 					image->set_image_name(Path::get(L"assets\\extra\\icons\\attack.png"));
 				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
 				{
-					
+
+					receiver->event_listeners.add([this, c](uint type, const vec2&) {
+						switch (type)
+						{
+						case "mouse_enter"_h:
+							show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Attack This Town");
+							break;
+						case "click"_h:
+							break;
+						}
+					});
 				}
 			}
 		}
@@ -261,6 +374,25 @@ struct BottomPanel
 						});
 					}
 				}
+			}
+
+			auto last_row = get_last_row_idx(action_list);
+			auto c = action_list->entity->children[last_row].get();
+			if (auto image = c->get_component_t<cImage>(); image)
+				image->set_image_name(Path::get(L"assets\\extra\\icons\\back.png"));
+			if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+			{
+				receiver->event_listeners.add([this, c](uint type, const vec2&) {
+					switch (type)
+					{
+					case "mouse_enter"_h:
+						show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
+						break;
+					case "click"_h:
+						enter_town_panel(&player->town);
+						break;
+					}
+				});
 			}
 		}
 	}
@@ -370,27 +502,24 @@ struct BottomPanel
 		switch (type)
 		{
 		case PanelTownMain:
-			if (hp_bar)
-			{
-				hp_bar->find_child("bar")->element()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
-				hp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
-			}
+			update_town_basics();
+			update_town_construction();
+			break;
+		case PanelTownConstrucion:
+			update_town_basics();
+			update_town_construction();
 			break;
 		case PanelTownBuilding:
 		{
-			if (hp_bar)
-			{
-				hp_bar->find_child("bar")->element()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
-				hp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
-			}
+			update_town_basics();
 
 			auto& building = town->buildings[building_index];
 			if (training_list)
 			{
-				training_list->entity->set_enable(true);
+				auto e_list = training_list->entity;
+				e_list->set_enable(true);
 
 				static uint training_updated_frame = 0;
-				auto e_list = training_list->entity;
 				if (training_updated_frame <= building.trainings_changed_frame)
 				{
 					training_updated_frame = building.trainings_changed_frame;
@@ -400,40 +529,29 @@ struct BottomPanel
 					{
 						auto c = e_list->children[i].get();
 						auto& training = building.trainings[i];
-						auto unit_info = unit_infos.find(training.action->name);
-						if (unit_info)
+						if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
+							image->set_image_name(training.unit_info->icon_name);
+						auto cancel_button = c->find_child("cancel");
+						if (cancel_button)
 						{
-							if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
-								image->set_image_name(unit_info->icon_name);
-							auto cancel_button = c->find_child("cancel");
-							if (cancel_button)
+							if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
 							{
-								if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
-								{
-									receiver->event_listeners.clear();
-									receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
-										switch (type)
-										{
-										case "mouse_enter"_h:
-											show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
-											break;
-										case "click"_h:
-										{
-											auto& building = town->buildings[building_index];
-											building.remove_training(building.trainings[i].action);
-										}
-											break;
-										}
-									});
-								}
-							}
-						}
-						else
-						{
-							if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
-								image->set_image_name(L"");
-							if (auto receiver = c->find_child("cancel")->get_component_t<cReceiver>(); receiver)
 								receiver->event_listeners.clear();
+								receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
+									switch (type)
+									{
+									case "mouse_enter"_h:
+										show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+										break;
+									case "click"_h:
+									{
+										auto& building = town->buildings[building_index];
+										building.remove_training(building.trainings[i].action);
+									}
+										break;
+									}
+								});
+							}
 						}
 					}
 				}

@@ -6,6 +6,7 @@
 struct Training
 {
 	const TrainingAction* action;
+	const UnitInfo* unit_info;
 	float duration;
 	float timer;
 	int number; // -1 means infinite
@@ -30,6 +31,7 @@ struct BuildingInstance
 struct Construction
 {
 	const ConstructionAction* action;
+	const BuildingInfo* building_info;
 	float duration;
 	float timer;
 	bool resources_costed;
@@ -52,6 +54,9 @@ struct TownInstance
 	vec3 target_pos = vec3(0.f);
 
 	void init(EntityPtr _e, Player* player, const TownInfo* info);
+	uint get_blood_production() const;
+	uint get_bones_production() const;
+	uint get_soul_sand_production() const;
 	void add_building(const BuildingInfo* info, int lv = 0);
 	void add_construction(const ConstructionAction* action);
 	void remove_construction(const ConstructionAction* action);
@@ -66,10 +71,13 @@ struct Player
 
 	// Reflect
 	uint blood = 1000;
+	float blood_fract = 0.f;
 	// Reflect
 	uint bones = 800;
+	float bones_fract = 0.f;
 	// Reflect
 	uint soul_sand = 10;
+	float soul_sand_fract = 0.f;
 
 	// Reflect
 	TownInstance town;

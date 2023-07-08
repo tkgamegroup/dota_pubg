@@ -1,9 +1,21 @@
 <?xml version="1.0"?>
 <preset type="BuildingInfosPreset">
 	<infos>
-		<item name="Blood Well" icon_name="extra\icons\blood_well.png" />
-		<item name="Grave Yard" icon_name="extra\icons\grave_yard.png" />
-		<item name="Altar" icon_name="extra\icons\altar.png" />
+		<item name="Blood Well" icon_name="extra\icons\blood_well.png">
+			<resource_production>
+				<item amount="100" />
+			</resource_production>
+		</item>
+		<item name="Grave Yard" icon_name="extra\icons\grave_yard.png">
+			<resource_production>
+				<item type="Bones" amount="50" />
+			</resource_production>
+		</item>
+		<item name="Altar" icon_name="extra\icons\altar.png">
+			<resource_production>
+				<item type="SoulSand" amount="1" />
+			</resource_production>
+		</item>
 		<item name="Barracks" icon_name="extra\icons\BTNCrypt.png" description="Training warrios.">
 			<training_actions>
 				<item name="Infantry" cost_blood="100" cost_bones="50" duration="10" />

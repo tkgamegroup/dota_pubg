@@ -140,6 +140,7 @@ void update_control()
 	hovering_character = nullptr;
 	hovering_chest = nullptr;
 	hovering_terrain = false;
+	hovering_town = nullptr;
 	//tooltip.clear();
 	if (hovering_node)
 	{
@@ -203,51 +204,54 @@ void update_control()
 		if (input->mpressed(Mouse_Right) || input->kpressed(Keyboard_Esc))
 			reset_select();
 	}
-	if (input->mpressed(Mouse_Left))
+	if (!input->hovering_receiver)
 	{
-		if (select_mode == TargetNull)
+		if (input->mpressed(Mouse_Left))
 		{
-			//focus_character.set(hovering_character ? hovering_character : nullptr);
-			if (hovering_character)
+			if (select_mode == TargetNull)
 			{
-
-			}
-			else if (hovering_town)
-			{
-				if (selected_target != hovering_town)
+				//focus_character.set(hovering_character ? hovering_character : nullptr);
+				if (hovering_character)
 				{
-					selected_target = hovering_town;
+
+				}
+				else if (hovering_town)
+				{
+					if (selected_target != hovering_town)
+					{
+						selected_target = hovering_town;
+						if (select_callbacks)
+							select_callbacks.call();
+					}
+				}
+				else
+				{
+					selected_target = nullptr;
 					if (select_callbacks)
 						select_callbacks.call();
 				}
 			}
 			else
 			{
-				selected_target = nullptr;
-				if (select_callbacks)
-					select_callbacks.call();
-			}
-		}
-		else
-		{
-			if (select_mode & TargetEnemy)
-			{
-				if (hovering_character && player1.faction != hovering_character->faction)
+				if (select_mode & TargetEnemy)
 				{
-					if (select_character_callback)
-						select_character_callback(true, hovering_character);
-					if (!select_multiple_times)
-						reset_select();
+					if (hovering_character && player1.faction != hovering_character->faction)
+					{
+						if (select_character_callback)
+							select_character_callback(true, hovering_character);
+						if (!select_multiple_times)
+							reset_select();
+					}
 				}
-			}
-			if (select_mode & TargetLocation)
-			{
-				if (hovering_terrain)
+				if (select_mode & TargetLocation)
 				{
-					if (select_location_callback)
-						select_location_callback(true, hovering_pos);
-					if (!select_multiple_times)
-						reset_select();
+					if (hovering_terrain)
+					{
+						if (select_location_callback)
+							select_location_callback(true, hovering_pos);
+						if (!select_multiple_times)
+							reset_select();
+					}
 				}
 			}
 		}

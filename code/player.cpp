@@ -15,8 +15,12 @@ void BuildingInstance::add_training(const TrainingAction* action, int number)
 	});
 	if (it == trainings.end())
 	{
+		auto unit_info = unit_infos.find(action->name);
+		if (!unit_info)
+			return;
 		it = trainings.emplace(trainings.end(), Training());
 		it->action = action;
+		it->unit_info = unit_info;
 		it->duration = action->duration;
 		it->timer = it->duration;
 		it->number = number;
@@ -81,6 +85,48 @@ void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 	buildings.clear();
 }
 
+uint TownInstance::get_blood_production() const
+{
+	uint ret = 16;
+	for (auto& b : buildings)
+	{
+		for (auto& r : b.info->resource_production)
+		{
+			if (r.type == ResourceBlood)
+				ret += r.amount;
+		}
+	}
+	return ret;
+}
+
+uint TownInstance::get_bones_production() const
+{
+	uint ret = 16;
+	for (auto& b : buildings)
+	{
+		for (auto& r : b.info->resource_production)
+		{
+			if (r.type == ResourceBones)
+				ret += r.amount;
+		}
+	}
+	return ret;
+}
+
+uint TownInstance::get_soul_sand_production() const
+{
+	uint ret = 16;
+	for (auto& b : buildings)
+	{
+		for (auto& r : b.info->resource_production)
+		{
+			if (r.type == ResourceSoulSand)
+				ret += r.amount;
+		}
+	}
+	return ret;
+}
+
 void TownInstance::add_building(const BuildingInfo* info, int lv)
 {
 	auto& building = buildings.emplace_back();
@@ -96,8 +142,12 @@ void TownInstance::add_construction(const ConstructionAction* action)
 	});
 	if (it == constructions.end())
 	{
+		auto building_info = building_infos.find(action->name);
+		if (!building_info)
+			return;
 		it = constructions.emplace(constructions.end(), Construction());
 		it->action = action;
+		it->building_info = building_info;
 		it->duration = action->duration;
 		it->timer = it->duration;
 	}
@@ -145,8 +195,37 @@ void TownInstance::update()
 		}
 		c.timer -= delta_time;
 		if (c.timer <= 0.f)
+			add_building(c.building_info, 1);
+	}
+	for (auto it = constructions.begin(); it != constructions.end();)
+	{
+		if (it->timer <= 0.f)
 		{
-
+			it = constructions.erase(it);
+			constructions_changed_frame = frames;
+		}
+		else
+			it++;
+	}
+	{
+		auto t = delta_time / 60.f;
+		{
+			player->blood_fract += get_blood_production() * t;
+			int i = floor(player->blood_fract);
+			player->blood += i;
+			player->blood_fract -= i;
+		}
+		{
+			player->bones_fract += get_bones_production() * t;
+			int i = floor(player->bones_fract);
+			player->bones += i;
+			player->bones_fract -= i;
+		}
+		{
+			player->soul_sand_fract += get_soul_sand_production() * t;
+			int i = floor(player->soul_sand_fract);
+			player->soul_sand += i;
+			player->soul_sand_fract -= i;
 		}
 	}
 	for (auto& b : buildings)

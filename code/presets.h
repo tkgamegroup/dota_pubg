@@ -13,7 +13,7 @@ struct UnitInfo
 	std::filesystem::path	prefab_name;
 };
 
-struct ResourceGenerating
+struct ResourceProduction
 {
 	ResourceType			type;
 	uint					amount; // per minute
@@ -56,7 +56,7 @@ struct BuildingInfo
 	vec4							icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	std::string						description;
 
-	std::vector<ResourceGenerating> resource_generating;
+	std::vector<ResourceProduction> resource_production;
 	std::vector<TrainingAction>		training_actions;
 };
 

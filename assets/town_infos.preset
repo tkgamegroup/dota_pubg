@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <preset type="TownInfosPreset">
 	<infos>
-		<item name="Vampire" hp_max="30" />
+		<item name="Vampire" hp_max="30">
+			<construction_actions>
+				<item name="Blood Well" cost_blood="100" cost_bones="100" cost_soul_sand="1" duration="30" />
+				<item name="Grave Yard" cost_blood="200" cost_bones="50" cost_soul_sand="1" duration="30" />
+				<item name="Altar" cost_blood="200" cost_bones="150" cost_soul_sand="2" duration="30" />
+				<item name="Barracks" cost_blood="150" cost_bones="100" cost_soul_sand="1" duration="30" />
+			</construction_actions>
+		</item>
 	</infos>
 </preset>

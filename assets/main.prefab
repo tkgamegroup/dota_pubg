@@ -26,7 +26,7 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1287,612" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1367,612" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
@@ -37,7 +37,7 @@
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,468" ext="1287,144" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,468" ext="1367,144" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 					</components>
@@ -79,6 +79,82 @@
 								<item type_name="flame::cElement" pos="296,8" ext="200,128" vertical_alignment="Fill" />
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
+							<children>
+								<item file_id="4c0dc28e764beb81db93b464663e4590" name="resources_production">
+									<components>
+										<item type_name="flame::cElement" pos="4,4" ext="181.5,96" />
+										<item type_name="flame::cLayout" item_spacing="0" />
+									</components>
+									<children>
+										<item file_id="45bcfcf9633297f42d59783cce774db1" name="title">
+											<components>
+												<item type_name="flame::cElement" pos="4,4" ext="173.5,16" />
+												<item type_name="flame::cText" text="Resource Production Per Minute" />
+											</components>
+										</item>
+										<item file_id="43bbb34d1304dce04e467363087b56a7" name="blood">
+											<components>
+												<item type_name="flame::cElement" pos="4,20" ext="42,24" />
+												<item type_name="flame::cLayout" type="Horizontal" />
+											</components>
+											<children>
+												<item file_id="48ed74698ca8e5c7092f6e7952e82a84" name="icon">
+													<components>
+														<item type_name="flame::cElement" pos="4,4" ext="16,16" />
+														<item type_name="flame::cImage" auto_size="false" image_name="icons\blood.png" />
+													</components>
+												</item>
+												<item file_id="4e02f67e0e7116df1a0a54cfb821ce83" name="text">
+													<components>
+														<item type_name="flame::cElement" pos="24,4" ext="14,16" />
+														<item type_name="flame::cText" text="16" />
+													</components>
+												</item>
+											</children>
+										</item>
+										<item file_id="43bbb34d1304dce04e467363087b56a7" name="bones">
+											<components>
+												<item type_name="flame::cElement" pos="4,44" ext="42,24" />
+												<item type_name="flame::cLayout" type="Horizontal" />
+											</components>
+											<children>
+												<item file_id="48ed74698ca8e5c7092f6e7952e82a84" name="icon">
+													<components>
+														<item type_name="flame::cElement" pos="4,4" ext="16,16" />
+														<item type_name="flame::cImage" auto_size="false" image_name="icons\bone.png" />
+													</components>
+												</item>
+												<item file_id="4e02f67e0e7116df1a0a54cfb821ce83" name="text">
+													<components>
+														<item type_name="flame::cElement" pos="24,4" ext="14,16" />
+														<item type_name="flame::cText" text="16" />
+													</components>
+												</item>
+											</children>
+										</item>
+										<item file_id="43bbb34d1304dce04e467363087b56a7" name="soul_sand">
+											<components>
+												<item type_name="flame::cElement" pos="4,68" ext="42,24" />
+												<item type_name="flame::cLayout" type="Horizontal" />
+											</components>
+											<children>
+												<item file_id="48ed74698ca8e5c7092f6e7952e82a84" name="icon">
+													<components>
+														<item type_name="flame::cElement" pos="4,4" ext="16,16" />
+														<item type_name="flame::cImage" auto_size="false" image_name="icons\soul_sand.png" />
+													</components>
+												</item>
+												<item file_id="4e02f67e0e7116df1a0a54cfb821ce83" name="text">
+													<components>
+														<item type_name="flame::cElement" pos="24,4" ext="14,16" />
+														<item type_name="flame::cText" text="16" />
+													</components>
+												</item>
+											</children>
+										</item>
+									</children>
+								</item>
+							</children>
 						</item>
 						<item file_id="4bf7247f40c5c2f4423a4e70a0f08a85" name="sub_panel3">
 							<components>
@@ -114,7 +190,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1287,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1367,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>
@@ -122,7 +198,17 @@
 							<modifications>
 								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pos" value="4,4" />
 								<item target="44add67d5a82088b2e6a49cffb074096|flame::cLayout|auto_height" value="true" />
-								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|ext" value="137.5,24" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|ext" value="226,24" />
+								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cText|auto_size" value="false" />
+								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cText|auto_size" value="false" />
+								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cText|auto_size" value="false" />
+								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cElement|ext" value="50,16" />
+								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cElement|ext" value="50,16" />
+								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cElement|ext" value="50,16" />
+								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cElement|frame_col" value="0,0,0,0" />
+								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cElement|background_col" value="0,0,0,180" />
+								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cElement|background_col" value="0,0,0,180" />
+								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cElement|background_col" value="0,0,0,180" />
 							</modifications>
 						</item>
 					</children>
