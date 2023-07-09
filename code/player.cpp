@@ -257,15 +257,12 @@ void TownInstance::update()
 				t.resources_costed = false;
 				if (spawn_node)
 				{
-					if (auto unit_info = unit_infos.find(t.action->name); unit_info)
+					if (auto character = add_character(t.unit_info->prefab_name, spawn_node->global_pos(), player->faction); character)
 					{
-						if (auto character = add_character(unit_info->prefab_name, spawn_node->global_pos(), player->faction); character)
+						if (auto ai = character->entity->get_component_t<cAI>(); ai)
 						{
-							if (auto ai = character->entity->get_component_t<cAI>(); ai)
-							{
-								ai->type = UnitLaneCreep;
-								ai->target_pos = target_pos;
-							}
+							ai->type = UnitLaneCreep;
+							ai->target_pos = target_pos;
 						}
 					}
 				}

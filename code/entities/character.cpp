@@ -856,9 +856,12 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 	}
 	else
 	{
+		float dist = atk_distance;
+		if (last_approached)
+			dist += 1.f;
 		auto approached = false;
 		if (chase_target && nav_agent)
-			approached = process_approach(p1, atk_distance, 60.f);
+			approached = process_approach(p1, dist, 60.f);
 		else
 		{
 			if (nav_agent)
@@ -866,12 +869,13 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 				nav_agent->set_target(p1);
 				nav_agent->set_speed_scale(0.f);
 
-				approached = nav_agent->dist < atk_distance && abs(nav_agent->ang_diff) < 60.f;
+				approached = nav_agent->dist < dist && abs(nav_agent->ang_diff) < 60.f;
 			}
 			else
-				approached = distance(p0, p1) < atk_distance;
+				approached = distance(p0, p1) < dist;
 			action = CharacterActionNone;
 		}
+		last_approached = approached;
 		if (attack_interval_timer <= 0.f)
 		{
 			if (approached)
@@ -941,15 +945,18 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 	}
 	else
 	{
+		float dist = ability->distance;
+		if (last_approached)
+			dist += 1.f;
 		auto approached = false;
 		if (ability->target_type == TargetNull)
 			approached = true;
 		else
 		{
 			if (nav_agent)
-				approached = process_approach(p1, ability->distance, 15.f);
+				approached = process_approach(p1, dist, 15.f);
 		}
-
+		last_approached = approached;
 		if (approached)
 		{
 			if (ability->cast_time == 0.f)
@@ -973,8 +980,9 @@ void cCharacter::process_cast_ability(cAbilityPtr ability, const vec3& location,
 void cCharacter::reset_cmd()
 {
 	command = CommandIdle;
-	action = CharacterActionNone;
 	target.reset();
+	action = CharacterActionNone;
+	action_timer = -1.f;
 }
 
 void cCharacter::cmd_idle()

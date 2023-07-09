@@ -207,6 +207,7 @@ struct cCharacter : Component
 	float pre_action_time = 0.f;
 	float total_action_time = 0.f;
 	float action_timer = -1.f;
+	bool last_approached = false;
 
 	Listeners<void(CharacterMessage msg, sVariant p0, sVariant p1, sVariant p2, sVariant p3)> message_listeners;
 
