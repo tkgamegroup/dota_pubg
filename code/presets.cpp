@@ -15,6 +15,7 @@ const CharacterInfo* CharacterInfosPreset::find(std::string_view name) const
 	}
 	return nullptr;
 }
+static CharacterInfo default_character_info;
 
 const ProjectileInfo* ProjectileInfosPreset::find(std::string_view name) const
 {
