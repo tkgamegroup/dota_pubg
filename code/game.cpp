@@ -244,9 +244,9 @@ std::vector<cCharacterPtr> find_characters_within_camera(FactionFlags faction)
 	return ret;
 }
 
-cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3& _pos, FactionFlags faction, uint id)
+cCharacterPtr add_character(const CharacterInfo* info, const vec3& _pos, FactionFlags faction, uint id)
 {
-	auto e = get_prefab(prefab_path);
+	auto e = get_prefab(info->prefab_name);
 	float radius = 0.f;
 	if (auto nav_agent = e->get_component_t<cNavAgent>(); nav_agent)
 		radius = nav_agent->radius;
@@ -265,6 +265,7 @@ cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3
 	node->set_pos(pos);
 	//object->init(1000 + prefab_id, id);
 	characters.push_back(character);
+	character->info = info;
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
 	{
@@ -280,14 +281,15 @@ cCharacterPtr add_character(const std::filesystem::path& prefab_path, const vec3
 	return character;
 }
 
-cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, cCharacterPtr target, float speed, uint id)
+cProjectilePtr add_projectile(const ProjectileInfo* info, const vec3& pos, cCharacterPtr target, float speed, uint id)
 {
-	auto e = get_prefab(prefab_path)->duplicate();
+	auto e = get_prefab(info->prefab_name)->duplicate();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
 	//object->init(2000 + prefab_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectiles.push_back(projectile);
+	projectile->info = info;
 	projectile->target.set(target);
 	projectile->speed = speed;
 	root->add_child(e);
@@ -295,14 +297,15 @@ cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const ve
 	return projectile;
 }
 
-cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const vec3& pos, const vec3& location, float speed, uint id)
+cProjectilePtr add_projectile(const ProjectileInfo* info, const vec3& pos, const vec3& location, float speed, uint id)
 {
-	auto e = get_prefab(prefab_path)->duplicate();
+	auto e = get_prefab(info->prefab_name)->duplicate();
 	e->node()->set_pos(pos);
 	auto object = e->get_component_t<cObject>();
 	//object->init(2000 + prefab_id, id);
 	auto projectile = e->get_component_t<cProjectile>();
 	projectiles.push_back(projectile);
+	projectile->info = info;
 	projectile->use_target = false;
 	projectile->location = location;
 	projectile->speed = speed;
@@ -311,9 +314,9 @@ cProjectilePtr add_projectile(const std::filesystem::path& prefab_path, const ve
 	return projectile;
 }
 
-cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos, const quat& qut, float duration, uint id)
+cEffectPtr add_effect(const EffectInfo* info, const vec3& pos, const quat& qut, float duration, uint id)
 {
-	auto e = get_prefab(prefab_path)->duplicate();
+	auto e = get_prefab(info->prefab_name)->duplicate();
 	auto node = e->node();
 	node->set_pos(pos);
 	node->set_qut(qut);
@@ -321,6 +324,7 @@ cEffectPtr add_effect(const std::filesystem::path& prefab_path, const vec3& pos,
 	//object->init(3000 + prefab_id, id);
 	auto effect = e->get_component_t<cEffect>();
 	effects.push_back(effect);
+	effect->info = info;
 	effect->duration = duration;
 	root->add_child(e);
 

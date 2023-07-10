@@ -414,7 +414,7 @@ struct BottomPanel
 				{
 					auto c = action_list->entity->children[i].get();
 					auto& training = building.info->training_actions[i];
-					if (auto unit_info = unit_infos.find(training.name); unit_info)
+					if (auto unit_info = character_infos.find(training.name); unit_info)
 					{
 						if (auto image = c->get_component_t<cImage>(); image)
 							image->set_image_name(unit_info->icon_name);
@@ -427,7 +427,7 @@ struct BottomPanel
 								{
 									auto& building = town->buildings[building_index];
 									auto& training = building.info->training_actions[i];
-									if (auto unit_info = unit_infos.find(training.name); unit_info)
+									if (auto unit_info = character_infos.find(training.name); unit_info)
 									{
 										std::wstring text;
 										text = s2w(unit_info->name);

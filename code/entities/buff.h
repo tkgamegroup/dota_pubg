@@ -1,7 +1,20 @@
 #pragma once
 
 #include "../head.h"
-#include "../command.h"
+
+struct PassiveBuffFunc
+{
+	virtual ~PassiveBuffFunc() {}
+
+	virtual void exec(cBuffPtr buff, cCharacterPtr character) = 0;
+};
+
+struct ContinuousBuffFunc
+{
+	virtual ~ContinuousBuffFunc() {}
+
+	virtual void exec(cBuffPtr buff, cCharacterPtr character) = 0;
+};
 
 // Reflect ctor
 struct cBuff : Component
@@ -20,8 +33,8 @@ struct cBuff : Component
 	float interval;
 	float duration;
 
-	ParameterNames			parameter_names;
-	ParameterPack			parameters;
-	CommandList				passive;
-	CommandList				continuous;
+	// Reflect
+	VirtualUdt<PassiveBuffFunc>	passive;
+	// Reflect
+	VirtualUdt<ContinuousBuffFunc>	continuous;
 };

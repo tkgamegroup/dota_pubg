@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../head.h"
-#include "../command.h"
+#include "../presets.h"
 
 // Reflect
 enum CharacterAction
@@ -30,20 +30,6 @@ extern std::vector<cCharacterPtr> characters;
 extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
 extern std::vector<cCharacterPtr> dead_characters;
 extern bool removing_dead_characters;
-
-struct InitStats
-{
-	uint hp_max;
-	uint mp_max;
-	DamageType atk_type;
-	uint atk;
-	uint phy_def;
-	uint mag_def;
-	uint hp_reg;
-	uint mp_reg;
-	uint mov_sp;
-	uint atk_sp;
-};
 
 // Reflect ctor
 struct cCharacter : Component
@@ -79,6 +65,8 @@ struct cCharacter : Component
 	cArmaturePtr armature = nullptr;
 	cAudioSourcePtr audio_source = nullptr;
 
+	const CharacterInfo* info = nullptr;
+
 	float get_radius();
 	float get_height();
 	vec3 get_pos(float height_factor = 1.f);
@@ -90,76 +78,50 @@ struct cCharacter : Component
 
 	// Reflect
 	uint lv = 1;
-	void set_lv(uint v);
 	// Reflect
 	uint exp = 0;
-	void set_exp(uint v);
 	uint exp_max = 0;
-	void set_exp_max(uint v);
 
 	// Reflect
 	CharacterStateFlags state = CharacterStateNormal;
 
 	// Reflect
 	uint hp = 100;
-	void set_hp(uint v);
 	// Reflect
 	uint hp_max = 100;
-	void set_hp_max(uint v);
 
 	// Reflect
 	uint mp = 100;
-	void set_mp(uint v);
 	// Reflect
 	uint mp_max = 100;
-	void set_mp_max(uint v);
 
 	// Reflect
 	uint exp_base = 0;
 	// Reflect
 	DamageType atk_type = PhysicalDamage;
 	// Reflect
-	void set_atk_type(DamageType v);
-	// Reflect
 	uint atk = 10;
 	// Reflect
-	void set_atk(uint v);
-	// Reflect
 	float atk_distance = 1.5f;
-	// Reflect
-	void set_atk_distance(float v);
 	// Reflect
 	float atk_interval = 2.f;
 	// Reflect
 	float atk_time = 1.5f;
 	// Reflect
 	float atk_point = 1.f;
-	// Reflect
-	std::filesystem::path atk_projectile;
+	const ProjectileInfo* atk_projectile;
 	// Reflect
 	uint phy_def = 0;
 	// Reflect
-	void set_phy_def(uint v);
-	// Reflect
 	uint mag_def = 0;
-	// Reflect
-	void set_mag_def(uint v);
 	// Reflect
 	uint hp_reg = 0;
 	// Reflect
-	void set_hp_reg(uint v);
-	// Reflect
 	uint mp_reg = 0;
-	// Reflect
-	void set_mp_reg(uint v);
 	// Reflect
 	uint mov_sp = 100;
 	// Reflect
-	void set_mov_sp(uint v);
-	// Reflect
 	uint atk_sp = 100;
-	// Reflect
-	void set_atk_sp(uint v);
 
 	std::vector<DropItem>		drop_items;
 
@@ -190,7 +152,6 @@ struct cCharacter : Component
 
 	bool dead = false;
 	bool stats_dirty = true;
-	InitStats init_stats;
 	Command command = CommandIdle;
 	Tracker target; // character, chest, shop, etc
 	vec3	target_location;

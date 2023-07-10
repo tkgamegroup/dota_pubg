@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../head.h"
+#include "../presets.h"
 
 extern std::vector<cProjectilePtr> projectiles;
 extern std::vector<cProjectilePtr> dead_projectiles;
@@ -13,6 +14,8 @@ struct cProjectile : Component
 	cNodePtr node;
 	// Reflect auto_requires
 	cObjectPtr object;
+
+	const ProjectileInfo* info = nullptr;
 
 	float speed = 0.1f;
 

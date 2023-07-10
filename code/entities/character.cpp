@@ -68,134 +68,6 @@ void cCharacter::set_faction(FactionFlags _faction)
 		nav_agent->separation_group = faction;
 }
 
-void cCharacter::set_lv(uint v)
-{
-	if (lv == v)
-		return;
-	lv = v;
-	data_changed("lv"_h);
-}
-
-void cCharacter::set_exp(uint v)
-{
-	if (exp == v)
-		return;
-	exp = v;
-	data_changed("exp"_h);
-}
-
-void cCharacter::set_exp_max(uint v)
-{
-	if (exp_max == v)
-		return;
-	exp_max = v;
-	data_changed("exp_max"_h);
-}
-
-void cCharacter::set_hp(uint v)
-{
-	if (hp == v)
-		return;
-	hp = v;
-	data_changed("hp"_h);
-}
-
-void cCharacter::set_hp_max(uint v)
-{
-	if (hp_max == v)
-		return;
-	hp_max = v;
-	data_changed("hp_max"_h);
-}
-
-void cCharacter::set_mp(uint v)
-{
-	if (mp == v)
-		return;
-	mp = v;
-	data_changed("mp"_h);
-}
-
-void cCharacter::set_mp_max(uint v)
-{
-	if (mp_max == v)
-		return;
-	mp_max = v;
-	data_changed("mp_max"_h);
-}
-
-void cCharacter::set_atk_type(DamageType v)
-{
-	if (atk_type == v)
-		return;
-	atk_type = v;
-	data_changed("atk_type"_h);
-}
-
-void cCharacter::set_atk(uint v)
-{
-	if (atk == v)
-		return;
-	atk = v;
-	data_changed("atk"_h);
-}
-
-void cCharacter::set_atk_distance(float v)
-{
-	if (atk_distance == v)
-		return;
-	atk_distance = v;
-	data_changed("atk_distance"_h);
-}
-
-void cCharacter::set_phy_def(uint v)
-{
-	if (phy_def == v)
-		return;
-	phy_def = v;
-	data_changed("phy_def"_h);
-}
-
-void cCharacter::set_mag_def(uint v)
-{
-	if (mag_def == v)
-		return;
-	mag_def = v;
-	data_changed("mag_def"_h);
-}
-
-void cCharacter::set_hp_reg(uint v)
-{
-	if (hp_reg == v)
-		return;
-	hp_reg = v;
-	data_changed("hp_reg"_h);
-}
-
-void cCharacter::set_mp_reg(uint v)
-{
-	if (mp_reg == v)
-		return;
-	mp_reg = v;
-	data_changed("mp_reg"_h);
-}
-
-void cCharacter::set_mov_sp(uint v)
-{
-	if (mov_sp == v)
-		return;
-	mov_sp = v;
-	data_changed("mov_sp"_h);
-}
-
-void cCharacter::set_atk_sp(uint v)
-{
-	if (atk_sp == v)
-		return;
-	atk_sp = v;
-	data_changed("atk_sp"_h);
-}
-
 cCharacter::~cCharacter()
 {
 	node->measurers.remove("character"_h);
@@ -272,21 +144,13 @@ void cCharacter::start()
 		audio_source->set_buffer_names(audio_buffer_names);
 	}
 
-	init_stats.hp_max = hp_max;
-	init_stats.mp_max = mp_max;
-	init_stats.atk_type = atk_type;
-	init_stats.atk = atk;
-	init_stats.phy_def = phy_def;
-	init_stats.mag_def = mag_def;
-	init_stats.hp_reg = hp_reg;
-	init_stats.mp_reg = mp_reg;
-	init_stats.mov_sp = mov_sp;
-	init_stats.atk_sp = atk_sp;
-
 	items_idx = entity->find_child_i("items");
 	abilities_idx = entity->find_child_i("abilities");
 	buffs_idx = entity->find_child_i("buffs");
 	attack_effects_idx = entity->find_child_i("attack_effects");
+
+	if (info->atk_projectile_name.empty())
+		atk_projectile = projectile_infos.find(info->atk_projectile_name);
 }
 
 void cCharacter::update()
@@ -305,18 +169,20 @@ void cCharacter::update()
 
 			auto old_hp_max = hp_max;
 			auto old_mp_max = mp_max;
-			hp_max = init_stats.hp_max;
-			mp_max = init_stats.mp_max;
-
-			atk_type = init_stats.atk_type;
-			atk = init_stats.atk;
-
-			phy_def = init_stats.phy_def;
-			mag_def = init_stats.mag_def;
-			hp_reg = init_stats.hp_reg;
-			mp_reg = init_stats.mp_reg;
-			mov_sp = init_stats.mov_sp;
-			atk_sp = init_stats.atk_sp;
+			hp_max			= info->hp_max;
+			mp_max			= info->mp_max;
+			atk_type		= info->atk_type;
+			atk				= info->atk;
+			atk_distance	= info->atk_distance;
+			atk_interval	= info->atk_interval;
+			atk_time		= info->atk_time;
+			atk_point		= info->atk_point;
+			phy_def			= info->phy_def;
+			mag_def			= info->mag_def;
+			hp_reg			= info->hp_reg;
+			mp_reg			= info->mp_reg;
+			mov_sp			= info->mov_sp;
+			atk_sp			= info->atk_sp;
 
 			//attack_effects.clear();
 			//for (auto ability : abilities)
@@ -335,12 +201,12 @@ void cCharacter::update()
 
 			if (hp_max != old_hp_max)
 			{
-				set_hp(hp * (float)hp_max / old_hp_max);
+				hp = hp * (float)hp_max / old_hp_max;
 				data_changed("hp_max"_h);
 			}
 			if (mp_max != old_hp_max)
 			{
-				set_mp(mp * (float)mp_max / old_mp_max);
+				hp = mp * (float)mp_max / old_mp_max;
 				data_changed("mp_max"_h);
 			}
 
@@ -351,8 +217,8 @@ void cCharacter::update()
 			regeneration_timer -= delta_time;
 		else
 		{
-			set_hp(min(hp + hp_reg, hp_max));
-			set_mp(min(mp + mp_reg, mp_max));
+			hp = min(hp + hp_reg, hp_max);
+			mp = min(mp + mp_reg, mp_max);
 			regeneration_timer = 1.f;
 		}
 
@@ -541,7 +407,7 @@ void cCharacter::die(uint type)
 	if (dead)
 		return;
 
-	set_hp(0);
+	hp = 0;
 
 	if (!drop_items.empty())
 	{
@@ -584,7 +450,7 @@ bool cCharacter::take_damage(DamageType type, uint value)
 		return false;
 	if (hp > value)
 	{
-		set_hp(hp - value);
+		hp -= value;
 		return false;
 	}
 
@@ -594,12 +460,12 @@ bool cCharacter::take_damage(DamageType type, uint value)
 
 void cCharacter::restore_hp(uint value)
 {
-	set_hp(min(hp + value, hp_max));
+	hp = min(hp + value, hp_max);
 }
 
 void cCharacter::restore_mp(uint value)
 {
-	set_hp(min(mp + value, mp_max));
+	mp = min(mp + value, mp_max);
 }
 
 void cCharacter::gain_exp(uint v)
@@ -715,7 +581,7 @@ void cCharacter::cast_ability(cAbilityPtr ability, const vec3& location, cCharac
 		return;
 
 	ability->cd_timer = ability->cd_max = ability->cd_max;
-	set_mp(mp - ability->mp);
+	mp -= ability->mp;
 
 	if (ability->active.type)
 		ability->active.value().exec(ability, this, location, target);
@@ -833,7 +699,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 				{
 					if (distance(p0, p1) <= atk_distance + 3.5f)
 					{
-						if (!atk_projectile.empty())
+						if (atk_projectile)
 						{
 							auto character = this;
 							auto pj = add_projectile(atk_projectile, p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f);

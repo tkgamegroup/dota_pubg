@@ -15,7 +15,7 @@ void BuildingInstance::add_training(const TrainingAction* action, int number)
 	});
 	if (it == trainings.end())
 	{
-		auto unit_info = unit_infos.find(action->name);
+		auto unit_info = character_infos.find(action->name);
 		if (!unit_info)
 			return;
 		it = trainings.emplace(trainings.end(), Training());
@@ -69,11 +69,17 @@ void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
 			if (type == "enter"_h)
 			{
-				character->die("removed"_h);
-				hp--;
-				if (hp == 0)
+				if (auto ai = character->entity->get_component_t<cAI>(); ai)
 				{
+					if (distance(ai->target_pos, e->node()->global_pos()) < 0.5f)
+					{
+						character->die("removed"_h);
+						hp--;
+						if (hp == 0)
+						{
 
+						}
+					}
 				}
 			}
 		});
@@ -257,7 +263,7 @@ void TownInstance::update()
 				t.resources_costed = false;
 				if (spawn_node)
 				{
-					if (auto character = add_character(t.unit_info->prefab_name, spawn_node->global_pos(), player->faction); character)
+					if (auto character = add_character(t.unit_info, spawn_node->global_pos(), player->faction); character)
 					{
 						if (auto ai = character->entity->get_component_t<cAI>(); ai)
 						{

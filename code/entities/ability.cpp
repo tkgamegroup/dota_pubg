@@ -42,7 +42,7 @@ struct EXPORT AbilityFunc_thorwer : ActiveAbilityFunc
 	~AbilityFunc_thorwer() {}
 
 	// Reflect
-	std::filesystem::path prefab_path;
+	std::string effect_name;
 	// Reflect
 	float inner_radius = 2.f;
 	// Reflect
@@ -58,16 +58,22 @@ struct EXPORT AbilityFunc_thorwer : ActiveAbilityFunc
 
 	void exec(cAbilityPtr ability, cCharacterPtr character, const vec3& location, cCharacterPtr target) override
 	{
-		if (prefab_path.empty())
+		if (effect_name.empty())
 		{
-			printf("Ability Thorwer: prefab path is empty\n");
+			printf("Ability Thorwer: effect_name is empty\n");
 			return;
 		}
 
 		auto distance = ability->distance * (1.f/*distance modifier*/);
 		auto duration = distance / speed;
 
-		auto effect = add_effect(prefab_path, character->get_pos(0.5f), angleAxis(radians(angle_xz(character->node->pos, location)), vec3(0.f, 1.f, 0.f)), duration);
+		auto info = effect_infos.find(effect_name);
+		if (!info)
+		{
+			printf("Ability Thorwer: cannot find effect\n");
+			return;
+		}
+		auto effect = add_effect(info, character->get_pos(0.5f), angleAxis(radians(angle_xz(character->node->pos, location)), vec3(0.f, 1.f, 0.f)), duration);
 		if (!effect)
 		{
 			printf("Ability Thorwer: cannot find prefab or prefab is missing cEffect\n");

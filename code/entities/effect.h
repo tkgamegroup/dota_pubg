@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../head.h"
+#include "../presets.h"
 
 extern std::vector<cEffectPtr> effects;
 extern std::vector<cEffectPtr> dead_effects;
@@ -41,6 +42,8 @@ struct cEffect : Component
 	cObjectPtr object;
 	// cEffect may control the particle system
 	cParticleSystemPtr particle_system = nullptr;
+
+	const EffectInfo* info = nullptr;
 
 	// Reflect hash=Normal|Link
 	uint type = "Normal"_h;

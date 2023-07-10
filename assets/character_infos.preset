@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<preset type="UnitInfosPreset">
+<preset type="CharacterInfosPreset">
 	<infos>
 		<item name="Infantry" icon_name="extra\icons\footman.png" icon_uvs="0,0,1,1" prefab_name="extra\characters\ELF_SM_light_infantry_A.prefab" />
 		<item name="Archer" icon_name="extra\icons\BTNHighElvenArcher.png" prefab_name="extra\characters\ELF_SM_archer_A.prefab" />

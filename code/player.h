@@ -6,7 +6,7 @@
 struct Training
 {
 	const TrainingAction* action;
-	const UnitInfo* unit_info;
+	const CharacterInfo* unit_info;
 	float duration;
 	float timer;
 	int number; // -1 means infinite
@@ -61,6 +61,12 @@ struct TownInstance
 	void add_construction(const ConstructionAction* action);
 	void remove_construction(const ConstructionAction* action);
 	void update();
+};
+
+struct TowerInstance
+{
+	EntityPtr e = nullptr;
+	Player* player;
 };
 
 // Reflect

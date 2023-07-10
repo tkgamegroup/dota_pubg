@@ -1,12 +1,25 @@
 #pragma once
 
 #include "../head.h"
-#include "../command.h"
 
 enum ItemType
 {
 	ItemItem,
 	ItemConsumable
+};
+
+struct ActiveItemFunc
+{
+	virtual ~ActiveItemFunc() {}
+
+	virtual void exec(cItemPtr item, cCharacterPtr character) = 0;
+};
+
+struct PassiveItemFunc
+{
+	virtual ~PassiveItemFunc() {}
+
+	virtual void exec(cItemPtr item, cCharacterPtr character) = 0;
 };
 
 // Reflect ctor
@@ -23,8 +36,8 @@ struct cItem : Component
 	ItemType				type = ItemItem;
 	uint					num = 1;
 
-	ParameterNames			parameter_names;
-	ParameterPack			parameters;
-	CommandList				active;
-	CommandList				passive;
+	// Reflect
+	VirtualUdt<ActiveItemFunc>	active;
+	// Reflect
+	VirtualUdt<PassiveItemFunc>	passive;
 };

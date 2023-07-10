@@ -2,8 +2,6 @@
 
 #include "../head.h"
 
-using namespace flame;
-
 // Reflect ctor
 struct cSpawner : Component
 {
@@ -11,7 +9,7 @@ struct cSpawner : Component
 	cNodePtr node;
 
 	// Reflect
-	std::filesystem::path prefab_path;
+	std::string character_name;
 	// Reflect
 	FactionFlags faction = FactionCreep;
 	// Reflect
@@ -32,7 +30,7 @@ struct cSpawner : Component
 
 	struct Create
 	{
-		virtual cSpawner* operator()(EntityPtr) = 0;
+		virtual cSpawnerPtr operator()(EntityPtr) = 0;
 	};
 	// Reflect static
 	EXPORT static Create& create;

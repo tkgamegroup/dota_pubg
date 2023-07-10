@@ -2,13 +2,43 @@
 
 #include "head.h"
 
-struct UnitInfo
+// Reflect any ctor
+struct CharacterInfo
 {
 	std::string				name;
 	std::filesystem::path	icon_name;
 	uvec2					icon_tile_coord = uvec2(0);
 	vec4					icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	std::string				description;
+
+	std::filesystem::path	prefab_name;
+	uint					hp_max = 100;
+	uint					mp_max = 100;
+	DamageType				atk_type = PhysicalDamage;
+	uint					atk = 10;
+	float					atk_distance = 1.5f;
+	float					atk_interval = 2.f; // the time between two attacks
+	float					atk_time = 1.5f; // the time of attack animation
+	float					atk_point = 1.f; // the time that attack happens
+	std::string				atk_projectile_name;
+	uint					phy_def = 0;
+	uint					mag_def = 0;
+	uint					hp_reg = 0;
+	uint					mp_reg = 0;
+	uint					mov_sp = 100;
+	uint					atk_sp = 100;
+};
+
+struct ProjectileInfo
+{
+	std::string				name;
+
+	std::filesystem::path	prefab_name;
+};
+
+struct EffectInfo
+{
+	std::string				name;
 
 	std::filesystem::path	prefab_name;
 };
@@ -35,18 +65,41 @@ struct ConstructionAction
 	uint					cost_bones;
 	uint					cost_soul_sand;
 	float					duration;
+
 };
 
 // Reflect
-struct UnitInfosPreset
+struct CharacterInfosPreset
 {
 	// Reflect
-	std::vector<UnitInfo> infos;
+	std::vector<CharacterInfo> infos;
 
-	const UnitInfo* find(std::string_view name) const;
+	const CharacterInfo* find(std::string_view name) const;
 };
 
-extern UnitInfosPreset unit_infos;
+extern CharacterInfosPreset character_infos;
+
+// Reflect
+struct ProjectileInfosPreset
+{
+	// Reflect
+	std::vector<ProjectileInfo> infos;
+
+	const ProjectileInfo* find(std::string_view name) const;
+};
+
+extern ProjectileInfosPreset projectile_infos;
+
+// Reflect
+struct EffectInfosPreset
+{
+	// Reflect
+	std::vector<EffectInfo> infos;
+
+	const EffectInfo* find(std::string_view name) const;
+};
+
+extern EffectInfosPreset effect_infos;
 
 struct BuildingInfo
 {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../head.h"
-#include "../command.h"
 
 // Reflect ctor
 struct cCircleCollider : Component

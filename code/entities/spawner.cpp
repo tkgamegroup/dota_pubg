@@ -16,14 +16,18 @@ void cSpawner::update()
 		spawn_timer -= delta_time;
 	else
 	{
-		for (auto i = 0; i < spawn_number; i++)
+		auto info = character_infos.find(character_name);
+		if (info)
 		{
-			if (auto character = add_character(prefab_path, node->pos, faction); character)
+			for (auto i = 0; i < spawn_number; i++)
 			{
-				if (auto ai = character->entity->get_component_t<cAI>(); ai)
+				if (auto character = add_character(info, node->pos, faction); character)
 				{
-					ai->type = unit_type;
-					ai->target_pos = unit_target_pos;
+					if (auto ai = character->entity->get_component_t<cAI>(); ai)
+					{
+						ai->type = unit_type;
+						ai->target_pos = unit_target_pos;
+					}
 				}
 			}
 		}
@@ -34,7 +38,7 @@ void cSpawner::update()
 
 struct cSpawnerCreate : cSpawner::Create
 {
-	cSpawner* operator()(EntityPtr e) override
+	cSpawnerPtr operator()(EntityPtr e) override
 	{
 		if (e == INVALID_POINTER)
 			return nullptr;
