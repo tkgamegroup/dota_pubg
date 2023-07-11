@@ -63,7 +63,7 @@ enum TargetTypeFlags
 enum DamageType
 {
 	PhysicalDamage,
-	MagicDamage
+	MagicalDamage
 };
 
 // Reflect
@@ -142,6 +142,11 @@ struct Tracker
 		std::swap(hash, oth.hash);
 		std::swap(entity, oth.entity);
 		std::swap(comp, oth.comp);
+	}
+
+	operator bool() const
+	{
+		return entity || comp;
 	}
 
 	void reset()

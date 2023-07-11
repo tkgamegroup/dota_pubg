@@ -12,6 +12,9 @@ struct CharacterInfo
 	std::string				description;
 
 	std::filesystem::path	prefab_name;
+	float					nav_radius = 0.2f;
+	float					nav_height = 2.f;
+	float					nav_speed = 5.f;
 	uint					hp_max = 100;
 	uint					mp_max = 100;
 	DamageType				atk_type = PhysicalDamage;

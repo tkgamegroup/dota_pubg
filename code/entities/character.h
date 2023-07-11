@@ -140,7 +140,7 @@ struct cCharacter : Component
 		{
 			auto e = entity->children[abilities_idx].get();
 			if (e->children.size() > idx)
-				return e->children[idx]->get_component_t<cAbility>();
+				return e->children[idx]->get_component<cAbility>();
 		}
 		return nullptr;
 	}

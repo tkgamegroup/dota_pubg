@@ -81,7 +81,7 @@ struct EXPORT AbilityFunc_thorwer : ActiveAbilityFunc
 		}
 
 		auto e = effect->entity;
-		if (auto collider = e->get_component_t<cSectorCollider>(); collider)
+		if (auto collider = e->get_component<cSectorCollider>(); collider)
 		{
 			collider->faction = ~character->faction;
 			collider->inner_radius = inner_radius;
@@ -92,14 +92,14 @@ struct EXPORT AbilityFunc_thorwer : ActiveAbilityFunc
 			collider->delay = 0.f;
 			collider->duration = duration;
 			collider->callbacks.add([this, character](cCharacterPtr target, bool enter_or_exit) {
-				character->inflict_damage(target, MagicDamage, damage);
+				character->inflict_damage(target, MagicalDamage, damage);
 			});
 		}
 		if (auto e2 = !e->children.empty() ? e->children[0].get() : nullptr; e2)
 		{
-			if (auto ps = e2->get_component_t<cParticleSystem>(); ps)
+			if (auto ps = e2->get_component<cParticleSystem>(); ps)
 			{
-				e2->node()->set_pos(vec3(-inner_radius, 0.f, 0.f));
+				e2->get_component<cNode>()->set_pos(vec3(-inner_radius, 0.f, 0.f));
 				ps->particle_life_time = duration;
 				ps->particle_speed = speed;
 				ps->emitt_duration = length / speed;

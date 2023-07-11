@@ -26,9 +26,9 @@ std::vector<std::pair<float, int>> site_centrality;
 
 void init_map(EntityPtr e)
 {
-	map_node = e->node();
-	hf_terrain = e->get_component_t<cTerrain>();
-	mc_terrain = e->get_component_t<cVolume>();
+	map_node = e->get_component<cNode>();
+	hf_terrain = e->get_component<cTerrain>();
+	mc_terrain = e->get_component<cVolume>();
 
 	if (hf_terrain)
 	{
@@ -416,7 +416,7 @@ void update_vision()
 			auto visible_flags = 0;
 			for (auto& f : factions)
 			{
-				auto v = get_vision(f.first, pair.second->entity->node()->pos);
+				auto v = get_vision(f.first, pair.second->entity->get_component<cNode>()->pos);
 				if (v)
 					visible_flags |= f.first;
 			}

@@ -26,18 +26,18 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1305,612" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1433,684" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,573.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,645.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,468" ext="1305,144" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,540" ext="1433,144" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 					</components>
@@ -80,9 +80,41 @@
 								<item type_name="flame::cLayout" auto_width="false" auto_height="false" />
 							</components>
 							<children>
+								<item file_id="400a8f3edba4c279b8c64b4bb6a0f6a1" name="character_stats">
+									<components>
+										<item type_name="flame::cElement" pos="4,4" ext="100,84" />
+										<item type_name="flame::cLayout" />
+									</components>
+									<children>
+										<item file_id="45caf683385b4d6db66ca8f3e727bea5" name="atk_text">
+											<components>
+												<item type_name="flame::cElement" pos="4,4" ext="91.5,16" />
+												<item type_name="flame::cText" text="ATK: 10 (Physical)" />
+											</components>
+										</item>
+										<item file_id="4c21f65a6f18480eb75e49aece2db38c" name="atk_distance_text">
+											<components>
+												<item type_name="flame::cElement" pos="4,24" ext="92,16" />
+												<item type_name="flame::cText" text="ATK Distance: 1.5" />
+											</components>
+										</item>
+										<item file_id="4e0d8be2d807ba9ad0f6f5753d56e89b" name="atk_intterval_text">
+											<components>
+												<item type_name="flame::cElement" pos="4,44" ext="76,16" />
+												<item type_name="flame::cText" text="ATK Interval: 2" />
+											</components>
+										</item>
+										<item file_id="407085970ce670c219da8e73471158b4" name="move_speed_text">
+											<components>
+												<item type_name="flame::cElement" pos="4,64" ext="79,16" />
+												<item type_name="flame::cText" text="Move Speed: 5" />
+											</components>
+										</item>
+									</children>
+								</item>
 								<item file_id="4c0dc28e764beb81db93b464663e4590" name="resources_production">
 									<components>
-										<item type_name="flame::cElement" pos="4,4" ext="181.5,96" />
+										<item type_name="flame::cElement" pos="4,92" ext="181.5,96" />
 										<item type_name="flame::cLayout" item_spacing="0" />
 									</components>
 									<children>
@@ -190,7 +222,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1305,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1433,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>

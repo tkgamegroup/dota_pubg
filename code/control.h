@@ -9,7 +9,7 @@ extern cChestPtr		hovering_chest;
 extern bool				hovering_terrain;
 extern cNodePtr			hovering_town;
 
-extern cNodePtr					selected_target;
+extern Tracker					selected_target;
 extern Listeners<void()>		select_callbacks;
 extern TargetTypeFlags			select_mode;
 extern float					select_distance;

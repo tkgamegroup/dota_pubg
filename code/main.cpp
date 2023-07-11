@@ -466,12 +466,12 @@
 //	for (auto& preset : effect_presets)
 //	{
 //		get_prefab(preset.path)->forward_traversal([](EntityPtr e) {
-//			if (auto particle_system = e->get_component_t<cParticleSystem>(); particle_system)
+//			if (auto particle_system = e->get_component<cParticleSystem>(); particle_system)
 //				sRenderer::instance()->get_material_res(particle_system->material);
 //		});
 //	}
 //
-//	if (auto nav_scene = entity->get_component_t<cNavScene>(); nav_scene)
+//	if (auto nav_scene = entity->get_component<cNavScene>(); nav_scene)
 //	{
 //		nav_scene->finished_callback.add([this]() {
 //			if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
@@ -484,7 +484,7 @@
 //				main_player.faction = player1_faction;
 //				main_player.character_id = character->object->uid;
 //				main_player.init(character->entity);
-//				if (auto harvester = main_player.entity->get_component_t<cNWDataHarvester>(); harvester)
+//				if (auto harvester = main_player.entity->get_component<cNWDataHarvester>(); harvester)
 //				{
 //					//harvester->add_target("exp"_h);
 //					//harvester->add_target("exp_max"_h);
@@ -588,7 +588,7 @@
 //					auto it = objects.find(stru.id);
 //					if (it == objects.end())
 //						continue;
-//					auto character = it->second->entity->get_component_t<cCharacter>();
+//					auto character = it->second->entity->get_component<cCharacter>();
 //					switch (stru.type)
 //					{
 //					case "Idle"_h:
@@ -599,14 +599,14 @@
 //						break;
 //					case "AttackTarget"_h:
 //						if (auto it = objects.find(stru.t.target); it != objects.end())
-//							new CharacterCommandAttackTarget(character, it->second->entity->get_component_t<cCharacter>());
+//							new CharacterCommandAttackTarget(character, it->second->entity->get_component<cCharacter>());
 //						break;
 //					case "AttackLocation"_h:
 //						new CharacterCommandAttackLocation(character, stru.t.location);
 //						break;
 //					case "PickUp"_h:
 //						if (auto it = objects.find(stru.t.target); it != objects.end())
-//							new CharacterCommandPickUp(character, it->second->entity->get_component_t<cChest>());
+//							new CharacterCommandPickUp(character, it->second->entity->get_component<cChest>());
 //						break;
 //					case "CastAbility"_h:
 //						break;
@@ -862,9 +862,9 @@
 //			for (auto& pair : objects)
 //			{
 //				auto entity = pair.second->entity;
-//				auto harvester = entity->get_component_t<cNWDataHarvester>();
+//				auto harvester = entity->get_component<cNWDataHarvester>();
 //				if (!harvester) continue;
-//				auto has_vision = get_vision(f.first, entity->node()->pos);
+//				auto has_vision = get_vision(f.first, entity->get_component<cNode>()->pos);
 //				nwUpdateObjectsStruct::Item item;
 //				item.obj_id = pair.first;
 //				for (auto i = 0; i < harvester->targets.size(); i++)

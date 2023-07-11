@@ -1,4 +1,5 @@
 #include <flame/graphics/canvas.h>
+#include <flame/graphics/extension.h>
 #include <flame/universe/draw_data.h>
 #include <flame/universe/components/camera.h>
 #include <flame/universe/components/mesh.h>
@@ -47,6 +48,11 @@ struct BottomPanel
 	EntityPtr hp_bar = nullptr;
 	EntityPtr mp_bar = nullptr;
 	EntityPtr sub_panel2 = nullptr;
+	EntityPtr character_stats_panel = nullptr;
+	cTextPtr atk_text = nullptr;
+	cTextPtr atk_distance_text = nullptr;
+	cTextPtr atk_intterval_text = nullptr;
+	cTextPtr move_speed_text = nullptr;
 	EntityPtr resources_production_panel = nullptr;
 	cTextPtr blood_production_text = nullptr;
 	cTextPtr bones_production_text = nullptr;
@@ -56,13 +62,13 @@ struct BottomPanel
 	cListPtr training_list = nullptr;
 	cListPtr action_list = nullptr;
 
-	Player* player = nullptr;
+	cCharacterPtr character = nullptr;
 	TownInstance* town = nullptr;
 	int building_index = -1;
 
 	int get_last_row_idx(cListPtr list)
 	{
-		auto columns = list->entity->get_component_t<cLayout>()->columns;
+		auto columns = list->entity->get_component<cLayout>()->columns;
 		return (int)floor(((float)list->entity->children.size() - 0.5f) / columns) * columns;
 	}
 
@@ -70,44 +76,60 @@ struct BottomPanel
 	{
 		e = _e;
 		if (auto e = _e->find_child("avatar_image"); e)
-			avatar_image = e->get_component_t<cImage>();
+			avatar_image = e->get_component<cImage>();
 		sub_panel1 = _e->find_child("sub_panel1");
 		if (sub_panel1)
 		{
 			if (auto e = sub_panel1->find_child("name"); e)
-				name_text = e->get_component_t<cText>();
+				name_text = e->get_component<cText>();
 			hp_bar = sub_panel1->find_child("hp_bar");
 			mp_bar = sub_panel1->find_child("mp_bar");
 		}
 		sub_panel2 = _e->find_child("sub_panel2");
 		if (sub_panel2)
 		{
+			character_stats_panel = sub_panel2->find_child("character_stats");
+			if (character_stats_panel)
+			{
+				if (auto e = character_stats_panel->find_child("atk_text"); e)
+					atk_text = e->get_component<cText>();
+				if (auto e = character_stats_panel->find_child("atk_distance_text"); e)
+					atk_distance_text = e->get_component<cText>();
+				if (auto e = character_stats_panel->find_child("atk_intterval_text"); e)
+					atk_intterval_text = e->get_component<cText>();
+				if (auto e = character_stats_panel->find_child("move_speed_text"); e)
+					move_speed_text = e->get_component<cText>();
+			}
 			resources_production_panel = sub_panel2->find_child("resources_production");
 			if (resources_production_panel)
 			{
 				if (auto e = resources_production_panel->find_child("blood"); e)
-					blood_production_text = e->find_child("text")->get_component_t<cText>();
+					blood_production_text = e->find_child("text")->get_component<cText>();
 				if (auto e = resources_production_panel->find_child("bones"); e)
-					bones_production_text = e->find_child("text")->get_component_t<cText>();
+					bones_production_text = e->find_child("text")->get_component<cText>();
 				if (auto e = resources_production_panel->find_child("soul_sand"); e)
-					soul_sand_production_text = e->find_child("text")->get_component_t<cText>();
+					soul_sand_production_text = e->find_child("text")->get_component<cText>();
 			}
 		}
 		sub_panel3 = _e->find_child("sub_panel3");
 		if (sub_panel3)
 		{
 			if (auto e = sub_panel3->find_child("construction_list"); e)
-				construction_list = e->get_component_t<cList>();
+				construction_list = e->get_component<cList>();
 			if (auto e = sub_panel3->find_child("training_list"); e)
-				training_list = e->get_component_t<cList>();
+				training_list = e->get_component<cList>();
 		}
 		if (auto e = _e->find_child("action_list"); e)
-			action_list = e->get_component_t<cList>();
+			action_list = e->get_component<cList>();
 	}
 
 	void reset()
 	{
 		type = PanelNone;
+		character = nullptr;
+		town = nullptr;
+		building_index = -1;
+
 		if (avatar_image)
 			avatar_image->set_image_name(L"");
 		if (name_text)
@@ -128,7 +150,7 @@ struct BottomPanel
 		{
 			for (auto& c : sub_panel3->children)
 			{
-				if (auto list = c->get_parent_component_t<cList>(); list)
+				if (auto list = c->get_parent_component<cList>(); list)
 					list->set_count(0);
 				c->set_enable(false);
 			}
@@ -137,9 +159,9 @@ struct BottomPanel
 		{
 			for (auto& c : action_list->entity->children)
 			{
-				if (auto image = c->get_component_t<cImage>(); image)
+				if (auto image = c->get_component<cImage>(); image)
 					image->set_image_name(L"");
-				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+				if (auto receiver = c->get_component<cReceiver>(); receiver)
 					receiver->event_listeners.clear();
 			}
 		}
@@ -147,10 +169,54 @@ struct BottomPanel
 		sInput::instance()->hovering_receiver = nullptr;
 	}
 
-	void enter_character_panel(cCharacterPtr character)
+	void update_character()
+	{
+		if (hp_bar)
+		{
+			hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)character->hp / (float)character->hp_max, 1.f));
+			hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(character->hp) + L"/" + wstr(character->hp_max));
+		}
+		if (mp_bar)
+		{
+			mp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)character->mp / (float)character->mp_max, 1.f));
+			mp_bar->find_child("text")->get_component<cText>()->set_text(wstr(character->mp) + L"/" + wstr(character->mp_max));
+		}
+
+		if (atk_text)
+			atk_text->set_text(std::format(L"ATK: {} ({})", character->atk, character->atk_type == PhysicalDamage ? L"Physical" : L"Magical"));
+		if (atk_distance_text)
+			atk_distance_text->set_text(std::format(L"ATK Distance: {}", character->atk_distance));
+		if (atk_intterval_text)
+			atk_intterval_text->set_text(std::format(L"ATK Intterval: {}", character->atk_interval));
+		if (move_speed_text)
+			move_speed_text->set_text(std::format(L"Move Speed: {}", character->info->nav_speed));
+	}
+
+	void enter_character_panel(cCharacterPtr _character)
 	{
 		reset();
 		type = PanelCharacter;
+		character = _character;
+
+		if (avatar_image)
+			avatar_image->set_image_name(character->info->icon_name);
+		if (name_text)
+		{
+			cvec4 col = cvec4(255);
+			if (character->faction == player1.faction)
+				col = cvec4(100, 255, 100, 255);
+			else if (character->faction == player2.faction)
+				col = cvec4(255, 100, 100, 255);
+			name_text->set_col(col);
+			name_text->set_text(s2w(selected_target.entity->name));
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
+		if (mp_bar)
+			mp_bar->set_enable(true);
+
+		if (character_stats_panel)
+			character_stats_panel->set_enable(true);
 	}
 
 	void show_town_basics()
@@ -158,12 +224,12 @@ struct BottomPanel
 		if (name_text)
 		{
 			cvec4 col = cvec4(255);
-			if (player == &player1)
+			if (town->player == &player1)
 				col = cvec4(100, 255, 100, 255);
-			else if (player == &player2)
+			else if (town->player == &player2)
 				col = cvec4(255, 100, 100, 255);
 			name_text->set_col(col);
-			name_text->set_text(s2w(selected_target->entity->name));
+			name_text->set_text(s2w(selected_target.entity->name));
 		}
 		if (hp_bar)
 			hp_bar->set_enable(true);
@@ -176,8 +242,8 @@ struct BottomPanel
 	{
 		if (hp_bar)
 		{
-			hp_bar->find_child("bar")->element()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
-			hp_bar->find_child("text")->get_component_t<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
+			hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
+			hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
 		}
 
 		if (blood_production_text)
@@ -205,19 +271,19 @@ struct BottomPanel
 				{
 					auto c = e_list->children[i].get();
 					auto& construction = town->constructions[i];
-					if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
+					if (auto image = c->find_child("icon")->get_component<cImage>(); image)
 						image->set_image_name(construction.building_info->icon_name);
 					auto cancel_button = c->find_child("cancel");
 					if (cancel_button)
 					{
-						if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
+						if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
 						{
 							receiver->event_listeners.clear();
 							receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
 								switch (type)
 								{
 								case "mouse_enter"_h:
-									show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+									show_tooltip(cancel_button->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
 									break;
 								case "click"_h:
 									town->remove_construction(town->constructions[i].action);
@@ -232,8 +298,8 @@ struct BottomPanel
 			{
 				auto c = e_list->children[i].get();
 				auto& construction = town->constructions[i];
-				c->find_child_recursively("bar")->element()->set_scl(vec2(1.f - construction.timer / construction.duration, 1.f));
-				c->find_child_recursively("text")->get_component_t<cText>()->set_text(std::format(L"{}:{}", int(construction.timer / 60.f), int(construction.timer)));
+				c->find_child_recursively("bar")->get_component<cElement>()->set_scl(vec2(1.f - construction.timer / construction.duration, 1.f));
+				c->find_child_recursively("text")->get_component<cText>()->set_text(std::format(L"{}:{}", int(construction.timer / 60.f), int(construction.timer)));
 			}
 		}
 	}
@@ -242,7 +308,6 @@ struct BottomPanel
 	{
 		reset();
 		type = PanelTownMain;
-		player = _town->player;
 		town = _town;
 		building_index = -1;
 
@@ -252,21 +317,21 @@ struct BottomPanel
 		{
 			auto last_row = get_last_row_idx(action_list);
 
-			if (player == &player1)
+			if (town->player == &player1)
 			{
 				for (auto i = 0; i < town->buildings.size(); i++)
 				{
 					auto c = action_list->entity->children[i].get();
 					auto& building = town->buildings[i];
-					if (auto image = c->get_component_t<cImage>(); image)
+					if (auto image = c->get_component<cImage>(); image)
 						image->set_image_name(building.info->icon_name);
-					if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+					if (auto receiver = c->get_component<cReceiver>(); receiver)
 					{
 						receiver->event_listeners.add([this, c, i](uint type, const vec2&) {
 							switch (type)
 							{
 							case "mouse_enter"_h:
-								show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), s2w(town->buildings[i].info->description));
+								show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), s2w(town->buildings[i].info->description));
 								break;
 							case "click"_h:
 								enter_town_building_panel(i);
@@ -277,15 +342,15 @@ struct BottomPanel
 				}
 
 				auto c = action_list->entity->children[last_row].get();
-				if (auto image = c->get_component_t<cImage>(); image)
+				if (auto image = c->get_component<cImage>(); image)
 					image->set_image_name(Path::get(L"assets\\extra\\icons\\build.png"));
-				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+				if (auto receiver = c->get_component<cReceiver>(); receiver)
 				{
 					receiver->event_listeners.add([this, c](uint type, const vec2&) {
 						switch (type)
 						{
 						case "mouse_enter"_h:
-							show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Build");
+							show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Build");
 							break;
 						case "click"_h:
 							enter_town_construction_panel();
@@ -297,16 +362,16 @@ struct BottomPanel
 			else
 			{
 				auto c = action_list->entity->children[last_row].get();
-				if (auto image = c->get_component_t<cImage>(); image)
+				if (auto image = c->get_component<cImage>(); image)
 					image->set_image_name(Path::get(L"assets\\extra\\icons\\attack.png"));
-				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+				if (auto receiver = c->get_component<cReceiver>(); receiver)
 				{
 
 					receiver->event_listeners.add([this, c](uint type, const vec2&) {
 						switch (type)
 						{
 						case "mouse_enter"_h:
-							show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Attack This Town");
+							show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Attack This Town");
 							break;
 						case "click"_h:
 							break;
@@ -319,9 +384,10 @@ struct BottomPanel
 
 	void enter_town_construction_panel()
 	{
+		auto _town = town;
 		reset();
 		type = PanelTownConstrucion;
-		building_index = -1;
+		town = _town;
 
 		show_town_basics();
 
@@ -348,9 +414,9 @@ struct BottomPanel
 				auto construction = actions[i];
 				if (auto building_info = building_infos.find(construction->name); building_info)
 				{
-					if (auto image = c->get_component_t<cImage>(); image)
+					if (auto image = c->get_component<cImage>(); image)
 						image->set_image_name(building_info->icon_name);
-					if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+					if (auto receiver = c->get_component<cReceiver>(); receiver)
 					{
 						receiver->event_listeners.add([this, c, construction](uint type, const vec2& v) {
 							switch (type)
@@ -362,7 +428,7 @@ struct BottomPanel
 									std::wstring text;
 									text = s2w(building_info->name);
 									text += L"\nLeft - Construct";
-									show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), text,
+									show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), text,
 										construction->cost_blood, construction->cost_bones, construction->cost_soul_sand);
 								}
 							}
@@ -378,18 +444,18 @@ struct BottomPanel
 
 			auto last_row = get_last_row_idx(action_list);
 			auto c = action_list->entity->children[last_row].get();
-			if (auto image = c->get_component_t<cImage>(); image)
+			if (auto image = c->get_component<cImage>(); image)
 				image->set_image_name(Path::get(L"assets\\extra\\icons\\back.png"));
-			if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+			if (auto receiver = c->get_component<cReceiver>(); receiver)
 			{
 				receiver->event_listeners.add([this, c](uint type, const vec2&) {
 					switch (type)
 					{
 					case "mouse_enter"_h:
-						show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
+						show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
 						break;
 					case "click"_h:
-						enter_town_panel(&player->town);
+						enter_town_panel(town);
 						break;
 					}
 				});
@@ -399,8 +465,10 @@ struct BottomPanel
 
 	void enter_town_building_panel(int index)
 	{
+		auto _town = town;
 		reset();
 		type = PanelTownBuilding;
+		town = _town;
 		building_index = index;
 
 		show_town_basics();
@@ -416,9 +484,9 @@ struct BottomPanel
 					auto& training = building.info->training_actions[i];
 					if (auto unit_info = character_infos.find(training.name); unit_info)
 					{
-						if (auto image = c->get_component_t<cImage>(); image)
+						if (auto image = c->get_component<cImage>(); image)
 							image->set_image_name(unit_info->icon_name);
-						if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+						if (auto receiver = c->get_component<cReceiver>(); receiver)
 						{
 							receiver->event_listeners.add([this, c, i](uint type, const vec2& v) {
 								switch (type)
@@ -430,10 +498,14 @@ struct BottomPanel
 									if (auto unit_info = character_infos.find(training.name); unit_info)
 									{
 										std::wstring text;
-										text = s2w(unit_info->name);
+										text = s2w(unit_info->name) + L'\n';
+										text += std::format(L"ATK: {} ({})\n", unit_info->atk, unit_info->atk_type == PhysicalDamage ? L"Physical" : L"Magical");
+										text += std::format(L"ATK Distance: {}\n", unit_info->atk_distance);
+										text += std::format(L"ATK Intterval: {}\n", unit_info->atk_interval);
+										text += std::format(L"Move Speed: {}\n", unit_info->nav_speed);
 										text += L"\nLeft - Train One\n"
 											L"Right - Train Infinite";
-										show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), text,
+										show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), text,
 											training.cost_blood, training.cost_bones, training.cost_soul_sand);
 									}
 								}
@@ -459,18 +531,18 @@ struct BottomPanel
 
 				auto last_row = get_last_row_idx(action_list);
 				auto c = action_list->entity->children[last_row].get();
-				if (auto image = c->get_component_t<cImage>(); image)
+				if (auto image = c->get_component<cImage>(); image)
 					image->set_image_name(Path::get(L"assets\\extra\\icons\\back.png"));
-				if (auto receiver = c->get_component_t<cReceiver>(); receiver)
+				if (auto receiver = c->get_component<cReceiver>(); receiver)
 				{
 					receiver->event_listeners.add([this, c](uint type, const vec2&) {
 						switch (type)
 						{
 						case "mouse_enter"_h:
-							show_tooltip(c->element()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
+							show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
 							break;
 						case "click"_h:
-							enter_town_panel(&player->town);
+							enter_town_panel(town);
 							break;
 						}
 					});
@@ -483,24 +555,28 @@ struct BottomPanel
 	{
 		if (selected_target_changed)
 		{
-			if (!selected_target)
-				reset();
-			else
+			if (auto character = selected_target.entity->get_component<cCharacter>(); character)
 			{
-				if (selected_target->entity->name.ends_with("_town"))
-				{
-					Player* player = nullptr;
-					if (selected_target->entity->name.starts_with("player1"))
-						player = &player1;
-					else if (selected_target->entity->name.starts_with("player2"))
-						player = &player2;
-					enter_town_panel(&player->town);
-				}
+				enter_character_panel(character);
+			}
+			else if (auto town = selected_target.entity->get_component<cTown>(); town)
+			{
+				Player* player = nullptr;
+				if (selected_target.entity->name.starts_with("player1"))
+					player = &player1;
+				else if (selected_target.entity->name.starts_with("player2"))
+					player = &player2;
+				enter_town_panel(&player->town);
 			}
 		}
+		if (!selected_target)
+			reset();
 
 		switch (type)
 		{
+		case PanelCharacter:
+			update_character();
+			break;
 		case PanelTownMain:
 			update_town_basics();
 			update_town_construction();
@@ -529,19 +605,19 @@ struct BottomPanel
 					{
 						auto c = e_list->children[i].get();
 						auto& training = building.trainings[i];
-						if (auto image = c->find_child("icon")->get_component_t<cImage>(); image)
+						if (auto image = c->find_child("icon")->get_component<cImage>(); image)
 							image->set_image_name(training.unit_info->icon_name);
 						auto cancel_button = c->find_child("cancel");
 						if (cancel_button)
 						{
-							if (auto receiver = cancel_button->get_component_t<cReceiver>(); receiver)
+							if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
 							{
 								receiver->event_listeners.clear();
 								receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
 									switch (type)
 									{
 									case "mouse_enter"_h:
-										show_tooltip(cancel_button->element()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+										show_tooltip(cancel_button->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
 										break;
 									case "click"_h:
 									{
@@ -559,9 +635,9 @@ struct BottomPanel
 				{
 					auto c = e_list->children[i].get();
 					auto& training = building.trainings[i];
-					c->find_child_recursively("number")->get_component_t<cText>()->set_text(wstr(training.number));
-					c->find_child_recursively("bar")->element()->set_scl(vec2(1.f - training.timer / training.duration, 1.f));
-					c->find_child_recursively("text")->get_component_t<cText>()->set_text(std::format(L"{}:{}", int(training.timer / 60.f), int(training.timer)));
+					c->find_child_recursively("number")->get_component<cText>()->set_text(wstr(training.number));
+					c->find_child_recursively("bar")->get_component<cElement>()->set_scl(vec2(1.f - training.timer / training.duration, 1.f));
+					c->find_child_recursively("text")->get_component<cText>()->set_text(std::format(L"{}:{}", int(training.timer / 60.f), int(training.timer)));
 				}
 			}
 		}
@@ -613,19 +689,19 @@ void update_ui()
 		if (auto e = ui_resource_bar->find_child("blood_text"); e)
 		{
 			e->set_enable(true);
-			e->get_component_t<cText>()->set_text(wstr(player1.blood));
+			e->get_component<cText>()->set_text(wstr(player1.blood));
 		}
 		ui_resource_bar->find_child("bones_icon")->set_enable(true);
 		if (auto e = ui_resource_bar->find_child("bones_text"); e)
 		{
 			e->set_enable(true);
-			e->get_component_t<cText>()->set_text(wstr(player1.bones));
+			e->get_component<cText>()->set_text(wstr(player1.bones));
 		}
 		ui_resource_bar->find_child("soul_sand_icon")->set_enable(true);
 		if (auto e = ui_resource_bar->find_child("soul_sand_text"); e)
 		{
 			e->set_enable(true);
-			e->get_component_t<cText>()->set_text(wstr(player1.soul_sand));
+			e->get_component<cText>()->set_text(wstr(player1.soul_sand));
 		}
 	}
 
@@ -693,27 +769,27 @@ void update_ui()
 
 		if (hovering_character)
 		{
-			if (auto first_child = hovering_character->entity->children.empty() ? nullptr : hovering_character->entity->children[0].get(); first_child)
+			std::vector<CommonDraw> ds;
+			for (auto& c : hovering_character->entity->children)
 			{
-				std::vector<CommonDraw> ds;
-				for (auto& c : first_child->children)
+				for (auto mesh : c->get_components<cMesh>(1))
 				{
-					if (auto node = c->node(); !node || !AABB_frustum_check(main_camera.camera->frustum, node->bounds))
+					if (!AABB_frustum_check(main_camera.camera->frustum, mesh->node->bounds))
 						continue;
-					if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+					if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
 						ds.emplace_back("mesh"_h, mesh->mesh_res_id, mesh->instance_id);
 				}
-				sRenderer::instance()->draw_outlines(ds, hovering_character->faction == player1.faction ? 
-					cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
 			}
+			sRenderer::instance()->draw_outlines(ds, hovering_character->faction == player1.faction ?
+				cvec4(64, 128, 64, 255) : cvec4(128, 64, 64, 255), 4, "BOX"_h);
 		}
 		if (hovering_chest)
 		{
 			for (auto& c : hovering_chest->entity->get_all_children())
 			{
-				if (auto node = c->node(); !node || !AABB_frustum_check(main_camera.camera->frustum, node->bounds))
+				if (auto node = c->get_component<cNode>(); !node || !AABB_frustum_check(main_camera.camera->frustum, node->bounds))
 					continue;
-				if (auto mesh = c->get_component_t<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
+				if (auto mesh = c->get_component<cMesh>(); mesh && mesh->instance_id != -1 && mesh->mesh_res_id != -1)
 				{
 					CommonDraw d("mesh"_h, mesh->mesh_res_id, mesh->instance_id);
 					sRenderer::instance()->draw_outlines({ d }, cvec4(64, 128, 64, 255), 4, "BOX"_h);
@@ -764,8 +840,8 @@ void show_tooltip(const vec2& pos, const std::wstring& text)
 	if (ui_tooltip)
 	{
 		ui_tooltip->set_enable(true);
-		ui_tooltip->element()->set_pos(pos);
-		ui_tooltip->find_child("text")->get_component_t<cText>()->set_text(text);
+		ui_tooltip->get_component<cElement>()->set_pos(pos);
+		ui_tooltip->find_child("text")->get_component<cText>()->set_text(text);
 		ui_tooltip->find_child("resources")->set_enable(false);
 	}
 }
@@ -775,8 +851,8 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 	if (ui_tooltip)
 	{
 		ui_tooltip->set_enable(true);
-		ui_tooltip->element()->set_pos(pos);
-		ui_tooltip->find_child("text")->get_component_t<cText>()->set_text(text);
+		ui_tooltip->get_component<cElement>()->set_pos(pos);
+		ui_tooltip->find_child("text")->get_component<cText>()->set_text(text);
 		auto e_resources = ui_tooltip->find_child("resources");
 		e_resources->set_enable(true);
 		if (blood > 0)
@@ -785,7 +861,7 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 			if (auto e = e_resources->find_child("blood_text"); e)
 			{
 				e->set_enable(true);
-				e->get_component_t<cText>()->set_text(wstr(blood));
+				e->get_component<cText>()->set_text(wstr(blood));
 			}
 		}
 		else
@@ -799,7 +875,7 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 			if (auto e = e_resources->find_child("bones_text"); e)
 			{
 				e->set_enable(true);
-				e->get_component_t<cText>()->set_text(wstr(bones));
+				e->get_component<cText>()->set_text(wstr(bones));
 			}
 		}
 		else
@@ -813,7 +889,7 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 			if (auto e = e_resources->find_child("soul_sand_text"); e)
 			{
 				e->set_enable(true);
-				e->get_component_t<cText>()->set_text(wstr(soul_sand));
+				e->get_component<cText>()->set_text(wstr(soul_sand));
 			}
 		}
 		else
@@ -832,4 +908,28 @@ void close_tooltip()
 		ui_tooltip->set_enable(false);
 		ui_tooltip->find_child("resources")->set_enable(false);
 	}
+}
+
+static std::map<graphics::ImagePtr, graphics::ImagePtr> gray_icons;
+graphics::ImagePtr get_gray_icon(graphics::ImagePtr icon)
+{
+	auto it = gray_icons.find(icon);
+	if (it != gray_icons.end())
+		return it->second;
+	auto img = graphics::Image::create(icon->format, icon->extent, graphics::ImageUsageAttachment | graphics::ImageUsageSampled);
+	{
+		graphics::InstanceCommandBuffer cb;
+		cb->image_barrier(img, {}, graphics::ImageLayoutAttachment);
+		cb->set_viewport_and_scissor(Rect(vec2(0.f), icon->extent.xy()));
+		cb->begin_renderpass(nullptr, img->get_shader_write_dst());
+		auto pl = graphics::GraphicsPipeline::get(L"flame\\shaders\\grayscale.pipeline", {});
+		cb->bind_pipeline(pl);
+		cb->bind_descriptor_set(0, icon->get_shader_read_src());
+		cb->draw(3, 1, 0, 0);
+		cb->end_renderpass();
+		cb->image_barrier(img, {}, graphics::ImageLayoutShaderReadOnly);
+		cb.excute();
+	}
+	gray_icons[icon] = img;
+	return img;
 }

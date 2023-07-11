@@ -31,20 +31,12 @@ bool removing_dead_characters = false;
 
 float cCharacter::get_radius()
 {
-	if (nav_agent)
-		return nav_agent->radius;
-	if (nav_obstacle)
-		return nav_obstacle->radius;
-	return 0.f;
+	return info->nav_radius;
 }
 
 float cCharacter::get_height()
 {
-	if (nav_agent)
-		return nav_agent->height;
-	if (nav_obstacle)
-		return nav_obstacle->height;
-	return 0.f;
+	return info->nav_height;
 }
 
 vec3 cCharacter::get_pos(float height_factor)
@@ -90,16 +82,14 @@ cCharacter::~cCharacter()
 
 void cCharacter::on_init()
 {
-	nav_agent = entity->get_component_t<cNavAgent>();
-	if (nav_agent)
-		nav_agent->separation_group = faction;
-	nav_obstacle = entity->get_component_t<cNavObstacle>();
-	audio_source = entity->get_component_t<cAudioSource>();
+	nav_agent = entity->get_component<cNavAgent>();
+	nav_obstacle = entity->get_component<cNavObstacle>();
+	audio_source = entity->get_component<cAudioSource>();
 
 	auto e = entity;
 	while (e)
 	{
-		if (armature = e->get_component_t<cArmature>(); armature)
+		if (armature = e->get_component<cArmature>(); armature)
 			break;
 		if (e->children.empty())
 			break;
@@ -125,11 +115,24 @@ void cCharacter::start()
 	entity->tag = entity->tag | CharacterTag;
 
 	entity->traversal_bfs([this](EntityPtr e, int depth) {
-		if (auto a = e->get_component_t<cArmature>(); a)
+		if (auto a = e->get_component<cArmature>(); a)
 			armature = a;
 		if ((armature) || depth > 2)
 			return false; 
 	});
+
+	if (nav_agent)
+	{
+		nav_agent->radius = info->nav_radius;
+		nav_agent->height = info->nav_height;
+		nav_agent->speed = info->nav_speed;
+		nav_agent->separation_group = faction;
+	}
+	if (nav_obstacle)
+	{
+		nav_obstacle->radius = info->nav_radius;
+		nav_obstacle->height = info->nav_height;
+	}
 
 	if (audio_source)
 	{
@@ -435,7 +438,7 @@ void cCharacter::inflict_damage(cCharacterPtr target, DamageType type, uint valu
 	case PhysicalDamage:
 		def = target->phy_def;
 		break;
-	case MagicDamage:
+	case MagicalDamage:
 		def = target->mag_def;
 		break;
 	}

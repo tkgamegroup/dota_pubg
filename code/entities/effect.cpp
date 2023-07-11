@@ -55,7 +55,7 @@ bool removing_dead_effects = false;
 //			auto& iap = *(IDAndPos*)data;
 //			if (auto it = objects.find(iap.id); it != objects.end())
 //			{
-//				auto character = it->second->entity->get_component_t<cCharacter>();
+//				auto character = it->second->entity->get_component<cCharacter>();
 //				target0.set(character);
 //				auto node = character->node;
 //				node->data_listeners.add([this, node](uint hash) {
@@ -72,7 +72,7 @@ bool removing_dead_effects = false;
 //			auto& iap = *(IDAndPos*)data;
 //			if (auto it = objects.find(iap.id); it != objects.end())
 //			{
-//				auto character = it->second->entity->get_component_t<cCharacter>();
+//				auto character = it->second->entity->get_component<cCharacter>();
 //				target1.set(character);
 //				auto node = character->node;
 //				node->data_listeners.add([this, node](uint hash) {
@@ -118,9 +118,9 @@ void cEffect::set_type(uint t)
 
 void cEffect::start()
 {
-	particle_system = entity->get_component_t<cParticleSystem>();
+	particle_system = entity->get_component<cParticleSystem>();
 	if (!particle_system && !entity->children.empty())
-		particle_system = entity->children[0]->get_component_t<cParticleSystem>();
+		particle_system = entity->children[0]->get_component<cParticleSystem>();
 
 	timer = duration;
 

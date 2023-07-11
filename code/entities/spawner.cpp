@@ -23,7 +23,7 @@ void cSpawner::update()
 			{
 				if (auto character = add_character(info, node->pos, faction); character)
 				{
-					if (auto ai = character->entity->get_component_t<cAI>(); ai)
+					if (auto ai = character->entity->get_component<cAI>(); ai)
 					{
 						ai->type = unit_type;
 						ai->target_pos = unit_target_pos;

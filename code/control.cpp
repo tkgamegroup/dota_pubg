@@ -28,7 +28,7 @@ cChestPtr		hovering_chest = nullptr;
 bool			hovering_terrain = false;
 cNodePtr		hovering_town;
 
-cNodePtr										selected_target = nullptr;
+Tracker											selected_target = nullptr;
 Listeners<void()>								select_callbacks;
 TargetTypeFlags									select_mode = TargetNull;
 bool											select_multiple_times = false;
@@ -53,7 +53,7 @@ void reset_select()
 
 void init_control()
 {
-	selected_target = nullptr;
+	selected_target.reset();
 }
 
 void update_control()
@@ -70,25 +70,22 @@ void update_control()
 		hovering_node = sRenderer::instance()->pick_up(input->mpos, &hovering_pos, [](cNodePtr n, DrawData& draw_data) {
 			if (draw_data.categories & CateMesh)
 			{
-				if (auto character = n->entity->get_component_t<cCharacter>(); character)
+				if (auto character = n->entity->get_component<cCharacter>(); character)
 				{
-					if (auto first_child = character->entity->children.empty() ? nullptr : character->entity->children[0].get(); first_child)
+					for (auto& c : character->entity->children)
 					{
-						for (auto& c : first_child->children)
+						for (auto mesh : c->get_components<cMesh>(1))
 						{
-							if (auto mesh = c->get_component_t<cMesh>(); mesh)
-							{
-								if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
-									draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
-							}
+							if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
+								draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 						}
 					}
 				}
-				if (auto chest = n->entity->get_component_t<cChest>(); chest)
+				if (auto chest = n->entity->get_component<cChest>(); chest)
 				{
 					for (auto& c : chest->entity->get_all_children())
 					{
-						if (auto mesh = c->get_component_t<cMesh>(); mesh)
+						if (auto mesh = c->get_component<cMesh>(); mesh)
 						{
 							if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
 								draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
@@ -98,15 +95,15 @@ void update_control()
 
 				if (n->entity->name == "navmesh_model")
 				{
-					if (auto mesh = n->entity->get_component_t<cMesh>(); mesh)
+					if (auto mesh = n->entity->get_component<cMesh>(); mesh)
 					{
 						if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
 							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 					}
 				}
-				if (n->entity->name.ends_with("_town"))
+				if (auto town = n->entity->get_component<cTown>(); town)
 				{
-					if (auto mesh = n->entity->get_component_t<cMesh>(); mesh)
+					if (auto mesh = n->entity->get_component<cMesh>(); mesh)
 					{
 						if (mesh->instance_id != -1 && mesh->mesh_res_id != -1 && mesh->material_res_id != -1)
 							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
@@ -115,7 +112,7 @@ void update_control()
 			}
 			if (draw_data.categories & CateTerrain)
 			{
-				if (auto terrain = n->entity->get_component_t<cTerrain>(); terrain)
+				if (auto terrain = n->entity->get_component<cTerrain>(); terrain)
 				{
 					if (terrain->instance_id != -1)
 						draw_data.terrains.emplace_back(terrain->instance_id, terrain->blocks, terrain->material_res_id);
@@ -123,7 +120,7 @@ void update_control()
 			}
 			if (draw_data.categories & CateMarchingCubes)
 			{
-				if (auto volume = n->entity->get_component_t<cVolume>(); volume)
+				if (auto volume = n->entity->get_component<cVolume>(); volume)
 				{
 					if (volume->marching_cubes)
 					{
@@ -152,17 +149,17 @@ void update_control()
 			return true;
 		};
 		sScene::instance()->navmesh_nearest_point(hovering_pos, vec3(2.f, 4.f, 2.f), hovering_pos);
-		if (auto character = hovering_node->entity->get_component_t<cCharacter>(); character)
+		if (auto character = hovering_node->entity->get_component<cCharacter>(); character)
 		{
 			if (select_mode == TargetNull || can_select(character))
 				hovering_character = character;
 		}
-		if (auto chest = hovering_node->entity->get_component_t<cChest>(); chest)
+		if (auto chest = hovering_node->entity->get_component<cChest>(); chest)
 		{
 			hovering_chest = chest;
 			//tooltip = Item::get(hovering_chest->item_id).name;
 		}
-		if (hovering_node->entity->name == "navmesh_model" || hovering_node->entity->get_component_t<cTerrain>() || hovering_node->entity->get_component_t<cVolume>())
+		if (hovering_node->entity->name == "navmesh_model" || hovering_node->entity->get_component<cTerrain>() || hovering_node->entity->get_component<cVolume>())
 		{
 			hovering_terrain = true;
 
@@ -177,7 +174,7 @@ void update_control()
 						auto min_dist = 10000.f;
 						for (auto n : objs)
 						{
-							if (auto character = n->entity->get_component_t<cCharacter>(); character)
+							if (auto character = n->entity->get_component<cCharacter>(); character)
 							{
 								if (!can_select(character))
 									continue;
@@ -193,7 +190,7 @@ void update_control()
 				}
 			}
 		}
-		if (hovering_node->entity->name.ends_with("_town"))
+		if (auto town = hovering_node->entity->get_component<cTown>(); town)
 		{
 			hovering_town = hovering_node;
 		}
@@ -213,13 +210,18 @@ void update_control()
 				//focus_character.set(hovering_character ? hovering_character : nullptr);
 				if (hovering_character)
 				{
-
+					if (selected_target.get<cNodePtr>() != hovering_character->node)
+					{
+						selected_target.set(hovering_character->node);
+						if (select_callbacks)
+							select_callbacks.call();
+					}
 				}
 				else if (hovering_town)
 				{
-					if (selected_target != hovering_town)
+					if (selected_target.get<cNodePtr>() != hovering_town)
 					{
-						selected_target = hovering_town;
+						selected_target.set(hovering_town);
 						if (select_callbacks)
 							select_callbacks.call();
 					}

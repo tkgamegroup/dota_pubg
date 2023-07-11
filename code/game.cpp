@@ -29,8 +29,8 @@ void MainCamera::init(EntityPtr e)
 	entity = e;
 	if (e)
 	{
-		node = e->node();
-		camera = e->get_component_t<cCamera>();
+		node = e->get_component<cNode>();
+		camera = e->get_component<cCamera>();
 	}
 }
 
@@ -180,7 +180,7 @@ std::vector<cCharacterPtr> find_characters_within_circle(FactionFlags faction, c
 	sScene::instance()->octree->get_colliding(pos.xz(), radius, objs, CharacterTag);
 	for (auto obj : objs)
 	{
-		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
+		if (auto chr = obj->entity->get_component<cCharacter>(); chr && (chr->faction & faction))
 			ret.push_back(chr);
 	}
 
@@ -207,7 +207,7 @@ std::vector<cCharacterPtr> find_characters_within_sector(FactionFlags faction, c
 	sScene::instance()->octree->get_colliding(pos.xz(), outer_radius, objs, CharacterTag);
 	for (auto obj : objs)
 	{
-		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
+		if (auto chr = obj->entity->get_component<cCharacter>(); chr && (chr->faction & faction))
 		{
 			if (circle_sector_intersect(obj->pos, chr->nav_agent->radius, pos, inner_radius, outer_radius, angle, rotation))
 				ret.push_back(chr);
@@ -237,7 +237,7 @@ std::vector<cCharacterPtr> find_characters_within_camera(FactionFlags faction)
 	sScene::instance()->octree->get_within_frustum(main_camera.camera->frustum, objs, CharacterTag);
 	for (auto obj : objs)
 	{
-		if (auto chr = obj->entity->get_component_t<cCharacter>(); chr && (chr->faction & faction))
+		if (auto chr = obj->entity->get_component<cCharacter>(); chr && (chr->faction & faction))
 			ret.push_back(chr);
 	}
 
@@ -248,7 +248,7 @@ cCharacterPtr add_character(const CharacterInfo* info, const vec3& _pos, Faction
 {
 	auto e = get_prefab(info->prefab_name);
 	float radius = 0.f;
-	if (auto nav_agent = e->get_component_t<cNavAgent>(); nav_agent)
+	if (auto nav_agent = e->get_component<cNavAgent>(); nav_agent)
 		radius = nav_agent->radius;
 	auto pos = _pos;
 	if (radius > 0.f)
@@ -259,9 +259,9 @@ cCharacterPtr add_character(const CharacterInfo* info, const vec3& _pos, Faction
 	}
 	e = e->duplicate();
 
-	auto node = e->node();
-	auto object = e->get_component_t<cObject>();
-	auto character = e->get_component_t<cCharacter>();
+	auto node = e->get_component<cNode>();
+	auto object = e->get_component<cObject>();
+	auto character = e->get_component<cCharacter>();
 	node->set_pos(pos);
 	//object->init(1000 + prefab_id, id);
 	characters.push_back(character);
@@ -269,7 +269,7 @@ cCharacterPtr add_character(const CharacterInfo* info, const vec3& _pos, Faction
 	character->set_faction(faction);
 	if (multi_player == MultiPlayerAsHost)
 	{
-		//auto harvester = e->add_component_t<cNWDataHarvester>();
+		//auto harvester = e->add_component<cNWDataHarvester>();
 		//harvester->add_target(th<cCharacter>(), "hp"_h);
 		//harvester->add_target(th<cCharacter>(), "hp_max"_h);
 		//harvester->add_target(th<cCharacter>(), "mp"_h);
@@ -284,10 +284,10 @@ cCharacterPtr add_character(const CharacterInfo* info, const vec3& _pos, Faction
 cProjectilePtr add_projectile(const ProjectileInfo* info, const vec3& pos, cCharacterPtr target, float speed, uint id)
 {
 	auto e = get_prefab(info->prefab_name)->duplicate();
-	e->node()->set_pos(pos);
-	auto object = e->get_component_t<cObject>();
+	e->get_component<cNode>()->set_pos(pos);
+	auto object = e->get_component<cObject>();
 	//object->init(2000 + prefab_id, id);
-	auto projectile = e->get_component_t<cProjectile>();
+	auto projectile = e->get_component<cProjectile>();
 	projectiles.push_back(projectile);
 	projectile->info = info;
 	projectile->target.set(target);
@@ -300,10 +300,10 @@ cProjectilePtr add_projectile(const ProjectileInfo* info, const vec3& pos, cChar
 cProjectilePtr add_projectile(const ProjectileInfo* info, const vec3& pos, const vec3& location, float speed, uint id)
 {
 	auto e = get_prefab(info->prefab_name)->duplicate();
-	e->node()->set_pos(pos);
-	auto object = e->get_component_t<cObject>();
+	e->get_component<cNode>()->set_pos(pos);
+	auto object = e->get_component<cObject>();
 	//object->init(2000 + prefab_id, id);
-	auto projectile = e->get_component_t<cProjectile>();
+	auto projectile = e->get_component<cProjectile>();
 	projectiles.push_back(projectile);
 	projectile->info = info;
 	projectile->use_target = false;
@@ -317,12 +317,12 @@ cProjectilePtr add_projectile(const ProjectileInfo* info, const vec3& pos, const
 cEffectPtr add_effect(const EffectInfo* info, const vec3& pos, const quat& qut, float duration, uint id)
 {
 	auto e = get_prefab(info->prefab_name)->duplicate();
-	auto node = e->node();
+	auto node = e->get_component<cNode>();
 	node->set_pos(pos);
 	node->set_qut(qut);
-	auto object = e->get_component_t<cObject>();
+	auto object = e->get_component<cObject>();
 	//object->init(3000 + prefab_id, id);
-	auto effect = e->get_component_t<cEffect>();
+	auto effect = e->get_component<cEffect>();
 	effects.push_back(effect);
 	effect->info = info;
 	effect->duration = duration;
@@ -334,11 +334,11 @@ cEffectPtr add_effect(const EffectInfo* info, const vec3& pos, const quat& qut, 
 cChestPtr add_chest(const vec3& pos, uint item_id, uint item_num, uint id)
 {
 	auto e = get_prefab(L"assets\\models\\chest.prefab")->duplicate();
-	e->node()->set_pos(get_map_coord(pos));
+	e->get_component<cNode>()->set_pos(get_map_coord(pos));
 	root->add_child(e);
-	auto object = e->get_component_t<cObject>();
+	auto object = e->get_component<cObject>();
 	object->init(4000, id);
-	auto chest = e->get_component_t<cChest>();
+	auto chest = e->get_component<cChest>();
 	chests.push_back(chest);
 	chest->item_id = item_id;
 	chest->item_num = item_num;
@@ -399,7 +399,7 @@ void cGame::start()
 	player2.init(root->find_child_recursively("player2_town"));
 	if (player2.town.e)
 	{
-		if (auto node = player2.town.e->node(); node)
+		if (auto node = player2.town.e->get_component<cNode>(); node)
 		{
 			node->update_transform_from_root();
 			player1.town.target_pos = node->global_pos();
@@ -407,7 +407,7 @@ void cGame::start()
 	}
 	if (player1.town.e)
 	{
-		if (auto node = player1.town.e->node(); node)
+		if (auto node = player1.town.e->get_component<cNode>(); node)
 		{
 			node->update_transform_from_root();
 			player2.town.target_pos = node->global_pos();
@@ -486,7 +486,7 @@ void enter_scene(EntityPtr root)
 {
 	add_event([root]() {
 		graphics::gui_set_clear(false, vec4(0.f));
-		root->remove_component_t<cLauncher>();
+		root->remove_component<cLauncher>();
 		root->load(L"assets\\main.prefab");
 		return false;
 	});

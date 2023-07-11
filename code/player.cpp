@@ -63,15 +63,15 @@ void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 	hp_max = info->hp_max;
 	hp = hp_max;
 
-	if (auto collider = e->get_component_t<cCircleCollider>(); collider)
+	if (auto collider = e->get_component<cCircleCollider>(); collider)
 	{
 		collider->callbacks.clear();
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {
 			if (type == "enter"_h)
 			{
-				if (auto ai = character->entity->get_component_t<cAI>(); ai)
+				if (auto ai = character->entity->get_component<cAI>(); ai)
 				{
-					if (distance(ai->target_pos, e->node()->global_pos()) < 0.5f)
+					if (distance(ai->target_pos, e->get_component<cNode>()->global_pos()) < 0.5f)
 					{
 						character->die("removed"_h);
 						hp--;
@@ -86,7 +86,7 @@ void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 	}
 
 	if (auto e_spawn_node = e->find_child("spawn_node"); e_spawn_node)
-		spawn_node = e_spawn_node->node();
+		spawn_node = e_spawn_node->get_component<cNode>();
 
 	buildings.clear();
 }
@@ -107,7 +107,7 @@ uint TownInstance::get_blood_production() const
 
 uint TownInstance::get_bones_production() const
 {
-	uint ret = 16;
+	uint ret = 8;
 	for (auto& b : buildings)
 	{
 		for (auto& r : b.info->resource_production)
@@ -121,7 +121,7 @@ uint TownInstance::get_bones_production() const
 
 uint TownInstance::get_soul_sand_production() const
 {
-	uint ret = 16;
+	uint ret = 1;
 	for (auto& b : buildings)
 	{
 		for (auto& r : b.info->resource_production)
@@ -265,7 +265,7 @@ void TownInstance::update()
 				{
 					if (auto character = add_character(t.unit_info, spawn_node->global_pos(), player->faction); character)
 					{
-						if (auto ai = character->entity->get_component_t<cAI>(); ai)
+						if (auto ai = character->entity->get_component<cAI>(); ai)
 						{
 							ai->type = UnitLaneCreep;
 							ai->target_pos = target_pos;
