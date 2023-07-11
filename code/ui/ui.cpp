@@ -20,6 +20,7 @@
 #include "../entities/character.h"
 #include "../entities/ability.h"
 #include "../entities/chest.h"
+#include "../entities/town.h"
 #include "ui.h"
 
 bool selected_target_changed = true;
@@ -208,7 +209,7 @@ struct BottomPanel
 			else if (character->faction == player2.faction)
 				col = cvec4(255, 100, 100, 255);
 			name_text->set_col(col);
-			name_text->set_text(s2w(selected_target.entity->name));
+			name_text->set_text(s2w(character->info->name));
 		}
 		if (hp_bar)
 			hp_bar->set_enable(true);
@@ -229,23 +230,20 @@ struct BottomPanel
 			else if (town->player == &player2)
 				col = cvec4(255, 100, 100, 255);
 			name_text->set_col(col);
-			name_text->set_text(s2w(selected_target.entity->name));
+			name_text->set_text(s2w(town->info->name));
 		}
 		if (hp_bar)
 			hp_bar->set_enable(true);
 
 		if (resources_production_panel)
-			resources_production_panel->set_enable(true);
+		{
+			if (town->player->faction == player1.faction)
+				resources_production_panel->set_enable(true);
+		}
 	}
 
-	void update_town_basics()
+	void update_town_production()
 	{
-		if (hp_bar)
-		{
-			hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
-			hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
-		}
-
 		if (blood_production_text)
 			blood_production_text->set_text(wstr(town->get_blood_production()));
 		if (bones_production_text)
@@ -359,24 +357,45 @@ struct BottomPanel
 					});
 				}
 			}
-			else
+			else if (town->player->faction != player1.faction)
 			{
-				auto c = action_list->entity->children[last_row].get();
-				if (auto image = c->get_component<cImage>(); image)
-					image->set_image_name(Path::get(L"assets\\extra\\icons\\attack.png"));
-				if (auto receiver = c->get_component<cReceiver>(); receiver)
 				{
-
-					receiver->event_listeners.add([this, c](uint type, const vec2&) {
-						switch (type)
-						{
-						case "mouse_enter"_h:
-							show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Attack This Town");
-							break;
-						case "click"_h:
-							break;
-						}
-					});
+					auto c = action_list->entity->children[0].get();
+					if (auto image = c->get_component<cImage>(); image)
+						image->set_image_name(Path::get(L"assets\\extra\\icons\\attack.png"));
+					if (auto receiver = c->get_component<cReceiver>(); receiver)
+					{
+						receiver->event_listeners.add([this, c](uint type, const vec2&) {
+							switch (type)
+							{
+							case "mouse_enter"_h:
+								show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Attack This Town");
+								break;
+							case "click"_h:
+								player1.town.add_attack_target(town->e->get_component<cNode>());
+								break;
+							}
+						});
+					}
+				}
+				{
+					auto c = action_list->entity->children[1].get();
+					if (auto image = c->get_component<cImage>(); image)
+						image->set_image_name(Path::get(L"assets\\extra\\icons\\cancel.png"));
+					if (auto receiver = c->get_component<cReceiver>(); receiver)
+					{
+						receiver->event_listeners.add([this, c](uint type, const vec2&) {
+							switch (type)
+							{
+							case "mouse_enter"_h:
+								show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel Actions On This Town");
+								break;
+							case "click"_h:
+								player1.town.remove_attack_target(town->e->get_component<cNode>());
+								break;
+							}
+						});
+					}
 				}
 			}
 		}
@@ -553,7 +572,7 @@ struct BottomPanel
 
 	void update()
 	{
-		if (selected_target_changed)
+		if (selected_target_changed && selected_target)
 		{
 			if (auto character = selected_target.entity->get_component<cCharacter>(); character)
 			{
@@ -578,16 +597,41 @@ struct BottomPanel
 			update_character();
 			break;
 		case PanelTownMain:
-			update_town_basics();
-			update_town_construction();
+			if (hp_bar)
+			{
+				hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
+				hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
+			}
+
+			if (town->player->faction == player1.faction)
+				update_town_production();
+			if (town->player == &player1)
+				update_town_construction();
 			break;
 		case PanelTownConstrucion:
-			update_town_basics();
-			update_town_construction();
+			if (hp_bar)
+			{
+				hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
+				hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
+			}
+
+			if (town->player->faction == player1.faction)
+				update_town_production();
+			if (town->player == &player1)
+				update_town_construction();
 			break;
 		case PanelTownBuilding:
 		{
-			update_town_basics();
+			if (hp_bar)
+			{
+				hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)town->hp / (float)town->hp_max, 1.f));
+				hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
+			}
+
+			if (town->player->faction == player1.faction)
+				update_town_production();
+			if (town->player == &player1)
+				update_town_construction();
 
 			auto& building = town->buildings[building_index];
 			if (training_list)
@@ -729,34 +773,36 @@ void update_ui()
 		}
 	}
 
-	// TODO: show selected character
-	//if (main_player.character)
-	//{
-	//	auto r = main_player.nav_agent->radius + 0.05f;
-	//	auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
-	//	std::vector<vec3> pts(circle_draw.pts.size() * 2);
-	//	auto center = main_player.node->pos;
-	//	center.y += 0.1f;
-	//	for (auto i = 0; i < circle_draw.pts.size(); i++)
-	//	{
-	//		pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
-	//		pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
-	//	}
-	//	sRenderer::instance()->draw_primitives("LineList"_h, pts.data(), pts.size(), cvec4(85, 131, 79, 255), true);
-	//}
+	if (selected_target)
+	{
+		if (auto character = selected_target.entity->get_component<cCharacter>(); character)
+		{
+			auto r = character->get_radius() + 0.05f;
+			auto circle_draw = graphics::GuiCircleDrawer(circle_lod(r));
+			std::vector<vec3> pts(circle_draw.pts.size() * 2);
+			auto center = character->node->pos;
+			center.y += 0.1f;
+			for (auto i = 0; i < circle_draw.pts.size(); i++)
+			{
+				pts[i * 2 + 0] = center + vec3(r * circle_draw.get_pt(i), 0.f).xzy();
+				pts[i * 2 + 1] = center + vec3(r * circle_draw.get_pt(i + 1), 0.f).xzy();
+			}
+			sRenderer::instance()->draw_primitives("LineList"_h, pts.data(), pts.size(), cvec4(85, 131, 79, 255), true);
+		}
+	}
 
 	if (main_camera.camera)
 	{
 		auto camera_x = main_camera.node->x_axis();
-		for (auto& character : find_characters_within_camera((FactionFlags)0xffffffff))
+		for (auto character : find_characters_within_camera((FactionFlags)0xffffffff))
 		{
 			auto radius = character->get_radius();
 			auto height = character->get_height();
 			auto pos = character->node->pos;
-			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.1f, 0.f) - camera_x * radius);
+			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.2f, 0.f) - camera_x * radius);
 			if (p0.x < 0.f)
 				continue;
-			auto p1 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.1f, 0.f) + camera_x * radius);
+			auto p1 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.2f, 0.f) + camera_x * radius);
 			if (p1.x < 0.f)
 				continue;
 			auto p2 = main_camera.camera->world_to_screen(pos + vec3(0.f, height, 0.f) + camera_x * radius);
@@ -765,6 +811,27 @@ void update_ui()
 			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
 			if (w > 0.f && h > 0.f)
 				canvas->add_rect_filled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * w, h), cvec4(80, 160, 85, 255));
+		}
+		for (auto town : towns)
+		{
+			const auto radius = 5.f;
+			const auto height = 5.f;
+			auto pos = town->node->global_pos();
+			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.5f, 0.f) - camera_x * radius);
+			if (p0.x < 0.f)
+				continue;
+			auto p1 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.5f, 0.f) + camera_x * radius);
+			if (p1.x < 0.f)
+				continue;
+			auto p2 = main_camera.camera->world_to_screen(pos + vec3(0.f, height, 0.f) + camera_x * radius);
+			if (p2.x < 0.f)
+				continue;
+			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
+			if (w > 0.f && h > 0.f)
+			{
+				canvas->add_rect_filled(p0, p0 + vec2((float)town->ins->hp / (float)town->ins->hp_max * w, h), cvec4(80, 160, 85, 255));
+				canvas->add_text(nullptr, 24, p0 + vec2(0.f, -24.f), wstr(town->ins->hp) + L'/' + wstr(town->ins->hp_max), cvec4(255), 0.5f, 0.2f);
+			}
 		}
 
 		if (hovering_character)

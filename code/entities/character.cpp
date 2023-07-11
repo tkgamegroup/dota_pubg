@@ -31,11 +31,15 @@ bool removing_dead_characters = false;
 
 float cCharacter::get_radius()
 {
+	if (!info)
+		return 0.f;
 	return info->nav_radius;
 }
 
 float cCharacter::get_height()
 {
+	if (!info)
+		return 0.f;
 	return info->nav_height;
 }
 

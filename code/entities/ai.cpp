@@ -102,7 +102,11 @@ void cAI::update()
 		{
 		case cCharacter::CommandIdle:
 			if (!attack_closest())
+			{
+				if (target_node)
+					target_pos = target_node->global_pos();
 				character->cmd_move_to(target_pos);
+			}
 			break;
 		case cCharacter::CommandMoveTo:
 			attack_closest();

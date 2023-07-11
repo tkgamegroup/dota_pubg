@@ -7,6 +7,7 @@
 #include "entities/character.h"
 #include "entities/ai.h"
 #include "entities/collider.h"
+#include "entities/town.h"
 
 void BuildingInstance::add_training(const TrainingAction* action, int number)
 {
@@ -57,6 +58,12 @@ void BuildingInstance::remove_training(const TrainingAction* action)
 void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 {
 	e = _e;
+	auto c_town = e->get_component<cTown>();
+	if (c_town)
+	{
+		towns.push_back(c_town);
+		c_town->ins = this;
+	}
 	player = _player;
 	info = _info;
 
@@ -71,14 +78,19 @@ void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 			{
 				if (auto ai = character->entity->get_component<cAI>(); ai)
 				{
-					if (distance(ai->target_pos, e->get_component<cNode>()->global_pos()) < 0.5f)
+					if (ai->target_node == e->get_component<cNode>())
 					{
-						character->die("removed"_h);
-						hp--;
-						if (hp == 0)
+						if (character->faction != player->faction)
 						{
+							character->die("removed"_h);
+							hp--;
+							if (hp == 0)
+							{
 
+							}
 						}
+						else
+							ai->target_node = nullptr;
 					}
 				}
 			}
@@ -179,6 +191,37 @@ void TownInstance::remove_construction(const ConstructionAction* action)
 	constructions_changed_frame = frames;
 }
 
+void TownInstance::add_attack_target(cNodePtr target)
+{
+	auto it = std::find_if(attack_list.begin(), attack_list.end(), [&](const auto& i) {
+		return i == target;
+	});
+	if (it == attack_list.end())
+	{
+		attack_list.emplace_back(target);
+	}
+}
+
+void TownInstance::remove_attack_target(cNodePtr target)
+{
+	for (auto it = attack_list.begin(); it != attack_list.end(); it++)
+	{
+		if (*it == target)
+		{
+			attack_list.erase(it);
+			return;
+		}
+	}
+	for (auto character : troop)
+	{
+		if (auto ai = character->entity->get_component<cAI>(); ai)
+		{
+			if (ai->target_node == target)
+				ai->target_node = e->get_component<cNode>();
+		}
+	}
+}
+
 void TownInstance::update()
 {
 	for (auto& c : constructions)
@@ -265,10 +308,23 @@ void TownInstance::update()
 				{
 					if (auto character = add_character(t.unit_info, spawn_node->global_pos(), player->faction); character)
 					{
+						troop.push_back(character);
+						character->entity->message_listeners.add([this, character](uint hash, void*, void*) {
+							if (hash == "destroyed"_h)
+							{
+								std::erase_if(troop, [&](const auto& i) {
+									return i == character;
+								});
+							}
+						});
 						if (auto ai = character->entity->get_component<cAI>(); ai)
 						{
 							ai->type = UnitLaneCreep;
-							ai->target_pos = target_pos;
+							if (!attack_list.empty())
+							{
+								auto idx = linearRand(0, (int)attack_list.size() - 1);
+								ai->target_node = attack_list[idx];
+							}
 						}
 					}
 				}
@@ -283,6 +339,20 @@ void TownInstance::update()
 			}
 			else
 				it++;
+		}
+	}
+	for (auto character : troop)
+	{
+		if (auto ai = character->entity->get_component<cAI>(); ai)
+		{
+			if (!ai->target_node)
+			{
+				if (!attack_list.empty())
+				{
+					auto idx = linearRand(0, (int)attack_list.size() - 1);
+					ai->target_node = attack_list[idx];
+				}
+			}
 		}
 	}
 }

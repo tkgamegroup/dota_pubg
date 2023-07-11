@@ -402,7 +402,7 @@ void cGame::start()
 		if (auto node = player2.town.e->get_component<cNode>(); node)
 		{
 			node->update_transform_from_root();
-			player1.town.target_pos = node->global_pos();
+			player1.town.add_attack_target(node);
 		}
 	}
 	if (player1.town.e)
@@ -410,7 +410,7 @@ void cGame::start()
 		if (auto node = player1.town.e->get_component<cNode>(); node)
 		{
 			node->update_transform_from_root();
-			player2.town.target_pos = node->global_pos();
+			player2.town.add_attack_target(node);
 		}
 	}
 

@@ -51,7 +51,8 @@ struct TownInstance
 	uint constructions_changed_frame;
 
 	cNodePtr spawn_node = nullptr;
-	vec3 target_pos = vec3(0.f);
+	std::vector<cCharacterPtr> troop;
+	std::vector<cNodePtr> attack_list;
 
 	void init(EntityPtr _e, Player* player, const TownInfo* info);
 	uint get_blood_production() const;
@@ -60,6 +61,8 @@ struct TownInstance
 	void add_building(const BuildingInfo* info, int lv = 0);
 	void add_construction(const ConstructionAction* action);
 	void remove_construction(const ConstructionAction* action);
+	void add_attack_target(cNodePtr target);
+	void remove_attack_target(cNodePtr target);
 	void update();
 };
 
@@ -67,6 +70,8 @@ struct TowerInstance
 {
 	EntityPtr e = nullptr;
 	Player* player;
+
+	void init(EntityPtr _e, const TowerInfo* info);
 };
 
 // Reflect

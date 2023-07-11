@@ -18,8 +18,8 @@
 		</item>
 		<item name="Barracks" icon_name="extra\icons\BTNCrypt.png" description="Training warrios.">
 			<training_actions>
-				<item name="Infantry" cost_blood="100" cost_bones="50" duration="1" />
-				<item name="Archer" cost_blood="80" cost_bones="100" duration="1" />
+				<item name="Infantry" cost_blood="100" cost_bones="50" duration="10" />
+				<item name="Archer" cost_blood="80" cost_bones="100" duration="10" />
 			</training_actions>
 		</item>
 	</infos>

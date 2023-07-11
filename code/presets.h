@@ -150,4 +150,26 @@ struct TownInfosPreset
 
 extern TownInfosPreset town_infos;
 
+struct TowerInfo
+{
+	std::string							name;
+	std::filesystem::path				icon_name;
+	uvec2								icon_tile_coord = uvec2(0);
+	vec4								icon_uvs = vec4(vec2(0.f), vec2(1.f));
+	std::string							description;
+
+	uint								hp_max;
+};
+
+// Reflect
+struct TowerInfosPreset
+{
+	// Reflect
+	std::vector<TowerInfo> infos;
+
+	const TowerInfo* find(std::string_view name) const;
+};
+
+extern TowerInfosPreset tower_infos;
+
 void init_presets();
