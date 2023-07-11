@@ -90,7 +90,11 @@ void TownInstance::init(EntityPtr _e, Player* _player, const TownInfo* _info)
 							}
 						}
 						else
+						{
 							ai->target_node = nullptr;
+							if (spawn_node)
+								ai->target_pos = spawn_node->global_pos();
+						}
 					}
 				}
 			}

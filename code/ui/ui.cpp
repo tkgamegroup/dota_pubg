@@ -61,6 +61,7 @@ struct BottomPanel
 	EntityPtr sub_panel3 = nullptr;
 	cListPtr construction_list = nullptr;
 	cListPtr training_list = nullptr;
+	cListPtr attack_list = nullptr;
 	cListPtr action_list = nullptr;
 
 	cCharacterPtr character = nullptr;
@@ -119,6 +120,8 @@ struct BottomPanel
 				construction_list = e->get_component<cList>();
 			if (auto e = sub_panel3->find_child("training_list"); e)
 				training_list = e->get_component<cList>();
+			if (auto e = sub_panel3->find_child("attack_list"); e)
+				attack_list = e->get_component<cList>();
 		}
 		if (auto e = _e->find_child("action_list"); e)
 			action_list = e->get_component<cList>();
@@ -259,10 +262,10 @@ struct BottomPanel
 			auto e_list = construction_list->entity;
 			e_list->set_enable(true);
 
-			static uint construction_updated_frame = 0;
-			if (construction_updated_frame <= town->constructions_changed_frame)
+			static uint constructions_updated_frame = 0;
+			if (constructions_updated_frame <= town->constructions_changed_frame)
 			{
-				construction_updated_frame = town->constructions_changed_frame;
+				constructions_updated_frame = town->constructions_changed_frame;
 
 				construction_list->set_count(town->constructions.size());
 				for (auto i = 0; i < town->constructions.size(); i++)
@@ -277,14 +280,15 @@ struct BottomPanel
 						if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
 						{
 							receiver->event_listeners.clear();
-							receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
+							auto action = construction.action;
+							receiver->event_listeners.add([this, cancel_button, action](uint type, const vec2&) {
 								switch (type)
 								{
 								case "mouse_enter"_h:
 									show_tooltip(cancel_button->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
 									break;
 								case "click"_h:
-									town->remove_construction(town->constructions[i].action);
+									town->remove_construction(action);
 									break;
 								}
 							});
@@ -507,14 +511,13 @@ struct BottomPanel
 							image->set_image_name(unit_info->icon_name);
 						if (auto receiver = c->get_component<cReceiver>(); receiver)
 						{
-							receiver->event_listeners.add([this, c, i](uint type, const vec2& v) {
+							auto action = &building.info->training_actions[i];
+							receiver->event_listeners.add([this, c, action](uint type, const vec2& v) {
 								switch (type)
 								{
 								case "mouse_enter"_h:
-								{
-									auto& building = town->buildings[building_index];
-									auto& training = building.info->training_actions[i];
-									if (auto unit_info = character_infos.find(training.name); unit_info)
+								{;
+									if (auto unit_info = character_infos.find(action->name); unit_info)
 									{
 										std::wstring text;
 										text = s2w(unit_info->name) + L'\n';
@@ -525,21 +528,21 @@ struct BottomPanel
 										text += L"\nLeft - Train One\n"
 											L"Right - Train Infinite";
 										show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), text,
-											training.cost_blood, training.cost_bones, training.cost_soul_sand);
+											action->cost_blood, action->cost_bones, action->cost_soul_sand);
 									}
 								}
 									break;
 								case "click"_h:
 								{
 									auto& building = town->buildings[building_index];
-									building.add_training(&building.info->training_actions[i], 1);
+									building.add_training(action, 1);
 								}
 									break;
 								case "mouse_up"_h:
 									if (v.x == 1.f)
 									{
 										auto& building = town->buildings[building_index];
-										building.add_training(&building.info->training_actions[i], -1);
+										building.add_training(action, -1);
 									}
 									break;
 								}
@@ -603,6 +606,46 @@ struct BottomPanel
 				hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(town->hp) + L"/" + wstr(town->hp_max));
 			}
 
+			if (town->player == &player1)
+			{
+				if (attack_list)
+				{
+					auto e_list = construction_list->entity;
+					e_list->set_enable(true);
+
+					static uint attacks_updated_frame = 0;
+					if (attacks_updated_frame <= town->attacks_changed_frame)
+					{
+						attacks_updated_frame = town->attacks_changed_frame;
+
+						attack_list->set_count(town->attack_list.size());
+						for (auto i = 0; i < town->attack_list.size(); i++)
+						{
+							auto c = e_list->children[i].get();
+							auto target = town->attack_list[i];
+							auto cancel_button = c->find_child("cancel");
+							if (cancel_button)
+							{
+								if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
+								{
+									receiver->event_listeners.clear();
+									receiver->event_listeners.add([this, cancel_button, target](uint type, const vec2&) {
+										switch (type)
+										{
+										case "mouse_enter"_h:
+											show_tooltip(cancel_button->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+											break;
+										case "click"_h:
+											town->remove_attack_target(target);
+											break;
+										}
+									});
+								}
+							}
+						}
+					}
+				}
+			}
 			if (town->player->faction == player1.faction)
 				update_town_production();
 			if (town->player == &player1)
@@ -657,7 +700,8 @@ struct BottomPanel
 							if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
 							{
 								receiver->event_listeners.clear();
-								receiver->event_listeners.add([this, cancel_button, i](uint type, const vec2&) {
+								auto action = training.action;
+								receiver->event_listeners.add([this, cancel_button, action](uint type, const vec2&) {
 									switch (type)
 									{
 									case "mouse_enter"_h:
@@ -666,7 +710,7 @@ struct BottomPanel
 									case "click"_h:
 									{
 										auto& building = town->buildings[building_index];
-										building.remove_training(building.trainings[i].action);
+										building.remove_training(action);
 									}
 										break;
 									}
@@ -796,7 +840,7 @@ void update_ui()
 		auto camera_x = main_camera.node->x_axis();
 		for (auto character : find_characters_within_camera((FactionFlags)0xffffffff))
 		{
-			auto radius = character->get_radius();
+			auto radius = character->get_radius() * 1.2f + 0.1f;
 			auto height = character->get_height();
 			auto pos = character->node->pos;
 			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.2f, 0.f) - camera_x * radius);

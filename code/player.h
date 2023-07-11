@@ -53,6 +53,7 @@ struct TownInstance
 	cNodePtr spawn_node = nullptr;
 	std::vector<cCharacterPtr> troop;
 	std::vector<cNodePtr> attack_list;
+	uint attacks_changed_frame;
 
 	void init(EntityPtr _e, Player* player, const TownInfo* info);
 	uint get_blood_production() const;
