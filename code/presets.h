@@ -137,6 +137,10 @@ struct TownInfo
 
 	uint								hp_max;
 	std::vector<ConstructionAction>		construction_actions;
+
+	std::vector<const CharacterInfo*>	all_trainings;
+
+	void init();
 };
 
 // Reflect

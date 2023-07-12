@@ -47,6 +47,21 @@ const BuildingInfo* BuildingInfosPreset::find(std::string_view name) const
 	return nullptr;
 }
 
+void TownInfo::init()
+{
+	for (auto& b : construction_actions)
+	{
+		if (auto building_info = building_infos.find(b.name); building_info)
+		{
+			for (auto& t : building_info->training_actions)
+			{
+				if (auto character_info = character_infos.find(t.name); character_info)
+					all_trainings.push_back(character_info);
+			}
+		}
+	}
+}
+
 const TownInfo* TownInfosPreset::find(std::string_view name) const
 {
 	for (auto& i : infos)
@@ -64,4 +79,6 @@ void init_presets()
 	load_preset_file(L"assets\\effect_infos.preset", &effect_infos);
 	load_preset_file(L"assets\\building_infos.preset", &building_infos);
 	load_preset_file(L"assets\\town_infos.preset", &town_infos);
+	for (auto& t : town_infos.infos)
+		t.init();
 }

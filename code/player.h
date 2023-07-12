@@ -37,6 +37,12 @@ struct Construction
 	bool resources_costed;
 };
 
+struct AttackAction
+{
+	cNodePtr target;
+	std::vector<std::pair<CharacterInfo*, uint>> formation;
+};
+
 struct TownInstance
 {
 	EntityPtr e = nullptr;
