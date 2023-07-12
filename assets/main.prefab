@@ -26,18 +26,18 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1433,684" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1305,612" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,645.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,573.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,540" ext="1433,144" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,468" ext="1305,144" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 					</components>
@@ -208,6 +208,12 @@
 										<item type_name="flame::cList" prefab_name="ui\training_slot.prefab" />
 									</components>
 								</item>
+								<item file_id="4a0e7150b4c28684627e606b5476e6aa" name="attack_list">
+									<components>
+										<item type_name="flame::cElement" pos="588,4" />
+										<item type_name="flame::cLayout" />
+									</components>
+								</item>
 							</children>
 						</item>
 						<item file_id="4259bf162f00672c937f45b846b7a584" name="action_list">
@@ -222,7 +228,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1433,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1305,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>

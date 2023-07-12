@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<prefab file_id="411f070322cecb9e93cd3da87fe65bac" name="attack_slot">
+	<components>
+		<item type_name="flame::cElement" pos="4,4" ext="265.5,48" background_col="255,255,255,64" frame_col="220,141,32,0" frame_thickness="4" />
+		<item type_name="flame::cLayout" type="Horizontal" padding="5.5,4,4,4" />
+	</components>
+	<children>
+		<item file_id="438c26d67c1deb21e9991d6fa65c5ead" name="formation_list">
+			<components>
+				<item type_name="flame::cElement" pos="5.5,4" ext="148,40" />
+				<item type_name="flame::cLayout" type="Horizontal" />
+				<item type_name="flame::cList" prefab_name="unit_slot.prefab" count="4" />
+			</components>
+			<children />
+		</item>
+		<item file_id="47d339ed8eaf1721433f6430a3a4c99a" name="cancel">
+			<components>
+				<item type_name="flame::cElement" pos="157.5,4" ext="32,32" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\extra\icons\cancel.png" />
+				<item type_name="flame::cReceiver">
+					<click_action type="" />
+					<mouse_enter_action type="" />
+					<mouse_leave_action type="" />
+				</item>
+			</components>
+		</item>
+		<item file_id="47d339ed8eaf1721433f6430a3a4c99a" name="cancel">
+			<components>
+				<item type_name="flame::cElement" pos="193.5,4" ext="32,32" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\extra\icons\cancel.png" />
+				<item type_name="flame::cReceiver">
+					<click_action type="" />
+					<mouse_enter_action type="" />
+					<mouse_leave_action type="" />
+				</item>
+			</components>
+		</item>
+		<item file_id="47d339ed8eaf1721433f6430a3a4c99a" name="cancel">
+			<components>
+				<item type_name="flame::cElement" pos="229.5,4" ext="32,32" />
+				<item type_name="flame::cImage" auto_size="false" image_name="assets\extra\icons\cancel.png" />
+				<item type_name="flame::cReceiver">
+					<click_action type="" />
+					<mouse_enter_action type="" />
+					<mouse_leave_action type="" />
+				</item>
+			</components>
+		</item>
+	</children>
+</prefab>

@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
-<prefab file_id="411f070322cecb9e93cd3da87fe65bac" name="unit_slot">
+<prefab file_id="4be7779386314f577831152c99b7bcaf" name="icon">
 	<components>
-		<item type_name="flame::cElement" pos="4,4" ext="32,32" background_col="255,255,255,64" frame_col="220,141,32,0" frame_thickness="4" />
-		<item type_name="flame::cImage" auto_size="false" />
-		<item type_name="flame::cReceiver">
-			<click_action type="Action_unit_slot_select" />
-		</item>
+		<item type_name="flame::cElement" pos="4,4" ext="32,32" />
+		<item type_name="flame::cImage" auto_size="false" image_name="assets\extra\icons\footman.png" />
 	</components>
+	<children>
+		<item file_id="4b2cb2aeab4913fa5433cb4a6ead08b2" name="number">
+			<components>
+				<item type_name="flame::cElement" pos="21.5,20" ext="10.5,12" horizontal_alignment="End1" vertical_alignment="End1" />
+				<item type_name="flame::cText" text="10" font_size="12" thickness="0.9" border="0.4" />
+			</components>
+		</item>
+	</children>
 </prefab>
