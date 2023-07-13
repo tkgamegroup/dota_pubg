@@ -9,9 +9,9 @@
 #include "entities/collider.h"
 #include "entities/town.h"
 
-void BuildingInstance::add_training(const TrainingAction* action, int number)
+void BuildingInstance::add_training(const TrainingAction* action, int number, bool new_training)
 {
-	auto it = std::find_if(trainings.begin(), trainings.end(), [&](const auto& i) {
+	auto it = new_training ? trainings.end() : std::find_if(trainings.begin(), trainings.end(), [&](const auto& i) {
 		return i.action == action;
 	});
 	if (it == trainings.end())
@@ -36,22 +36,18 @@ void BuildingInstance::add_training(const TrainingAction* action, int number)
 	trainings_changed_frame = frames;
 }
 
-void BuildingInstance::remove_training(const TrainingAction* action)
+void BuildingInstance::remove_training(uint idx)
 {
-	for (auto it = trainings.begin(); it != trainings.end(); it++)
+	if (idx >= trainings.size())
+		return;
+	auto& training = trainings[idx];
+	if (training.resources_costed)
 	{
-		if (it->action == action)
-		{
-			if (it->resources_costed)
-			{
-				player->blood += it->action->cost_blood;
-				player->bones += it->action->cost_bones;
-				player->soul_sand += it->action->cost_soul_sand;
-			}
-			trainings.erase(it);
-			return;
-		}
+		player->blood += training.action->cost_blood;
+		player->bones += training.action->cost_bones;
+		player->soul_sand += training.action->cost_soul_sand;
 	}
+	trainings.erase(trainings.begin() + idx);
 	trainings_changed_frame = frames;
 }
 
@@ -115,7 +111,7 @@ uint TownInstance::get_blood_production() const
 		for (auto& r : b.info->resource_production)
 		{
 			if (r.type == ResourceBlood)
-				ret += r.amount;
+				ret += r.amount * b.number;
 		}
 	}
 	return ret;
@@ -129,7 +125,7 @@ uint TownInstance::get_bones_production() const
 		for (auto& r : b.info->resource_production)
 		{
 			if (r.type == ResourceBones)
-				ret += r.amount;
+				ret += r.amount * b.number;
 		}
 	}
 	return ret;
@@ -143,18 +139,26 @@ uint TownInstance::get_soul_sand_production() const
 		for (auto& r : b.info->resource_production)
 		{
 			if (r.type == ResourceSoulSand)
-				ret += r.amount;
+				ret += r.amount * b.number;
 		}
 	}
 	return ret;
 }
 
-void TownInstance::add_building(const BuildingInfo* info, int lv)
+void TownInstance::add_building(const BuildingInfo* info)
 {
-	auto& building = buildings.emplace_back();
-	building.player = player;
-	building.info = info;
-	building.lv = lv;
+	auto it = std::find_if(buildings.begin(), buildings.end(), [&](const auto& i) {
+		return i.info == info;
+	});
+	if (it == buildings.end())
+	{
+		it = buildings.emplace(buildings.end(), BuildingInstance());
+		it->player = player;
+		it->info = info;
+		it->number = 1;
+	}
+	else
+		it->number++;
 }
 
 void TownInstance::add_construction(const ConstructionAction* action)
@@ -195,6 +199,58 @@ void TownInstance::remove_construction(const ConstructionAction* action)
 	constructions_changed_frame = frames;
 }
 
+bool TownInstance::send_troop(cNodePtr target, const std::vector<std::pair<const CharacterInfo*, uint>>& formation)
+{
+	auto ok = true;
+	for (auto& u : formation)
+	{
+		auto n = 0;
+		for (auto c : troop)
+		{
+			if (c->info == u.first)
+			{
+				if (auto ai = c->entity->get_component<cAI>(); ai)
+				{
+					if (!ai->target_node)
+						n++;
+				}
+			}
+		}
+		if (n < u.second)
+		{
+			ok = false;
+			break;
+		}
+	}
+	if (ok)
+	{
+		for (auto& u : formation)
+		{
+			auto n = u.second;
+			if (n > 0)
+			{
+				for (auto c : troop)
+				{
+					if (c->info == u.first)
+					{
+						if (auto ai = c->entity->get_component<cAI>(); ai)
+						{
+							if (!ai->target_node)
+							{
+								ai->target_node = target;
+								n--;
+								if (n == 0)
+									break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return ok;
+}
+
 void TownInstance::add_attack_target(cNodePtr target)
 {
 	auto it = std::find_if(attack_list.begin(), attack_list.end(), [&](const auto& i) {
@@ -228,6 +284,7 @@ void TownInstance::remove_attack_target(cNodePtr target)
 
 void TownInstance::update()
 {
+	auto num_construction = 1;
 	for (auto& c : constructions)
 	{
 		if (c.timer <= 0.f)
@@ -248,7 +305,10 @@ void TownInstance::update()
 		}
 		c.timer -= delta_time;
 		if (c.timer <= 0.f)
-			add_building(c.building_info, 1);
+			add_building(c.building_info);
+		num_construction--;
+		if (num_construction == 0)
+			break;
 	}
 	for (auto it = constructions.begin(); it != constructions.end();)
 	{
@@ -283,6 +343,7 @@ void TownInstance::update()
 	}
 	for (auto& b : buildings)
 	{
+		auto num_training = b.number;
 		for (auto& t : b.trainings)
 		{
 			if (t.timer <= 0.f)
@@ -333,6 +394,9 @@ void TownInstance::update()
 					}
 				}
 			}
+			num_training--;
+			if (num_training == 0)
+				break;
 		}
 		for (auto it = b.trainings.begin(); it != b.trainings.end();)
 		{
@@ -366,10 +430,6 @@ void Player::init(EntityPtr e_town)
 	{
 		auto info = town_infos.find("Vampire");
 		town.init(e_town, this, info);
-	}
-	{
-		auto info = building_infos.find("Barracks");
-		town.add_building(info, 1);
 	}
 }
 

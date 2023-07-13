@@ -2,6 +2,6 @@
 <preset type="CharacterInfosPreset">
 	<infos>
 		<item name="Infantry" icon_name="extra\icons\footman.png" prefab_name="extra\characters\ELF_SM_light_infantry_A.prefab" hp_max="200" atk_interval="1.8" atk_time="1.3" atk_point="0.5" />
-		<item name="Archer" icon_name="extra\icons\BTNHighElvenArcher.png" prefab_name="extra\characters\ELF_SM_archer_A.prefab" atk_distance="5" atk_interval="1.8" atk_time="1.3" atk_point="0.7" />
+		<item name="Archer" icon_name="extra\icons\BTNHighElvenArcher.png" prefab_name="extra\characters\ELF_SM_archer_A.prefab" atk="12" atk_distance="5" atk_interval="1.8" atk_time="1.3" atk_point="0.7" />
 	</infos>
 </preset>

@@ -397,22 +397,6 @@ void cGame::start()
 	player2.faction = FactionParty2;
 	player1.init(root->find_child_recursively("player1_town"));
 	player2.init(root->find_child_recursively("player2_town"));
-	if (player2.town.e)
-	{
-		if (auto node = player2.town.e->get_component<cNode>(); node)
-		{
-			node->update_transform_from_root();
-			player1.town.add_attack_target(node);
-		}
-	}
-	if (player1.town.e)
-	{
-		if (auto node = player1.town.e->get_component<cNode>(); node)
-		{
-			node->update_transform_from_root();
-			player2.town.add_attack_target(node);
-		}
-	}
 
 	preload_images.push_back(graphics::Image::get(L"assets\\effects\\Fireball.png"));
 }
@@ -455,6 +439,17 @@ void cGame::update()
 	player2.update();
 
 	// naive ai for computer
+	if (player2.town.constructions.empty())
+	{
+		auto idx = linearRand(0, (int)player2.town.info->construction_actions.size() - 1);
+		auto& action = player2.town.info->construction_actions[idx];
+		if (player2.blood >= action.cost_blood &&
+			player2.bones >= action.cost_bones &&
+			player2.soul_sand >= action.cost_soul_sand)
+		{
+			player2.town.add_construction(&action);
+		}
+	}
 	for (auto& b : player2.town.buildings)
 	{
 		if (!b.info->training_actions.empty() && b.trainings.empty())

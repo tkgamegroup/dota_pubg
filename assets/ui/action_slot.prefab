@@ -9,4 +9,12 @@
 			<mouse_leave_action type="" />
 		</item>
 	</components>
+	<children>
+		<item file_id="40ed4ca901d794895e6d489c764a8c8c" name="number" enable="false">
+			<components>
+				<item type_name="flame::cElement" pos="21.5,20" ext="10.5,12" horizontal_alignment="End1" vertical_alignment="End1" />
+				<item type_name="flame::cText" text="10" font_size="12" />
+			</components>
+		</item>
+	</children>
 </prefab>

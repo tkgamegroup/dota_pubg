@@ -19,13 +19,13 @@ struct BuildingInstance
 {
 	Player* player;
 	const BuildingInfo* info;
-	int lv = 0;
+	uint number = 0;
 
 	std::vector<Training> trainings;
 	uint trainings_changed_frame;
 
-	void add_training(const TrainingAction* action, int number);
-	void remove_training(const TrainingAction* action);
+	void add_training(const TrainingAction* action, int number, bool new_training = false);
+	void remove_training(uint idx);
 };
 
 struct Construction
@@ -65,9 +65,10 @@ struct TownInstance
 	uint get_blood_production() const;
 	uint get_bones_production() const;
 	uint get_soul_sand_production() const;
-	void add_building(const BuildingInfo* info, int lv = 0);
+	void add_building(const BuildingInfo* info);
 	void add_construction(const ConstructionAction* action);
 	void remove_construction(const ConstructionAction* action);
+	bool send_troop(cNodePtr target, const std::vector<std::pair<const CharacterInfo*, uint>>& formation);
 	void add_attack_target(cNodePtr target);
 	void remove_attack_target(cNodePtr target);
 	void update();
