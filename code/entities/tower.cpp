@@ -24,6 +24,10 @@ void cTower::start()
 	hp_max = info->hp_max;
 	hp = hp_max;
 
+	atk = info->atk;
+	atk_distance = info->atk_distance;
+	atk_interval = info->atk_interval;
+
 	if (auto collider = entity->get_component<cCircleCollider>(); collider)
 	{
 		collider->callbacks.add([this](cCharacterPtr character, uint type) {

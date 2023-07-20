@@ -332,9 +332,9 @@ void cTown::update()
 							{
 								std::erase_if(troop, [&](const auto& i) {
 									return i == character;
-									});
+								});
 							}
-							});
+						});
 						if (auto ai = character->entity->get_component<cAI>(); ai)
 						{
 							ai->type = UnitLaneCreep;

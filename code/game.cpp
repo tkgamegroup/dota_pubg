@@ -436,21 +436,52 @@ void cGame::update()
 	dead_characters.clear();
 	removing_dead_characters = false;
 
-	player1.update();
-	player2.update();
-
 	// naive ai for computer
 	if (player2.town->constructions.empty())
 	{
 		if (player2.town->info)
 		{
-			auto idx = linearRand(0, (int)player2.town->info->construction_actions.size() - 1);
-			auto& action = player2.town->info->construction_actions[idx];
-			if (player2.blood >= action.cost_blood &&
-				player2.bones >= action.cost_bones &&
-				player2.soul_sand >= action.cost_soul_sand)
+			auto& construct_actions = player2.town->info->construction_actions;
+			auto idx = linearRand(0, (int)construct_actions.size() - 1);
+			for (auto i = 0; i < construct_actions.size(); i++)
 			{
-				player2.town->add_construction(&action);
+				auto _i = (idx + i) % construct_actions.size();
+				auto& action = construct_actions[_i];
+				if (auto building_info = building_infos.find(action.name); building_info && !building_info->training_actions.empty())
+				{
+					auto found = false;
+					for (auto& b : player2.town->buildings)
+					{
+						if (b.info == building_info)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						if (player2.blood >= action.cost_blood &&
+							player2.bones >= action.cost_bones &&
+							player2.soul_sand >= action.cost_soul_sand)
+						{
+							player2.town->add_construction(&action);
+							printf("player2 now constructing: %s\n", building_info->name.c_str());
+						}
+						idx = -1;
+					}
+				}
+			}
+			if (idx != -1)
+			{
+				idx = linearRand(0, (int)construct_actions.size() - 1);
+				auto& action = construct_actions[idx];
+				if (player2.blood >= action.cost_blood &&
+					player2.bones >= action.cost_bones &&
+					player2.soul_sand >= action.cost_soul_sand)
+				{
+					player2.town->add_construction(&action);
+					printf("player2 now constructing: %s\n", action.name.c_str());
+				}
 			}
 		}
 	}
@@ -465,6 +496,7 @@ void cGame::update()
 				player2.soul_sand >= action.cost_soul_sand)
 			{
 				b.add_training(&action, 1);
+				printf("player2 now trainging: %s\n", action.name.c_str());
 			}
 		}
 	}

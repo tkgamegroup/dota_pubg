@@ -12,7 +12,7 @@ struct CharacterInfo
 	std::string				description;
 
 	std::filesystem::path	prefab_name;
-	float					nav_radius = 0.2f;
+	float					nav_radius = 0.05f;
 	float					nav_height = 2.f;
 	float					nav_speed = 5.f;
 	uint					hp_max = 100;
@@ -166,8 +166,8 @@ struct TowerInfo
 
 	uint								hp_max = 6;
 	uint								atk = 100;
-	float								atk_distance = 1.5f;
-	float								atk_interval = 2.f; // the time between two attacks
+	float								atk_distance = 6.f;
+	float								atk_interval = 1.8f; // the time between two attacks
 	std::string							atk_projectile_name;
 };
 

@@ -9,7 +9,7 @@ extern EntityPtr ui;
 void init_ui();
 void deinit_ui();
 void update_ui();
-cvec4 get_player_color(const Player* player);
+cvec4 get_player_color(FactionFlags faction);
 void show_tooltip(const vec2& pos, const std::wstring& text);
 void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bones, uint soul_sand);
 void close_tooltip();

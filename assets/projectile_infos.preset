@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<preset type="TowerInfosPreset">
+<preset type="ProjectileInfosPreset">
 	<infos>
-		<item name="Arrow" prefab_name="assets\characters\bullet.prefab" />
+		<item name="Bullet" prefab_name="assets\characters\bullet.prefab" />
 	</infos>
 </preset>

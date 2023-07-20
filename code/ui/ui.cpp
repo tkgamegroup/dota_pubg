@@ -217,7 +217,7 @@ struct BottomPanel
 
 		if (name_text)
 		{
-			name_text->set_col(get_player_color(town->player));
+			name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
 			name_text->set_text(s2w(town->info->name));
 		}
 		if (hp_bar)
@@ -339,7 +339,7 @@ struct BottomPanel
 
 		if (name_text)
 		{
-			name_text->set_col(get_player_color(town->player));
+			name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
 			name_text->set_text(s2w(town->info->name));
 		}
 		if (hp_bar)
@@ -419,14 +419,11 @@ struct BottomPanel
 
 		if (name_text)
 		{
-			name_text->set_col(get_player_color(town->player));
+			name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
 			name_text->set_text(s2w(town->info->name));
 		}
 		if (hp_bar)
 			hp_bar->set_enable(true);
-
-		if (character_stats_panel)
-			character_stats_panel->set_enable(true);
 
 		if (action_list)
 		{
@@ -518,12 +515,12 @@ struct BottomPanel
 		{
 			if (town)
 			{
-				name_text->set_col(get_player_color(town->player));
+				name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
 				name_text->set_text(s2w(town->info->name));
 			}
 			else if (tower)
 			{
-				name_text->set_col(get_player_color(tower->player));
+				name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
 				name_text->set_text(s2w(tower->info->name));
 			}
 		}
@@ -671,11 +668,14 @@ struct BottomPanel
 
 		if (name_text)
 		{
-			name_text->set_col(get_player_color(tower->player));
+			name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
 			name_text->set_text(s2w(tower->info->name));
 		}
 		if (hp_bar)
 			hp_bar->set_enable(true);
+
+		if (character_stats_panel)
+			character_stats_panel->set_enable(true);
 
 		if (action_list)
 		{
@@ -999,6 +999,17 @@ struct BottomPanel
 			}
 		}
 			break;
+		case PanelTowerMain:
+		{
+			if (hp_bar)
+			{
+				hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)tower->hp / (float)tower->hp_max, 1.f));
+				hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(tower->hp) + L"/" + wstr(tower->hp_max));
+			}
+
+			update_tower();
+		}
+			break;
 		}
 	}
 };
@@ -1123,7 +1134,7 @@ void update_ui()
 				continue;
 			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
 			if (w > 0.f && h > 0.f)
-				canvas->add_rect_filled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * w, h), cvec4(80, 160, 85, 255));
+				canvas->add_rect_filled(p0, p0 + vec2((float)character->hp / (float)character->hp_max * w, h), get_player_color(character->faction));
 		}
 		for (auto town : towns)
 		{
@@ -1131,7 +1142,7 @@ void update_ui()
 			const auto height = 5.f;
 			auto pos = town->node->global_pos();
 			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.5f, 0.f) - camera_x * radius);
-			if (p0.x < 0.f)
+			if (p0.x < 0.f)          
 				continue;
 			auto p1 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.5f, 0.f) + camera_x * radius);
 			if (p1.x < 0.f)
@@ -1142,7 +1153,7 @@ void update_ui()
 			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
 			if (w > 0.f && h > 0.f)
 			{
-				canvas->add_rect_filled(p0, p0 + vec2((float)town->hp / (float)town->hp_max * w, h), get_player_color(town->player));
+				canvas->add_rect_filled(p0, p0 + vec2((float)town->hp / (float)town->hp_max * w, h), get_player_color(town->player ? town->player->faction : FactionNone));
 				canvas->add_text(nullptr, 24, p0 + vec2(0.f, -24.f), wstr(town->hp) + L'/' + wstr(town->hp_max), cvec4(255), 0.5f, 0.2f);
 			}
 		}
@@ -1163,7 +1174,7 @@ void update_ui()
 			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
 			if (w > 0.f && h > 0.f)
 			{
-				canvas->add_rect_filled(p0, p0 + vec2((float)tower->hp / (float)tower->hp_max * w, h), get_player_color(tower->player));
+				canvas->add_rect_filled(p0, p0 + vec2((float)tower->hp / (float)tower->hp_max * w, h), get_player_color(tower->player ? tower->player->faction : FactionNone));
 				canvas->add_text(nullptr, 24, p0 + vec2(0.f, -24.f), wstr(tower->hp) + L'/' + wstr(tower->hp_max), cvec4(255), 0.5f, 0.2f);
 			}
 		}
@@ -1236,11 +1247,11 @@ void update_ui()
 	selected_target_changed = false;
 }
 
-cvec4 get_player_color(const Player* player)
+cvec4 get_player_color(FactionFlags faction)
 {
-	if (player)
+	if (faction)
 	{
-		if (player->faction == player1.faction)
+		if (faction & player1.faction)
 			return cvec4(80, 160, 85, 255);
 		return cvec4(160, 80, 85, 255);
 	}
