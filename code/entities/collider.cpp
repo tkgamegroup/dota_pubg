@@ -54,7 +54,7 @@ static int circle_lod(float r)
 
 void cCircleCollider::update()
 {
-	auto characters = find_characters_within_circle(faction, node->global_pos(), radius);
+	auto characters = faction != FactionNone ? find_characters_within_circle(faction, node->global_pos(), radius) : std::vector<cCharacterPtr>();
 	process_colliding(characters, last_collidings, callbacks);
 
 	if (enable_collider_debugging)

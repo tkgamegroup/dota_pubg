@@ -27,6 +27,7 @@ cCharacterPtr	hovering_character = nullptr;
 cChestPtr		hovering_chest = nullptr;
 bool			hovering_terrain = false;
 cNodePtr		hovering_town;
+cNodePtr		hovering_tower;
 
 Tracker											selected_target = nullptr;
 Listeners<void()>								select_callbacks;
@@ -101,7 +102,7 @@ void update_control()
 							draw_data.meshes.emplace_back(mesh->instance_id, mesh->mesh_res_id, mesh->material_res_id);
 					}
 				}
-				if (auto town = n->entity->get_component<cTown>(); town)
+				if (n->entity->get_component<cTown>() || n->entity->get_component<cTower>())
 				{
 					if (auto mesh = n->entity->get_component<cMesh>(); mesh)
 					{
@@ -138,6 +139,7 @@ void update_control()
 	hovering_chest = nullptr;
 	hovering_terrain = false;
 	hovering_town = nullptr;
+	hovering_tower = nullptr;
 	//tooltip.clear();
 	if (hovering_node)
 	{
@@ -194,6 +196,10 @@ void update_control()
 		{
 			hovering_town = hovering_node;
 		}
+		if (auto tower = hovering_node->entity->get_component<cTower>(); tower)
+		{
+			hovering_tower = hovering_node;
+		}
 	}
 
 	if (select_mode != TargetNull)
@@ -222,6 +228,15 @@ void update_control()
 					if (selected_target.get<cNodePtr>() != hovering_town)
 					{
 						selected_target.set(hovering_town);
+						if (select_callbacks)
+							select_callbacks.call();
+					}
+				}
+				else if (hovering_tower)
+				{
+					if (selected_target.get<cNodePtr>() != hovering_tower)
+					{
+						selected_target.set(hovering_tower);
 						if (select_callbacks)
 							select_callbacks.call();
 					}

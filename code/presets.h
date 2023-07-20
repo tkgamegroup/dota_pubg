@@ -127,6 +127,7 @@ struct BuildingInfosPreset
 
 extern BuildingInfosPreset building_infos;
 
+// Reflect any ctor
 struct TownInfo
 {
 	std::string							name;
@@ -135,7 +136,7 @@ struct TownInfo
 	vec4								icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	std::string							description;
 
-	uint								hp_max;
+	uint								hp_max = 30;
 	std::vector<ConstructionAction>		construction_actions;
 
 	std::vector<const CharacterInfo*>	all_trainings;
@@ -154,6 +155,7 @@ struct TownInfosPreset
 
 extern TownInfosPreset town_infos;
 
+// Reflect any ctor
 struct TowerInfo
 {
 	std::string							name;
@@ -162,7 +164,11 @@ struct TowerInfo
 	vec4								icon_uvs = vec4(vec2(0.f), vec2(1.f));
 	std::string							description;
 
-	uint								hp_max;
+	uint								hp_max = 6;
+	uint								atk = 100;
+	float								atk_distance = 1.5f;
+	float								atk_interval = 2.f; // the time between two attacks
+	std::string							atk_projectile_name;
 };
 
 // Reflect

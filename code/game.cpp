@@ -23,6 +23,7 @@
 #include "entities/chest.h"
 #include "entities/collider.h"
 #include "entities/ai.h"
+#include "entities/town.h"
 
 void MainCamera::init(EntityPtr e)
 {
@@ -439,18 +440,21 @@ void cGame::update()
 	player2.update();
 
 	// naive ai for computer
-	if (player2.town.constructions.empty())
+	if (player2.town->constructions.empty())
 	{
-		auto idx = linearRand(0, (int)player2.town.info->construction_actions.size() - 1);
-		auto& action = player2.town.info->construction_actions[idx];
-		if (player2.blood >= action.cost_blood &&
-			player2.bones >= action.cost_bones &&
-			player2.soul_sand >= action.cost_soul_sand)
+		if (player2.town->info)
 		{
-			player2.town.add_construction(&action);
+			auto idx = linearRand(0, (int)player2.town->info->construction_actions.size() - 1);
+			auto& action = player2.town->info->construction_actions[idx];
+			if (player2.blood >= action.cost_blood &&
+				player2.bones >= action.cost_bones &&
+				player2.soul_sand >= action.cost_soul_sand)
+			{
+				player2.town->add_construction(&action);
+			}
 		}
 	}
-	for (auto& b : player2.town.buildings)
+	for (auto& b : player2.town->buildings)
 	{
 		if (!b.info->training_actions.empty() && b.trainings.empty())
 		{
@@ -461,6 +465,23 @@ void cGame::update()
 				player2.soul_sand >= action.cost_soul_sand)
 			{
 				b.add_training(&action, 1);
+			}
+		}
+	}
+	if (player2.town->troop.size() > 0)
+	{
+		if (linearRand(0, 100) < 2)
+		{
+			for (auto c : player2.town->troop)
+			{
+				if (auto ai = c->entity->get_component<cAI>(); ai)
+				{
+					if (!ai->target_node)
+					{
+						if (linearRand(0, 100) < 50)
+							ai->target_node = player1.town->entity->get_component<cNode>();
+					}
+				}
 			}
 		}
 	}

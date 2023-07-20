@@ -43,45 +43,6 @@ struct AttackAction
 	std::vector<std::pair<CharacterInfo*, uint>> formation;
 };
 
-struct TownInstance
-{
-	EntityPtr e = nullptr;
-	Player* player;
-	const TownInfo* info;
-
-	uint hp_max;
-	uint hp;
-
-	std::vector<BuildingInstance> buildings;
-	std::vector<Construction> constructions;
-	uint constructions_changed_frame;
-
-	cNodePtr spawn_node = nullptr;
-	std::vector<cCharacterPtr> troop;
-	std::vector<cNodePtr> attack_list;
-	uint attacks_changed_frame;
-
-	void init(EntityPtr _e, Player* player, const TownInfo* info);
-	uint get_blood_production() const;
-	uint get_bones_production() const;
-	uint get_soul_sand_production() const;
-	void add_building(const BuildingInfo* info);
-	void add_construction(const ConstructionAction* action);
-	void remove_construction(const ConstructionAction* action);
-	bool send_troop(cNodePtr target, const std::vector<std::pair<const CharacterInfo*, uint>>& formation);
-	void add_attack_target(cNodePtr target);
-	void remove_attack_target(cNodePtr target);
-	void update();
-};
-
-struct TowerInstance
-{
-	EntityPtr e = nullptr;
-	Player* player;
-
-	void init(EntityPtr _e, const TowerInfo* info);
-};
-
 // Reflect
 struct Player
 {
@@ -99,7 +60,7 @@ struct Player
 	float soul_sand_fract = 0.f;
 
 	// Reflect
-	TownInstance town;
+	cTownPtr town;
 
 	void init(EntityPtr e_town);
 	void update();

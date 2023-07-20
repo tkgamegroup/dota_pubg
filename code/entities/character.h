@@ -109,7 +109,7 @@ struct cCharacter : Component
 	float atk_time = 1.5f;
 	// Reflect
 	float atk_point = 1.f;
-	const ProjectileInfo* atk_projectile;
+	const ProjectileInfo* atk_projectile = nullptr;
 	// Reflect
 	uint phy_def = 0;
 	// Reflect
@@ -163,7 +163,6 @@ struct cCharacter : Component
 	float cast_speed = 1.f;
 	float regeneration_timer = 1.f;
 	float search_timer = 0.f;
-
 	float attack_interval_timer = 0.f;
 	float pre_action_time = 0.f;
 	float total_action_time = 0.f;

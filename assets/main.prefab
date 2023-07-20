@@ -26,18 +26,18 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1305,612" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1436,684" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,573.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,645.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,468" ext="1305,144" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,540" ext="1436,144" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 					</components>
@@ -228,7 +228,7 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1305,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1436,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>
@@ -540,6 +540,20 @@
 				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|cCircleCollider|faction" value="Party1" />
 				<item target="49e95196de385cc61fb127ef7ad1288a|cTown|add" />
 				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|cTown|add" />
+				<item target="49e95196de385cc61fb127ef7ad1288a|cTown|info_name" value="Vampire" />
+				<item target="42deb0fc1d79fc84297d6c1fa3ecea9f|cTown|info_name" value="Vampire" />
+				<item target="47eca940ae5c68a9fc92d4197fb6faac|name" value="Tower" />
+				<item target="4f87fc2cd536cb1866a27bec2b1ed9b4|name" value="Tower" />
+				<item target="47eca940ae5c68a9fc92d4197fb6faac|cCircleCollider|add" />
+				<item target="47eca940ae5c68a9fc92d4197fb6faac|cCircleCollider|radius" value="3" />
+				<item target="47eca940ae5c68a9fc92d4197fb6faac|cCircleCollider|faction" value="Party1|Party2" />
+				<item target="47eca940ae5c68a9fc92d4197fb6faac|cTower|add" />
+				<item target="47eca940ae5c68a9fc92d4197fb6faac|cTower|info_name" value="Arrow Tower" />
+				<item target="4f87fc2cd536cb1866a27bec2b1ed9b4|cCircleCollider|add" />
+				<item target="4f87fc2cd536cb1866a27bec2b1ed9b4|cCircleCollider|radius" value="3" />
+				<item target="4f87fc2cd536cb1866a27bec2b1ed9b4|cCircleCollider|faction" value="Party1|Party2" />
+				<item target="4f87fc2cd536cb1866a27bec2b1ed9b4|cTower|add" />
+				<item target="4f87fc2cd536cb1866a27bec2b1ed9b4|cTower|info_name" value="Arrow Tower" />
 			</modifications>
 		</item>
 	</children>

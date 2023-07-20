@@ -22,6 +22,7 @@
 #include "../entities/ability.h"
 #include "../entities/chest.h"
 #include "../entities/town.h"
+#include "../entities/tower.h"
 #include "ui.h"
 
 bool selected_target_changed = true;
@@ -40,7 +41,8 @@ struct BottomPanel
 		PanelTownMain,
 		PanelTownConstrucion,
 		PanelTownBuilding,
-		PanelTownAttack
+		PanelTowerMain,
+		PanelSendTroop
 	};
 	PanelType type = PanelNone;
 
@@ -67,7 +69,8 @@ struct BottomPanel
 	cListPtr action_list = nullptr;
 
 	cCharacterPtr character = nullptr;
-	TownInstance* town = nullptr;
+	cTownPtr town = nullptr;
+	cTowerPtr tower = nullptr;
 	int building_index = -1;
 
 	int get_last_row_idx(cListPtr list)
@@ -134,6 +137,7 @@ struct BottomPanel
 		type = PanelNone;
 		character = nullptr;
 		town = nullptr;
+		tower = nullptr;
 		building_index = -1;
 
 		if (avatar_image)
@@ -177,29 +181,6 @@ struct BottomPanel
 		sInput::instance()->hovering_receiver = nullptr;
 	}
 
-	void update_character()
-	{
-		if (hp_bar)
-		{
-			hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)character->hp / (float)character->hp_max, 1.f));
-			hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(character->hp) + L"/" + wstr(character->hp_max));
-		}
-		if (mp_bar)
-		{
-			mp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)character->mp / (float)character->mp_max, 1.f));
-			mp_bar->find_child("text")->get_component<cText>()->set_text(wstr(character->mp) + L"/" + wstr(character->mp_max));
-		}
-
-		if (atk_text)
-			atk_text->set_text(std::format(L"ATK: {} ({})", character->atk, character->atk_type == PhysicalDamage ? L"Physical" : L"Magical"));
-		if (atk_distance_text)
-			atk_distance_text->set_text(std::format(L"ATK Distance: {}", character->atk_distance));
-		if (atk_intterval_text)
-			atk_intterval_text->set_text(std::format(L"ATK Intterval: {}", character->atk_interval));
-		if (move_speed_text)
-			move_speed_text->set_text(std::format(L"Move Speed: {}", character->info->nav_speed));
-	}
-
 	void enter_character_panel(cCharacterPtr _character)
 	{
 		reset();
@@ -227,16 +208,16 @@ struct BottomPanel
 			character_stats_panel->set_enable(true);
 	}
 
-	void show_town_basics()
+	void enter_town_panel(cTownPtr _town)
 	{
+		reset();
+		type = PanelTownMain;
+		town = _town;
+		building_index = -1;
+
 		if (name_text)
 		{
-			cvec4 col = cvec4(255);
-			if (town->player == &player1)
-				col = cvec4(100, 255, 100, 255);
-			else if (town->player == &player2)
-				col = cvec4(255, 100, 100, 255);
-			name_text->set_col(col);
+			name_text->set_col(get_player_color(town->player));
 			name_text->set_text(s2w(town->info->name));
 		}
 		if (hp_bar)
@@ -247,76 +228,6 @@ struct BottomPanel
 			if (town->player->faction == player1.faction)
 				resources_production_panel->set_enable(true);
 		}
-	}
-
-	void update_town_production()
-	{
-		if (blood_production_text)
-			blood_production_text->set_text(wstr(town->get_blood_production()));
-		if (bones_production_text)
-			bones_production_text->set_text(wstr(town->get_bones_production()));
-		if (soul_sand_production_text)
-			soul_sand_production_text->set_text(wstr(town->get_soul_sand_production()));
-	}
-
-	void update_town_construction()
-	{
-		if (construction_list)
-		{
-			auto e_list = construction_list->entity;
-			e_list->set_enable(true);
-
-			static uint constructions_updated_frame = 0;
-			if (constructions_updated_frame <= town->constructions_changed_frame)
-			{
-				constructions_updated_frame = town->constructions_changed_frame;
-
-				construction_list->set_count(town->constructions.size());
-				for (auto i = 0; i < town->constructions.size(); i++)
-				{
-					auto c = e_list->children[i].get();
-					auto& construction = town->constructions[i];
-					if (auto image = c->find_child("icon")->get_component<cImage>(); image)
-						image->set_image_name(construction.building_info->icon_name);
-					if (auto cancel_button = c->find_child("cancel"); cancel_button)
-					{
-						if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
-						{
-							receiver->event_listeners.clear();
-							auto action = construction.action;
-							receiver->event_listeners.add([this, cancel_button, action](uint type, const vec2&) {
-								switch (type)
-								{
-								case "mouse_enter"_h:
-									show_tooltip(cancel_button->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
-									break;
-								case "click"_h:
-									town->remove_construction(action);
-									break;
-								}
-							});
-						}
-					}
-				}
-			}
-			for (auto i = 0; i < town->constructions.size(); i++)
-			{
-				auto c = e_list->children[i].get();
-				auto& construction = town->constructions[i];
-				c->find_child_recursively("bar")->get_component<cElement>()->set_scl(vec2(1.f - construction.timer / construction.duration, 1.f));
-				c->find_child_recursively("text")->get_component<cText>()->set_text(std::format(L"{}:{}", int(construction.timer / 60.f), int(construction.timer)));
-			}
-		}
-	}
-
-	void enter_town_panel(TownInstance* _town)
-	{
-		reset();
-		type = PanelTownMain;
-		town = _town;
-		building_index = -1;
-
-		show_town_basics();
 
 		if (action_list)
 		{
@@ -390,7 +301,7 @@ struct BottomPanel
 								show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Attack This Town");
 								break;
 							case "click"_h:
-								enter_town_attack_panel();
+								enter_send_troop_panel();
 								break;
 							}
 						});
@@ -409,7 +320,7 @@ struct BottomPanel
 								show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel Actions On This Town");
 								break;
 							case "click"_h:
-								player1.town.remove_attack_target(town->e->get_component<cNode>());
+								player1.town->remove_attack_target(town->entity->get_component<cNode>());
 								break;
 							}
 						});
@@ -426,7 +337,19 @@ struct BottomPanel
 		type = PanelTownConstrucion;
 		town = _town;
 
-		show_town_basics();
+		if (name_text)
+		{
+			name_text->set_col(get_player_color(town->player));
+			name_text->set_text(s2w(town->info->name));
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
+
+		if (resources_production_panel)
+		{
+			if (town->player->faction == player1.faction)
+				resources_production_panel->set_enable(true);
+		}
 
 		if (action_list)
 		{
@@ -494,7 +417,16 @@ struct BottomPanel
 		town = _town;
 		building_index = index;
 
-		show_town_basics();
+		if (name_text)
+		{
+			name_text->set_col(get_player_color(town->player));
+			name_text->set_text(s2w(town->info->name));
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
+
+		if (character_stats_panel)
+			character_stats_panel->set_enable(true);
 
 		if (action_list)
 		{
@@ -573,19 +505,35 @@ struct BottomPanel
 		}
 	}
 
-	void enter_town_attack_panel()
+	void enter_send_troop_panel()
 	{
 		auto _town = town;
+		auto _tower = tower;
 		reset();
-		type = PanelTownAttack;
+		type = PanelSendTroop;
 		town = _town;
+		tower = _tower;
 
-		show_town_basics();
+		if (name_text)
+		{
+			if (town)
+			{
+				name_text->set_col(get_player_color(town->player));
+				name_text->set_text(s2w(town->info->name));
+			}
+			else if (tower)
+			{
+				name_text->set_col(get_player_color(tower->player));
+				name_text->set_text(s2w(tower->info->name));
+			}
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
 
 		if (action_list)
 		{
 			std::vector<std::pair<const CharacterInfo*, uint>> available_units;
-			for (auto c : player1.town.troop)
+			for (auto c : player1.town->troop)
 			{
 				if (auto ai = c->entity->get_component<cAI>(); ai)
 				{
@@ -677,7 +625,10 @@ struct BottomPanel
 						show_tooltip(c1->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Back To Main Panel");
 						break;
 					case "click"_h:
-						enter_town_panel(town);
+						if (town)
+							enter_town_panel(town);
+						else if (tower)
+							enter_tower_panel(tower);
 						break;
 					}
 				});
@@ -698,7 +649,12 @@ struct BottomPanel
 						auto formation = available_units;
 						for (auto i = 0; i < formation.size(); i++)
 							formation[i].second = s2t<uint>(action_list->entity->children[i]->find_child("number")->get_component<cText>()->text);
-						player1.town.send_troop(town->e->get_component<cNode>(), formation);
+						cNodePtr node = nullptr;
+						if (town)
+							node = town->entity->get_component<cNode>();
+						else if (tower)
+							node = tower->entity->get_component<cNode>();
+						player1.town->send_troop(node, formation);
 					}
 						break;
 					}
@@ -707,23 +663,178 @@ struct BottomPanel
 		}
 	}
 
+	void enter_tower_panel(cTowerPtr _tower)
+	{
+		reset();
+		type = PanelTowerMain;
+		tower = _tower;
+
+		if (name_text)
+		{
+			name_text->set_col(get_player_color(tower->player));
+			name_text->set_text(s2w(tower->info->name));
+		}
+		if (hp_bar)
+			hp_bar->set_enable(true);
+
+		if (action_list)
+		{
+			auto last_row = get_last_row_idx(action_list);
+
+			if (tower->player == &player1)
+			{
+				auto c = action_list->entity->children[0].get();
+				if (auto image = c->get_component<cImage>(); image)
+					image->set_image_name(Path::get(L"assets\\extra\\icons\\occupy.png"));
+				if (auto receiver = c->get_component<cReceiver>(); receiver)
+				{
+					receiver->event_listeners.add([this, c](uint type, const vec2&) {
+						switch (type)
+						{
+						case "mouse_enter"_h:
+							show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Reinforce This Tower");
+							break;
+						case "click"_h:
+							enter_send_troop_panel();
+							break;
+						}
+					});
+				}
+			}
+			else
+			{
+				auto c = action_list->entity->children[0].get();
+				if (auto image = c->get_component<cImage>(); image)
+					image->set_image_name(Path::get(L"assets\\extra\\icons\\attack.png"));
+				if (auto receiver = c->get_component<cReceiver>(); receiver)
+				{
+					receiver->event_listeners.add([this, c](uint type, const vec2&) {
+						switch (type)
+						{
+						case "mouse_enter"_h:
+							show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Attack This Tower");
+							break;
+						case "click"_h:
+							enter_send_troop_panel();
+							break;
+						}
+					});
+				}
+			}
+		}
+	}
+
+	void update_character()
+	{
+		if (hp_bar)
+		{
+			hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)character->hp / (float)character->hp_max, 1.f));
+			hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(character->hp) + L"/" + wstr(character->hp_max));
+		}
+		if (mp_bar)
+		{
+			mp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)character->mp / (float)character->mp_max, 1.f));
+			mp_bar->find_child("text")->get_component<cText>()->set_text(wstr(character->mp) + L"/" + wstr(character->mp_max));
+		}
+
+		if (atk_text)
+			atk_text->set_text(std::format(L"ATK: {} ({})", character->atk, character->atk_type == PhysicalDamage ? L"Physical" : L"Magical"));
+		if (atk_distance_text)
+			atk_distance_text->set_text(std::format(L"ATK Distance: {}", character->atk_distance));
+		if (atk_intterval_text)
+			atk_intterval_text->set_text(std::format(L"ATK Intterval: {}", character->atk_interval));
+		if (move_speed_text)
+			move_speed_text->set_text(std::format(L"Move Speed: {}", character->info->nav_speed));
+	}
+
+	void update_town_production()
+	{
+		if (blood_production_text)
+			blood_production_text->set_text(wstr(town->get_blood_production()));
+		if (bones_production_text)
+			bones_production_text->set_text(wstr(town->get_bones_production()));
+		if (soul_sand_production_text)
+			soul_sand_production_text->set_text(wstr(town->get_soul_sand_production()));
+	}
+
+	void update_town_construction()
+	{
+		if (construction_list)
+		{
+			auto e_list = construction_list->entity;
+			e_list->set_enable(true);
+
+			static uint constructions_updated_frame = 0;
+			if (constructions_updated_frame <= town->constructions_changed_frame)
+			{
+				constructions_updated_frame = town->constructions_changed_frame;
+
+				construction_list->set_count(town->constructions.size());
+				for (auto i = 0; i < town->constructions.size(); i++)
+				{
+					auto c = e_list->children[i].get();
+					auto& construction = town->constructions[i];
+					if (auto image = c->find_child("icon")->get_component<cImage>(); image)
+						image->set_image_name(construction.building_info->icon_name);
+					if (auto cancel_button = c->find_child("cancel"); cancel_button)
+					{
+						if (auto receiver = cancel_button->get_component<cReceiver>(); receiver)
+						{
+							receiver->event_listeners.clear();
+							auto action = construction.action;
+							receiver->event_listeners.add([this, cancel_button, action](uint type, const vec2&) {
+								switch (type)
+								{
+								case "mouse_enter"_h:
+									show_tooltip(cancel_button->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), L"Cancel");
+									break;
+								case "click"_h:
+									town->remove_construction(action);
+									break;
+								}
+								});
+						}
+					}
+				}
+			}
+			for (auto i = 0; i < town->constructions.size(); i++)
+			{
+				auto c = e_list->children[i].get();
+				auto& construction = town->constructions[i];
+				c->find_child_recursively("bar")->get_component<cElement>()->set_scl(vec2(1.f - construction.timer / construction.duration, 1.f));
+				c->find_child_recursively("text")->get_component<cText>()->set_text(std::format(L"{}:{}", int(construction.timer / 60.f), int(construction.timer)));
+			}
+		}
+	}
+
+	void update_tower()
+	{
+		if (hp_bar)
+		{
+			hp_bar->find_child("bar")->get_component<cElement>()->set_scl(vec2((float)tower->hp / (float)tower->hp_max, 1.f));
+			hp_bar->find_child("text")->get_component<cText>()->set_text(wstr(tower->hp) + L"/" + wstr(tower->hp_max));
+		}
+
+		if (atk_text)
+			atk_text->set_text(std::format(L"ATK: {} ({})", tower->atk, L"Physical"));
+		if (atk_distance_text)
+			atk_distance_text->set_text(std::format(L"ATK Distance: {}", tower->atk_distance));
+		if (atk_intterval_text)
+			atk_intterval_text->set_text(std::format(L"ATK Intterval: {}", tower->atk_interval));
+		if (move_speed_text)
+			move_speed_text->set_text(L"");
+	}
+
 	void update()
 	{
 		if (selected_target_changed && selected_target)
 		{
 			if (auto character = selected_target.entity->get_component<cCharacter>(); character)
-			{
 				enter_character_panel(character);
-			}
 			else if (auto town = selected_target.entity->get_component<cTown>(); town)
-			{
-				Player* player = nullptr;
-				if (selected_target.entity->name.starts_with("player1"))
-					player = &player1;
-				else if (selected_target.entity->name.starts_with("player2"))
-					player = &player2;
-				enter_town_panel(&player->town);
-			}
+				enter_town_panel(town);
+			else if (auto tower = selected_target.entity->get_component<cTower>(); tower)
+				enter_tower_panel(tower);
 		}
 		if (!selected_target)
 			reset();
@@ -1031,8 +1142,29 @@ void update_ui()
 			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
 			if (w > 0.f && h > 0.f)
 			{
-				canvas->add_rect_filled(p0, p0 + vec2((float)town->ins->hp / (float)town->ins->hp_max * w, h), cvec4(80, 160, 85, 255));
-				canvas->add_text(nullptr, 24, p0 + vec2(0.f, -24.f), wstr(town->ins->hp) + L'/' + wstr(town->ins->hp_max), cvec4(255), 0.5f, 0.2f);
+				canvas->add_rect_filled(p0, p0 + vec2((float)town->hp / (float)town->hp_max * w, h), get_player_color(town->player));
+				canvas->add_text(nullptr, 24, p0 + vec2(0.f, -24.f), wstr(town->hp) + L'/' + wstr(town->hp_max), cvec4(255), 0.5f, 0.2f);
+			}
+		}
+		for (auto tower : towers)
+		{
+			const auto radius = 3.f;
+			const auto height = 8.f;
+			auto pos = tower->node->global_pos();
+			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.5f, 0.f) - camera_x * radius);
+			if (p0.x < 0.f)
+				continue;
+			auto p1 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.5f, 0.f) + camera_x * radius);
+			if (p1.x < 0.f)
+				continue;
+			auto p2 = main_camera.camera->world_to_screen(pos + vec3(0.f, height, 0.f) + camera_x * radius);
+			if (p2.x < 0.f)
+				continue;
+			auto w = p1.x - p0.x; auto h = p2.y - p0.y;
+			if (w > 0.f && h > 0.f)
+			{
+				canvas->add_rect_filled(p0, p0 + vec2((float)tower->hp / (float)tower->hp_max * w, h), get_player_color(tower->player));
+				canvas->add_text(nullptr, 24, p0 + vec2(0.f, -24.f), wstr(tower->hp) + L'/' + wstr(tower->hp_max), cvec4(255), 0.5f, 0.2f);
 			}
 		}
 
@@ -1102,6 +1234,17 @@ void update_ui()
 	//}
 
 	selected_target_changed = false;
+}
+
+cvec4 get_player_color(const Player* player)
+{
+	if (player)
+	{
+		if (player->faction == player1.faction)
+			return cvec4(80, 160, 85, 255);
+		return cvec4(160, 80, 85, 255);
+	}
+	return cvec4(255);
 }
 
 void show_tooltip(const vec2& pos, const std::wstring& text)

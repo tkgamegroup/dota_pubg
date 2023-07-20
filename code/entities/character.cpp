@@ -156,7 +156,7 @@ void cCharacter::start()
 	buffs_idx = entity->find_child_i("buffs");
 	attack_effects_idx = entity->find_child_i("attack_effects");
 
-	if (info->atk_projectile_name.empty())
+	if (!info->atk_projectile_name.empty())
 		atk_projectile = projectile_infos.find(info->atk_projectile_name);
 }
 

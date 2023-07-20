@@ -5,6 +5,7 @@ ProjectileInfosPreset projectile_infos;
 EffectInfosPreset effect_infos;
 BuildingInfosPreset building_infos;
 TownInfosPreset town_infos;
+TowerInfosPreset tower_infos;
 
 const CharacterInfo* CharacterInfosPreset::find(std::string_view name) const
 {
@@ -71,6 +72,18 @@ const TownInfo* TownInfosPreset::find(std::string_view name) const
 	}
 	return nullptr;
 }
+static TownInfo default_town_info;
+
+const TowerInfo* TowerInfosPreset::find(std::string_view name) const
+{
+	for (auto& i : infos)
+	{
+		if (i.name == name)
+			return &i;
+	}
+	return nullptr;
+}
+static TowerInfo default_tower_info;
 
 void init_presets()
 {
@@ -79,6 +92,7 @@ void init_presets()
 	load_preset_file(L"assets\\effect_infos.preset", &effect_infos);
 	load_preset_file(L"assets\\building_infos.preset", &building_infos);
 	load_preset_file(L"assets\\town_infos.preset", &town_infos);
+	load_preset_file(L"assets\\tower_infos.preset", &tower_infos);
 	for (auto& t : town_infos.infos)
 		t.init();
 }
