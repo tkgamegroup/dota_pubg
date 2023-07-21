@@ -256,9 +256,12 @@ void cTown::update()
 			else
 				continue;
 		}
-		c.timer -= delta_time;
+		c.timer -= game && game->quick_construct ? delta_time * 10.f : delta_time;
 		if (c.timer <= 0.f)
+		{
 			add_building(c.building_info);
+			bordcast_message("construction_complected"_h);
+		}
 		num_construction--;
 		if (num_construction == 0)
 			break;
@@ -315,7 +318,7 @@ void cTown::update()
 				else
 					continue;
 			}
-			t.timer -= delta_time;
+			t.timer -= game && game->quick_construct ? delta_time * 10.f : delta_time;
 			if (t.timer <= 0.f)
 			{
 				if (t.number > 0)

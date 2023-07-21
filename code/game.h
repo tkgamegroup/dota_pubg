@@ -4,6 +4,7 @@
 #include "presets.h"
 
 extern EntityPtr root;
+extern cGamePtr game;
 
 struct MainCamera
 {
@@ -20,6 +21,8 @@ struct MainCamera
 extern MainCamera main_camera;
 
 void enable_game(bool v);
+void add_message_listener(uint hash, const std::function<void()>& cb);
+void bordcast_message(uint hash);
 EntityPtr get_prefab(const std::filesystem::path& path);
 std::filesystem::path get_prefab_path(uint prefab_id /* path hash */ );
 void add_player(vec3& pos, uint& faction, uint& prefab_id);
@@ -53,6 +56,8 @@ struct cGame : Component
 	void set_enable_collider_debugging(bool v);
 	// Reflect
 	bool wtf = false;
+	// Reflect
+	bool quick_construct = false;
 
 	~cGame();
 

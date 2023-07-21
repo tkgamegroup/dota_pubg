@@ -52,6 +52,10 @@ void BuildingInstance::remove_training(uint idx)
 
 void Player::init(EntityPtr e_town)
 {
+	blood = 1000;
+	bones = 800;
+	soul_sand = 10;
+
 	town = e_town->get_component<cTown>();
 	if (town)
 		town->player = this;

@@ -31,6 +31,8 @@ EntityPtr ui = nullptr;
 
 graphics::CanvasPtr canvas = nullptr;
 EntityPtr ui_resource_bar = nullptr;
+EntityPtr ui_tooltip = nullptr;
+EntityPtr ui_messages = nullptr;
 
 struct BottomPanel
 {
@@ -130,6 +132,11 @@ struct BottomPanel
 		}
 		if (auto e = _e->find_child("action_list"); e)
 			action_list = e->get_component<cList>();
+
+		add_message_listener("construction_complected"_h, [this]() {
+			if (type == PanelTownMain)
+				enter_town_panel(town);
+		});
 	}
 
 	void reset()
@@ -373,6 +380,34 @@ struct BottomPanel
 								{
 									std::wstring text;
 									text = s2w(building_info->name) + L'\n';
+									text += s2w(building_info->description) + L'\n';
+									if (!building_info->resource_production.empty())
+									{
+										text += L"Offer production per minite:\n";
+										bool first = true;
+										for (auto& r : building_info->resource_production)
+										{
+											text += wstr(r.amount) + L' ';
+											text += s2w(resource_type_name(r.type));
+											if (!first)
+												text += L", ";
+											first = false;
+										}
+										text += L'\n';
+									}
+									if (!building_info->training_actions.empty())
+									{
+										text += L"You can train these units here:\n";
+										bool first = true;
+										for (auto& t : building_info->training_actions)
+										{
+											text += s2w(t.name);
+											if (!first)
+												text += L", ";
+											first = false;
+										}
+										text += L'\n';
+									}
 									text += L"Left - Construct";
 									show_tooltip(c->get_component<cElement>()->global_pos0() + vec2(0.f, -8.f), text,
 										construction->cost_blood, construction->cost_bones, construction->cost_soul_sand);
@@ -450,6 +485,7 @@ struct BottomPanel
 									{
 										std::wstring text;
 										text = s2w(unit_info->name) + L'\n';
+										text += s2w(unit_info->description) + L'\n';
 										text += std::format(L"ATK: {} ({})\n", unit_info->atk, unit_info->atk_type == PhysicalDamage ? L"Physical" : L"Magical");
 										text += std::format(L"ATK Distance: {}\n", unit_info->atk_distance);
 										text += std::format(L"ATK Intterval: {}\n", unit_info->atk_interval);
@@ -520,7 +556,7 @@ struct BottomPanel
 			}
 			else if (tower)
 			{
-				name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
+				name_text->set_col(get_player_color(tower->player ? tower->player->faction : FactionNone));
 				name_text->set_text(s2w(tower->info->name));
 			}
 		}
@@ -668,7 +704,7 @@ struct BottomPanel
 
 		if (name_text)
 		{
-			name_text->set_col(get_player_color(town->player ? town->player->faction : FactionNone));
+			name_text->set_col(get_player_color(tower->player ? tower->player->faction : FactionNone));
 			name_text->set_text(s2w(tower->info->name));
 		}
 		if (hp_bar)
@@ -1015,7 +1051,6 @@ struct BottomPanel
 };
 
 BottomPanel bottom_panel;
-EntityPtr ui_tooltip = nullptr;
 
 static int circle_lod(float r)
 {
@@ -1039,6 +1074,8 @@ void init_ui()
 			bottom_panel.init(e);
 		if (auto e = ui->find_child("tooltip"); e)
 			ui_tooltip = e;
+		if (auto e = ui->find_child("messages"); e)
+			ui_messages = e;
 	}
 }
 
@@ -1118,9 +1155,9 @@ void update_ui()
 	if (main_camera.camera)
 	{
 		auto camera_x = main_camera.node->x_axis();
-		for (auto character : find_characters_within_camera((FactionFlags)0xffffffff))
+		for (auto character : find_characters_within_camera(FactionAll))
 		{
-			auto radius = character->get_radius() * 1.2f + 0.1f;
+			auto radius = character->get_radius() * 1.2f + 0.5f;
 			auto height = character->get_height();
 			auto pos = character->node->pos;
 			auto p0 = main_camera.camera->world_to_screen(pos + vec3(0.f, height + 0.2f, 0.f) - camera_x * radius);
@@ -1284,7 +1321,9 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 			if (auto e = e_resources->find_child("blood_text"); e)
 			{
 				e->set_enable(true);
-				e->get_component<cText>()->set_text(wstr(blood));
+				auto text = e->get_component<cText>();
+				text->set_col(blood <= player1.blood ? cvec4(255) : cvec4(200, 50, 50, 255));
+				text->set_text(wstr(blood));
 			}
 		}
 		else
@@ -1298,7 +1337,9 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 			if (auto e = e_resources->find_child("bones_text"); e)
 			{
 				e->set_enable(true);
-				e->get_component<cText>()->set_text(wstr(bones));
+				auto text = e->get_component<cText>();
+				text->set_col(blood <= player1.blood ? cvec4(255) : cvec4(200, 50, 50, 255));
+				text->set_text(wstr(bones));
 			}
 		}
 		else
@@ -1312,7 +1353,9 @@ void show_tooltip(const vec2& pos, const std::wstring& text, uint blood, uint bo
 			if (auto e = e_resources->find_child("soul_sand_text"); e)
 			{
 				e->set_enable(true);
-				e->get_component<cText>()->set_text(wstr(soul_sand));
+				auto text = e->get_component<cText>();
+				text->set_col(blood <= player1.blood ? cvec4(255) : cvec4(200, 50, 50, 255));
+				text->set_text(wstr(soul_sand));
 			}
 		}
 		else

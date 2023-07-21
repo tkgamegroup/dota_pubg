@@ -54,6 +54,7 @@ void MainCamera::update()
 MainCamera main_camera;
 
 EntityPtr root = nullptr;
+cGamePtr game = nullptr;
 
 bool parse_literal(const std::string& str, int& id)
 {
@@ -106,6 +107,26 @@ void enable_game(bool v)
 {
 	World::instance()->update_components = v;
 	sScene::instance()->enable = v;
+}
+
+static std::map<uint, std::vector<std::function<void()>>> message_listeners;
+
+void add_message_listener(uint hash, const std::function<void()>& cb)
+{
+	auto it = message_listeners.find(hash);
+	if (it == message_listeners.end())
+		it = message_listeners.emplace(hash, std::vector<std::function<void()>>()).first;
+	it->second.push_back(cb);
+}
+
+void bordcast_message(uint hash)
+{
+	auto it = message_listeners.find(hash);
+	if (it != message_listeners.end())
+	{
+		for (auto& cb : it->second)
+			cb();
+	}
 }
 
 static std::map<std::filesystem::path, EntityPtr> prefabs;
@@ -388,6 +409,7 @@ cGame::~cGame()
 void cGame::start()
 {
 	root = entity;
+	game = this;
 	main_camera.init(root->find_child("main_camera"));
 	init_ui();
 	init_control();
@@ -427,13 +449,20 @@ void cGame::update()
 	removing_dead_chests = false;
 
 	removing_dead_characters = true;
-	for (auto o : dead_characters)
+	for (auto it = dead_characters.begin(); it != dead_characters.end();)
 	{
-		if (hovering_character == o)
+		if (hovering_character == it->first)
 			hovering_character = nullptr;
-		o->entity->remove_from_parent();
+
+		it->second -= delta_time;
+		if (it->second <= 0.f)
+		{
+			it->first->entity->remove_from_parent();
+			it = dead_characters.erase(it);
+		}
+		else
+			it++;
 	}
-	dead_characters.clear();
 	removing_dead_characters = false;
 
 	// naive ai for computer

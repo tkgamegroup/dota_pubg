@@ -9,7 +9,8 @@ enum CharacterAction
 	CharacterActionNone,
 	CharacterActionMove,
 	CharacterActionAttack,
-	CharacterActionCast
+	CharacterActionCast,
+	CharacterActionDie
 };
 
 // Reflect
@@ -28,7 +29,7 @@ enum CharacterAttribute
 
 extern std::vector<cCharacterPtr> characters;
 extern std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
-extern std::vector<cCharacterPtr> dead_characters;
+extern std::vector<std::pair<cCharacterPtr, float>> dead_characters;
 extern bool removing_dead_characters;
 
 // Reflect ctor

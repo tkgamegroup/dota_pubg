@@ -21,10 +21,13 @@ void cAI::update()
 			if (character->search_timer <= 0.f)
 			{
 				auto enemies = find_characters_within_circle(~character->faction, character->node->pos, 5.f);
-				if (!enemies.empty())
+				for (auto t : enemies)
 				{
-					character->cmd_attack_target(enemies[0]);
-					found = true;
+					if (!t->dead)
+					{
+						character->cmd_attack_target(enemies[0]);
+						found = true;
+					}
 				}
 				character->search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
 			}

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <preset type="ProjectileInfosPreset">
 	<infos>
-		<item name="Bullet" prefab_name="assets\characters\bullet.prefab" />
+		<item name="Bullet" prefab_name="characters\bullet.prefab" />
+		<item name="Arrow" prefab_name="extra\characters\ELF_arrow.prefab" />
 	</infos>
 </preset>

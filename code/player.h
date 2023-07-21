@@ -50,13 +50,13 @@ struct Player
 	FactionFlags faction = FactionNone;
 
 	// Reflect
-	uint blood = 1000;
+	uint blood = 1;
 	float blood_fract = 0.f;
 	// Reflect
-	uint bones = 800;
+	uint bones = 1;
 	float bones_fract = 0.f;
 	// Reflect
-	uint soul_sand = 10;
+	uint soul_sand = 1;
 	float soul_sand_fract = 0.f;
 
 	// Reflect

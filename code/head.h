@@ -36,8 +36,12 @@ enum FactionFlags
 	FactionParty1 = 1 << 1,
 	FactionParty2 = 1 << 2,
 	FactionParty3 = 1 << 3,
-	FactionParty4 = 1 << 4
+	FactionParty4 = 1 << 4,
+	FactionAll = 0xffffffff
 };
+
+inline FactionFlags operator| (FactionFlags a, FactionFlags b) { return (FactionFlags)((int)a | (int)b); }
+inline FactionFlags operator~ (FactionFlags v) { return (FactionFlags)(~(int)v); }
 
 // Reflect
 enum ResourceType
@@ -47,8 +51,16 @@ enum ResourceType
 	ResourceSoulSand
 };
 
-inline FactionFlags operator| (FactionFlags a, FactionFlags b) { return (FactionFlags)((int)a | (int)b); }
-inline FactionFlags operator~ (FactionFlags v) { return (FactionFlags)(~(int)v); }
+inline std::string resource_type_name(ResourceType type)
+{
+	switch (type)
+	{
+	case ResourceBlood: return "Blood";
+	case ResourceBones: return "Bones";
+	case ResourceSoulSand: return "Soul Sand";
+	default: return "Unknown";
+	}
+}
 
 // Reflect
 enum TargetTypeFlags
@@ -128,20 +140,6 @@ struct Tracker
 	~Tracker()
 	{
 		reset();
-	}
-
-	Tracker(Tracker&& oth)
-	{
-		std::swap(hash, oth.hash);
-		std::swap(entity, oth.entity);
-		std::swap(comp, oth.comp);
-	}
-
-	void operator=(Tracker&& oth)
-	{
-		std::swap(hash, oth.hash);
-		std::swap(entity, oth.entity);
-		std::swap(comp, oth.comp);
 	}
 
 	operator bool() const

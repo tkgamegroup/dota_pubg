@@ -26,7 +26,7 @@
 
 std::vector<cCharacterPtr> characters;
 std::unordered_map<uint, std::vector<cCharacterPtr>> factions;
-std::vector<cCharacterPtr> dead_characters;
+std::vector<std::pair<cCharacterPtr, float>> dead_characters;
 bool removing_dead_characters = false;
 
 float cCharacter::get_radius()
@@ -79,7 +79,7 @@ cCharacter::~cCharacter()
 	if (dead && !removing_dead_characters)
 	{
 		std::erase_if(dead_characters, [this](const auto& i) {
-			return i == this;
+			return i.first == this;
 		});
 	}
 }
@@ -162,214 +162,216 @@ void cCharacter::start()
 
 void cCharacter::update()
 {
-	if (dead)
-		return;
-
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
-		if (stats_dirty)
+		if (!dead)
 		{
-			if (exp_max == 0)
-				exp_max = exp_base;
+			if (stats_dirty)
+			{
+				if (exp_max == 0)
+					exp_max = exp_base;
 
-			state = CharacterStateNormal;
+				state = CharacterStateNormal;
 
-			auto old_hp_max = hp_max;
-			auto old_mp_max = mp_max;
-			hp_max			= info->hp_max;
-			mp_max			= info->mp_max;
-			atk_type		= info->atk_type;
-			atk				= info->atk;
-			atk_distance	= info->atk_distance;
-			atk_interval	= info->atk_interval;
-			atk_time		= info->atk_time;
-			atk_point		= info->atk_point;
-			phy_def			= info->phy_def;
-			mag_def			= info->mag_def;
-			hp_reg			= info->hp_reg;
-			mp_reg			= info->mp_reg;
-			mov_sp			= info->mov_sp;
-			atk_sp			= info->atk_sp;
+				auto old_hp_max = hp_max;
+				auto old_mp_max = mp_max;
+				hp_max = info->hp_max;
+				mp_max = info->mp_max;
+				atk_type = info->atk_type;
+				atk = info->atk;
+				atk_distance = info->atk_distance;
+				atk_interval = info->atk_interval;
+				atk_time = info->atk_time;
+				atk_point = info->atk_point;
+				phy_def = info->phy_def;
+				mag_def = info->mag_def;
+				hp_reg = info->hp_reg;
+				mp_reg = info->mp_reg;
+				mov_sp = info->mov_sp;
+				atk_sp = info->atk_sp;
 
-			//attack_effects.clear();
-			//for (auto ability : abilities)
+				//attack_effects.clear();
+				//for (auto ability : abilities)
+				//{
+				//	if (ability && ability->lv > 0)
+				//	{
+				//		if (!ability->passive.cmds.empty())
+				//			CommandListExecuteThread(ability->passive, this, nullptr, vec3(0.f), ability->parameters, ability->lv).execute();
+				//	}
+				//}
+				//for (auto buff : buffs)
+				//{
+				//	if (!buff->passive.cmds.empty())
+				//		CommandListExecuteThread(buff->passive, this, nullptr, vec3(0.f), buff->parameters, buff->lv).execute();
+				//}
+
+				if (hp_max != old_hp_max)
+				{
+					hp = hp * (float)hp_max / old_hp_max;
+					data_changed("hp_max"_h);
+				}
+				if (mp_max != old_hp_max)
+				{
+					hp = mp * (float)mp_max / old_mp_max;
+					data_changed("mp_max"_h);
+				}
+
+				stats_dirty = false;
+			}
+
+			if (regeneration_timer > 0)
+				regeneration_timer -= delta_time;
+			else
+			{
+				hp = min(hp + hp_reg, hp_max);
+				mp = min(mp + mp_reg, mp_max);
+				regeneration_timer = 1.f;
+			}
+
+			if (search_timer > 0)
+				search_timer -= delta_time;
+			if (attack_interval_timer > 0)
+				attack_interval_timer -= delta_time;
+
+			//for (auto& ins : abilities)
 			//{
-			//	if (ability && ability->lv > 0)
+			//	if (ins && ins->cd_timer > 0.f)
+			//		ins->cd_timer -= delta_time;
+			//}
+			//for (auto it = buffs.begin(); it != buffs.end();)
+			//{
+			//	auto& ins = *it;
+			//	auto& buff = Buff::get(ins->id);
+
+			//	if (ins->t0 - ins->timer > ins->duration)
 			//	{
-			//		if (!ability->passive.cmds.empty())
-			//			CommandListExecuteThread(ability->passive, this, nullptr, vec3(0.f), ability->parameters, ability->lv).execute();
+			//		if (!buff.continuous.cmds.empty())
+			//			CommandListExecuteThread(buff.continuous, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
+			//		ins->t0 = ins->timer;
 			//	}
+
+			//	if (ins->timer > 0)
+			//	{
+			//		ins->timer -= delta_time;
+			//		if (ins->timer <= 0)
+			//		{
+			//			it = buffs.erase(it);
+			//			stats_dirty = true;
+			//			continue;
+			//		}
+			//	}
+			//	it++;
 			//}
-			//for (auto buff : buffs)
-			//{
-			//	if (!buff->passive.cmds.empty())
-			//		CommandListExecuteThread(buff->passive, this, nullptr, vec3(0.f), buff->parameters, buff->lv).execute();
-			//}
-
-			if (hp_max != old_hp_max)
+			for (auto it = markers.begin(); it != markers.end();)
 			{
-				hp = hp * (float)hp_max / old_hp_max;
-				data_changed("hp_max"_h);
-			}
-			if (mp_max != old_hp_max)
-			{
-				hp = mp * (float)mp_max / old_mp_max;
-				data_changed("mp_max"_h);
-			}
-
-			stats_dirty = false;
-		}
-
-		if (regeneration_timer > 0)
-			regeneration_timer -= delta_time;
-		else
-		{
-			hp = min(hp + hp_reg, hp_max);
-			mp = min(mp + mp_reg, mp_max);
-			regeneration_timer = 1.f;
-		}
-
-		if (search_timer > 0)
-			search_timer -= delta_time;
-		if (attack_interval_timer > 0)
-			attack_interval_timer -= delta_time;
-
-		//for (auto& ins : abilities)
-		//{
-		//	if (ins && ins->cd_timer > 0.f)
-		//		ins->cd_timer -= delta_time;
-		//}
-		//for (auto it = buffs.begin(); it != buffs.end();)
-		//{
-		//	auto& ins = *it;
-		//	auto& buff = Buff::get(ins->id);
-
-		//	if (ins->t0 - ins->timer > ins->duration)
-		//	{
-		//		if (!buff.continuous.cmds.empty())
-		//			CommandListExecuteThread(buff.continuous, this, nullptr, vec3(0.f), buff.parameters, ins->lv).execute();
-		//		ins->t0 = ins->timer;
-		//	}
-
-		//	if (ins->timer > 0)
-		//	{
-		//		ins->timer -= delta_time;
-		//		if (ins->timer <= 0)
-		//		{
-		//			it = buffs.erase(it);
-		//			stats_dirty = true;
-		//			continue;
-		//		}
-		//	}
-		//	it++;
-		//}
-		for (auto it = markers.begin(); it != markers.end();)
-		{
-			if (it->second.first > 0.f)
-			{
-				it->second.first -= delta_time;
-				if (it->second.first <= 0.f)
+				if (it->second.first > 0.f)
 				{
-					it = markers.erase(it);
-					continue;
-				}
-			}
-			it++;
-		}
-
-		switch (command)
-		{
-		case CommandIdle:
-			action = CharacterActionNone;
-			break;
-		case CommandMoveTo:
-			if (process_approach(target_location))
-			{
-				if (nav_agent)
-					nav_agent->stop();
-				cmd_idle();
-			}
-			break;
-		case CommandAttackTarget:
-			if (!target.comp)
-				cmd_idle();
-			else
-				process_attack_target(target.get<cCharacterPtr>());
-			break;
-		case CommandAttackLocation:
-			if (!target.comp)
-			{
-				if (search_timer <= 0.f)
-				{
-					auto enemies = find_characters_within_circle(~faction, node->pos, max(atk_distance, 5.f));
-					if (!enemies.empty())
-						target.set(enemies.front());
-
-					search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
-				}
-			}
-
-			if (target.comp)
-				process_attack_target(target.get<cCharacterPtr>());
-			else
-			{
-				if (process_approach(target_location))
-					action = CharacterActionNone;
-			}
-			break;
-		case CommandHold:
-			if (!target.comp)
-			{
-				if (search_timer <= 0.f)
-				{
-					auto enemies = find_characters_within_circle(~faction, node->pos, max(atk_distance, 1.5f));
-					if (!enemies.empty())
-						target.set(enemies.front());
-
-					search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
-				}
-			}
-
-			if (target.comp)
-				process_attack_target(target.get<cCharacterPtr>(), false);
-			else
-				action = CharacterActionNone;
-			break;
-		case CommandInteract:
-			if (!target.comp)
-				cmd_idle();
-			else
-			{
-				switch (target.comp->type_hash)
-				{
-				case "cChest"_h:
-					auto chest = target.get<cChestPtr>();
-					if (process_approach(chest->node->pos, 1.5f))
+					it->second.first -= delta_time;
+					if (it->second.first <= 0.f)
 					{
-						if (gain_item(chest->item_id, chest->item_num))
-							chest->die();
-
-						if (nav_agent)
-							nav_agent->stop();
-						cmd_idle();
+						it = markers.erase(it);
+						continue;
 					}
-					break;
 				}
+				it++;
 			}
-			break;
-		case CommandCastAbility:
-			process_cast_ability((cAbilityPtr)target_obj, vec3(0.f), nullptr);
-			break;
-		case CommandCastAbilityToLocation:
-			process_cast_ability((cAbilityPtr)target_obj, target_location, nullptr);
-			break;
-		case CommandCastAbilityToTarget:
-			if (!target.comp)
-				cmd_idle();
-			else
-				process_cast_ability((cAbilityPtr)target_obj, vec3(0.f), target.get<cCharacterPtr>());
-			break;
+
+			switch (command)
+			{
+			case CommandIdle:
+				action = CharacterActionNone;
+				break;
+			case CommandMoveTo:
+				if (process_approach(target_location))
+				{
+					if (nav_agent)
+						nav_agent->stop();
+					cmd_idle();
+				}
+				break;
+			case CommandAttackTarget:
+				if (!target.comp)
+					cmd_idle();
+				else
+					process_attack_target(target.get<cCharacterPtr>());
+				break;
+			case CommandAttackLocation:
+				if (!target.comp)
+				{
+					if (search_timer <= 0.f)
+					{
+						auto enemies = find_characters_within_circle(~faction, node->pos, max(atk_distance, 5.f));
+						if (!enemies.empty())
+							target.set(enemies.front());
+
+						search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+					}
+				}
+
+				if (target.comp)
+					process_attack_target(target.get<cCharacterPtr>());
+				else
+				{
+					if (process_approach(target_location))
+						action = CharacterActionNone;
+				}
+				break;
+			case CommandHold:
+				if (!target.comp)
+				{
+					if (search_timer <= 0.f)
+					{
+						auto enemies = find_characters_within_circle(~faction, node->pos, max(atk_distance, 1.5f));
+						if (!enemies.empty())
+							target.set(enemies.front());
+
+						search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
+					}
+				}
+
+				if (target.comp)
+					process_attack_target(target.get<cCharacterPtr>(), false);
+				else
+					action = CharacterActionNone;
+				break;
+			case CommandInteract:
+				if (!target.comp)
+					cmd_idle();
+				else
+				{
+					switch (target.comp->type_hash)
+					{
+					case "cChest"_h:
+						auto chest = target.get<cChestPtr>();
+						if (process_approach(chest->node->pos, 1.5f))
+						{
+							if (gain_item(chest->item_id, chest->item_num))
+								chest->die();
+
+							if (nav_agent)
+								nav_agent->stop();
+							cmd_idle();
+						}
+						break;
+					}
+				}
+				break;
+			case CommandCastAbility:
+				process_cast_ability((cAbilityPtr)target_obj, vec3(0.f), nullptr);
+				break;
+			case CommandCastAbilityToLocation:
+				process_cast_ability((cAbilityPtr)target_obj, target_location, nullptr);
+				break;
+			case CommandCastAbilityToTarget:
+				if (!target.comp)
+					cmd_idle();
+				else
+					process_cast_ability((cAbilityPtr)target_obj, vec3(0.f), target.get<cCharacterPtr>());
+				break;
+			}
 		}
+		else
+			action = CharacterActionDie;
 	}
 
 	if (armature)
@@ -404,6 +406,11 @@ void cCharacter::update()
 				armature->playing_speed = cast_speed;
 				armature->play("cast"_h);
 				break;
+			case CharacterActionDie:
+				armature->loop = false;
+				armature->playing_speed = 1.f;
+				armature->play("die"_h);
+				break;
 			}
 		}
 	}
@@ -429,7 +436,7 @@ void cCharacter::die(uint type)
 			add_chest(get_map_coord(p + vec3(linearRand(-0.3f, +0.3f), 0.f, linearRand(-0.3f, +0.3f))), d.first, d.second);
 	}
 
-	dead_characters.push_back(this);
+	dead_characters.emplace_back(this, type != "removed"_h ? 1.6f : 0.f);
 	dead = true;
 }
 
@@ -686,6 +693,14 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 		return;
 	}
 
+	if (target->dead)
+	{
+		if (nav_agent)
+			nav_agent->stop();
+		action = CharacterActionNone;
+		return;
+	}
+
 	auto p0 = node->pos;
 	auto p1 = target->node->pos;
 
@@ -709,7 +724,7 @@ void cCharacter::process_attack_target(cCharacterPtr target, bool chase_target)
 						if (atk_projectile)
 						{
 							auto character = this;
-							auto pj = add_projectile(atk_projectile, p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 6.f);
+							auto pj = add_projectile(atk_projectile, p0 + vec3(0.f, get_height() * 0.9f, 0.f), target, 15.f);
 							pj->on_end = [character](const vec3&, cCharacterPtr target) {
 								if (target)
 									attack_proc(character, target);

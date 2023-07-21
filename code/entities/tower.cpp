@@ -88,8 +88,11 @@ void cTower::update()
 			if (search_timer <= 0.f)
 			{
 				auto enemies = find_characters_within_circle(~player->faction, node->pos, atk_distance);
-				if (!enemies.empty())
-					target.set(enemies[0]);
+				for (auto t : enemies)
+				{
+					if (!t->dead)
+						target.set(enemies[0]);
+				}
 				search_timer = enemies.empty() ? 0.1f : 1.f + linearRand(0.f, 0.05f);
 			}
 		}
@@ -105,7 +108,7 @@ void cTower::update()
 					if (atk_projectile)
 					{
 						auto tower = this;
-						auto pj = add_projectile(atk_projectile, p0 + vec3(0.f, 6.f, 0.f), target.get<cCharacterPtr>(), 6.f);
+						auto pj = add_projectile(atk_projectile, p0 + vec3(0.f, 6.f, 0.f), target.get<cCharacterPtr>(), 15.f);
 						pj->on_end = [tower](const vec3&, cCharacterPtr target) {
 							if (target)
 							{
