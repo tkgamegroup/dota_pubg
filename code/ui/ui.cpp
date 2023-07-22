@@ -1075,7 +1075,10 @@ void init_ui()
 		if (auto e = ui->find_child("tooltip"); e)
 			ui_tooltip = e;
 		if (auto e = ui->find_child("messages"); e)
+		{
 			ui_messages = e;
+			ui_messages->remove_all_children();
+		}
 	}
 }
 
@@ -1087,6 +1090,29 @@ void update_ui()
 {
 	std::wstring tooltip_str = L"";
 	vec2 tooltip_pos;
+
+	if (ui_messages)
+	{
+		static std::vector<float> timers;
+		while (timers.size() < ui_messages->children.size())
+			timers.push_back(5.f);
+		for (auto i = 0; i < timers.size(); i++)
+		{
+			auto& timer = timers[i];
+			auto e = ui_messages->children[i].get();
+			if (timer > 0.f)
+			{
+				e->get_component<cText>()->set_col(cvec4(255, 255, 255, timer > 1.f ? 1.f : timer / 1.f * 255.f));
+				timer -= delta_time;
+			}
+			else
+			{
+				e->remove_from_parent();
+				timers.erase(timers.begin() + i);
+				i--;
+			}
+		}
+	}
 
 	if (ui_resource_bar)
 	{
@@ -1373,6 +1399,18 @@ void close_tooltip()
 	{
 		ui_tooltip->set_enable(false);
 		ui_tooltip->find_child("resources")->set_enable(false);
+	}
+}
+
+void add_ui_message(const std::wstring& str, const cvec4& color)
+{
+	if (ui_messages)
+	{
+		auto entry = Entity::create();
+		entry->add_component<cElement>();
+		auto text = entry->add_component<cText>();
+		text->set_text(str);
+		ui_messages->add_child(entry);
 	}
 }
 

@@ -2,7 +2,7 @@
 
 #include "head.h"
 
-void init_map(EntityPtr e);
+void init_map(EntityPtr e, uint type = "default"_h);
 vec3 get_map_coord(const vec2& uv);
 vec3 get_map_coord(const vec3& pos);
 vec3 get_coord_by_centrality(int i);

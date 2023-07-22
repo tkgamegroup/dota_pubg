@@ -126,10 +126,6 @@ struct cCharacter : Component
 
 	std::vector<DropItem>		drop_items;
 
-	std::filesystem::path		move_sound_path;
-	std::filesystem::path		attack_precast_sound_path;
-	std::filesystem::path		attack_hit_sound_path;
-
 	ivec2 vision_coord = ivec2(-1);
 	uint vision_range = 20;
 

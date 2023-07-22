@@ -26,18 +26,18 @@
 		</item>
 		<item file_id="40d154342be2618d9c777dec529df39b" name="ui">
 			<components>
-				<item type_name="flame::cElement" ext="1403,623" horizontal_alignment="Fill" vertical_alignment="Fill" />
+				<item type_name="flame::cElement" ext="1315,626" horizontal_alignment="Fill" vertical_alignment="Fill" />
 			</components>
 			<children>
 				<item file_id="4fa8c337b4c5077af210a7609c9e8ca0" name="bottom_left_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,584.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,587.6" ext="155.3,38.4" horizontal_alignment="End0" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" />
 					</components>
 				</item>
 				<item file_id="432be72b4a56bc2b0630213956e593a7" name="bottom_panel">
 					<components>
-						<item type_name="flame::cElement" pos="0,479" ext="1403,144" horizontal_alignment="Fill" vertical_alignment="End1" />
+						<item type_name="flame::cElement" pos="0,482" ext="1315,144" horizontal_alignment="Fill" vertical_alignment="End1" />
 						<item type_name="flame::cLayout" type="Horizontal" padding="8,8,8,8" auto_width="false" />
 						<item type_name="flame::cStretchedImage" image_name="ui\frame.png" border="8,8,8,8" />
 					</components>
@@ -228,13 +228,13 @@
 				</item>
 				<item file_id="459898b9acff4a83a56e0d91eb4d45ae" name="top_bar">
 					<components>
-						<item type_name="flame::cElement" ext="1403,30" background_col="0,0,0,200" horizontal_alignment="Fill" vertical_alignment="End0" />
+						<item type_name="flame::cElement" ext="1315,30" background_col="0,0,0,255" horizontal_alignment="Fill" vertical_alignment="End0" />
 						<item type_name="flame::cLayout" padding="4,4,2,2" item_spacing="0" auto_width="false" />
 					</components>
 					<children>
 						<item filename="D:\dota_pubg\assets\ui\resources_bar.prefab">
 							<modifications>
-								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pos" value="4,4" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pos" value="1087,4" />
 								<item target="44add67d5a82088b2e6a49cffb074096|flame::cLayout|auto_height" value="true" />
 								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|ext" value="226,24" />
 								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cText|auto_size" value="false" />
@@ -247,6 +247,9 @@
 								<item target="4b5d2c756749a5b980691f9e3c77d1a8|flame::cElement|background_col" value="0,0,0,180" />
 								<item target="4027d3a13b30b832fd5e665d7cae5d81|flame::cElement|background_col" value="0,0,0,180" />
 								<item target="4267e8bcf6ab70857d1e29698638f9b1|flame::cElement|background_col" value="0,0,0,180" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|pivot" value="0,0" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|horizontal_alignment" value="End1" />
+								<item target="44add67d5a82088b2e6a49cffb074096|flame::cElement|background_col" value="0,0,0,0" />
 							</modifications>
 						</item>
 					</children>
@@ -507,6 +510,32 @@
 									</components>
 								</item>
 							</children>
+						</item>
+					</children>
+				</item>
+				<item file_id="4bf549e132d44303243d2dace81ca185" name="messages">
+					<components>
+						<item type_name="flame::cElement" pos="0,412" ext="31.5,64" vertical_alignment="End1" margin="0,0,0,150" />
+						<item type_name="flame::cLayout" />
+					</components>
+					<children>
+						<item file_id="4734a60a5adc612ea8d4068c47c4778e" name="entry">
+							<components>
+								<item type_name="flame::cElement" pos="4,4" ext="23.5,16" />
+								<item type_name="flame::cText" text="Test" />
+							</components>
+						</item>
+						<item file_id="4734a60a5adc612ea8d4068c47c4778e" name="entry">
+							<components>
+								<item type_name="flame::cElement" pos="4,24" ext="23.5,16" />
+								<item type_name="flame::cText" text="Test" />
+							</components>
+						</item>
+						<item file_id="4734a60a5adc612ea8d4068c47c4778e" name="entry">
+							<components>
+								<item type_name="flame::cElement" pos="4,44" ext="23.5,16" />
+								<item type_name="flame::cText" text="Test" />
+							</components>
 						</item>
 					</children>
 				</item>

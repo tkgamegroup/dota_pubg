@@ -80,6 +80,8 @@ void cTower::update()
 
 	if (multi_player == SinglePlayer || multi_player == MultiPlayerAsHost)
 	{
+		if (search_timer > 0)
+			search_timer -= delta_time;
 		if (attack_interval_timer > 0)
 			attack_interval_timer -= delta_time;
 

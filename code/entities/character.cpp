@@ -142,12 +142,12 @@ void cCharacter::start()
 	{
 		std::vector<std::pair<std::filesystem::path, std::string>> audio_buffer_names;
 		audio_buffer_names.emplace_back(L"assets\\level_up.wav", "level_up");
-		if (!move_sound_path.empty() && std::filesystem::exists(move_sound_path))
-			audio_buffer_names.emplace_back(move_sound_path, "move");
-		if (!attack_precast_sound_path.empty() && std::filesystem::exists(attack_precast_sound_path))
-			audio_buffer_names.emplace_back(attack_precast_sound_path, "attack_precast");
-		if (!attack_hit_sound_path.empty() && std::filesystem::exists(attack_hit_sound_path))
-			audio_buffer_names.emplace_back(attack_hit_sound_path, "attack_hit");
+		if (!info->move_sound_path.empty() && std::filesystem::exists(info->move_sound_path))
+			audio_buffer_names.emplace_back(info->move_sound_path, "move");
+		if (!info->attack_precast_sound_path.empty() && std::filesystem::exists(info->attack_precast_sound_path))
+			audio_buffer_names.emplace_back(info->attack_precast_sound_path, "attack_precast");
+		if (!info->attack_hit_sound_path.empty() && std::filesystem::exists(info->attack_hit_sound_path))
+			audio_buffer_names.emplace_back(info->attack_hit_sound_path, "attack_hit");
 		audio_source->set_buffer_names(audio_buffer_names);
 	}
 

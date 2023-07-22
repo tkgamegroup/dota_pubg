@@ -1,4 +1,5 @@
 #include "../game.h"
+#include "../ui/ui.h"
 #include "character.h"
 #include "ai.h"
 #include "collider.h"
@@ -261,6 +262,8 @@ void cTown::update()
 		{
 			add_building(c.building_info);
 			bordcast_message("construction_complected"_h);
+			if (player == &player1)
+				add_ui_message(std::format(L"Building constructed: {}", s2w(c.building_info->name)));
 		}
 		num_construction--;
 		if (num_construction == 0)

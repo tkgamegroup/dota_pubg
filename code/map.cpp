@@ -24,9 +24,10 @@ vec3 map_extent;
 std::vector<vec3> site_positions;
 std::vector<std::pair<float, int>> site_centrality;
 
-void init_map(EntityPtr e)
+void init_map(EntityPtr e, uint type)
 {
 	map_node = e->get_component<cNode>();
+
 	hf_terrain = e->get_component<cTerrain>();
 	mc_terrain = e->get_component<cVolume>();
 
@@ -61,6 +62,11 @@ void init_map(EntityPtr e)
 	else if (mc_terrain)
 	{
 		map_extent = mc_terrain->extent;
+	}
+
+	if (type == "random"_h)
+	{
+
 	}
 }
 
