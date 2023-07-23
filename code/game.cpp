@@ -412,6 +412,7 @@ void cGame::start()
 	game = this;
 	main_camera.init(root->find_child("main_camera"));
 	init_ui();
+	init_map(root, "random"_h);
 	init_control();
 	init_presets();
 

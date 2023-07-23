@@ -5,6 +5,7 @@
 #include <flame/graphics/image.h>
 #include <flame/graphics/extension.h>
 #include <flame/universe/octree.h>
+#include <flame/universe/components/mesh.h>
 #include <flame/universe/components/terrain.h>
 #include <flame/universe/components/volume.h>
 #include <flame/universe/systems/renderer.h>
@@ -66,6 +67,12 @@ void init_map(EntityPtr e, uint type)
 
 	if (type == "random"_h)
 	{
+		auto plane = Entity::create();
+		auto node = plane->add_component<cNode>();
+		node->set_scl(vec3(20.f, 1.f, 20.f));
+		auto mesh = plane->add_component<cMesh>();
+		mesh->set_mesh_and_material(L"plane", L"default");
+		e->add_child(plane);
 
 	}
 }
